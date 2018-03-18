@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "NotificationEmail",
+        "ParameterValue": "jason.debolt@joinmosaic.com"
+    },
+    {
+        "ParameterKey": "ProjectName",
+        "ParameterValue": "dev-project-1"
+    },
+    {
+        "ParameterKey": "ProjectDescription",
+        "ParameterValue": "My dev project."
+    }
+]

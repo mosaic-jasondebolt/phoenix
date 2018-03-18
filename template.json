@@ -1,0 +1,413 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description" : "Generates all resources required for a microservice.",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
+    "ProjectDescription": {
+      "Description": "A description of your project",
+      "Type": "String"
+    },
+    "NotificationEmail": {
+      "Description": "The email to send notifications to for this microservice",
+      "Type": "String"
+    },
+    "IAMRole": {
+      "Description": "The IAM role that has access to all of the projects resources.",
+      "Type": "String",
+      "AllowedValues": [
+        "arn:aws:iam::057281004471:role/SolarmosaicAdmins",
+        "arn:aws:iam::057281004471:role/SolarmosaicDevelopers"
+      ],
+      "Default": "arn:aws:iam::057281004471:role/SolarmosaicDevelopers"
+    }
+  },
+  "Resources": {
+    "MasterTriggerSNSTopic": {
+      "Type" : "AWS::SNS::Topic",
+      "Properties" : {
+        "DisplayName" : "GitMaster",
+        "Subscription" : [
+          {
+            "Endpoint": { "Ref": "NotificationEmail" },
+            "Protocol": "email"
+          }
+        ],
+        "TopicName" : { "Fn::Join": ["-", [
+          "master-branch-event-triggered-for",
+          { "Ref": "ProjectName" }
+        ]]}
+      }
+    },
+    "CodePipelineApprovalSNSTopic": {
+      "Type" : "AWS::SNS::Topic",
+      "Properties" : {
+        "DisplayName" : "CodePipeLn",
+        "Subscription" : [
+          {
+            "Endpoint": { "Ref": "NotificationEmail" },
+            "Protocol": "email"
+          }
+        ],
+        "TopicName" : { "Fn::Join": ["-", [
+          "code-pipeline-approval-required-for",
+          { "Ref": "ProjectName" }
+        ]]}
+      }
+    },
+    "CodeCommitRepository": {
+      "Type": "AWS::CodeCommit::Repository",
+      "Properties" : {
+        "RepositoryName" : { "Ref": "ProjectName" },
+        "RepositoryDescription" : { "Ref": "ProjectDescription"},
+        "Triggers" : [
+          {
+            "Name" : "MasterTrigger",
+            "CustomData" : { "Fn::Join": [" ", [
+              "Project",
+              { "Ref": "ProjectName" }
+            ]]},
+            "DestinationArn" : { "Ref":"MasterTriggerSNSTopic" },
+            "Branches" : ["master"],
+            "Events" : ["all"]
+          }
+        ]
+      }
+    },
+    "ECRRepository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "RepositoryName" : {
+          "Ref": "ProjectName"
+        },
+        "RepositoryPolicyText" : {
+          "Version": "2008-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowPushPull",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  {"Ref": "IAMRole"}
+                ]
+              },
+              "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload"
+              ]
+            },
+            {
+              "Sid": "CodeBuildAccess",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "codebuild.amazonaws.com"
+              },
+              "Action": [
+                "ecr:*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "CodeBuildServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": { "Fn::Join": ["-", [
+          "code-build",
+          { "Ref": "ProjectName" },
+          "service-role",
+        ]]},
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "codebuild.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": { "Fn::Join": ["-", [
+              "code-build",
+              { "Ref": "ProjectName" },
+              "service-policy",
+            ]]},
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "AccessCacheAndArtifactBucket",
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::mosaic-code-build/*"
+                  ]
+                },
+                {
+                  "Sid": "AccessCodePipelineBucket",
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:s3:::mosaic-code-pipeline*"
+                  ],
+                  "Action": [
+                    "s3:PutObject",
+                    "s3:GetObject",
+                    "s3:GetObjectVersion"
+                  ]
+                },
+                {
+                  "Sid": "AccessLogs",
+                  "Effect": "Allow",
+                  "Resource": [
+                    { "Fn::Join": ["", [
+                      "arn:aws:logs:us-east-1:057281004471:log-group:/aws/codebuild/",
+                      { "Ref": "ProjectName" }
+                    ]]},
+                    { "Fn::Join": ["", [
+                      "arn:aws:logs:us-east-1:057281004471:log-group:/aws/codebuild/",
+                      { "Ref": "ProjectName" },
+                      ":*"
+                    ]]}
+                  ],
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ]
+                },
+                {
+                  "Sid": "AccessCodeCommitRepo",
+                  "Effect": "Allow",
+                  "Resource": [
+                    { "Fn::Join": ["", [
+                      "arn:aws:codecommit:us-east-1:057281004471:",
+                      { "Ref": "ProjectName" }
+                    ]]}
+                  ],
+                  "Action": [
+                    "codecommit:GitPull"
+                  ]
+                },
+                {
+                  "Sid": "AccessSystemsManagerParameters",
+                  "Effect": "Allow",
+                  "Action": [
+                    "ssm:GetParameters"
+                  ],
+                  "Resource": "arn:aws:ssm:us-east-1:057281004471:parameter/CodeBuild/*"
+                },
+                {
+                  "Sid": "AccessECR",
+                  "Effect": "Allow",
+                  "Action": [
+                    "ecr:*"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "CodeBuild": {
+      "Type" : "AWS::CodeBuild::Project",
+      "Properties" : {
+        "Artifacts": {
+          "Type": "S3",
+          "Location": "mosaic-code-build",
+          "NamespaceType": "BUILD_ID",
+          "Name": { "Ref": "ProjectName" },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location" : { "Fn::Join": ["", [
+            "mosaic-code-build/",
+            { "Ref": "ProjectName"},
+            "-cache"
+          ]]},
+          "Type" : "S3"
+        },
+        "Description": { "Ref": "ProjectDescription" },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [],
+          "Image": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": { "Ref": "ProjectName" },
+        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Source": {
+          "Type": "CODECOMMIT",
+          "Location": { "Fn::Join": ["", [
+            "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
+            { "Ref": "ProjectName"}
+          ]]}
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
+    "CodePipeline": {
+      "Type": "AWS::CodePipeline::Pipeline",
+      "Properties": {
+        "RoleArn": "arn:aws:iam::057281004471:role/AWS-CodePipeline-Service",
+        "Name": { "Ref": "ProjectName" },
+        "Stages": [
+          {
+            "Name": "Source",
+            "Actions": [
+              {
+                "Name": "SourceAction",
+                "ActionTypeId": {
+                  "Category": "Source",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeCommit"
+                },
+                "OutputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "Configuration": {
+                  "RepositoryName": { "Fn::GetAtt": [
+                    "CodeCommitRepository",
+                    "Name"
+                  ]},
+                  "BranchName": "master"
+                },
+                "RunOrder": 1
+              }
+            ]
+          },
+          {
+            "Name": "Build",
+            "Actions": [
+              {
+                "Name": "Build",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "OutputArtifacts": [
+                  {
+                    "Name": "BuildOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": { "Ref": "ProjectName" }
+                }
+              }
+            ]
+          }
+        ],
+        "ArtifactStore": {
+          "Type": "S3",
+          "Location": "mosaic-code-pipeline"
+        }
+      }
+    }
+  },
+  "Outputs" : {
+    "GitCloneInstructions": {
+      "Description": "IMPORTANT! Instructions for cloning the Git repo",
+      "Value": "For mac users, you may need to disable the OSX keychain for CodeCommit credentials and delete any keys stored in there. Your keychain credentials will expire 15 minutes after you clone your repo by default!: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-unixes.html"
+    },
+    "GitInstructions": {
+      "Description": "IMPORTANT! Code Commit will NOT automatically create a master branch.",
+      "Value": {"Fn::Join": ["<br />", [
+        "1) ",
+        {"Fn::Join": [" ", [
+          "git clone",
+          { "Fn::GetAtt": [
+            "CodeCommitRepository",
+            "CloneUrlHttp"
+          ]}
+        ]]},
+        "2) Create local README.md file and add content to it",
+        "3) git add README.md",
+        "4) git commit",
+        "5) git push origin master",
+        "6) If you have issues, see the GitCloneInstructions section of this doc."
+      ]]}
+    },
+    "CodeCommitRepositoryURL" : {
+      "Description" : "The AWS Console URL of the CodeCommit Repository",
+      "Value" :  {"Fn::Join": ["",
+        ["https://console.aws.amazon.com/codecommit/home?region=",
+          { "Ref": "AWS::Region"},
+          "#/repository/",
+          { "Ref": "ProjectName" }
+        ]]
+      }
+    },
+    "MasterTriggerSNSTopic": {
+      "Description" : "The name of this SNS topic",
+      "Value": { "Fn::GetAtt": [
+          "MasterTriggerSNSTopic",
+          "TopicName"
+      ]}
+    },
+    "MasterTriggerSNSTopicInstructions": {
+      "Description" : "Instructions for this SNS topic",
+      "Value": "Check your email for an SNS subscription confirmation request"
+    },
+    "CodePipelineApprovalSNSTopic": {
+      "Description" : "The name of this SNS topic",
+      "Value": { "Fn::GetAtt": [
+          "CodePipelineApprovalSNSTopic",
+          "TopicName"
+      ]}
+    },
+    "CodePipelineApprovalSNSTopicInstructions": {
+      "Description" : "Instructions for this SNS topic",
+      "Value": "Check your email for an SNS subscription confirmation request"
+    },
+    "DockerRepositoryURL" : {
+      "Description" : "The AWS Console URL of the Docker ECR Repository",
+      "Value" :  {"Fn::Join": ["",
+        ["https://console.aws.amazon.com/ecs/home?region=",
+          { "Ref": "AWS::Region"},
+          "#/repositories/",
+          { "Ref": "ProjectName" }
+        ]]
+      }
+    },
+    "DockerRepositoryInstructions" : {
+      "Description" : "Instructions",
+      "Value" :  "Click on repo link in the DockerRepositoryURL section and then click on the 'View Push Commands' button"
+    }
+  }
+}
