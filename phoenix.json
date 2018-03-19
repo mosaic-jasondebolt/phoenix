@@ -331,6 +331,178 @@
         "Tags": []
       }
     },
+    "CodeBuildUnitTest": {
+      "Type" : "AWS::CodeBuild::Project",
+      "Properties" : {
+        "Artifacts": {
+          "Type": "S3",
+          "Location": "mosaic-code-build",
+          "NamespaceType": "BUILD_ID",
+          "Name": { "Ref": "ProjectName" },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location" : { "Fn::Join": ["", [
+            "mosaic-code-build/",
+            { "Ref": "ProjectName"},
+            "-cache"
+          ]]},
+          "Type" : "S3"
+        },
+        "Description": { "Ref": "ProjectDescription" },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [],
+          "Image": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": { "Fn::Join": ["", [
+          { "Ref": "ProjectName" },
+          "-unit-test"
+        ]]},
+        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Source": {
+          "Type": "CODECOMMIT",
+          "Location": { "Fn::Join": ["", [
+            "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
+            { "Ref": "ProjectName"}
+          ]]}
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
+    "CodeBuildLint": {
+      "Type" : "AWS::CodeBuild::Project",
+      "Properties" : {
+        "Artifacts": {
+          "Type": "S3",
+          "Location": "mosaic-code-build",
+          "NamespaceType": "BUILD_ID",
+          "Name": { "Ref": "ProjectName" },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location" : { "Fn::Join": ["", [
+            "mosaic-code-build/",
+            { "Ref": "ProjectName"},
+            "-cache"
+          ]]},
+          "Type" : "S3"
+        },
+        "Description": { "Ref": "ProjectDescription" },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [],
+          "Image": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": { "Fn::Join": ["", [
+          { "Ref": "ProjectName" },
+          "lint"
+        ]]},
+        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Source": {
+          "Type": "CODECOMMIT",
+          "Location": { "Fn::Join": ["", [
+            "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
+            { "Ref": "ProjectName"}
+          ]]}
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
+    "CodeBuildCalculateCosts": {
+      "Type" : "AWS::CodeBuild::Project",
+      "Properties" : {
+        "Artifacts": {
+          "Type": "S3",
+          "Location": "mosaic-code-build",
+          "NamespaceType": "BUILD_ID",
+          "Name": { "Ref": "ProjectName" },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location" : { "Fn::Join": ["", [
+            "mosaic-code-build/",
+            { "Ref": "ProjectName"},
+            "-cache"
+          ]]},
+          "Type" : "S3"
+        },
+        "Description": { "Ref": "ProjectDescription" },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [],
+          "Image": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": { "Fn::Join": ["", [
+          { "Ref": "ProjectName" },
+          "calculate-costs"
+        ]]},
+        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Source": {
+          "Type": "CODECOMMIT",
+          "Location": { "Fn::Join": ["", [
+            "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
+            { "Ref": "ProjectName"}
+          ]]}
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
+    "CodeBuildStaticAnalysis": {
+      "Type" : "AWS::CodeBuild::Project",
+      "Properties" : {
+        "Artifacts": {
+          "Type": "S3",
+          "Location": "mosaic-code-build",
+          "NamespaceType": "BUILD_ID",
+          "Name": { "Ref": "ProjectName" },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location" : { "Fn::Join": ["", [
+            "mosaic-code-build/",
+            { "Ref": "ProjectName"},
+            "-cache"
+          ]]},
+          "Type" : "S3"
+        },
+        "Description": { "Ref": "ProjectDescription" },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [],
+          "Image": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": { "Fn::Join": ["", [
+          { "Ref": "ProjectName" },
+          "static-analysis"
+        ]]},
+        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Source": {
+          "Type": "CODECOMMIT",
+          "Location": { "Fn::Join": ["", [
+            "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
+            { "Ref": "ProjectName"}
+          ]]}
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
     "CodeBuildIntegrationTest": {
       "Type" : "AWS::CodeBuild::Project",
       "Properties" : {
@@ -477,14 +649,98 @@
                 "Configuration": {
                   "ProjectName": { "Ref": "ProjectName" }
                 }
+              },
+              {
+                "Name": "UnitTest",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "unit-test"
+                  ]]}
+                }
+              },
+              {
+                "Name": "Lint",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "lint"
+                  ]]}
+                }
+              },
+              {
+                "Name": "CalculateCosts",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "calculate-costs"
+                  ]]}
+                }
+              },
+              {
+                "Name": "StaticAnalysis",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "static-analysis"
+                  ]]}
+                }
               }
             ]
           },
           {
-            "Name": "Staging",
+            "Name": "StagingClusterDeploy",
             "Actions": [
               {
-                "Name": "Staging",
+                "Name": "StagingDeploy",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -508,11 +764,37 @@
                   "TemplateConfiguration": "BuildOutput::ecs_task_definition_params_staging.json",
                   "TemplatePath": "BuildOutput::ecs_task_definition.json"
                 }
+              },
+              {
+                "Name": "PerformanceDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "BuildOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_IAM",
+                  "RoleArn": "arn:aws:iam::057281004471:role/cloudformationRole",
+                  "StackName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "performance-deploy"
+                  ]]},
+                  "TemplateConfiguration": "BuildOutput::ecs_task_definition_params_performance.json",
+                  "TemplatePath": "BuildOutput::ecs_task_definition.json"
+                }
               }
             ]
           },
           {
-            "Name": "Test",
+            "Name": "StagingClusterTests",
             "Actions": [
               {
                 "Name": "IntegrationTest",
@@ -558,6 +840,55 @@
               }
             ]
           },
+          {
+            "Name": "Approval",
+            "Actions": [
+              {
+                "Name": "ManualApproval",
+                "ActionTypeId": {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Manual"
+                },
+                "RunOrder": 1,
+                "Configuration": {
+                  "NotificationArn": { "Ref": "CodePipelineApprovalSNSTopic" }
+                }
+              }
+            ]
+          },
+          {
+            "Name": "ProdClusterDeploy",
+            "Actions": [
+              {
+                "Name": "ProdDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "BuildOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_IAM",
+                  "RoleArn": "arn:aws:iam::057281004471:role/cloudformationRole",
+                  "StackName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "production-deploy"
+                  ]]},
+                  "TemplateConfiguration": "BuildOutput::ecs_task_definition_params_prod.json",
+                  "TemplatePath": "BuildOutput::ecs_task_definition.json"
+                }
+              }
+            ]
+          }
         ],
         "ArtifactStore": {
           "Type": "S3",
