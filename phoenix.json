@@ -402,7 +402,7 @@
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["", [
+        "Name": { "Fn::Join": ["-", [
           { "Ref": "ProjectName" },
           "lint"
         ]]},
@@ -446,7 +446,7 @@
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["", [
+        "Name": { "Fn::Join": ["-", [
           { "Ref": "ProjectName" },
           "calculate-costs"
         ]]},
@@ -490,7 +490,7 @@
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["", [
+        "Name": { "Fn::Join": ["-", [
           { "Ref": "ProjectName" },
           "static-analysis"
         ]]},
