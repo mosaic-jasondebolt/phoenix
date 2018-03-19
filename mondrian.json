@@ -331,6 +331,37 @@
                 }
               }
             ]
+          },
+          {
+            "Name": "Staging",
+            "Actions": [
+              {
+                "Name": "Staging",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "BuildOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_IAM",
+                  "RoleArn": "arn:aws:iam::057281004471:role/cloudformationRole",
+                  "StackName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "staging-deploy"
+                  ]]},
+                  "TemplateConfiguration": "BuildOutput::ecs_task_definition_params_staging.json",
+                  "TemplatePath": "BuildOutput::ecs_task_definition.json"
+                }
+              }
+            ]
           }
         ],
         "ArtifactStore": {
