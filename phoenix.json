@@ -245,7 +245,7 @@
                     { "Fn::Join": ["", [
                       "arn:aws:logs:us-east-1:057281004471:log-group:/aws/codebuild/",
                       { "Ref": "ProjectName" },
-                      "-", "perforamance-test", ":*"
+                      "-", "performance-test", ":*"
                     ]]}
                   ],
                   "Action": [
