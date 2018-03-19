@@ -364,6 +364,7 @@
         ]]},
         "ServiceRole": { "Ref": "CodeBuildServiceRole" },
         "Source": {
+          "BuildSpec": "buildspec-unit-test.yml",
           "Type": "CODECOMMIT",
           "Location": { "Fn::Join": ["", [
             "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
@@ -407,6 +408,7 @@
         ]]},
         "ServiceRole": { "Ref": "CodeBuildServiceRole" },
         "Source": {
+          "BuildSpec": "buildspec-lint.yml",
           "Type": "CODECOMMIT",
           "Location": { "Fn::Join": ["", [
             "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
@@ -450,6 +452,7 @@
         ]]},
         "ServiceRole": { "Ref": "CodeBuildServiceRole" },
         "Source": {
+          "BuildSpec": "buildspec-calculate-costs.yml",
           "Type": "CODECOMMIT",
           "Location": { "Fn::Join": ["", [
             "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
@@ -493,6 +496,7 @@
         ]]},
         "ServiceRole": { "Ref": "CodeBuildServiceRole" },
         "Source": {
+          "BuildSpec": "buildspec-static-analysis.yml",
           "Type": "CODECOMMIT",
           "Location": { "Fn::Join": ["", [
             "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
