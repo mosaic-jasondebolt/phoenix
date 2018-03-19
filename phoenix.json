@@ -271,6 +271,50 @@
         "Tags": []
       }
     },
+    "CodeBuildIntegrationTest": {
+      "Type" : "AWS::CodeBuild::Project",
+      "Properties" : {
+        "Artifacts": {
+          "Type": "S3",
+          "Location": "mosaic-code-build",
+          "NamespaceType": "BUILD_ID",
+          "Name": { "Ref": "ProjectName" },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location" : { "Fn::Join": ["", [
+            "mosaic-code-build/",
+            { "Ref": "ProjectName"},
+            "-cache"
+          ]]},
+          "Type" : "S3"
+        },
+        "Description": { "Ref": "ProjectDescription" },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [],
+          "Image": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": { "Fn::Join": ["-", [
+          { "Ref": "ProjectName" },
+          "integration-test"
+        ]]},
+        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Source": {
+          "BuildSpec": "buildspec-integration-test.yml",
+          "Type": "CODECOMMIT",
+          "Location": { "Fn::Join": ["", [
+            "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
+            { "Ref": "ProjectName"}
+          ]]}
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
@@ -362,7 +406,33 @@
                 }
               }
             ]
-          }
+          },
+          {
+            "Name": "Test",
+            "Actions": [
+              {
+                "Name": "IntegrationTest",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "BuildOutput"
+                  }
+                ],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "integration-test"
+                  ]]}
+                }
+              }
+            ]
+          },
         ],
         "ArtifactStore": {
           "Type": "S3",
