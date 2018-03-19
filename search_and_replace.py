@@ -1,5 +1,7 @@
 """Recursively searches and replaces all strings in a given directory for a given file pattern.
 
+AUTHOR: jason.debolt@joinmosaic.com
+
 USAGE:
   $ python search_and_replace.py {directory_to_search} {string_to_find} {replacement_string} {pattern}
 
@@ -8,8 +10,8 @@ EXAMPLE:
   for all text files in the current directory and all subdirectories.
 
   $ python search_and_replace.py . FOO BAR    ==> Matches ALL files, like *
-  $ python search_and_replace.py . FOO BAR *  ==> Matches ALL files, like *
-  $ python search_and_replace.py . FOO BAR *.txt  ==> Matches
+  $ python search_and_replace.py . FOO BAR "*"  ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR "*.txt"  ==> Matches
 """
 import os, fnmatch, sys
 import fnmatch
@@ -18,15 +20,9 @@ import itertools
 import os
 import sys
 
+
 def find_files(dir_path=None, patterns=None):
-    """
-    Returns a generator yielding files matching the given patterns
-    :type dir_path: str
-    :type patterns: [str]
-    :rtype : [str]
-    :param dir_path: Directory to search for files/directories under. Defaults to current dir.
-    :param patterns: Patterns of files to search for. Defaults to ["*"]. Example: ["*.json", "*.xml"]
-    """
+    """Returns a generator yielding files matching the given pattern."""
     path = dir_path or "."
     path_patterns = patterns or ["*"]
 
@@ -50,6 +46,7 @@ def search_and_replace(directory, find, replace, filePattern=None):
             f.write(s_new)
 
 if __name__ == '__main__':
+    #TODO(jason.debolt): Clean this up with argparse.
     print('directory is ' + sys.argv[1])
     print('find ' + sys.argv[2])
     print('replace with ' + sys.argv[3])
