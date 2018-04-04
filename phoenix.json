@@ -200,16 +200,6 @@
                     { "Fn::Join": ["", [
                       "arn:aws:logs:us-east-1:057281004471:log-group:/aws/codebuild/",
                       { "Ref": "ProjectName" },
-                      "-", "client-swagger-integration-test"
-                    ]]},
-                    { "Fn::Join": ["", [
-                      "arn:aws:logs:us-east-1:057281004471:log-group:/aws/codebuild/",
-                      { "Ref": "ProjectName" },
-                      "-", "client-swagger-integration-test", ":*"
-                    ]]},
-                    { "Fn::Join": ["", [
-                      "arn:aws:logs:us-east-1:057281004471:log-group:/aws/codebuild/",
-                      { "Ref": "ProjectName" },
                       "-", "lint"
                     ]]},
                     { "Fn::Join": ["", [
@@ -570,59 +560,6 @@
         "Tags": []
       }
     },
-    "CodeBuildClientSwaggerIntegrationTest": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": [
-            "sg-09554f65"
-          ],
-          "Subnets": [
-            "subnet-326a3f5a"
-          ],
-          "VpcId": "vpc-3a6a3f52"
-        },
-        "Artifacts": {
-          "Type": "S3",
-          "Location": "mosaic-code-build",
-          "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
-          "Packaging": "NONE"
-        },
-        "BadgeEnabled": "true",
-        "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            "mosaic-code-build/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
-        },
-        "Description": { "Ref": "ProjectDescription" },
-        "Environment": {
-          "ComputeType": "BUILD_GENERAL1_LARGE",
-          "EnvironmentVariables": [],
-          "Image": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
-          "PrivilegedMode": "true",
-          "Type": "LINUX_CONTAINER"
-        },
-        "Name": { "Fn::Join": ["", [
-          { "Ref": "ProjectName" },
-          "-client-swagger-integration-test"
-        ]]},
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
-        "Source": {
-          "BuildSpec": "buildspec-client-swagger-integration-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
-        },
-        "TimeoutInMinutes": 60,
-        "Tags": []
-      }
-    },
     "CodeBuildIntegrationTest": {
       "Type" : "AWS::CodeBuild::Project",
       "Properties" : {
@@ -848,27 +785,6 @@
                   "ProjectName": { "Fn::Join": ["-", [
                     { "Ref": "ProjectName" },
                     "calculate-costs"
-                  ]]}
-                }
-              },
-              {
-                "Name": "ClientSwaggerIntegrationTest",
-                "ActionTypeId": {
-                  "Category": "Test",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CodeBuild"
-                },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
-                "RunOrder": 1,
-                "Configuration": {
-                  "ProjectName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "client-swagger-integration-test"
                   ]]}
                 }
               },
