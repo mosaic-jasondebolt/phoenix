@@ -45,7 +45,7 @@
       "Type" : "AWS::ApiGateway::Method",
       "Properties" : {
         "RestApiId" : { "Ref": "RestAPI" },
-        "AuthorizationType" : "AWS_IAM",
+        "AuthorizationType" : "NONE",
         "HttpMethod": "GET",
         "ResourceId" : { "Ref": "ProjectsResource" },
         "MethodResponses": [
@@ -64,6 +64,9 @@
           "IntegrationHttpMethod": "POST",
           "IntegrationResponses": [
             {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
               "ResponseTemplates" : { "application/json": "" },
               "StatusCode" : "200"
             }
