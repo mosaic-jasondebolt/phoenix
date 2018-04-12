@@ -836,7 +836,7 @@
                     { "Ref": "ProjectName" },
                     "staging-deploy"
                   ]]},
-                  "TemplateConfiguration": "BuildOutput::ecs_task_definition_params_staging.json",
+                  "TemplateConfiguration": "BuildOutput::staging_params.json",
                   "TemplatePath": "BuildOutput::ecs_task_definition.json"
                 }
               },
@@ -862,7 +862,7 @@
                     { "Ref": "ProjectName" },
                     "performance-deploy"
                   ]]},
-                  "TemplateConfiguration": "BuildOutput::ecs_task_definition_params_performance.json",
+                  "TemplateConfiguration": "BuildOutput::performance_params.json",
                   "TemplatePath": "BuildOutput::ecs_task_definition.json"
                 }
               }
@@ -958,7 +958,7 @@
                     { "Ref": "ProjectName" },
                     "production-deploy"
                   ]]},
-                  "TemplateConfiguration": "BuildOutput::ecs_task_definition_params_prod.json",
+                  "TemplateConfiguration": "BuildOutput::prod_params.json",
                   "TemplatePath": "BuildOutput::ecs_task_definition.json"
                 }
               }

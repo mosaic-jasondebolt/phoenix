@@ -1,0 +1,46 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay&
+      #- timeout -t 15 sh -c "until docker info; do echo .; sleep 1; done"
+      - timeout 15s sh -c "until docker info; do echo .; sleep 1; done"
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - PROJECT_NAME=phoenix
+      - AWS_ACCOUNT_ID=057281004471
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME
+      - IMAGE_TAG=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo replacing build number in build.sbt
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" build.sbt > build.tmp && mv build.tmp build.sbt
+      - echo replacing build number in the task definition param files and moving the files to the root directory.
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" params/environments/staging.json > staging_params.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" params/environments/performance.json > performance_params.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" params/environments/prod.json > prod_params.json
+      - echo moving ecs.json into the root directory so CodePipeline can find it for the deploy stage.
+      - mv pillars/backend/ecs/ecs.json .
+      - echo Running sbt docker:stage to generate a directory with the Dockerfile and environment prepared for creating a Docker image.
+      - sbt docker:stage
+      - echo Building the Docker image from Dockerfile that sbt created in the target/docker/stage directory
+      - docker build -t $REPOSITORY_URI:latest target/docker/stage
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+artifacts:
+    files:
+      - ecs.json
+      - staging_params.json
+      - performance_params.json
+      - prod_params.json

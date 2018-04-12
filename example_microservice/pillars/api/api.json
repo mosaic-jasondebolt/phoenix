@@ -18,6 +18,19 @@
     }
   },
   "Resources": {
+    "APIGatewayDeployment": {
+      "Type" : "AWS::ApiGateway::Deployment",
+      "Properties" : {
+        "Description" : "Deployment 2.",
+        "RestApiId" : {"Ref": "RestAPI"},
+        "StageName" : { "Ref": "Environment" },
+        "StageDescription" : {
+          "Description" : { "Ref": "Environment" },
+          "LoggingLevel" : "INFO",
+          "MetricsEnabled" : true
+        }
+      }
+    },
     "RestAPI": {
       "Type" : "AWS::ApiGateway::RestApi",
       "Properties" : {
@@ -45,7 +58,7 @@
       "Type" : "AWS::ApiGateway::Method",
       "Properties" : {
         "RestApiId" : { "Ref": "RestAPI" },
-        "AuthorizationType" : "NONE",
+        "AuthorizationType" : "AWS_IAM",
         "HttpMethod": "GET",
         "ResourceId" : { "Ref": "ProjectsResource" },
         "MethodResponses": [
