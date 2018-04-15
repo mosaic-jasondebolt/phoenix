@@ -66,6 +66,11 @@
     "SecurityGroupIds": {
       "Description": "The security groups that CodeBuild nodes will be associated with. (i.e 'sg-abc444,sg-bbb555')",
       "Type": "CommaDelimitedList"
+    },
+    "Username": {
+      "Description": "Ther username of the user launching the stack, if relevant.",
+      "Type": "String",
+      "Default": ""
     }
   },
   "Resources": {
