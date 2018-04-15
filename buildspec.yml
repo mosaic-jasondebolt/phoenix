@@ -18,8 +18,23 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - echo Running lint on source code...
-      #- sbt scalastyle
+      - echo replacing build number in the task definition param files.
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-staging.json > staging_params.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-perf.json > performance_params.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-prod.json > prod_params.json
+      - echo Building the Docker image from the Dockerfile.
+      - docker build -t $REPOSITORY_URI:latest ecs
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
   post_build:
     commands:
       - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo Writing image definitions file...
+artifacts:
+    files:
+      - template-ecs.json
+      - staging_params.json
+      - performance_params.json
+      - prod_params.json

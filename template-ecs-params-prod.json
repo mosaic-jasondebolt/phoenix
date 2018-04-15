@@ -1,0 +1,29 @@
+{
+  "Parameters": {
+    "AssignPublicIp": "ENABLED",
+    "Cluster": "Prod",
+    "ContainerName": "phoenix",
+    "ContainerPort": "5000",
+    "DesiredECSInstances": "1",
+    "DesiredTaskCount": "1",
+    "Domain": "solarmosaic.com",
+    "ECRRepoURL": "057281004471.dkr.ecr.us-east-1.amazonaws.com",
+    "ELBSubnets": "Public",
+    "HostedZoneId": "Z15DLFBU9EZQ4W",
+    "ImageName": "phoenix",
+    "ImageVersion": "IMAGE_TAG",
+    "InstanceType": "c4.large",
+    "KeyName": "us-east-1-ecs-057281004471",
+    "LaunchType": "EC2",
+    "LoadBalancerLogsS3Bucket": "mosaic-load-balancer-logs",
+    "MaxECSInstances": "2",
+    "MaxTasksToScaleOutInResponseTo500Errors": "2",
+    "MinECSInstances": "1",
+    "MinTasksToScaleInInResponseToScaleInEvent": "1",
+    "SSLCertificateARN": "arn:aws:acm:us-east-1:057281004471:certificate/8fad114d-3703-486a-a117-f640b49cef3e",
+    "TaskExecutionRoleArn": "arn:aws:iam::057281004471:role/ecsTaskExecutionRole",
+    "TaskFamily": "phoenix",
+    "VPCPrefix": "production",
+    "WebSubnets": "Public"
+  }
+}

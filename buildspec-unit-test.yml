@@ -11,8 +11,8 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - PROJECT_NAME=phoenix
-      - AWS_ACCOUNT_ID=057281004471
+      - PROJECT_NAME=`jq '.Parameters.ProjectName' template-microservice-params.json`
+      - AWS_ACCOUNT_ID=`jq '.Parameters.AWSAccountId' template-microservice-params.json`
       - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME
       - IMAGE_TAG=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
