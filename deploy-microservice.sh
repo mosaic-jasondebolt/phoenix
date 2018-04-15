@@ -1,7 +1,7 @@
 # Creates a microservice project.
 
 # USAGE
-#   ./create_update_phoenix_project.sh [create | update]
+#   ./deploy-microservice.sh [create | update]
 
 if [ $# -ne 1 ]
   then
