@@ -17,6 +17,7 @@ python parameters_generator.py template-microservice-params.json > temp.json
 aws cloudformation $1-stack \
     --stack-name $STACK_NAME \
     --template-body file://template-microservice.json \
+    --parameters file://temp.json \
     --capabilities CAPABILITY_NAMED_IAM
 
 # Cleanup
