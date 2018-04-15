@@ -7,7 +7,7 @@ set -e
 #   ./upload_function.sh {dev|staging|prod}
 
 LAMBDA_S3_LOCATION="s3://mosaic-phoenix-cfn/lambdas/"
-PROJECT_NAME=`jq '.Parameters.ProjectName' template-microservice-params.json`
+PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 
 aws s3 sync --delete backend/lambdas/ s3://mosaic-phoenix-cfn/lambdas/
 

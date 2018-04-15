@@ -18,9 +18,9 @@
 USERNAME=`echo $USER | tr . "-"` # Replace . in username with hyphen for CloudFormation naming convention.
 TAG_NUMBER=$USERNAME
 IMAGE_TAG=dev_$TAG_NUMBER
-AWS_ACCOUNT_ID=`jq '.Parameters.AWSAccountId' template-microservice-params.json`
-IMAGE_NAME=`jq '.Parameters.ProjectName' template-microservice-params.json`
-AWS_REGION=`jq '.Parameters.ECRRegion' template-microservice-params.json`
+AWS_ACCOUNT_ID=`jq -r '.Parameters.AWSAccountId' template-microservice-params.json`
+IMAGE_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+AWS_REGION=`jq -r '.Parameters.ECRRegion' template-microservice-params.json`
 ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
 
 

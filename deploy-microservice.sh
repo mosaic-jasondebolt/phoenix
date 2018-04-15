@@ -9,7 +9,7 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
-STACK_NAME=`jq '.Parameters.StackName' template-microservice-params.json`
+STACK_NAME=`jq -r '.Parameters.StackName' template-microservice-params.json`
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-microservice-params.json > temp.json
