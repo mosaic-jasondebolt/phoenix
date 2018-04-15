@@ -159,7 +159,7 @@
       "Type": "String"
     },
     "Username": {
-      "Description": "Ther username of the user launching the stack, if relevant.",
+      "Description": "Ther username of the user who last updated the stack, if relevant.",
       "Type": "String",
       "Default": ""
     },

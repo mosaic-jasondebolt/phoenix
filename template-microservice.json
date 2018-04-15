@@ -68,7 +68,7 @@
       "Type": "CommaDelimitedList"
     },
     "Username": {
-      "Description": "Ther username of the user launching the stack, if relevant.",
+      "Description": "Ther username of the user who last updated the stack, if relevant.",
       "Type": "String",
       "Default": ""
     }
@@ -199,24 +199,28 @@
                 {
                   "Sid": "AccessCacheAndArtifactBucket",
                   "Effect": "Allow",
+                  "Resource": {
+                    "Fn::Join": ["", [
+                      "arn:aws:s3:::",
+                      { "Ref": "CodeBuildBucket"},
+                      "/*"
+                    ]]
+                  },
                   "Action": [
                     "s3:PutObject",
                     "s3:GetObject"
-                  ],
-                  "Resource": [
-                    "arn:aws:s3:::",
-                    { "Ref": "CodeBuildBucket"},
-                    "/*"
                   ]
                 },
                 {
                   "Sid": "AccessCodePipelineBucket",
                   "Effect": "Allow",
-                  "Resource": [
-                    "arn:aws:s3:::",
-                    { "Ref": "CodePipelineBucket" },
-                    "*"
-                  ],
+                  "Resource": {
+                    "Fn::Join": ["", [
+                      "arn:aws:s3:::",
+                      { "Ref": "CodePipelineBucket" },
+                      "/*"
+                    ]]
+                  },
                   "Action": [
                     "s3:PutObject",
                     "s3:GetObject",
@@ -256,7 +260,7 @@
                   "Effect": "Allow",
                   "Resource": [
                     { "Fn::Join": ["", [
-                      "arn:aws:codecommit",
+                      "arn:aws:codecommit:",
                       { "Ref": "AWSRegion" },
                       ":",
                       { "Ref": "AWSAccountId" },
