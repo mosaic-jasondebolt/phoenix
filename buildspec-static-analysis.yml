@@ -19,6 +19,10 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Running static analysis on source code...
+      - # Check/enforce function/method length
+      - # Check/enforce aggressive timeouts on downstream service calls
+      - # Check/enforce circuit breaker microservice pattern
+      - # Check/enforce bulkhead microservice pattern
   post_build:
     commands:
       - echo Build completed on `date`

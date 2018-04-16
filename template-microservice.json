@@ -221,13 +221,22 @@
                 {
                   "Sid": "AccessCacheAndArtifactBucket",
                   "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Join": ["", [
-                      "arn:aws:s3:::",
-                      { "Ref": "CodeBuildBucket"},
-                      "/*"
-                    ]]
-                  },
+                  "Resource": [
+                    {
+                      "Fn::Join": ["", [
+                        "arn:aws:s3:::",
+                        { "Ref": "CodeBuildBucket"},
+                        "/*"
+                      ]]
+                    },
+                    {
+                      "Fn::Join": ["", [
+                        "arn:aws:s3:::",
+                        { "Ref": "LambdaBucketName"},
+                        "/*"
+                      ]]
+                    }
+                  ],
                   "Action": [
                     "s3:PutObject",
                     "s3:GetObject"
