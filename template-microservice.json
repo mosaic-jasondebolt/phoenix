@@ -650,58 +650,6 @@
         "Tags": []
       }
     },
-    "CodeBuildPerformanceTest": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": {"Ref": "SecurityGroupIds"},
-          "Subnets": {"Ref": "Subnets"},
-          "VpcId": {"Ref": "VpcId"}
-        },
-        "Artifacts": {
-          "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucket"},
-          "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
-          "Packaging": "NONE"
-        },
-        "BadgeEnabled": "true",
-        "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            {"Ref": "CodeBuildBucket"},
-            "/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
-        },
-        "Description": { "Ref": "ProjectDescription" },
-        "Environment": {
-          "ComputeType": "BUILD_GENERAL1_LARGE",
-          "EnvironmentVariables": [],
-          "Image": { "Ref": "CodeBuildDockerImage" },
-          "PrivilegedMode": "true",
-          "Type": "LINUX_CONTAINER"
-        },
-        "Name": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName" },
-          "performance-test"
-        ]]},
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
-        "Source": {
-          "BuildSpec": "buildspec-performance-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.",
-            {"Ref": "AWSRegion"},
-            ".amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
-        },
-        "TimeoutInMinutes": 60,
-        "Tags": []
-      }
-    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
@@ -851,7 +799,7 @@
             "Name": "StagingClusterDeploy",
             "Actions": [
               {
-                "Name": "StagingECSDeploy",
+                "Name": "StagingECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -870,14 +818,14 @@
                   "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
                   "StackName": { "Fn::Join": ["-", [
                     { "Ref": "ProjectName" },
-                    "staging-ecs-deploy"
+                    "staging-ecs"
                   ]]},
                   "TemplateConfiguration": "BuildOutput::staging-ecs-params.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
                 }
               },
               {
-                "Name": "StagingLambdaDeploy",
+                "Name": "StagingLambda",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -896,14 +844,14 @@
                   "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
                   "StackName": { "Fn::Join": ["-", [
                     { "Ref": "ProjectName" },
-                    "staging-lambda-deploy"
+                    "staging-lambda"
                   ]]},
                   "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
               },
               {
-                "Name": "PerformanceECSDeploy",
+                "Name": "StagingAPIGateway",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -915,17 +863,43 @@
                     "Name": "BuildOutput"
                   }
                 ],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
                   "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
                   "StackName": { "Fn::Join": ["-", [
                     { "Ref": "ProjectName" },
-                    "performance-ecs-deploy"
+                    "staging-api-gateway"
                   ]]},
-                  "TemplateConfiguration": "BuildOutput::performance-ecs-params.json",
-                  "TemplatePath": "BuildOutput::template-ecs.json"
+                  "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
+                  "TemplatePath": "BuildOutput::template-api-lambda.json"
+                }
+              }
+              {
+                "Name": "StagingAPIGatewayDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "BuildOutput"
+                  }
+                ],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_IAM",
+                  "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
+                  "StackName": { "Fn::Join": ["-", [
+                    { "Ref": "ProjectName" },
+                    "staging-lambda"
+                  ]]},
+                  "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
+                  "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
               }
             ]
@@ -951,27 +925,6 @@
                   "ProjectName": { "Fn::Join": ["-", [
                     { "Ref": "ProjectName" },
                     "integration-test"
-                  ]]}
-                }
-              },
-              {
-                "Name": "PerformanceTest",
-                "ActionTypeId": {
-                  "Category": "Test",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CodeBuild"
-                },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
-                "RunOrder": 1,
-                "Configuration": {
-                  "ProjectName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "performance-test"
                   ]]}
                 }
               }
@@ -1018,7 +971,7 @@
                   "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
                   "StackName": { "Fn::Join": ["-", [
                     { "Ref": "ProjectName" },
-                    "prod-ecs-deploy"
+                    "prod-ecs"
                   ]]},
                   "TemplateConfiguration": "BuildOutput::prod-ecs-params.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
@@ -1044,7 +997,7 @@
                   "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
                   "StackName": { "Fn::Join": ["-", [
                     { "Ref": "ProjectName" },
-                    "prod-lambda-deploy"
+                    "prod-lambda"
                   ]]},
                   "TemplateConfiguration": "BuildOutput::prod-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"

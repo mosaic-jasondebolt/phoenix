@@ -1,8 +1,8 @@
 {
   "Parameters": {
-    "Environment": "staging",
+    "Environment": "testing",
     "ProjectName": "phoenix",
     "LambdaBucketName": "mosaic-phoenix-lambda",
-    "LambaS3LambdaS3BucketIdentifier": "LAMBDA_ID"
+    "LambdaS3BucketIdentifier": "LAMBDA_ID"
   }
 }

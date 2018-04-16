@@ -1,0 +1,10 @@
+{
+  "Parameters": {
+    "VPCCidrBlock": "10.3.0.0/16",
+    "PrivateSubnet1CidrBlock": "10.3.1.0/24",
+    "PrivateSubnet2CidrBlock": "10.3.3.0/24",
+    "PublicSubnet1CidrBlock": "10.3.2.0/24",
+    "PublicSubnet2CidrBlock": "10.3.4.0/24",
+    "Tenancy": "default"
+  }
+}

@@ -3,6 +3,6 @@
     "Environment": "dev",
     "ProjectName": "phoenix",
     "LambdaBucketName": "mosaic-phoenix-lambda",
-    "LambaS3LambdaS3BucketIdentifier": "LAMBDA_ID"
+    "LambdaS3BucketIdentifier": "LAMBDA_ID"
   }
 }

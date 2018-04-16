@@ -150,7 +150,7 @@
     },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
-      "AllowedValues": ["dev", "staging", "production"],
+      "AllowedValues": ["dev", "testing", "production"],
       "Default": "dev",
       "Type": "String"
     },
@@ -159,7 +159,7 @@
       "Type": "String"
     },
     "Username": {
-      "Description": "Ther username of the user who last updated the stack, if relevant.",
+      "Description": "Ther username of the user who last updated the dev stack, if run in the dev environment.",
       "Type": "String",
       "Default": ""
     },
