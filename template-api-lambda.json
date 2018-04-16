@@ -1,31 +1,39 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Deploys a REST (hopefully) API and all supporting backend and database resources.",
+  "Description" : "Deploys a REST (hopefully) API and supporting API Lambda function.",
   "Parameters": {
     "ProjectName": {
       "Description": "The name of the project.",
       "Type": "String"
     },
     "Environment": {
-      "Description": "The environment (Dev, Staging, Prod) to deploy to.",
-      "Type": "String",
-      "AllowedValues" : ["dev", "staging", "prod"],
-      "Default": "dev"
+      "Description": "The environment (dev, staging, performance, prod, etc.) to deploy to.",
+      "Type": "String"
     },
-    "LambdaS3Location": {
-      "Description": "The S3 directory (i.e s3://..) where the lambda YAML files are found.",
+    "LambdaBucketName": {
+      "Description": "The S3 bucket name in which to store Lambda function.",
+      "Type": "String"
+    },
+    "LambdaS3BucketIdentifier": {
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
       "Type": "String"
     }
   },
   "Resources": {
-    "APIGatewayDeployment": {
+    "LambdaBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": { "Ref": "LambdaBucketName" }
+      }
+    },
+    "API_V1": {
       "Type" : "AWS::ApiGateway::Deployment",
       "Properties" : {
-        "Description" : "Deployment 2.",
+        "Description" : "",
         "RestApiId" : {"Ref": "RestAPI"},
         "StageName" : { "Ref": "Environment" },
         "StageDescription" : {
-          "Description" : { "Ref": "Environment" },
+          "Description" : "",
           "LoggingLevel" : "INFO",
           "MetricsEnabled" : true
         }
@@ -119,27 +127,17 @@
     },
     "LambdaProjects": {
       "Type": "AWS::Lambda::Function",
+      "DependsOn": "LambdaBucket",
       "Properties": {
         "Handler": "index.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
-        "FunctionName": {"Fn::Join": ["-", [
-          {"Ref": "ProjectName"},
-          "api",
-          "projects",
-          { "Ref": "Environment" }
-        ]]},
         "Code": {
-          "Fn::Transform": [
-            {
-              "Name": "AWS::Include",
-              "Parameters": {
-                "Location": {"Fn::Join": ["", [
-                  { "Ref": "LambdaS3Location" },
-                  "projects.yaml"
-                ]]}
-              }
-            }
-          ]
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "LambdaS3BucketIdentifier"},
+            "projects",
+            "lambda_function.zip"
+          ]]}
         },
         "Runtime": "python3.6",
         "Timeout": "25",

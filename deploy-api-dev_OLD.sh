@@ -9,7 +9,7 @@ set -e
 LAMBDA_S3_LOCATION="s3://mosaic-phoenix-cfn/lambdas/"
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 
-aws s3 sync --delete backend/lambdas/ s3://mosaic-phoenix-cfn/lambdas/
+aws s3 sync --delete lambda/ s3://mosaic-phoenix-cfn/lambdas/
 
 aws cloudformation validate-template --template-body file://api.json
 

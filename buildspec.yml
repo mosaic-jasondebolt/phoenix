@@ -15,16 +15,34 @@ phases:
       - AWS_ACCOUNT_ID=`jq -r '.Parameters.AWSAccountId' template-microservice-params.json`
       - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME
       - IMAGE_TAG=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - LAMBDA_BUCKET_NAME=`jq -r '.Parameters.LambdaBucketName' template-microservice-params.json`
+      - LAMBDA_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
     commands:
       - echo Build started on `date`
+      - # DOCKER
+      - echo ===== DOCKER BUILD =====
       - echo replacing build number in the task definition param files.
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-staging.json > staging_params.json
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-perf.json > performance_params.json
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-prod.json > prod_params.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-staging.json > staging-ecs-params.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-perf.json > performance-ecs-params.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-prod.json > prod-ecs-params.json
       - echo Building the Docker image from the Dockerfile.
       - docker build -t $REPOSITORY_URI:latest ecs
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - # LAMBDA
+      - echo ===== LAMBDA BUILD =====
+      - echo ||---- PROJECTS FUNCTION ----||
+      - echo replacing lambda id in the lambda params file.
+      - sed "s/LAMBDA_ID/$LAMBDA_ID/g" template-api-lambda-params-staging.json > staging-lambda-params.json
+      - sed "s/LAMBDA_ID/$LAMBDA_ID/g" template-api-lambda-params-prod.json > prod-lambda-params.json
+      - echo Building the 'projects' lambda function...
+      - mkdir -p builds/projects
+      - cp -rf lambda/projects/* builds/projects/
+      - cd builds/projects/
+      - pip install -r requirements.txt -t .
+      - zip -r lambda_function.zip ./*
+      - aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$LAMBDA_ID/projects/
+      - cd ../../
   post_build:
     commands:
       - echo Build completed on `date`
@@ -34,7 +52,12 @@ phases:
       - echo Writing image definitions file...
 artifacts:
     files:
+      - # DOCKER
       - template-ecs.json
-      - staging_params.json
-      - performance_params.json
-      - prod_params.json
+      - staging-ecs-params.json
+      - performance-ecs-params.json
+      - prod-ecs-params.json
+      - # LAMBDA
+      - template-api-lambda.json
+      - staging-lambda-params.json
+      - prod-lambda-params.json

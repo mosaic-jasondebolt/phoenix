@@ -1,18 +1,26 @@
-# Creates a microservice project.
+#!/bin/bash
+set -e
 
+# Creates a microservice project.
+#
 # USAGE
 #   ./deploy-microservice.sh [create | update]
 
+# Check for valid arguments
 if [ $# -ne 1 ]
   then
     echo "Incorrect number of arguments supplied. Pass in either 'create' or 'update'."
     exit 1
 fi
 
+# Extract JSON properties for a file into a local variable
 STACK_NAME=`jq -r '.Parameters.StackName' template-microservice-params.json`
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-microservice-params.json > temp.json
+
+# Validate the CloudFormation template before template execution.
+aws cloudformation validate-template --template-body file://template-microservice.json
 
 aws cloudformation $1-stack \
     --stack-name $STACK_NAME \
