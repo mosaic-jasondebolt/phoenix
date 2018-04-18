@@ -250,19 +250,25 @@
     },
     "RouteTablePrivateAZ1": {
       "Properties": {
-        "VpcId": { "Ref": "VPC" }
+        "VpcId": {
+          "Ref": "VPC"
+        }
       },
       "Type": "AWS::EC2::RouteTable"
     },
     "RouteTablePrivateAZ2": {
       "Properties": {
-        "VpcId": { "Ref": "VPC" }
+        "VpcId": {
+          "Ref": "VPC"
+        }
       },
       "Type": "AWS::EC2::RouteTable"
     },
     "RouteTablePublic": {
       "Properties": {
-        "VpcId": { "Ref": "VPC" }
+        "VpcId": {
+          "Ref": "VPC"
+        }
       },
       "Type": "AWS::EC2::RouteTable"
     },
@@ -273,7 +279,9 @@
         },
         "EnableDnsHostnames": "true",
         "EnableDnsSupport": "true",
-        "InstanceTenancy": {"Ref": "Tenancy"}
+        "InstanceTenancy": {
+          "Ref": "Tenancy"
+        }
       },
       "Type": "AWS::EC2::VPC"
     }
@@ -325,6 +333,18 @@
       },
       "Value": {
         "Ref": "PrivateSubnetAZ1"
+      }
+    },
+    "PrivateSubnetAZ1AvailabilityZone": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["", [{
+            "Ref": "AWS::StackName"
+          }, "-", "PrivateSubnetAZ1AvailabilityZone"]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["PrivateSubnetAZ1", "AvailabilityZone"]
       }
     },
     "PrivateSubnetAZ2": {
