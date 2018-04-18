@@ -25,19 +25,19 @@ aws cloudformation validate-template --template-body file://template-vpc.json
 
 # Create or update the dev VPC.
 aws cloudformation $1-stack \
-    --stack-name $VPC_STACK_NAME_PREFIX-dev \
+    --stack-name dev-vpc \
     --template-body file://template-vpc.json \
     --parameters file://temp_dev.json
 
 # Create or update the testing VPC.
 aws cloudformation $1-stack \
-    --stack-name $VPC_STACK_NAME_PREFIX-testing \
+    --stack-name testing-vpc \
     --template-body file://template-vpc.json \
     --parameters file://temp_testing.json
 
 # Create or update the prod VPC.
 aws cloudformation $1-stack \
-    --stack-name $VPC_STACK_NAME_PREFIX-prod \
+    --stack-name prod-vpc \
     --template-body file://template-vpc.json \
     --parameters file://temp_prod.json
 

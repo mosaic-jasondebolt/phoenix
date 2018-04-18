@@ -1,20 +1,16 @@
 {
   "Parameters": {
-    "AWSAccountId": "057281004471",
+    "AWSAccountId": "714284646049",
     "AWSRegion": "us-east-1",
     "ProjectName": "phoenix",
     "ProjectDescription": "The Mosaic Phoenix project.",
     "StackName": "phoenix-microservice",
     "NotificationEmail": "jason.debolt@joinmosaic.com",
-    "IAMRole": "arn:aws:iam::057281004471:role/SolarmosaicDevelopers",
+    "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
     "LambdaBucketName": "mosaic-phoenix-lambda",
+    "LoadBalancerLogsBucketName": "mosaic-phoenix-load-balancer-logs",
     "CodeBuildBucketName": "mosaic-phoenix-code-build",
     "CodePipelineBucketName": "mosaic-phoenix-code-pipeline",
-    "CodePipelineDeployActionRole": "arn:aws:iam::057281004471:role/cloudformationRole",
-    "CodePipelineServiceRole": "arn:aws:iam::057281004471:role/AWS-CodePipeline-Service",
-    "CodeBuildDockerImage": "057281004471.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
-    "VpcId": "vpc-3a6a3f52",
-    "Subnets": "subnet-326a3f5a",
-    "SecurityGroupIds": "sg-09554f65"
+    "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0"
   }
 }

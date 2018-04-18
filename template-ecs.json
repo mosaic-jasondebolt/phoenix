@@ -56,7 +56,7 @@
       "Default": "FARGATE",
       "Type": "String"
     },
-    "LoadBalancerLogsS3Bucket": {
+    "LoadBalancerLogsBucketName": {
       "Description": "The S3 bucket in which load balancer logs will be stored",
       "Type": "String"
     },
@@ -438,7 +438,7 @@
           },
           {
             "Key": "access_logs.s3.bucket",
-            "Value": {"Ref": "LoadBalancerLogsS3Bucket"}
+            "Value": {"Ref": "LoadBalancerLogsBucketName"}
           },
           {
             "Key": "access_logs.s3.prefix",

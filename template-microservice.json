@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Generates all resources required for a microservice.",
+  "Description": "Generates all resources required for a microservice.",
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
@@ -39,6 +39,10 @@
       "Description": "The bucket name in which Lambda artifacts will be stored.",
       "Type": "String"
     },
+    "LoadBalancerLogsBucketName": {
+      "Description": "The bucket name in which load balancer logs will be stored.",
+      "Type": "String"
+    },
     "ProjectDescription": {
       "Description": "A description of your project",
       "Type": "String"
@@ -51,26 +55,6 @@
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "String"
     },
-    "CodePipelineServiceRole": {
-      "Description": "The service role used by CodePipeline to interact with other AWS services like CodeCommit, CodeBuild, S3, etc.",
-      "Type": "String"
-    },
-    "CodePipelineDeployActionRole": {
-      "Description": "The service role assumed by CodePipeline execute deploy actions",
-      "Type": "String"
-    },
-    "VpcId": {
-      "Description": "The ID of the VPC in which CodeBuild nodes will be placed.",
-      "Type": "String"
-    },
-    "Subnets": {
-      "Description": "The subnets in which CodeBuild nodes will be placed. (i.e 'subnet-abc444,subnet-bbb555')",
-      "Type": "CommaDelimitedList"
-    },
-    "SecurityGroupIds": {
-      "Description": "The security groups that CodeBuild nodes will be associated with. (i.e 'sg-abc444,sg-bbb555')",
-      "Type": "CommaDelimitedList"
-    },
     "Username": {
       "Description": "Ther username of the user who last updated the stack, if relevant.",
       "Type": "String",
@@ -81,70 +65,100 @@
     "CodeBuildBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": { "Ref": "CodeBuildBucketName" }
+        "BucketName": {
+          "Ref": "CodeBuildBucketName"
+        }
       }
     },
     "CodePipelineBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": { "Ref": "CodePipelineBucketName" }
+        "BucketName": {
+          "Ref": "CodePipelineBucketName"
+        }
       }
     },
     "LambdaBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": { "Ref": "LambdaBucketName" }
+        "BucketName": {
+          "Ref": "LambdaBucketName"
+        }
+      }
+    },
+    "LoadBalancerLogsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Ref": "LoadBalancerLogsBucketName"
+        }
       }
     },
     "MasterTriggerSNSTopic": {
-      "Type" : "AWS::SNS::Topic",
-      "Properties" : {
-        "DisplayName" : "GitMaster",
-        "Subscription" : [
-          {
-            "Endpoint": { "Ref": "NotificationEmail" },
-            "Protocol": "email"
-          }
-        ],
-        "TopicName" : { "Fn::Join": ["-", [
-          "master-branch-event-triggered-for",
-          { "Ref": "ProjectName" }
-        ]]}
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "GitMaster",
+        "Subscription": [{
+          "Endpoint": {
+            "Ref": "NotificationEmail"
+          },
+          "Protocol": "email"
+        }],
+        "TopicName": {
+          "Fn::Join": ["-", [
+            "master-branch-event-triggered-for",
+            {
+              "Ref": "ProjectName"
+            }
+          ]]
+        }
       }
     },
     "CodePipelineApprovalSNSTopic": {
-      "Type" : "AWS::SNS::Topic",
-      "Properties" : {
-        "DisplayName" : "CodePipeLn",
-        "Subscription" : [
-          {
-            "Endpoint": { "Ref": "NotificationEmail" },
-            "Protocol": "email"
-          }
-        ],
-        "TopicName" : { "Fn::Join": ["-", [
-          "code-pipeline-approval-required-for",
-          { "Ref": "ProjectName" }
-        ]]}
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "CodePipeLn",
+        "Subscription": [{
+          "Endpoint": {
+            "Ref": "NotificationEmail"
+          },
+          "Protocol": "email"
+        }],
+        "TopicName": {
+          "Fn::Join": ["-", [
+            "code-pipeline-approval-required-for",
+            {
+              "Ref": "ProjectName"
+            }
+          ]]
+        }
       }
     },
     "CodeCommitRepository": {
       "Type": "AWS::CodeCommit::Repository",
-      "Properties" : {
-        "RepositoryName" : { "Ref": "ProjectName" },
-        "RepositoryDescription" : { "Ref": "ProjectDescription"},
-        "Triggers" : [
-          {
-            "Name" : "MasterTrigger",
-            "CustomData" : { "Fn::Join": [" ", [
+      "Properties": {
+        "RepositoryName": {
+          "Ref": "ProjectName"
+        },
+        "RepositoryDescription": {
+          "Ref": "ProjectDescription"
+        },
+        "Triggers": [{
+          "Name": "MasterTrigger",
+          "CustomData": {
+            "Fn::Join": [" ", [
               "Project",
-              { "Ref": "ProjectName" }
-            ]]},
-            "DestinationArn" : { "Ref":"MasterTriggerSNSTopic" },
-            "Branches" : ["master"],
-            "Events" : ["all"]
-          }
-        ]
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          },
+          "DestinationArn": {
+            "Ref": "MasterTriggerSNSTopic"
+          },
+          "Branches": ["master"],
+          "Events": ["all"]
+        }]
       }
     },
     "ECRRepository": {
@@ -188,463 +202,506 @@
         }
       }
     },
-    "CodeBuildServiceRole": {
+    "CodePipelineServiceRole": {
       "Type": "AWS::IAM::Role",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
       "Properties": {
-        "RoleName": { "Fn::Join": ["-", [
-          "code-build",
-          { "Ref": "ProjectName" },
-          "service-role"
-        ]]},
+        "RoleName": {
+          "Fn::Join": ["-", [
+            "code-pipeline",
+            {
+              "Ref": "ProjectName"
+            },
+            "service-role"
+          ]]
+        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "codebuild.amazonaws.com"
-              },
-              "Action": "sts:AssumeRole"
-            }
-          ]
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "codepipeline.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }]
         },
-        "Policies": [
-          {
-            "PolicyName": { "Fn::Join": ["-", [
+        "Policies": [{
+          "PolicyName": {
+            "Fn::Join": ["-", [
               "code-build",
-              { "Ref": "ProjectName" },
+              {
+                "Ref": "ProjectName"
+              },
               "service-policy"
-            ]]},
-            "PolicyDocument": {
-              "Version": "2012-10-17",
-              "Statement": [
-                {
-                  "Sid": "AccessCacheAndArtifactBucket",
-                  "Effect": "Allow",
-                  "Resource": [
-                    {
-                      "Fn::Join": ["", [
-                        "arn:aws:s3:::",
-                        { "Ref": "CodeBuildBucket"},
-                        "/*"
-                      ]]
-                    },
-                    {
-                      "Fn::Join": ["", [
-                        "arn:aws:s3:::",
-                        { "Ref": "LambdaBucketName"},
-                        "/*"
-                      ]]
-                    }
-                  ],
-                  "Action": [
-                    "s3:PutObject",
-                    "s3:GetObject"
-                  ]
-                },
-                {
-                  "Sid": "AccessCodePipelineBucket",
-                  "Effect": "Allow",
-                  "Resource": {
-                    "Fn::Join": ["", [
-                      "arn:aws:s3:::",
-                      { "Ref": "CodePipelineBucket" },
-                      "/*"
-                    ]]
-                  },
-                  "Action": [
-                    "s3:PutObject",
-                    "s3:GetObject",
-                    "s3:GetObjectVersion"
-                  ]
-                },
-                {
-                  "Sid": "AccessLogs",
-                  "Effect": "Allow",
-                  "Resource": [
-                    { "Fn::Join": ["", [
-                      "arn:aws:logs:",
-                      {"Ref": "AWSRegion"},
-                      ":",
-                      {"Ref": "AWSAccountId"},
-                      ":log-group:/aws/codebuild/",
-                      { "Ref": "ProjectName" },
-                      "*"
-                    ]]},
-                    { "Fn::Join": ["", [
-                      "arn:aws:logs:",
-                      {"Ref": "AWSRegion"},
-                      ":",
-                      {"Ref": "AWSAccountId"},
-                      ":log-group:/aws/codebuild/",
-                      { "Ref": "ProjectName" },
-                      "*:*"
-                    ]]}
-                  ],
-                  "Action": [
-                    "logs:CreateLogGroup",
-                    "logs:CreateLogStream",
-                    "logs:PutLogEvents"
-                  ]
-                },
-                {
-                  "Sid": "AccessCodeCommitRepo",
-                  "Effect": "Allow",
-                  "Resource": [
-                    { "Fn::Join": ["", [
-                      "arn:aws:codecommit:",
-                      { "Ref": "AWSRegion" },
-                      ":",
-                      { "Ref": "AWSAccountId" },
-                      ":",
-                      { "Ref": "ProjectName" }
-                    ]]}
-                  ],
-                  "Action": [
-                    "codecommit:GitPull"
-                  ]
-                },
-                {
-                  "Sid": "AccessEc2",
-                  "Effect": "Allow",
-                  "Action": [
-                    "ec2:*"
-                  ],
-                  "Resource": "*"
-                },
-                {
-                  "Sid": "AccessSystemsManagerParameters",
-                  "Effect": "Allow",
-                  "Action": [
-                    "ssm:GetParameters"
-                  ],
-                  "Resource": {"Fn::Join": ["", [
-                    "arn:aws:ssm:",
-                    { "Ref": "AWSRegion" },
-                    ":",
-                    { "Ref": "AWSAccountId" },
-                    ":parameter/CodeBuild/*"
-                  ]]}
-                },
-                {
-                  "Sid": "AccessECR",
-                  "Effect": "Allow",
-                  "Action": [
-                    "ecr:*"
-                  ],
-                  "Resource": [
-                    "*"
-                  ]
-                }
-              ]
-            }
+            ]]
+          },
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": "*",
+                "Resource": "*"
+              }
+            ]
           }
-        ]
+        }]
+      }
+    },
+    "CodeBuildServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
+        "RoleName": {
+          "Fn::Join": ["-", [
+            "code-build",
+            {
+              "Ref": "ProjectName"
+            },
+            "service-role"
+          ]]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "codebuild.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "Policies": [{
+          "PolicyName": {
+            "Fn::Join": ["-", [
+              "code-build",
+              {
+                "Ref": "ProjectName"
+              },
+              "service-policy"
+            ]]
+          },
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Effect": "Allow",
+                "Action": "*",
+                "Resource": "*"
+              }
+            ]
+          }
+        }]
       }
     },
     "CodeBuild": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": {"Ref": "SecurityGroupIds"},
-          "Subnets": {"Ref": "Subnets"},
-          "VpcId": {"Ref": "VpcId"}
-        },
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
         "Artifacts": {
           "Type": "S3",
-          "Location": { "Ref": "CodeBuildBucket" },
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
           "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
+          "Name": {
+            "Ref": "ProjectName"
+          },
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            {"Ref": "CodeBuildBucket"},
-            "/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
         },
-        "Description": { "Ref": "ProjectDescription" },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [],
-          "Image": { "Ref": "CodeBuildDockerImage" },
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Ref": "ProjectName" },
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Name": {
+          "Ref": "ProjectName"
+        },
+        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
         "Source": {
           "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.",
-            {"Ref": "AWSRegion"},
-            ".amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {
+                "Ref": "AWSRegion"
+              },
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
         },
         "TimeoutInMinutes": 60,
         "Tags": []
       }
     },
     "CodeBuildUnitTest": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": {"Ref": "SecurityGroupIds"},
-          "Subnets": {"Ref": "Subnets"},
-          "VpcId": {"Ref": "VpcId"}
-        },
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
         "Artifacts": {
           "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucket"},
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
           "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
+          "Name": {
+            "Ref": "ProjectName"
+          },
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            {"Ref": "CodeBuildBucket"},
-            "/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
         },
-        "Description": { "Ref": "ProjectDescription" },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [],
-          "Image": { "Ref": "CodeBuildDockerImage" },
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["", [
-          { "Ref": "ProjectName" },
-          "-unit-test"
-        ]]},
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Name": {
+          "Fn::Join": ["", [{
+              "Ref": "ProjectName"
+            },
+            "-unit-test"
+          ]]
+        },
+        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
         "Source": {
           "BuildSpec": "buildspec-unit-test.yml",
           "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.",
-            {"Ref": "AWSRegion"},
-            ".amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {
+                "Ref": "AWSRegion"
+              },
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
         },
         "TimeoutInMinutes": 60,
         "Tags": []
       }
     },
     "CodeBuildLint": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": {"Ref": "SecurityGroupIds"},
-          "Subnets": {"Ref": "Subnets"},
-          "VpcId": {"Ref": "VpcId"}
-        },
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
         "Artifacts": {
           "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucket"},
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
           "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
+          "Name": {
+            "Ref": "ProjectName"
+          },
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            {"Ref": "CodeBuildBucket"},
-            "/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
         },
-        "Description": { "Ref": "ProjectDescription" },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [],
-          "Image": { "Ref": "CodeBuildDockerImage" },
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName" },
-          "lint"
-        ]]},
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Name": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            "lint"
+          ]]
+        },
+        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
         "Source": {
           "BuildSpec": "buildspec-lint.yml",
           "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.",
-            {"Ref": "AWSRegion"},
-            ".amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {
+                "Ref": "AWSRegion"
+              },
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
         },
         "TimeoutInMinutes": 60,
         "Tags": []
       }
     },
     "CodeBuildCalculateCosts": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": {"Ref": "SecurityGroupIds"},
-          "Subnets": {"Ref": "Subnets"},
-          "VpcId": {"Ref": "VpcId"}
-        },
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
         "Artifacts": {
           "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucket"},
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
           "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
+          "Name": {
+            "Ref": "ProjectName"
+          },
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            {"Ref": "CodeBuildBucket"},
-            "/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
         },
-        "Description": { "Ref": "ProjectDescription" },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [],
-          "Image": { "Ref": "CodeBuildDockerImage" },
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName" },
-          "calculate-costs"
-        ]]},
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Name": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            "calculate-costs"
+          ]]
+        },
+        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
         "Source": {
           "BuildSpec": "buildspec-calculate-costs.yml",
           "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.",
-            {"Ref": "AWSRegion"},
-            ".amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {
+                "Ref": "AWSRegion"
+              },
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
         },
         "TimeoutInMinutes": 60,
         "Tags": []
       }
     },
     "CodeBuildStaticAnalysis": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": {"Ref": "SecurityGroupIds"},
-          "Subnets": {"Ref": "Subnets"},
-          "VpcId": {"Ref": "VpcId"}
-        },
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
         "Artifacts": {
           "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucket"},
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
           "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
+          "Name": {
+            "Ref": "ProjectName"
+          },
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            {"Ref": "CodeBuildBucket"},
-            "/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
         },
-        "Description": { "Ref": "ProjectDescription" },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [],
-          "Image": { "Ref": "CodeBuildDockerImage" },
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName" },
-          "static-analysis"
-        ]]},
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Name": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            "static-analysis"
+          ]]
+        },
+        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
         "Source": {
           "BuildSpec": "buildspec-static-analysis.yml",
           "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.",
-            {"Ref": "AWSRegion"},
-            ".amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {
+                "Ref": "AWSRegion"
+              },
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
         },
         "TimeoutInMinutes": 60,
         "Tags": []
       }
     },
     "CodeBuildIntegrationTest": {
-      "Type" : "AWS::CodeBuild::Project",
-      "Properties" : {
-        "VpcConfig": {
-          "SecurityGroupIds": {"Ref": "SecurityGroupIds"},
-          "Subnets": {"Ref": "Subnets"},
-          "VpcId": {"Ref": "VpcId"}
-        },
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
         "Artifacts": {
           "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucket"},
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
           "NamespaceType": "BUILD_ID",
-          "Name": { "Ref": "ProjectName" },
+          "Name": {
+            "Ref": "ProjectName"
+          },
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
-          "Location" : { "Fn::Join": ["", [
-            {"Ref": "CodeBuildBucket"},
-            "/",
-            { "Ref": "ProjectName"},
-            "-cache"
-          ]]},
-          "Type" : "S3"
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
         },
-        "Description": { "Ref": "ProjectDescription" },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [],
-          "Image": { "Ref": "CodeBuildDockerImage" },
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName" },
-          "integration-test"
-        ]]},
-        "ServiceRole": { "Ref": "CodeBuildServiceRole" },
+        "Name": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            "integration-test"
+          ]]
+        },
+        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
         "Source": {
           "BuildSpec": "buildspec-integration-test.yml",
           "Type": "CODECOMMIT",
-          "Location": { "Fn::Join": ["", [
-            "https://git-codecommit.",
-            {"Ref": "AWSRegion"},
-            ".amazonaws.com/v1/repos/",
-            { "Ref": "ProjectName"}
-          ]]}
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {
+                "Ref": "AWSRegion"
+              },
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
         },
         "TimeoutInMinutes": 60,
         "Tags": []
@@ -652,41 +709,40 @@
     },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket", "CodePipelineServiceRole"],
       "Properties": {
-        "RoleArn": { "Ref": "CodePipelineServiceRole" },
-        "Name": { "Ref": "ProjectName" },
-        "Stages": [
-          {
+        "RoleArn": {"Fn::GetAtt" : ["CodePipelineServiceRole", "Arn"] },
+        "Name": {
+          "Ref": "ProjectName"
+        },
+        "Stages": [{
             "Name": "Source",
-            "Actions": [
-              {
-                "Name": "SourceAction",
-                "ActionTypeId": {
-                  "Category": "Source",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CodeCommit"
-                },
-                "OutputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
-                "Configuration": {
-                  "RepositoryName": { "Fn::GetAtt": [
+            "Actions": [{
+              "Name": "SourceAction",
+              "ActionTypeId": {
+                "Category": "Source",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "CodeCommit"
+              },
+              "OutputArtifacts": [{
+                "Name": "SourceOutput"
+              }],
+              "Configuration": {
+                "RepositoryName": {
+                  "Fn::GetAtt": [
                     "CodeCommitRepository",
                     "Name"
-                  ]},
-                  "BranchName": "master"
+                  ]
                 },
-                "RunOrder": 1
-              }
-            ]
+                "BranchName": "master"
+              },
+              "RunOrder": 1
+            }]
           },
           {
             "Name": "Build",
-            "Actions": [
-              {
+            "Actions": [{
                 "Name": "Build",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -694,19 +750,17 @@
                   "Version": "1",
                   "Provider": "CodeBuild"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
-                "OutputArtifacts": [
-                  {
-                    "Name": "BuildOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "OutputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": { "Ref": "ProjectName" }
+                  "ProjectName": {
+                    "Ref": "ProjectName"
+                  }
                 }
               },
               {
@@ -717,17 +771,18 @@
                   "Version": "1",
                   "Provider": "CodeBuild"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "unit-test"
-                  ]]}
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "unit-test"
+                    ]]
+                  }
                 }
               },
               {
@@ -738,17 +793,18 @@
                   "Version": "1",
                   "Provider": "CodeBuild"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "lint"
-                  ]]}
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "lint"
+                    ]]
+                  }
                 }
               },
               {
@@ -759,17 +815,18 @@
                   "Version": "1",
                   "Provider": "CodeBuild"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "calculate-costs"
-                  ]]}
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "calculate-costs"
+                    ]]
+                  }
                 }
               },
               {
@@ -780,25 +837,25 @@
                   "Version": "1",
                   "Provider": "CodeBuild"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "static-analysis"
-                  ]]}
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "static-analysis"
+                    ]]
+                  }
                 }
               }
             ]
           },
           {
             "Name": "StagingClusterDeploy",
-            "Actions": [
-              {
+            "Actions": [{
                 "Name": "StagingECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -806,20 +863,20 @@
                   "Version": "1",
                   "Provider": "CloudFormation"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "BuildOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
-                  "StackName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "staging-ecs"
-                  ]]},
+                  "StackName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "staging-ecs"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::staging-ecs-params.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
                 }
@@ -832,20 +889,20 @@
                   "Version": "1",
                   "Provider": "CloudFormation"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "BuildOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
-                  "StackName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "staging-lambda"
-                  ]]},
+                  "StackName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "staging-lambda"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
@@ -858,24 +915,24 @@
                   "Version": "1",
                   "Provider": "CloudFormation"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "BuildOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
                 "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
-                  "StackName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "staging-api-gateway"
-                  ]]},
+                  "StackName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "staging-api-gateway"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
-              }
+              },
               {
                 "Name": "StagingAPIGatewayDeploy",
                 "ActionTypeId": {
@@ -884,20 +941,20 @@
                   "Version": "1",
                   "Provider": "CloudFormation"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "BuildOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
                 "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
-                  "StackName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "staging-lambda"
-                  ]]},
+                  "StackName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "staging-lambda"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
@@ -906,52 +963,50 @@
           },
           {
             "Name": "StagingClusterTests",
-            "Actions": [
-              {
-                "Name": "IntegrationTest",
-                "ActionTypeId": {
-                  "Category": "Test",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CodeBuild"
-                },
-                "InputArtifacts": [
-                  {
-                    "Name": "SourceOutput"
-                  }
-                ],
-                "RunOrder": 1,
-                "Configuration": {
-                  "ProjectName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
+            "Actions": [{
+              "Name": "IntegrationTest",
+              "ActionTypeId": {
+                "Category": "Test",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "CodeBuild"
+              },
+              "InputArtifacts": [{
+                "Name": "SourceOutput"
+              }],
+              "RunOrder": 1,
+              "Configuration": {
+                "ProjectName": {
+                  "Fn::Join": ["-", [{
+                      "Ref": "ProjectName"
+                    },
                     "integration-test"
-                  ]]}
+                  ]]
                 }
               }
-            ]
+            }]
           },
           {
             "Name": "Approval",
-            "Actions": [
-              {
-                "Name": "ManualApproval",
-                "ActionTypeId": {
-                  "Category": "Approval",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "Manual"
-                },
-                "RunOrder": 1,
-                "Configuration": {
-                  "NotificationArn": { "Ref": "CodePipelineApprovalSNSTopic" }
+            "Actions": [{
+              "Name": "ManualApproval",
+              "ActionTypeId": {
+                "Category": "Approval",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "Manual"
+              },
+              "RunOrder": 1,
+              "Configuration": {
+                "NotificationArn": {
+                  "Ref": "CodePipelineApprovalSNSTopic"
                 }
               }
-            ]
+            }]
           },
           {
             "Name": "ProdClusterDeploy",
-            "Actions": [
-              {
+            "Actions": [{
                 "Name": "ProdECSDeploy",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -959,20 +1014,20 @@
                   "Version": "1",
                   "Provider": "CloudFormation"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "BuildOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
-                  "StackName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "prod-ecs"
-                  ]]},
+                  "StackName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "prod-ecs"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::prod-ecs-params.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
                 }
@@ -985,20 +1040,20 @@
                   "Version": "1",
                   "Provider": "CloudFormation"
                 },
-                "InputArtifacts": [
-                  {
-                    "Name": "BuildOutput"
-                  }
-                ],
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
                 "RunOrder": 1,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
-                  "RoleArn": { "Ref": "CodePipelineDeployActionRole" },
-                  "StackName": { "Fn::Join": ["-", [
-                    { "Ref": "ProjectName" },
-                    "prod-lambda"
-                  ]]},
+                  "StackName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "prod-lambda"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::prod-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
@@ -1008,79 +1063,99 @@
         ],
         "ArtifactStore": {
           "Type": "S3",
-          "Location": {"Ref": "CodePipelineBucket"}
+          "Location": {
+            "Ref": "CodePipelineBucket"
+          }
         }
       }
     }
   },
-  "Outputs" : {
+  "Outputs": {
     "GitCloneInstructions": {
       "Description": "IMPORTANT! Instructions for cloning the Git repo",
       "Value": "For mac users, you may need to disable the OSX keychain for CodeCommit credentials and delete any keys stored in there. Your keychain credentials will expire 15 minutes after you clone your repo by default!: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-unixes.html"
     },
     "GitInstructions": {
       "Description": "IMPORTANT! Code Commit will NOT automatically create a master branch.",
-      "Value": {"Fn::Join": ["<br />", [
-        "1) ",
-        {"Fn::Join": [" ", [
-          "git clone",
-          { "Fn::GetAtt": [
-            "CodeCommitRepository",
-            "CloneUrlHttp"
-          ]}
-        ]]},
-        "2) Create local README.md file and add content to it",
-        "3) git add README.md",
-        "4) git commit",
-        "5) git push origin master",
-        "6) If you have issues, see the GitCloneInstructions section of this doc."
-      ]]}
+      "Value": {
+        "Fn::Join": ["<br />", [
+          "1) ",
+          {
+            "Fn::Join": [" ", [
+              "git clone",
+              {
+                "Fn::GetAtt": [
+                  "CodeCommitRepository",
+                  "CloneUrlHttp"
+                ]
+              }
+            ]]
+          },
+          "2) Create local README.md file and add content to it",
+          "3) git add README.md",
+          "4) git commit",
+          "5) git push origin master",
+          "6) If you have issues, see the GitCloneInstructions section of this doc."
+        ]]
+      }
     },
-    "CodeCommitRepositoryURL" : {
-      "Description" : "The AWS Console URL of the CodeCommit Repository",
-      "Value" :  {"Fn::Join": ["",
-        ["https://console.aws.amazon.com/codecommit/home?region=",
-          { "Ref": "AWS::Region"},
+    "CodeCommitRepositoryURL": {
+      "Description": "The AWS Console URL of the CodeCommit Repository",
+      "Value": {
+        "Fn::Join": ["", ["https://console.aws.amazon.com/codecommit/home?region=",
+          {
+            "Ref": "AWS::Region"
+          },
           "#/repository/",
-          { "Ref": "ProjectName" }
+          {
+            "Ref": "ProjectName"
+          }
         ]]
       }
     },
     "MasterTriggerSNSTopic": {
-      "Description" : "The name of this SNS topic",
-      "Value": { "Fn::GetAtt": [
+      "Description": "The name of this SNS topic",
+      "Value": {
+        "Fn::GetAtt": [
           "MasterTriggerSNSTopic",
           "TopicName"
-      ]}
+        ]
+      }
     },
     "MasterTriggerSNSTopicInstructions": {
-      "Description" : "Instructions for this SNS topic",
+      "Description": "Instructions for this SNS topic",
       "Value": "Check your email for an SNS subscription confirmation request"
     },
     "CodePipelineApprovalSNSTopic": {
-      "Description" : "The name of this SNS topic",
-      "Value": { "Fn::GetAtt": [
+      "Description": "The name of this SNS topic",
+      "Value": {
+        "Fn::GetAtt": [
           "CodePipelineApprovalSNSTopic",
           "TopicName"
-      ]}
+        ]
+      }
     },
     "CodePipelineApprovalSNSTopicInstructions": {
-      "Description" : "Instructions for this SNS topic",
+      "Description": "Instructions for this SNS topic",
       "Value": "Check your email for an SNS subscription confirmation request"
     },
-    "DockerRepositoryURL" : {
-      "Description" : "The AWS Console URL of the Docker ECR Repository",
-      "Value" :  {"Fn::Join": ["",
-        ["https://console.aws.amazon.com/ecs/home?region=",
-          { "Ref": "AWS::Region"},
+    "DockerRepositoryURL": {
+      "Description": "The AWS Console URL of the Docker ECR Repository",
+      "Value": {
+        "Fn::Join": ["", ["https://console.aws.amazon.com/ecs/home?region=",
+          {
+            "Ref": "AWS::Region"
+          },
           "#/repositories/",
-          { "Ref": "ProjectName" }
+          {
+            "Ref": "ProjectName"
+          }
         ]]
       }
     },
-    "DockerRepositoryInstructions" : {
-      "Description" : "Instructions",
-      "Value" :  "Click on repo link in the DockerRepositoryURL section and then click on the 'View Push Commands' button"
+    "DockerRepositoryInstructions": {
+      "Description": "Instructions",
+      "Value": "Click on repo link in the DockerRepositoryURL section and then click on the 'View Push Commands' button"
     }
   }
 }
