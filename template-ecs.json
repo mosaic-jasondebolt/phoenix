@@ -60,10 +60,6 @@
       "Description": "The S3 bucket in which load balancer logs will be stored",
       "Type": "String"
     },
-    "TaskExecutionRoleArn": {
-      "Description": "Fargate requires task definition to have execution role ARN to support ECR images",
-      "Type": "String"
-    },
     "Cluster": {
       "Description": "The Name of the ECS Cluster",
       "Type": "String"
@@ -304,8 +300,33 @@
         "RetentionInDays": {"Ref": "ContainerLogsRetentionDays"}
       }
     },
+    "TaskExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2008-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        ],
+        "RoleName": {"Fn::Join": ["-", [
+          {"Ref": "AWS::StackName"},
+          {"Ref": "ProjectName"}
+        ]]}
+      }
+    },
     "ECSTaskDefinition": {
       "Type": "AWS::ECS::TaskDefinition",
+      "DependsOn": ["TaskExecutionRole"],
       "Properties": {
         "RequiresCompatibilities": [
           { "Ref": "LaunchType" }
@@ -313,7 +334,9 @@
         "NetworkMode": { "Ref": "NetworkMode" },
         "Cpu": { "Ref": "Cpu" },
         "Memory": { "Ref": "Memory" },
-        "ExecutionRoleArn": { "Ref": "TaskExecutionRoleArn"},
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": ["TaskExecutionRole", "Arn"]
+        },
         "Family": { "Ref": "TaskFamily" },
         "ContainerDefinitions": [
           {

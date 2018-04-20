@@ -22,7 +22,7 @@
       "Description": "The username of the user who last updated the dev stack, if run in the dev environment.",
       "Type": "String",
       "Default": ""
-    },
+    }
   },
   "Resources": {
     "APIInitialDeployment": {
@@ -126,6 +126,7 @@
     },
     "LambdaProjects": {
       "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
       "Properties": {
         "Handler": "index.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
