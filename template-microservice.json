@@ -974,9 +974,9 @@
             ]
           },
           {
-            "Name": "StagingClusterDeploy",
+            "Name": "TestingClusterDeploy",
             "Actions": [{
-                "Name": "StagingECS",
+                "Name": "TestingECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -994,15 +994,15 @@
                     "Fn::Join": ["-", [{
                         "Ref": "ProjectName"
                       },
-                      "staging-ecs"
+                      "testing-ecs"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::staging-ecs-params.json",
+                  "TemplateConfiguration": "BuildOutput::testing-ecs-params.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
                 }
               },
               {
-                "Name": "StagingLambda",
+                "Name": "TestingLambda",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1020,15 +1020,15 @@
                     "Fn::Join": ["-", [{
                         "Ref": "ProjectName"
                       },
-                      "staging-lambda"
+                      "testing-lambda"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
+                  "TemplateConfiguration": "BuildOutput::testing-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
               },
               {
-                "Name": "StagingAPIGateway",
+                "Name": "TestingAPIGateway",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1046,15 +1046,15 @@
                     "Fn::Join": ["-", [{
                         "Ref": "ProjectName"
                       },
-                      "staging-api-gateway"
+                      "testing-api-gateway"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
+                  "TemplateConfiguration": "BuildOutput::testing-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
               },
               {
-                "Name": "StagingAPIGatewayDeploy",
+                "Name": "TestingAPIGatewayDeploy",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1072,17 +1072,17 @@
                     "Fn::Join": ["-", [{
                         "Ref": "ProjectName"
                       },
-                      "staging-lambda"
+                      "testing-lambda"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::staging-lambda-params.json",
+                  "TemplateConfiguration": "BuildOutput::testing-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
               }
             ]
           },
           {
-            "Name": "StagingClusterTests",
+            "Name": "TestingClusterTests",
             "Actions": [{
               "Name": "IntegrationTest",
               "ActionTypeId": {

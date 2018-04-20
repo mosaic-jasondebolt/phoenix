@@ -12,7 +12,7 @@ set -e
 
 # Grab the current username so we can propagate to URL's, stack names, etc.
 USERNAME=`echo $USER | tr . "-"` # Replace . in username with hyphen for CloudFormation naming convention.
-LAMBDA_ID=dev_$USERNAME
+VERSION_ID=dev_$USERNAME
 
 # Extract JSON properties for a file into a local variable
 AWS_ACCOUNT_ID=`jq -r '.Parameters.AWSAccountId' template-microservice-params.json`
@@ -26,8 +26,8 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
-# Replace the LAMBDA_ID string in the dev params file with the $LAMBDA_ID variable
-sed "s/LAMBDA_ID/$LAMBDA_ID/g" template-api-lambda-params-dev.json > temp1.json
+# Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
+sed "s/VERSION_ID/$VERSION_ID/g" template-api-lambda-params-dev.json > temp1.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py temp1.json > temp2.json

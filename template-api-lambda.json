@@ -7,7 +7,7 @@
       "Type": "String"
     },
     "Environment": {
-      "Description": "The environment (dev, staging, performance, prod, etc.) to deploy to.",
+      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
     },
     "LambdaBucketName": {

@@ -3,6 +3,6 @@
     "Environment": "prod",
     "ProjectName": "phoenix",
     "LambdaBucketName": "mosaic-phoenix-lambda",
-    "Version": "LAMBDA_ID"
+    "Version": "VERSION_ID"
   }
 }
