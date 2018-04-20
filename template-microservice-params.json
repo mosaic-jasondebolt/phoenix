@@ -11,6 +11,8 @@
     "LoadBalancerLogsBucketName": "mosaic-phoenix-load-balancer-logs",
     "CodeBuildBucketName": "mosaic-phoenix-code-build",
     "CodePipelineBucketName": "mosaic-phoenix-code-pipeline",
+    "SecretsBucketName": "mosaic-phoenix-encrypted-secrets",
+    "EncryptionKeyName": "mosaic-phoenix-kms-key",
     "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0"
   }
 }

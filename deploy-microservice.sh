@@ -14,7 +14,7 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-STACK_NAME=`jq -r '.Parameters.StackName' template-microservice-params.json`
+MICROSERVICE_STACK_NAME=`jq -r '.Parameters.StackName' template-microservice-params.json`
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-microservice-params.json > temp.json
@@ -23,7 +23,7 @@ python parameters_generator.py template-microservice-params.json > temp.json
 aws cloudformation validate-template --template-body file://template-microservice.json
 
 aws cloudformation $1-stack \
-    --stack-name $STACK_NAME \
+    --stack-name $MICROSERVICE_STACK_NAME \
     --template-body file://template-microservice.json \
     --parameters file://temp.json \
     --capabilities CAPABILITY_NAMED_IAM

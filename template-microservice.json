@@ -43,6 +43,14 @@
       "Description": "The bucket name in which load balancer logs will be stored.",
       "Type": "String"
     },
+    "SecretsBucketName": {
+      "Description": "The bucket name in which KMS encrypted secrets will be stored.",
+      "Type": "String"
+    },
+    "EncryptionKeyName": {
+      "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets.",
+      "Type": "String"
+    },
     "ProjectDescription": {
       "Description": "A description of your project",
       "Type": "String"
@@ -56,17 +64,100 @@
       "Type": "String"
     },
     "Username": {
-      "Description": "Ther username of the user who last updated the stack, if relevant.",
+      "Description": "The username of the user who last updated the stack, if relevant.",
       "Type": "String",
       "Default": ""
     }
   },
   "Resources": {
+    "EncryptionKeyAlias": {
+      "Type": "AWS::KMS::Alias",
+      "Properties": {
+        "AliasName": {
+          "Fn::Join": ["", [
+            "alias/",
+            "mosaic-",
+            {
+              "Ref": "ProjectName"
+            },
+            "-kms-key"
+          ]]
+        },
+        "TargetKeyId": {
+          "Ref": "EncryptionKey"
+        }
+      }
+    },
+    "EncryptionKey": {
+      "Type": "AWS::KMS::Key",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [" ", [
+            "Encryption Key used by",
+            {
+              "Ref": "ProjectName"
+            }
+          ]]
+        },
+        "Enabled": true,
+        "KeyPolicy": {
+          "Version": "2012-10-17",
+          "Statement": [{
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": ["", [
+                    "arn:aws:iam::",
+                    {
+                      "Ref": "AWSAccountId"
+                    },
+                    ":root"
+                  ]]
+                }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            },
+            {
+              "Sid": "Allow access for Key Administrators",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "IAMRole"
+                }
+              },
+              "Action": "kms:*",
+              "Resource": "*"
+            }
+          ]
+        }
+      }
+    },
+    "EncryptedSecretsBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Ref": "SecretsBucketName"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [{
+            "ExpirationInDays": 99999,
+            "Status": "Disabled"
+          }]
+        }
+      }
+    },
     "CodeBuildBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
         "BucketName": {
           "Ref": "CodeBuildBucketName"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [{
+            "ExpirationInDays": 180,
+            "Status": "Enabled"
+          }]
         }
       }
     },
@@ -75,6 +166,12 @@
       "Properties": {
         "BucketName": {
           "Ref": "CodePipelineBucketName"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [{
+            "ExpirationInDays": 180,
+            "Status": "Enabled"
+          }]
         }
       }
     },
@@ -83,6 +180,12 @@
       "Properties": {
         "BucketName": {
           "Ref": "LambdaBucketName"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [{
+            "ExpirationInDays": 180,
+            "Status": "Enabled"
+          }]
         }
       }
     },
@@ -91,6 +194,12 @@
       "Properties": {
         "BucketName": {
           "Ref": "LoadBalancerLogsBucketName"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [{
+            "ExpirationInDays": 180,
+            "Status": "Enabled"
+          }]
         }
       }
     },
@@ -164,19 +273,18 @@
     "ECRRepository": {
       "Type": "AWS::ECR::Repository",
       "Properties": {
-        "RepositoryName" : {
+        "RepositoryName": {
           "Ref": "ProjectName"
         },
-        "RepositoryPolicyText" : {
+        "RepositoryPolicyText": {
           "Version": "2008-10-17",
-          "Statement": [
-            {
+          "Statement": [{
               "Sid": "AllowPushPull",
               "Effect": "Allow",
               "Principal": {
-                "AWS": [
-                  {"Ref": "IAMRole"}
-                ]
+                "AWS": [{
+                  "Ref": "IAMRole"
+                }]
               },
               "Action": [
                 "ecr:GetDownloadUrlForLayer",
@@ -238,11 +346,10 @@
           "PolicyDocument": {
             "Version": "2012-10-17",
             "Statement": [{
-                "Effect": "Allow",
-                "Action": "*",
-                "Resource": "*"
-              }
-            ]
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            }]
           }
         }]
       }
@@ -283,11 +390,10 @@
           "PolicyDocument": {
             "Version": "2012-10-17",
             "Statement": [{
-                "Effect": "Allow",
-                "Action": "*",
-                "Resource": "*"
-              }
-            ]
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            }]
           }
         }]
       }
@@ -337,7 +443,9 @@
         "Name": {
           "Ref": "ProjectName"
         },
-        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
         "Source": {
           "Type": "CODECOMMIT",
           "Location": {
@@ -406,7 +514,9 @@
             "-unit-test"
           ]]
         },
-        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
         "Source": {
           "BuildSpec": "buildspec-unit-test.yml",
           "Type": "CODECOMMIT",
@@ -476,7 +586,9 @@
             "lint"
           ]]
         },
-        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
         "Source": {
           "BuildSpec": "buildspec-lint.yml",
           "Type": "CODECOMMIT",
@@ -546,7 +658,9 @@
             "calculate-costs"
           ]]
         },
-        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
         "Source": {
           "BuildSpec": "buildspec-calculate-costs.yml",
           "Type": "CODECOMMIT",
@@ -616,7 +730,9 @@
             "static-analysis"
           ]]
         },
-        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
         "Source": {
           "BuildSpec": "buildspec-static-analysis.yml",
           "Type": "CODECOMMIT",
@@ -686,7 +802,9 @@
             "integration-test"
           ]]
         },
-        "ServiceRole": { "Ref": "CodeBuildServiceRole"},
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
         "Source": {
           "BuildSpec": "buildspec-integration-test.yml",
           "Type": "CODECOMMIT",
@@ -711,7 +829,9 @@
       "Type": "AWS::CodePipeline::Pipeline",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket", "CodePipelineServiceRole"],
       "Properties": {
-        "RoleArn": {"Fn::GetAtt" : ["CodePipelineServiceRole", "Arn"] },
+        "RoleArn": {
+          "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+        },
         "Name": {
           "Ref": "ProjectName"
         },
@@ -1071,6 +1191,54 @@
     }
   },
   "Outputs": {
+    "KMSEncryptionKeyArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["", [{
+            "Ref": "AWS::StackName"
+          }, "-", "KMSEncryptionKeyArn"]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["EncryptionKey", "Arn"]
+      }
+    },
+    "KMSEncryptionKeyId": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["", [{
+            "Ref": "AWS::StackName"
+          }, "-", "KMSEncryptionKeyId"]]
+        }
+      },
+      "Value": {
+        "Ref": "EncryptionKey"
+      }
+    },
+    "KMSEncryptionKeyAlias": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["", [{
+            "Ref": "AWS::StackName"
+          }, "-", "KMSEncryptionKeyAlias"]]
+        }
+      },
+      "Value": {
+        "Ref": "EncryptionKeyAlias"
+      }
+    },
+    "EncryptedSecretsBucket": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["", [{
+            "Ref": "AWS::StackName"
+          }, "-", "EncryptedSecretsBucket"]]
+        }
+      },
+      "Value": {
+        "Ref": "EncryptedSecretsBucket"
+      }
+    },
     "GitCloneInstructions": {
       "Description": "IMPORTANT! Instructions for cloning the Git repo",
       "Value": "For mac users, you may need to disable the OSX keychain for CodeCommit credentials and delete any keys stored in there. Your keychain credentials will expire 15 minutes after you clone your repo by default!: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-unixes.html"

@@ -347,6 +347,18 @@
         "Fn::GetAtt": ["PrivateSubnetAZ1", "AvailabilityZone"]
       }
     },
+    "PrivateSubnetAZ2AvailabilityZone": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["", [{
+            "Ref": "AWS::StackName"
+          }, "-", "PrivateSubnetAZ2AvailabilityZone"]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["PrivateSubnetAZ2", "AvailabilityZone"]
+      }
+    },
     "PrivateSubnetAZ2": {
       "Export": {
         "Name": {

@@ -159,7 +159,7 @@
       "Type": "String"
     },
     "Username": {
-      "Description": "Ther username of the user who last updated the dev stack, if run in the dev environment.",
+      "Description": "The username of the user who last updated the dev stack, if run in the dev environment.",
       "Type": "String",
       "Default": ""
     },
