@@ -453,6 +453,29 @@
         "TaskDefinition" : { "Ref": "ECSTaskDefinition" }
       }
     },
+    "ApplicationELBLogsS3BucketPolicy": {
+      "Type" : "AWS::S3::BucketPolicy",
+      "Properties" : {
+         "Bucket" : {"Ref": "LoadBalancerLogsBucketName"},
+         "PolicyDocument" : {
+           "Version": "2012-10-17",
+           "Statement": [
+             {
+               "Action": [
+                 "s3:PutObject"
+               ],
+               "Effect": "Allow",
+               "Resource": {"Ref": "ApplicationELB"},
+               "Principal": {
+                 "AWS": [
+                   {"Ref": "AWS::AccountId"}
+                 ]
+               }
+             }
+           ]
+         }
+      }
+    },
     "ApplicationELB": {
       "Properties": {
         "IpAddressType": "ipv4",
