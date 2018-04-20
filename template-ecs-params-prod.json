@@ -20,6 +20,7 @@
     "MaxTasksToScaleOutInResponseTo500Errors": "2",
     "MinECSInstances": "1",
     "MinTasksToScaleInInResponseToScaleInEvent": "1",
+    "ProjectName": "phoenix",
     "SSLCertificateARN": "arn:aws:acm:us-east-1:714284646049:certificate/3d18178b-9cbb-48ab-a695-20bf49d930c1",
     "TaskFamily": "phoenix",
     "VPCPrefix": "production",

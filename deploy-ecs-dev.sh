@@ -57,7 +57,7 @@ aws cloudformation validate-template --template-body file://template-ecs.json
 aws cloudformation $1-stack --stack-name $PROJECT_NAME-dev-ecs-$USERNAME \
     --template-body file://template-ecs.json \
     --parameters file://temp2.json \
-    --capabilities CAPABILITY_IAM
+    --capabilities CAPABILITY_NAMED_IAM
 
 # Cleanup
 rm temp1.json

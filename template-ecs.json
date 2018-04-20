@@ -2,6 +2,14 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description" : "Generates all resources required for a single container ECS service.",
   "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
     "KeyName":{
       "Type":"AWS::EC2::KeyPair::KeyName",
       "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
@@ -165,8 +173,6 @@
     },
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",
-      "AllowedValues": ["Z15DLFBU9EZQ4W"],
-      "Default": "Z15DLFBU9EZQ4W",
       "Type": "String"
     },
     "DesiredECSInstances": {
