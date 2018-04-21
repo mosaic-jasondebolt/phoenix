@@ -1,7 +1,7 @@
 {
   "Parameters": {
     "AssignPublicIp": "ENABLED",
-    "Cluster": "Prod",
+    "Cluster": "phoenixProd",
     "ContainerName": "phoenix",
     "ContainerPort": "5000",
     "DesiredECSInstances": "1",

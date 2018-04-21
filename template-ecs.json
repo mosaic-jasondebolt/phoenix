@@ -281,10 +281,12 @@
       {"Ref" : "LaunchType"}, "FARGATE"
     ]},
     "IsProd" : {"Fn::Equals" : [
-      {"Ref" : "Cluster"}, "Prod"
+      {"Ref" : "Cluster"},
+      {"Fn::Join": ["", [ {"Ref": "ProjectName"}, "Prod" ]]}
     ]},
     "IsDev" : {"Fn::Equals" : [
-      {"Ref" : "Cluster"}, "Dev"
+      {"Ref" : "Cluster"},
+      {"Fn::Join": ["", [ {"Ref": "ProjectName"}, "Dev" ]]}
     ]},
     "HasPlacementConstraints" : {"Fn::Not": [
       {"Fn::Equals" : [
