@@ -310,53 +310,6 @@
         }
       }
     },
-    "CodePipelineServiceRole": {
-      "Type": "AWS::IAM::Role",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
-      "Properties": {
-        "RoleName": {
-          "Fn::Join": ["-", [
-            "code-pipeline",
-            {
-              "Ref": "ProjectName"
-            },
-            "service-role"
-          ]]
-        },
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": {
-              "Service": [
-                "codepipeline.amazonaws.com",
-                "cloudformation.amazonaws.com"
-              ]
-            },
-            "Action": "sts:AssumeRole"
-          }]
-        },
-        "Policies": [{
-          "PolicyName": {
-            "Fn::Join": ["-", [
-              "code-build",
-              {
-                "Ref": "ProjectName"
-              },
-              "service-policy"
-            ]]
-          },
-          "PolicyDocument": {
-            "Version": "2012-10-17",
-            "Statement": [{
-              "Effect": "Allow",
-              "Action": "*",
-              "Resource": "*"
-            }]
-          }
-        }]
-      }
-    },
     "CodeBuildServiceRole": {
       "Type": "AWS::IAM::Role",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
@@ -828,6 +781,53 @@
         "Tags": []
       }
     },
+    "CodePipelineServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
+        "RoleName": {
+          "Fn::Join": ["-", [
+            "code-pipeline",
+            {
+              "Ref": "ProjectName"
+            },
+            "service-role"
+          ]]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [
+                "codepipeline.amazonaws.com",
+                "cloudformation.amazonaws.com"
+              ]
+            },
+            "Action": "sts:AssumeRole"
+          }]
+        },
+        "Policies": [{
+          "PolicyName": {
+            "Fn::Join": ["-", [
+              "code-pipeline",
+              {
+                "Ref": "ProjectName"
+              },
+              "service-policy"
+            ]]
+          },
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            }]
+          }
+        }]
+      }
+    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket", "CodePipelineServiceRole"],
@@ -866,8 +866,8 @@
           {
             "Name": "Build",
             "Actions": [{
-                "Name": "Build",
-                "ActionTypeId": {
+              "Name": "Build",
+              "ActionTypeId": {
                   "Category": "Build",
                   "Owner": "AWS",
                   "Version": "1",
@@ -991,6 +991,9 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
                   "StackName": {
@@ -1017,6 +1020,9 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
                   "StackName": {
@@ -1043,6 +1049,9 @@
                 }],
                 "RunOrder": 2,
                 "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
                   "StackName": {
@@ -1069,6 +1078,9 @@
                 }],
                 "RunOrder": 3,
                 "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
                   "StackName": {
@@ -1142,6 +1154,9 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
                   "StackName": {
@@ -1168,6 +1183,9 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_IAM",
                   "StackName": {
@@ -1180,7 +1198,7 @@
                   "TemplateConfiguration": "BuildOutput::prod-lambda-params.json",
                   "TemplatePath": "BuildOutput::template-api-lambda.json"
                 }
-              },
+              }
             ]
           }
         ],

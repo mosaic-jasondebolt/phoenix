@@ -465,7 +465,11 @@
                  "s3:PutObject"
                ],
                "Effect": "Allow",
-               "Resource": {"Ref": "ApplicationELB"},
+               "Resource": {"Fn::Join": ["", [
+                 "arn:aws:s3:::",
+                 {"Ref": "LoadBalancerLogsBucketName"},
+                 "/*"
+               ]]},
                "Principal": {
                  "AWS": [
                    {"Ref": "AWS::AccountId"}
