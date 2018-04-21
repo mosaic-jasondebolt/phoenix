@@ -237,33 +237,42 @@
     }
   },
   "Mappings":{
-    "AWSRegionToAMI":{
+    "RegionalConfigs":{
       "us-east-1":{
-        "AMIID":"ami-aff65ad2"
+        "AMIID":"ami-aff65ad2",
+        "ELBAccountId": "127311923021"
       },
       "us-east-2":{
-        "AMIID":"ami-64300001"
+        "AMIID":"ami-64300001",
+        "ELBAccountId": "033677994240"
       },
       "us-west-1":{
-        "AMIID":"ami-69677709"
+        "AMIID":"ami-69677709",
+        "ELBAccountId": "027434742980"
       },
       "us-west-2":{
-        "AMIID":"ami-40ddb938"
+        "AMIID":"ami-40ddb938",
+        "ELBAccountId": "797873946194"
       },
       "eu-west-1":{
-        "AMIID":"ami-2d386654"
+        "AMIID":"ami-2d386654",
+        "ELBAccountId": "156460612806"
       },
       "eu-central-1":{
-        "AMIID":"ami-9fc39c74"
+        "AMIID":"ami-9fc39c74",
+        "ELBAccountId": "054676820928"
       },
       "ap-northeast-1":{
-        "AMIID":"ami-a99d8ad5"
+        "AMIID":"ami-a99d8ad5",
+        "ELBAccountId": "582318560864"
       },
       "ap-southeast-1":{
-        "AMIID":"ami-846144f8"
+        "AMIID":"ami-846144f8",
+        "ELBAccountId": "114774131450"
       },
       "ap-southeast-2":{
-        "AMIID":"ami-efda148d"
+        "AMIID":"ami-efda148d",
+        "ELBAccountId": "783225319266"
       }
     }
   },
@@ -467,13 +476,27 @@
                "Effect": "Allow",
                "Resource": {"Fn::Join": ["", [
                  "arn:aws:s3:::",
-                 {"Ref": "LoadBalancerLogsBucketName"},
+                 {
+                   "Ref": "LoadBalancerLogsBucketName"
+                 },
+                 "/",
+                 { "Ref": "AWS::StackName" },
+                 "/AWSLogs/",
+                 {
+                   "Ref": "AWS::AccountId"
+                 },
                  "/*"
                ]]},
                "Principal": {
-                 "AWS": [
-                   {"Ref": "AWS::AccountId"}
-                 ]
+                 "AWS": {
+                   "Fn::FindInMap": [
+                     "RegionalConfigs",
+                     {
+                       "Ref": "AWS::Region"
+                     },
+                     "ELBAccountId"
+                   ]
+                 }
                }
              }
            ]
@@ -498,18 +521,7 @@
           },
           {
             "Key": "access_logs.s3.prefix",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  {
-                    "Ref": "AWS::StackName"
-                  },
-                  "-",
-                  { "Ref": "Cluster" }
-                ]
-              ]
-            }
+            "Value": { "Ref": "AWS::StackName" }
           }
         ],
         "Scheme": "internet-facing",
@@ -709,7 +721,7 @@
       "Properties":{
         "ImageId":{
           "Fn::FindInMap":[
-            "AWSRegionToAMI",
+            "RegionalConfigs",
             {
               "Ref":"AWS::Region"
             },

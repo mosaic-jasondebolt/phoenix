@@ -27,6 +27,7 @@
   "Resources": {
     "APIInitialDeployment": {
       "Type" : "AWS::ApiGateway::Deployment",
+      "DependsOn": ["ProjectsGet"],
       "Properties" : {
         "Description" : "",
         "RestApiId" : {"Ref": "RestAPI"},

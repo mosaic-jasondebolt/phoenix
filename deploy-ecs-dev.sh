@@ -10,8 +10,8 @@ set -e
 #   ./deploy-ecs-dev.sh [create | update] [location of docker file]
 #
 # EXAMPLES:
-#   ./deploy-ecs-dev.sh update .
-#   ./deploy-ecs-dev.sh update ecs
+#   ./deploy-ecs-dev.sh update .   --> Dockerfile in project root dir.
+#   ./deploy-ecs-dev.sh update ecs   --> Dockerfile in ecs dir.
 #   ./deploy-ecs-dev.sh create ecs/target/docker/stage
 
 # Generate a random version number to tag the docker image with
