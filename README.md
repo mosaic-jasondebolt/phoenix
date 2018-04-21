@@ -3,6 +3,8 @@
 ##### Getting started
 * Update all of the params....json files with your project info
 
+* Run the docker code pipeline (See the docker-code-pipeline git repo)
+
 * Create the VPC's (assuming you are starting with a new AWS account)
 ```
 ./deploy-vpc.sh create

@@ -154,7 +154,7 @@
     },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
-      "AllowedValues": ["dev", "testing", "production"],
+      "AllowedValues": ["dev", "testing", "prod"],
       "Default": "dev",
       "Type": "String"
     },
