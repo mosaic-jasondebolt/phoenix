@@ -1,5 +1,18 @@
 # Phoenix Microservice
 
+##### Getting started
+* Update all of the params....json files with your project info
+
+* Create the VPC's (assuming you are starting with a new AWS account)
+```
+./deploy-vpc.sh create
+```
+
+* Create the ECS Clusters
+```
+./deploy-ecs-clusters.sh create
+```
+
 ##### Creating and updating a microservice project
 ```
 * Update the template-microservice file with your project details.

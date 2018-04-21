@@ -337,7 +337,8 @@
         ],
         "RoleName": {"Fn::Join": ["-", [
           {"Ref": "AWS::StackName"},
-          {"Ref": "ProjectName"}
+          {"Ref": "ProjectName"},
+          "ecs-task-execution-role"
         ]]}
       }
     },
@@ -1067,7 +1068,7 @@
                     "IsDev",
                     { "Fn::Join": ["", [
                       "-",
-                      { "Ref": "Username" },
+                      { "Ref": "Username" }
                     ]]},
                     ""
                   ]},
@@ -1099,7 +1100,7 @@
               "IsDev",
               { "Fn::Join": ["", [
                 "-",
-                { "Ref": "Username" },
+                { "Ref": "Username" }
               ]]},
               ""
             ]},
