@@ -1053,7 +1053,7 @@
                 "IsProd",
                 "",
                 {"Ref": "Environment"}
-              ]}
+              ]},
               ".",
               {"Ref": "Domain"}
             ]]},
