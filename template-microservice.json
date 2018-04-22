@@ -1010,7 +1010,7 @@
                       "testing"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json.json",
+                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
                 }
               },
@@ -1039,7 +1039,7 @@
                       "testing"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json.json",
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
                   "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               },
