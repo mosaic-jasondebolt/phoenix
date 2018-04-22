@@ -14,7 +14,8 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-MICROSERVICE_STACK_NAME=`jq -r '.Parameters.StackName' template-microservice-params.json`
+PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+MICROSERVICE_STACK_NAME=$PROJECT_NAME-microservice
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-microservice-params.json > temp.json
