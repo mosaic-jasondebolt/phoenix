@@ -9,6 +9,7 @@
     "Domain": "mosaic-phoenix.com",
     "ECRRepoURL": "714284646049.dkr.ecr.us-east-1.amazonaws.com",
     "ELBSubnets": "Public",
+    "Environment": "devjason",
     "HostedZoneId": "Z26KY8AGSSM28M",
     "ImageName": "phoenix",
     "ImageVersion": "IMAGE_TAG",

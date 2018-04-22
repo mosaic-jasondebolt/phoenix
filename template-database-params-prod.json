@@ -1,6 +1,7 @@
 {
   "Parameters": {
     "Environment": "prod",
+    "Vpc": "prod",
     "ProjectName": "phoenix",
     "MicroserviceStackName": "phoenix-microservice",
     "DBEngine": "aurora-mysql",

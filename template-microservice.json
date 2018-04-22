@@ -1003,7 +1003,7 @@
                       "testing-ecs"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::testing-ecs-params.json",
+                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
                 }
               },
@@ -1032,8 +1032,8 @@
                       "testing-lambda"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::testing-lambda-params.json",
-                  "TemplatePath": "BuildOutput::template-api-lambda.json"
+                  "TemplateConfiguration": "BuildOutput::t-lambra-params-testing.json.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               },
               {
@@ -1061,8 +1061,8 @@
                       "testing-api-gateway"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::testing-lambda-params.json",
-                  "TemplatePath": "BuildOutput::template-api-lambda.json"
+                  "TemplateConfiguration": "BuildOutput::t-api-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
                 }
               },
               {
@@ -1090,8 +1090,8 @@
                       "testing-lambda"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::testing-lambda-params.json",
-                  "TemplatePath": "BuildOutput::template-api-lambda.json"
+                  "TemplateConfiguration": "BuildOutput::t-api-deploy-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api-deploy.json"
                 }
               }
             ]
@@ -1166,7 +1166,7 @@
                       "prod-ecs"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::prod-ecs-params.json",
+                  "TemplateConfiguration": "BuildOutput::t-ecs-params-prod.json",
                   "TemplatePath": "BuildOutput::template-ecs.json"
                 }
               },
@@ -1195,8 +1195,8 @@
                       "prod-lambda"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::prod-lambda-params.json",
-                  "TemplatePath": "BuildOutput::template-api-lambda.json"
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               }
             ]

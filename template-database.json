@@ -12,7 +12,10 @@
     },
     "Environment": {
       "Description": "The environment to deploy the instance to.",
-      "AllowedValues": ["dev", "testing", "prod"],
+      "Type": "String"
+    },
+    "Vpc": {
+      "Description": "The name of the VPC to deploy into",
       "Type": "String"
     },
     "MicroserviceStackName": {
@@ -79,7 +82,7 @@
         "AvailabilityZones": [{
           "Fn::ImportValue": {
             "Fn::Join": ["-", [{
-                "Ref": "Environment"
+                "Ref": "Vpc"
               },
               "vpc",
               "PrivateSubnetAZ1AvailabilityZone"
@@ -88,7 +91,7 @@
         }, {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [{
-                "Ref": "Environment"
+                "Ref": "Vpc"
               },
               "vpc",
               "PrivateSubnetAZ2AvailabilityZone"
@@ -133,7 +136,7 @@
         "SubnetIds": [{
             "Fn::ImportValue": {
               "Fn::Join": ["-", [{
-                  "Ref": "Environment"
+                  "Ref": "Vpc"
                 },
                 "vpc",
                 "PrivateSubnetAZ1"
@@ -143,7 +146,7 @@
           {
             "Fn::ImportValue": {
               "Fn::Join": ["-", [{
-                  "Ref": "Environment"
+                  "Ref": "Vpc"
                 },
                 "vpc",
                 "PrivateSubnetAZ2"
@@ -180,9 +183,8 @@
         },
         "VpcId": {
           "Fn::ImportValue": {
-            "Fn::Join": ["-", [{
-                "Ref": "Environment"
-              },
+            "Fn::Join": ["-", [
+              { "Ref": "Vpc" },
               "vpc",
               "VPC"
             ]]
@@ -367,9 +369,12 @@
     "RDSDBSecurityGroup": {
       "Export": {
         "Name": {
-          "Fn::Join": ["", [{
-            "Ref": "AWS::StackName"
-          }, "-", "RDSDBSecurityGroup"]]
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "RDSDBSecurityGroup"
+          ]]
         }
       },
       "Value": {
@@ -379,9 +384,12 @@
     "EndpointAddress": {
       "Export": {
         "Name": {
-          "Fn::Join": ["", [{
-            "Ref": "AWS::StackName"
-          }, "-", "EndpointAddress"]]
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "EndpointAddress"
+          ]]
         }
       },
       "Value": {
@@ -391,9 +399,12 @@
     "ReadEndpointAddress": {
       "Export": {
         "Name": {
-          "Fn::Join": ["", [{
-            "Ref": "AWS::StackName"
-          }, "-", "ReadEndpointAddress"]]
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "ReadEndpointAddress"
+          ]]
         }
       },
       "Value": {
@@ -403,9 +414,12 @@
     "EndpointPort": {
       "Export": {
         "Name": {
-          "Fn::Join": ["", [{
-            "Ref": "AWS::StackName"
-          }, "-", "EndpointPort"]]
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "EndpointPort"
+          ]]
         }
       },
       "Value": {

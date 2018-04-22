@@ -154,18 +154,11 @@
     },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
-      "AllowedValues": ["dev", "testing", "prod"],
-      "Default": "dev",
       "Type": "String"
     },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "String"
-    },
-    "Username": {
-      "Description": "The username of the user who last updated the dev stack, if run in the dev environment.",
-      "Type": "String",
-      "Default": ""
     },
     "SSLCertificateARN": {
       "Description": "The AWS ACM Certificate ARN.",
@@ -283,10 +276,6 @@
     "IsProd" : {"Fn::Equals" : [
       {"Ref" : "Cluster"},
       {"Fn::Join": ["", [ {"Ref": "ProjectName"}, "Prod" ]]}
-    ]},
-    "IsDev" : {"Fn::Equals" : [
-      {"Ref" : "Cluster"},
-      {"Fn::Join": ["", [ {"Ref": "ProjectName"}, "Dev" ]]}
     ]},
     "HasPlacementConstraints" : {"Fn::Not": [
       {"Fn::Equals" : [
@@ -1063,19 +1052,8 @@
               { "Fn::If": [
                 "IsProd",
                 "",
-                { "Fn::Join": ["", [
-                  { "Fn::If": [
-                    "IsDev",
-                    { "Fn::Join": ["", [
-                      "-",
-                      { "Ref": "Username" }
-                    ]]},
-                    ""
-                  ]},
-                  "-",
-                  { "Ref": "Cluster"}
-                ]]}
-              ]},
+                {"Ref": "Environment"}
+              ]}
               ".",
               {"Ref": "Domain"}
             ]]},
@@ -1095,18 +1073,7 @@
         { "Fn::If": [
           "IsProd",
           "",
-          { "Fn::Join": ["", [
-            { "Fn::If": [
-              "IsDev",
-              { "Fn::Join": ["", [
-                "-",
-                { "Ref": "Username" }
-              ]]},
-              ""
-            ]},
-            "-",
-            { "Ref": "Cluster"}
-          ]]}
+          {"Ref": "Environment"}
         ]},
         ".",
         {"Ref": "Domain"}
