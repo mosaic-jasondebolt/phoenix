@@ -24,7 +24,7 @@ phases:
       - # DOCKER
       - echo ===== DOCKER BUILD =====
       - echo replacing build number in the task definition param files.
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-testing.json > t-ecs-params-testing.json.json
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-testing.json > t-ecs-params-testing.json
       - sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-prod.json > t-ecs-params-prod.json
       - echo Building the Docker image from the Dockerfile.
       - docker build -t $REPOSITORY_URI:latest ecs
@@ -33,7 +33,7 @@ phases:
       - echo ===== LAMBDA BUILD =====
       - echo ||---- PROJECTS FUNCTION ----||
       - echo replacing VERSION_ID in the lambda params file.
-      - sed "s/VERSION_ID/$VERSION_ID/g" template-lambda-params-testing.json > t-lambra-params-testing.json.json
+      - sed "s/VERSION_ID/$VERSION_ID/g" template-lambda-params-testing.json > t-lambra-params-testing.json
       - sed "s/VERSION_ID/$VERSION_ID/g" template-lambda-params-prod.json > t-lambda-params-prod.json
       - echo Building the 'projects' lambda function...
       - mkdir -p builds/projects
@@ -45,7 +45,7 @@ phases:
       - cd ../../
       - # API Gateway Version
       - echo replacing VERSION_ID in the api params file.
-      - sed "s/VERSION_ID/$VERSION_ID/g" template-api-params-testing.json > t-api-params-testing.json.json
+      - sed "s/VERSION_ID/$VERSION_ID/g" template-api-params-testing.json > t-api-params-testing.json
       - sed "s/VERSION_ID/$VERSION_ID/g" template-api-params-prod.json > t-api-params-prod.json
   post_build:
     commands:
@@ -58,13 +58,13 @@ artifacts:
     files:
       - # DOCKER
       - template-ecs.json
-      - t-ecs-params-testing.json.json
+      - t-ecs-params-testing.json
       - t-ecs-params-prod.json
       - # LAMBDA
       - template-lambda.json
-      - t-lambda-params-testing.json.json
+      - t-lambda-params-testing.json
       - t-lambda-params-prod.json
       - # API Gateway
       - template-api.json
-      - t-api-params-testing.json.json
+      - t-api-params-testing.json
       - t-api-params-prod.json
