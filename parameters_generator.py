@@ -19,11 +19,6 @@ def convert_parameters_file(obj):
     params = obj['Parameters']
     new_obj = []
 
-    # Add the user's username as a parameter for an optional URL prefix.
-    new_obj.append(
-        {'ParameterKey': 'Username', 'ParameterValue': os.environ[
-            'USER'].replace('.', '-')})
-
     for param_key in params:
         new_obj.append(
             {'ParameterKey': param_key, 'ParameterValue': params[param_key]})

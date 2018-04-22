@@ -32,11 +32,6 @@
       "Description": "Then VPC tenancy",
       "AllowedValues": ["default", "dedicated"],
       "Default": "default"
-    },
-    "Username": {
-      "Description": "Ther username of the user who last updated the dev stack, if run in the dev environment.",
-      "Type": "String",
-      "Default": ""
     }
   },
   "Resources": {

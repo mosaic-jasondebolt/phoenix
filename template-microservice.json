@@ -62,11 +62,6 @@
     "IAMRole": {
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "String"
-    },
-    "Username": {
-      "Description": "The username of the user who last updated the stack, if relevant.",
-      "Type": "String",
-      "Default": ""
     }
   },
   "Resources": {

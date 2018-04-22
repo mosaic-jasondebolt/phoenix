@@ -39,11 +39,6 @@
     "Version": {
       "Description": "The Lambda function version",
       "Type": "String"
-    },
-    "Username": {
-      "Description": "The username of the user who last updated the stack, if relevant.",
-      "Type": "String",
-      "Default": ""
     }
   },
   "Resources": {

@@ -9,11 +9,6 @@
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
-    },
-    "Username": {
-      "Description": "The username of the user who last updated the dev stack, if run in the dev environment.",
-      "Type": "String",
-      "Default": ""
     }
   },
   "Resources": {
