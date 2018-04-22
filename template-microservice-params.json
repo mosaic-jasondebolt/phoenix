@@ -1,10 +1,7 @@
 {
   "Parameters": {
-    "AWSAccountId": "714284646049",
-    "AWSRegion": "us-east-1",
     "ProjectName": "phoenix",
     "ProjectDescription": "The Mosaic Phoenix project.",
-    "StackName": "phoenix-microservice",
     "NotificationEmail": "jason.debolt@joinmosaic.com",
     "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
     "LambdaBucketName": "mosaic-phoenix-lambda",

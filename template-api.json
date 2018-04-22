@@ -9,6 +9,10 @@
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
+    },
+    "Version": {
+      "Description": "The identifier/version associated with this API.",
+      "Type": "String"
     }
   },
   "Resources": {
@@ -32,7 +36,9 @@
         "Description" : {"Fn::Join": ["", [
           "The ",
           { "Ref": "ProjectName" },
-          " REST API."
+          " REST API (Release Candidate ",
+          {"Ref": "Version"},
+          ")"
         ]]},
         "Name" : { "Fn::Join": ["-",  [
           { "Ref": "ProjectName" },

@@ -14,17 +14,13 @@ set -e
 #   ./deploy-ecs-dev.sh update ecs   --> Dockerfile in ecs dir.
 #   ./deploy-ecs-dev.sh create ecs/target/docker/stage
 
-# Generate a random version number to tag the docker image with
-#TAG_NUMBER=`python2.7 -c "import random; print random.randint(5,100000)"`
-
-# Grab the current username so we can propagate to URL's, stack names, etc.
-USERNAME=`echo $USER | tr . "-"` # Replace . in username with hyphen for CloudFormation naming convention.
-IMAGE_TAG=dev_$USERNAME
-
-# Extract JSON properties for a file into a local variable
-AWS_ACCOUNT_ID=`jq -r '.Parameters.AWSAccountId' template-microservice-params.json`
+AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
+AWS_REGION=`aws configure get region`
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
-AWS_REGION=`jq -r '.Parameters.AWSRegion' template-microservice-params.json`
+ENVIRONMENT=`jq -r '.Parameters.Environment' template-ecs-params-dev.json`
+# Allow developers to name the environment whatever they want, supporting multiple dev environments.
+IMAGE_TAG=$ENVIRONMENT
+
 IMAGE_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
 
@@ -54,7 +50,7 @@ python parameters_generator.py temp1.json > temp2.json
 aws cloudformation validate-template --template-body file://template-ecs.json
 
 # Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $PROJECT_NAME-dev-ecs-$USERNAME \
+aws cloudformation $1-stack --stack-name $PROJECT_NAME-ecs-$ENVIRONMENT \
     --template-body file://template-ecs.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_NAMED_IAM
