@@ -10,6 +10,10 @@
       "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
       "Type": "String"
     },
+    "Environment": {
+      "Description": "The environment to deploy the instance to.",
+      "Type": "String"
+    },
     "KeyName":{
       "Type":"AWS::EC2::KeyPair::KeyName",
       "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
@@ -274,8 +278,8 @@
       {"Ref" : "LaunchType"}, "FARGATE"
     ]},
     "IsProd" : {"Fn::Equals" : [
-      {"Ref" : "Cluster"},
-      {"Fn::Join": ["", [ {"Ref": "ProjectName"}, "Prod" ]]}
+      {"Ref" : "Environment"},
+      "prod"
     ]},
     "HasPlacementConstraints" : {"Fn::Not": [
       {"Fn::Equals" : [
