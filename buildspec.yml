@@ -33,7 +33,7 @@ phases:
       - echo ===== LAMBDA BUILD =====
       - echo ||---- PROJECTS FUNCTION ----||
       - echo replacing VERSION_ID in the lambda params file.
-      - sed "s/VERSION_ID/$VERSION_ID/g" template-lambda-params-testing.json > t-lambra-params-testing.json
+      - sed "s/VERSION_ID/$VERSION_ID/g" template-lambda-params-testing.json > t-lambda-params-testing.json
       - sed "s/VERSION_ID/$VERSION_ID/g" template-lambda-params-prod.json > t-lambda-params-prod.json
       - echo Building the 'projects' lambda function...
       - mkdir -p builds/projects
