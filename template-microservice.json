@@ -1337,6 +1337,30 @@
     }
   },
   "Outputs": {
+    "LambdaBucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "LambdaBucketName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "LambdaBucket"}
+    },
+    "LoadBalancerLogsBucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "LoadBalancerLogsBucketName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "LoadBalancerLogsBucket"}
+    },
     "KMSEncryptionKeyArn": {
       "Export": {
         "Name": {

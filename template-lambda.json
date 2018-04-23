@@ -10,10 +10,6 @@
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
     },
-    "LambdaBucketName": {
-      "Description": "The S3 bucket name in which to store Lambda function.",
-      "Type": "String"
-    },
     "Version": {
       "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
       "Type": "String"
@@ -27,7 +23,15 @@
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "ProjectName"},
+                "microservice",
+                "LambdaBucketName"
+              ]]
+            }
+          },
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "projects",

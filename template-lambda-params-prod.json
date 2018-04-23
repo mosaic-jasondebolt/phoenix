@@ -2,7 +2,6 @@
   "Parameters": {
     "Environment": "prod",
     "ProjectName": "phoenix",
-    "LambdaBucketName": "mosaic-phoenix-lambda",
     "Version": "VERSION_ID"
   }
 }

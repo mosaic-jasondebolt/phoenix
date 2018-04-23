@@ -1,11 +1,10 @@
 {
   "Parameters": {
     "Environment": "prod",
-    "Vpc": "prod",
     "ProjectName": "phoenix",
+    "Version": "VERSION_ID",
+    "Vpc": "prod",
     "DBEngine": "aurora-mysql",
-    "MasterUsername": "phoenix_admin",
-    "LambdaBucketName": "mosaic-phoenix-lambda",
-    "Version": "VERSION_ID"
+    "MasterUsername": "phoenix_admin"
   }
 }

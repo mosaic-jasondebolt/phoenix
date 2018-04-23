@@ -28,10 +28,6 @@
       "Description": "The username of the database",
       "Type": "String"
     },
-    "LambdaBucketName": {
-      "Description": "The S3 bucket name in which to store Lambda function.",
-      "Type": "String"
-    },
     "Version": {
       "Description": "The Lambda function version",
       "Type": "String"
@@ -273,8 +269,14 @@
           "Fn::GetAtt": ["LambdaRole", "Arn"]
         },
         "Code": {
-          "S3Bucket": {
-            "Ref": "LambdaBucketName"
+          "S3Bucket" : {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "ProjectName"},
+                "microservice",
+                "LambdaBucketName"
+              ]]
+            }
           },
           "S3Key": {
             "Fn::Join": ["/", [{
