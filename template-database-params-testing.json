@@ -3,7 +3,6 @@
     "Environment": "testing",
     "Vpc": "testing",
     "ProjectName": "phoenix",
-    "MicroserviceStackName": "phoenix-microservice",
     "DBEngine": "aurora-mysql",
     "MasterUsername": "phoenix_admin",
     "LambdaBucketName": "mosaic-phoenix-lambda",
