@@ -1178,8 +1178,9 @@
           },
           {
             "Name": "DeployToProduction",
-            "Actions": [{
-                "Name": "ECS",
+            "Actions": [
+              {
+                "Name": "Database",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1190,6 +1191,35 @@
                   "Name": "BuildOutput"
                 }],
                 "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "database",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-database-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-database.json"
+                }
+              },
+              {
+                "Name": "ECS",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1218,7 +1248,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1234,6 +1264,64 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
                   "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
+                "Name": "APIGateway",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
+                }
+              },
+              {
+                "Name": "APIGatewayDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 4,
+                "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-deployment",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-deployment-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api-deployment-prod.json"
                 }
               }
             ]

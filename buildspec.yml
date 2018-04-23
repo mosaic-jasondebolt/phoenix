@@ -42,7 +42,8 @@ phases:
       - # Upload the Lambda functions
       - listOfLambdaFunctions='projects password_generator'
       - |-
-        for functionName in $listOfLambdaFunctions; do
+        for functionName in $listOfLambdaFunctions
+        do
           mkdir -p builds/$functionName
           cp -rf lambda/$functionName/* builds/$functionName/
           cd builds/$functionName/
@@ -50,8 +51,8 @@ phases:
           zip -r lambda_function.zip ./*
           aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
           rm -rf builds
-          cd ../../;
-          done
+          cd ../../
+        done
       - # API Gateway (Changes current API at HEAD, but does not deploy the API distrubtion to the API Endpoint)
       - echo ===== API GATEWAY BUILD =====
       - echo replacing VERSION_ID in the api params files.
