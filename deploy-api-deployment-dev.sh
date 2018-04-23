@@ -24,7 +24,7 @@ if [ $# -ne 1 ]
 fi
 
 # Get the current API Gateway Deployment template from the stack, compare, and generate a new template.
-python api-gateway-deployment-generator.py template-api-deployment-params-dev.json > template-api-deployment.json
+python api_gateway_deployment_rotator.py template-api-deployment-params-dev.json > template-api-deployment.json
 
 # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
 sed "s/VERSION_ID/$VERSION_ID/g" template-api-deployment-params-dev.json > temp1.json
