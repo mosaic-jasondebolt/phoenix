@@ -1093,7 +1093,7 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "lambda",
+                      "api-deployment",
                       "testing"
                     ]]
                   },
