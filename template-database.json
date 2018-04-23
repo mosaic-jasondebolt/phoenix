@@ -28,6 +28,22 @@
       "Description": "The username of the database",
       "Type": "String"
     },
+    "DBInstanceClass": {
+      "Description": "The db instance class",
+      "AllowedValues": [
+        "db.t2.small",
+        "db.t2.medium",
+        "db.r3.large",
+        "db.r3.xlarge",
+        "db.r3.2xlarge",
+        "db.r3.4xlarge",
+        "db.r3.8xlarge",
+        "db.r4.large",
+        "db.r4.xlarge",
+        "db.r4.2xlarge"
+      ],
+      "Type": "String"
+    },
     "Version": {
       "Description": "The Lambda function version",
       "Type": "String"
@@ -103,7 +119,7 @@
           "Ref": "DBEngine"
         },
         "PubliclyAccessible": "false",
-        "DBInstanceClass": "db.t2.small"
+        "DBInstanceClass": {"Ref": "DBInstanceClass"}
       }
     },
     "DBSubnetGroup": {

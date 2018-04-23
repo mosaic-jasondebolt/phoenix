@@ -1417,34 +1417,6 @@
         "Ref": "EncryptedSecretsBucket"
       }
     },
-    "GitCloneInstructions": {
-      "Description": "IMPORTANT! Instructions for cloning the Git repo",
-      "Value": "For mac users, you may need to disable the OSX keychain for CodeCommit credentials and delete any keys stored in there. Your keychain credentials will expire 15 minutes after you clone your repo by default!: https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-unixes.html"
-    },
-    "GitInstructions": {
-      "Description": "IMPORTANT! Code Commit will NOT automatically create a master branch.",
-      "Value": {
-        "Fn::Join": ["<br />", [
-          "1) ",
-          {
-            "Fn::Join": [" ", [
-              "git clone",
-              {
-                "Fn::GetAtt": [
-                  "CodeCommitRepository",
-                  "CloneUrlHttp"
-                ]
-              }
-            ]]
-          },
-          "2) Create local README.md file and add content to it",
-          "3) git add README.md",
-          "4) git commit",
-          "5) git push origin master",
-          "6) If you have issues, see the GitCloneInstructions section of this doc."
-        ]]
-      }
-    },
     "CodeCommitRepositoryURL": {
       "Description": "The AWS Console URL of the CodeCommit Repository",
       "Value": {

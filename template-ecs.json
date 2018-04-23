@@ -72,10 +72,6 @@
       "Description": "The S3 bucket in which load balancer logs will be stored",
       "Type": "String"
     },
-    "Cluster": {
-      "Description": "The Name of the ECS Cluster",
-      "Type": "String"
-    },
     "MaximumPercent": {
       "Description": "The maximum number of tasks, specified as a percentage of the Amazon ECS service's DesiredCount value, that can run in a service during a deployment",
       "Default": "200",
@@ -293,6 +289,15 @@
     ]}
   },
   "Resources": {
+    "Cluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties" : {
+        "ClusterName" : {"Fn::Join": ["-", [
+          {"Ref": "ProjectName"},
+          {"Ref": "Environment"}
+        ]]}
+      }
+    },
     "CloudwatchLogsGroup":{
       "Type":"AWS::Logs::LogGroup",
       "Properties":{
