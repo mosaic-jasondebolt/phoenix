@@ -13,6 +13,8 @@ USAGE:
   aws cloudformation create-stack --stack-name <stack_name> --template-body file://template.json --parameters file://temp.json
 """
 
+__author__ = "Jason DeBolt (jasondebolt@gmail.com)"
+
 import sys, os, json
 
 def convert_parameters_file(obj):

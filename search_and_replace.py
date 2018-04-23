@@ -13,6 +13,9 @@ EXAMPLE:
   $ python search_and_replace.py . FOO BAR "*"  ==> Matches ALL files, like *
   $ python search_and_replace.py . FOO BAR "*.txt"  ==> Matches
 """
+
+__author__ = "Jason DeBolt (jasondebolt@gmail.com)"
+
 import os, fnmatch, sys
 import fnmatch
 import functools
