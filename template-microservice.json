@@ -984,9 +984,10 @@
             ]
           },
           {
-            "Name": "TestingClusterDeploy",
-            "Actions": [{
-                "Name": "TestingECS",
+            "Name": "DeployToTestingEnvironments",
+            "Actions": [
+              {
+                "Name": "Database",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1006,45 +1007,16 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "ecs",
+                      "database",
                       "testing"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-ecs.json"
+                  "TemplateConfiguration": "BuildOutput::t-database-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-database.json"
                 }
               },
               {
-                "Name": "TestingLambda",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 1,
-                "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "lambda",
-                      "testing"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-lambda.json"
-                }
-              },
-              {
-                "Name": "TestingAPIGateway",
+                "Name": "ECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1064,16 +1036,45 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "api",
+                      "ecs",
                       "testing"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api.json"
+                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ecs.json"
                 }
               },
               {
-                "Name": "TestingAPIGatewayDeploy",
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "lambda",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
+                "Name": "APIGateway",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1084,6 +1085,35 @@
                   "Name": "BuildOutput"
                 }],
                 "RunOrder": 3,
+                "Configuration": {
+                  "RoleArn": {
+                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
+                }
+              },
+              {
+                "Name": "APIGatewayDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 4,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1104,7 +1134,7 @@
             ]
           },
           {
-            "Name": "TestingClusterTests",
+            "Name": "Tests",
             "Actions": [{
               "Name": "IntegrationTest",
               "ActionTypeId": {
@@ -1147,9 +1177,9 @@
             }]
           },
           {
-            "Name": "ProdClusterDeploy",
+            "Name": "DeployToProduction",
             "Actions": [{
-                "Name": "ProdECSDeploy",
+                "Name": "ECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1178,7 +1208,7 @@
                 }
               },
               {
-                "Name": "ProdLambdaDeploy",
+                "Name": "Lambda",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
