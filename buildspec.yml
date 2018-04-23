@@ -41,8 +41,7 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" template-lambda-params-prod.json > t-lambda-params-prod.json
       - # Upload the Lambda functions
       - listOfLambdaFunctions='projects password_generator'
-      - for functionName in $listOfLambdaFunctions
-      - do
+      - for functionName in $listOfLambdaFunctions; do
       -   mkdir -p builds/$functionName
       -   cp -rf lambda/$functionName/* builds/$functionName/
       -   cd builds/$functionName/
