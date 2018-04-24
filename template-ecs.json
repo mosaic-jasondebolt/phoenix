@@ -41,10 +41,6 @@
       "AllowedValues": ["true", "false"],
       "Type": "String"
     },
-    "ECRRepoURL": {
-      "Description": "The Name of the ECR Repo",
-      "Type": "String"
-    },
     "ImageName": {
       "Description": "The short name of the ECR Image",
       "Type": "String"
@@ -66,10 +62,6 @@
       "Description": "ECS Launch Type",
       "AllowedValues": ["FARGATE", "EC2"],
       "Default": "FARGATE",
-      "Type": "String"
-    },
-    "LoadBalancerLogsBucketName": {
-      "Description": "The S3 bucket in which load balancer logs will be stored",
       "Type": "String"
     },
     "MaximumPercent": {
@@ -358,7 +350,12 @@
           {
             "Name": { "Ref": "ContainerName" },
             "Image": { "Fn::Join" : [ "", [
-              { "Ref": "ECRRepoURL"},
+              {"Fn::Join": ["", [
+                {"Ref": "AWS::AccountId"},
+                ".dkr.ecr.",
+                {"Ref": "AWS::Region"},
+                ".amazonaws.com",
+              ]]},
               "/",
               { "Ref": "ImageName"},
               ":",
@@ -466,7 +463,15 @@
     "ApplicationELBLogsS3BucketPolicy": {
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
-         "Bucket" : {"Ref": "LoadBalancerLogsBucketName"},
+         "Bucket": {
+           "Fn::ImportValue": {
+             "Fn::Join": ["-", [
+               {"Ref": "ProjectName"},
+               "microservice",
+               "LoadBalancerLogsBucketName"
+              ]]
+            }
+         },
          "PolicyDocument" : {
            "Version": "2012-10-17",
            "Statement": [
@@ -476,9 +481,14 @@
                ],
                "Effect": "Allow",
                "Resource": {"Fn::Join": ["", [
-                 "arn:aws:s3:::",
-                 {
-                   "Ref": "LoadBalancerLogsBucketName"
+                 "arn:aws:s3:::", {
+                   "Fn::ImportValue": {
+                     "Fn::Join": ["-", [
+                       {"Ref": "ProjectName"},
+                       "microservice",
+                       "LoadBalancerLogsBucketName"
+                     ]]
+                   }
                  },
                  "/",
                  { "Ref": "AWS::StackName" },
@@ -518,7 +528,15 @@
           },
           {
             "Key": "access_logs.s3.bucket",
-            "Value": {"Ref": "LoadBalancerLogsBucketName"}
+            "Value": {
+              "Fn::ImportValue": {
+                "Fn::Join": ["-", [
+                  {"Ref": "ProjectName"},
+                  "microservice",
+                  "LoadBalancerLogsBucketName"
+                ]]
+              }
+            }
           },
           {
             "Key": "access_logs.s3.prefix",
