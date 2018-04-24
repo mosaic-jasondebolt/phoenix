@@ -60,3 +60,4 @@ aws cloudformation $1-stack --stack-name $PROJECT_NAME-database-$ENVIRONMENT \
 # Cleanup
 rm temp1.json
 rm temp2.json
+rm -rf builds

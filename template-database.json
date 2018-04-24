@@ -390,6 +390,21 @@
         "Ref": "RDSDBSecurityGroup"
       }
     },
+    "MasterUsername": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "MasterUsername"
+          ]]
+        }
+      },
+      "Value": {
+        "Ref": "MasterUsername"
+      }
+    },
     "EndpointAddress": {
       "Export": {
         "Name": {

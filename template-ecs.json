@@ -333,6 +333,59 @@
         "ContainerDefinitions": [
           {
             "Name": { "Ref": "ContainerName" },
+            "Environment": [
+              {
+                "Name": "KMSEncryptionKeyId",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "microservice",
+                      "KMSEncryptionKeyId"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "EndpointAddress",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "database",
+                      {"Ref": "Environment"},
+                      "EndpointAddress"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "ReadEndpointAddress",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "database",
+                      {"Ref": "Environment"},
+                      "ReadEndpointAddress"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "EndpointPort",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "database",
+                      {"Ref": "Environment"},
+                      "EndpointPort"
+                    ]]
+                  }
+                }
+              }
+            ],
             "Image": { "Fn::Join" : [ "", [
               {"Fn::Join": ["", [
                 {"Ref": "AWS::AccountId"},
@@ -1081,7 +1134,6 @@
               }
             },
             "Name": {"Fn::Join": ["", [
-              { "Ref": "TaskFamily" },
               { "Fn::If": [
                 "IsProd",
                 "",
@@ -1110,7 +1162,6 @@
       "Description" : "The URL of the service",
       "Value": {"Fn::Join": ["", [
         "https://",
-        { "Ref": "TaskFamily" },
         { "Fn::If": [
           "IsProd",
           "",
