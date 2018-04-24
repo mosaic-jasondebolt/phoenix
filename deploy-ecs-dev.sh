@@ -19,7 +19,7 @@ AWS_REGION=`aws configure get region`
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-ecs-params-dev.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
-IMAGE_TAG=$ENVIRONMENT
+IMAGE_TAG=$ENVIRONMENT-`date +"%Y-%m-%d-%H%M%S"`
 
 IMAGE_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
