@@ -449,6 +449,21 @@
       "Value": {
         "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
       }
+    },
+    "RDSDBSecurityGroup": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "RDSDBSecurityGroup"
+          ]]
+        }
+      },
+      "Value": {
+        "Ref": "RDSDBSecurityGroup"
+      }
     }
   }
 }

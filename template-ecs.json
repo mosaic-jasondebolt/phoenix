@@ -1059,6 +1059,45 @@
       },
       "Type": "AWS::EC2::SecurityGroupIngress"
     },
+    "WebToRDS": {
+      "Properties": {
+        "FromPort": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "database",
+              {"Ref": "Environment"},
+              "EndpointPort"
+            ]]
+          }
+        },
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "database",
+              {"Ref": "Environment"},
+              "RDSDBSecurityGroup"
+            ]]
+          }
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Ref": "WebSG"
+        },
+        "ToPort": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "database",
+              {"Ref": "Environment"},
+              "EndpointPort"
+            ]]
+          }
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
+    },
     "MainVPCSSHToWeb": {
       "Properties": {
         "CidrIp": "10.0.0.0/16",
@@ -1137,9 +1176,13 @@
               { "Fn::If": [
                 "IsProd",
                 "",
-                {"Ref": "Environment"}
+                {
+                  "Fn::Join": ["", [
+                    {"Ref": "Environment"},
+                    "."
+                  ]]
+                }
               ]},
-              ".",
               {
                 "Fn::ImportValue": {
                   "Fn::Join": ["-", [
@@ -1165,9 +1208,13 @@
         { "Fn::If": [
           "IsProd",
           "",
-          {"Ref": "Environment"}
+          {
+            "Fn::Join": ["", [
+              {"Ref": "Environment"},
+              "."
+            ]]
+          }
         ]},
-        ".",
         {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
