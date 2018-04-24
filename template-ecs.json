@@ -14,10 +14,6 @@
       "Description": "The environment to deploy the instance to.",
       "Type": "String"
     },
-    "KeyName":{
-      "Type":"AWS::EC2::KeyPair::KeyName",
-      "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
-    },
     "NetworkMode": {
       "Description": "The Docker networking mode to use for the containers in the task, such as none, bridge, or host. For Fargate launch types, you can specify awsvpc only. The none, bridge, or host option won't work for Fargate launch types.",
       "Default": "awsvpc",
@@ -146,18 +142,6 @@
     },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
-      "Type": "String"
-    },
-    "Domain": {
-      "Description": "The domain name that this service will fall under.",
-      "Type": "String"
-    },
-    "SSLCertificateARN": {
-      "Description": "The AWS ACM Certificate ARN.",
-      "Type": "String"
-    },
-    "HostedZoneId": {
-      "Description": "The Route53 hosted zone id that this service will fall under.",
       "Type": "String"
     },
     "DesiredECSInstances": {
@@ -574,7 +558,15 @@
       "Properties": {
         "Certificates": [
           {
-            "CertificateArn": { "Ref": "SSLCertificateARN" }
+            "CertificateArn": {
+              "Fn::ImportValue": {
+                "Fn::Join": ["-", [
+                  {"Ref": "ProjectName"},
+                  "microservice",
+                  "SSLCertificateARN"
+                ]]
+              }
+            }
           }
         ],
         "DefaultActions": [
@@ -753,7 +745,13 @@
         "InstanceType": { "Ref": "InstanceType" },
         "IamInstanceProfile": { "Ref": "EC2InstanceProfile" },
         "KeyName": {
-          "Ref": "KeyName"
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "KeyPairName"
+            ]]
+          }
         },
         "UserData": {
           "Fn::Base64": {
@@ -1057,7 +1055,15 @@
     },
     "DnsRecordSetGroup": {
       "Properties": {
-        "HostedZoneId": { "Ref": "HostedZoneId"},
+        "HostedZoneId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "HostedZoneId"
+            ]]
+          }
+        },
         "RecordSets": [
           {
             "AliasTarget": {
@@ -1082,7 +1088,15 @@
                 {"Ref": "Environment"}
               ]},
               ".",
-              {"Ref": "Domain"}
+              {
+                "Fn::ImportValue": {
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    "microservice",
+                    "Domain"
+                  ]]
+                }
+              }
             ]]},
             "Type": "A"
           }
@@ -1103,7 +1117,15 @@
           {"Ref": "Environment"}
         ]},
         ".",
-        {"Ref": "Domain"}
+        {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "Domain"
+            ]]
+          }
+        }
       ]]}
     }
   }

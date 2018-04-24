@@ -23,6 +23,22 @@
       "Description": "The bucket name in which CodePipeline artifacts will be stored.",
       "Type": "String"
     },
+    "Domain": {
+      "Description": "The domain name that this service will fall under.",
+      "Type": "String"
+    },
+    "SSLCertificateARN": {
+      "Description": "The AWS ACM Certificate ARN.",
+      "Type": "String"
+    },
+    "HostedZoneId": {
+      "Description": "The Route53 hosted zone id that this service will fall under.",
+      "Type": "String"
+    },
+    "KeyPairName":{
+      "Type":"AWS::EC2::KeyPair::KeyName",
+      "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
+    },
     "LambdaBucketName": {
       "Description": "The bucket name in which Lambda artifacts will be stored.",
       "Type": "String"
@@ -1337,6 +1353,54 @@
     }
   },
   "Outputs": {
+    "Domain": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "Domain"
+          ]]
+        }
+      },
+      "Value": {"Ref": "Domain"}
+    },
+    "HostedZoneId": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "HostedZoneId"
+          ]]
+        }
+      },
+      "Value": {"Ref": "HostedZoneId"}
+    },
+    "SSLCertificateARN": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "SSLCertificateARN"
+          ]]
+        }
+      },
+      "Value": {"Ref": "SSLCertificateARN"}
+    },
+    "KeyPairName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "KeyPairName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "KeyPairName"}
+    },
     "LambdaBucketName": {
       "Export": {
         "Name": {
