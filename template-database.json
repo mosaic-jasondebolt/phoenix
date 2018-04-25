@@ -57,6 +57,7 @@
         "MasterUsername": {
           "Ref": "MasterUsername"
         },
+        "StorageEncrypted": true,
         "MasterUserPassword": {
           "Fn::GetAtt": ["CustomResourcePasswordRetriever", "Password"]
         },
