@@ -193,6 +193,47 @@
               "VPC"
             ]]
           }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "rds",
+              {"Ref": "Environment"},
+              "sg"
+            ]]}
+          }
+        ]
+      }
+    },
+    "SolarmosaicDMSToRDSFirstSubnet": {
+      "DependsOn": "RDSCluster",
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "FromPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+        },
+        "GroupId": {"Ref": "RDSDBSecurityGroup"},
+        "IpProtocol": "tcp",
+        "CidrIp": "10.0.250.0/24",
+        "ToPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+        }
+      }
+    },
+    "SolarmosaicDMSToRDSSecondSubnet": {
+      "DependsOn": "RDSCluster",
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "FromPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+        },
+        "GroupId": {"Ref": "RDSDBSecurityGroup"},
+        "IpProtocol": "tcp",
+        "CidrIp": "10.0.251.0/24",
+        "ToPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
         }
       }
     },
@@ -373,24 +414,75 @@
           " Aurora DB"
         ]]}
       }
+    },
+    "DnsRecordSetGroup": {
+      "Properties": {
+        "HostedZoneId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "HostedZoneId"
+            ]]
+          }
+        },
+        "RecordSets": [
+          {
+            "ResourceRecords": [
+              {
+                "Fn::GetAtt": [
+                  "RDSCluster", "Endpoint.Address"
+                ]
+              }
+            ],
+            "TTL": "60",
+            "Name": {"Fn::Join": ["", [
+              {"Ref": "Environment"},
+              "db",
+              ".",
+              {
+                "Fn::ImportValue": {
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    "microservice",
+                    "Domain"
+                  ]]
+                }
+              }
+            ]]},
+            "Type": "CNAME"
+          },
+          {
+            "ResourceRecords": [
+              {
+                "Fn::GetAtt": [
+                  "RDSCluster", "ReadEndpoint.Address"
+                ]
+              }
+            ],
+            "TTL": "60",
+            "Name": {"Fn::Join": ["", [
+              {"Ref": "Environment"},
+              "dbread",
+              ".",
+              {
+                "Fn::ImportValue": {
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    "microservice",
+                    "Domain"
+                  ]]
+                }
+              }
+            ]]},
+            "Type": "CNAME"
+          }
+        ]
+      },
+      "Type": "AWS::Route53::RecordSetGroup"
     }
   },
   "Outputs": {
-    "RDSDBSecurityGroup": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "database",
-            {"Ref": "Environment"},
-            "RDSDBSecurityGroup"
-          ]]
-        }
-      },
-      "Value": {
-        "Ref": "RDSDBSecurityGroup"
-      }
-    },
     "MasterUsername": {
       "Export": {
         "Name": {
@@ -404,36 +496,6 @@
       },
       "Value": {
         "Ref": "MasterUsername"
-      }
-    },
-    "EndpointAddress": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "database",
-            {"Ref": "Environment"},
-            "EndpointAddress"
-          ]]
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": ["RDSCluster", "Endpoint.Address"]
-      }
-    },
-    "ReadEndpointAddress": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "database",
-            {"Ref": "Environment"},
-            "ReadEndpointAddress"
-          ]]
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": ["RDSCluster", "ReadEndpoint.Address"]
       }
     },
     "EndpointPort": {
@@ -450,6 +512,58 @@
       "Value": {
         "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
       }
+    },
+    "Endpoint": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "Endpoint"
+          ]]
+        }
+      },
+      "Value": {"Fn::Join": ["", [
+        {"Ref": "Environment"},
+        "db",
+        ".",
+        {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "Domain"
+            ]]
+          }
+        }
+      ]]}
+    },
+    "ReadEndpoint": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "ReadEndpoint"
+          ]]
+        }
+      },
+      "Value": {"Fn::Join": ["", [
+        {"Ref": "Environment"},
+        "dbread",
+        ".",
+        {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "Domain"
+            ]]
+          }
+        }
+      ]]}
     },
     "RDSDBSecurityGroup": {
       "Export": {
