@@ -5,7 +5,8 @@
     "ContainerPort": "5000",
     "DesiredECSInstances": "1",
     "DesiredTaskCount": "1",
-    "ELBSubnets": "Public",
+    "ELBSubnets": "Private",
+    "Scheme": "internal",
     "Environment": "testing",
     "ImageName": "phoenix",
     "ImageVersion": "IMAGE_TAG",
@@ -18,6 +19,6 @@
     "ProjectName": "phoenix",
     "TaskFamily": "phoenix",
     "VPCPrefix": "testing",
-    "WebSubnets": "Public"
+    "WebSubnets": "Private"
   }
 }

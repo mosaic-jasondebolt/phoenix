@@ -140,6 +140,12 @@
       "Default": "Public",
       "Type": "String"
     },
+    "Scheme": {
+      "Description": "The elastic load balancer schema",
+      "AllowedValues": ["internal", "internet-facing"],
+      "Default": "internal",
+      "Type": "String"
+    },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
       "Type": "String"
@@ -248,6 +254,9 @@
   "Conditions": {
     "IsFargate" : {"Fn::Equals" : [
       {"Ref" : "LaunchType"}, "FARGATE"
+    ]},
+    "IsInternalELB": {"Fn::Equals": [
+      {"Ref": "Scheme"}, "internal"
     ]},
     "IsProd" : {"Fn::Equals" : [
       {"Ref" : "Environment"},
@@ -554,33 +563,39 @@
     "ApplicationELB": {
       "Properties": {
         "IpAddressType": "ipv4",
-        "LoadBalancerAttributes": [
-          {
-            "Key":"idle_timeout.timeout_seconds",
-            "Value":"30"
-          },
-          {
-            "Key": "access_logs.s3.enabled",
-            "Value": "true"
-          },
-          {
-            "Key": "access_logs.s3.bucket",
-            "Value": {
-              "Fn::ImportValue": {
-                "Fn::Join": ["-", [
-                  {"Ref": "ProjectName"},
-                  "microservice",
-                  "LoadBalancerLogsBucketName"
-                ]]
+        "LoadBalancerAttributes": {
+          "Fn::If": [
+            "IsInternalELB",
+            {"Ref": "AWS::NoValue"},
+            [
+              {
+                "Key":"idle_timeout.timeout_seconds",
+                "Value":"30"
+              },
+              {
+                "Key": "access_logs.s3.enabled",
+                "Value": "true"
+              },
+              {
+                "Key": "access_logs.s3.bucket",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "microservice",
+                      "LoadBalancerLogsBucketName"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Key": "access_logs.s3.prefix",
+                "Value": { "Ref": "AWS::StackName" }
               }
-            }
-          },
-          {
-            "Key": "access_logs.s3.prefix",
-            "Value": { "Ref": "AWS::StackName" }
-          }
-        ],
-        "Scheme": "internet-facing",
+            ]
+          ]
+        },
+        "Scheme": {"Ref": "Scheme"},
         "SecurityGroups": [
           { "Ref" : "ApplicationELBSG"}
         ],
@@ -1098,15 +1113,27 @@
       },
       "Type": "AWS::EC2::SecurityGroupIngress"
     },
-    "MainVPCSSHToWeb": {
+    "MainVPCToWeb": {
       "Properties": {
+        "FromPort": "-1",
         "CidrIp": "10.0.0.0/16",
-        "FromPort": "22",
+        "IpProtocol": "-1",
         "GroupId": {
           "Ref": "WebSG"
         },
-        "IpProtocol": "tcp",
-        "ToPort": "22"
+        "ToPort": "-1"
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
+    },
+    "MainVPCToELB": {
+      "Properties": {
+        "FromPort": "-1",
+        "CidrIp": "10.0.0.0/16",
+        "IpProtocol": "-1",
+        "GroupId": {
+          "Ref": "ApplicationELBSG"
+        },
+        "ToPort": "-1"
       },
       "Type": "AWS::EC2::SecurityGroupIngress"
     },
