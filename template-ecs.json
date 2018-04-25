@@ -347,27 +347,27 @@
                 }
               },
               {
-                "Name": "EndpointAddress",
+                "Name": "Endpoint",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
                       "database",
                       {"Ref": "Environment"},
-                      "EndpointAddress"
+                      "Endpoint"
                     ]]
                   }
                 }
               },
               {
-                "Name": "ReadEndpointAddress",
+                "Name": "ReadEndpoint",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
                       "database",
                       {"Ref": "Environment"},
-                      "ReadEndpointAddress"
+                      "ReadEndpoint"
                     ]]
                   }
                 }

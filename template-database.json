@@ -437,8 +437,9 @@
             ],
             "TTL": "60",
             "Name": {"Fn::Join": ["", [
-              {"Ref": "Environment"},
               "db",
+              ".",
+              {"Ref": "Environment"},
               ".",
               {
                 "Fn::ImportValue": {
@@ -462,8 +463,11 @@
             ],
             "TTL": "60",
             "Name": {"Fn::Join": ["", [
+              "read",
+              ".",
+              "db",
+              ".",
               {"Ref": "Environment"},
-              "dbread",
               ".",
               {
                 "Fn::ImportValue": {
@@ -525,8 +529,9 @@
         }
       },
       "Value": {"Fn::Join": ["", [
-        {"Ref": "Environment"},
         "db",
+        ".",
+        {"Ref": "Environment"},
         ".",
         {
           "Fn::ImportValue": {
@@ -551,8 +556,11 @@
         }
       },
       "Value": {"Fn::Join": ["", [
+        "read",
+        ".",
+        "db",
+        ".",
         {"Ref": "Environment"},
-        "dbread",
         ".",
         {
           "Fn::ImportValue": {
