@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "Environment": "prod",
     "VPCCidrBlock": "10.54.0.0/16",
     "PrivateSubnet1CidrBlock": "10.54.1.0/24",
     "PrivateSubnet2CidrBlock": "10.54.3.0/24",

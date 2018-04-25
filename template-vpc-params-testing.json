@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "Environment": "testing",
     "VPCCidrBlock": "10.55.0.0/16",
     "PrivateSubnet1CidrBlock": "10.55.1.0/24",
     "PrivateSubnet2CidrBlock": "10.55.3.0/24",
