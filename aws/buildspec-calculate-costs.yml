@@ -22,8 +22,6 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Calculting AWS costs...
-      #- cd devops
-      #- python parameters_generator.py ecs_task_definition_params_prod.json > temp.json
       #- aws cloudformation estimate-template-cost --template-body file://ecs_task_definition.json --parameters file://temp.json
   post_build:
     commands:
