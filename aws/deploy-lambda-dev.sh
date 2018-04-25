@@ -34,8 +34,8 @@ do
   pip install -r requirements.txt -t .
   zip -r lambda_function.zip ./*
   aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
-  rm -rf builds
   cd ../../
+  rm -rf builds
 done
 
 # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable

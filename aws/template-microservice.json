@@ -408,6 +408,7 @@
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
+          "BuildSpec": "aws/buildspec.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
@@ -483,7 +484,7 @@
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
-          "BuildSpec": "buildspec-unit-test.yml",
+          "BuildSpec": "aws/buildspec-unit-test.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
@@ -559,7 +560,7 @@
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
-          "BuildSpec": "buildspec-lint.yml",
+          "BuildSpec": "aws/buildspec-lint.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
@@ -635,7 +636,7 @@
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
-          "BuildSpec": "buildspec-calculate-costs.yml",
+          "BuildSpec": "aws/buildspec-calculate-costs.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
@@ -711,7 +712,7 @@
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
-          "BuildSpec": "buildspec-static-analysis.yml",
+          "BuildSpec": "aws/buildspec-static-analysis.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
@@ -787,7 +788,7 @@
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
-          "BuildSpec": "buildspec-integration-test.yml",
+          "BuildSpec": "aws/buildspec-integration-test.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
