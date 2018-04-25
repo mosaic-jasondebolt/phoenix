@@ -70,8 +70,8 @@ phases:
       - # Get the current API Gateway Deployment template from the stack, compare, and generate a new template.
       - # We need to generate 2 differnt templates (NOT param templates) for testing and prod.
       - # The reason for this is because these two templates will actually have different numbers of API deployment resources.
-      - python $CODEBUILD_SRC_DIR/aws/api_gateway_deployment_rotator.py $CODEBUILD_SRC_DIR/aws/template-api-deployment-params-testing.json > $CODEBUILD_SRC_DIR/aws/template-api-deployment-testing.json
-      - python $CODEBUILD_SRC_DIR/aws/api_gateway_deployment_rotator.py $CODEBUILD_SRC_DIR/aws/template-api-deployment-params-prod.json > $CODEBUILD_SRC_DIR/aws/template-api-deployment-prod.json
+      - python $CODEBUILD_SRC_DIR/aws/api_gateway_deployment_rotator.py $CODEBUILD_SRC_DIR/aws/template-api-deployment-params-testing.json > $CODEBUILD_SRC_DIR/template-api-deployment-testing.json
+      - python $CODEBUILD_SRC_DIR/aws/api_gateway_deployment_rotator.py $CODEBUILD_SRC_DIR/aws/template-api-deployment-params-prod.json > $CODEBUILD_SRC_DIR/template-api-deployment-prod.json
   post_build:
     commands:
       - echo Build completed on `date`
