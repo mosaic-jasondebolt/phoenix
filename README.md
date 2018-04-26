@@ -1,10 +1,10 @@
 # Phoenix Microservice
 A full CI/CD solution for continuously building and deploying RDS, ECS, Lambda, and API Gateway resources.
 
-<img src="images/logo.png" height="70px"/>
+<img src="/Phoenix/images/logo.png" height="70px"/>
 
-![Pipeline](/images/pipeline1a.png)
-![Pipeline](/images/pipeline1b.png)
+![Pipeline](/Phoenix/images/pipeline1a.png)
+![Pipeline](/Phoenix/images/pipeline1b.png)
 
 #### What ships with Phoenix?
 ##### Phoenix Microservice (template-microservice.json)
