@@ -31,12 +31,28 @@ A full CI/CD solution for continuously building and deploying RDS, ECS, Lambda, 
 * Creates a deployment script to build, zip, and deploy a set of dev Lambda functions.
 * Creates a deployment script to create/update an API Gateway REST API.
 * Creates a deployment script to do "last 10" rolling deploys of API Gateway stages.
+
 ##### Phoenix Database (template-database.json)
-* Jason to fill out
+For each environment (dev, testing, prod), and additional developer environments:
+* Creates an RDS Aurora cluster
+* Creates an RDS Aurora instance
+* Creates a DB Security Group
+* Creates an RDS Subnet Group
+* Creates an RDS Parameter Group
+* Creates an RDS cluster Parameter Group
+* Creates a Lambda custom resource to generate, encrypt, and store database password in Parameter Store
+* Creates a Lambda password generator function.
+* Create a Lambda custom resource to retrieve and decrypt database password from Parameter Store before injecting password into 'MasterPassword' field.
+* Creates a Lambda Role and Lambda Role Policy for the password generator lambda function
+* Creates a DNS record set to map DB address to a user friendly URL.
+* Creates ingress rules to allow Database Migration Service to access from specific CIDR blocks.
+
 ##### Phoenix ECS (template-ecs.json)
 * Jason to fill out
+
 ##### Phoenix Lambda (template-lambda.json)
 * Jason to fill out
+
 ##### Phoenix API Gateway (template-api.json)
 * Jason to fill out
 
