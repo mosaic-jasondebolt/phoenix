@@ -1,6 +1,8 @@
 # Phoenix Microservice
 A full CI/CD solution for continuously building and deploying RDS, ECS, Lambda, and API Gateway resources.
 
+<img src="logo.png" height="70px"/>
+
 #### What ships with Phoenix?
 ##### Phoenix Microservice (template-microservice.json)
 * Creates a local CodeCommit repo which stores all of your source code, buildspecs, templates, etc.
