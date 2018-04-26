@@ -1,7 +1,10 @@
 # Phoenix Microservice
 A full CI/CD solution for continuously building and deploying RDS, ECS, Lambda, and API Gateway resources.
 
-<img src="logo.png" height="70px"/>
+<img src="images/logo.png" height="70px"/>
+
+![Pipeline](/images/pipeline1a.png)
+![Pipeline](/images/pipeline1b.png)
 
 #### What ships with Phoenix?
 ##### Phoenix Microservice (template-microservice.json)
@@ -42,7 +45,7 @@ For each environment (dev, testing, prod), and additional developer environments
 * Creates an RDS cluster Parameter Group
 * Creates a Lambda custom resource to generate, encrypt, and store database password in Parameter Store
 * Creates a Lambda password generator function.
-* Create a Lambda custom resource to retrieve and decrypt database password from Parameter Store before injecting password into 'MasterPassword' field.
+* Creates a Lambda custom resource to retrieve and decrypt database password from Parameter Store before injecting password into 'MasterPassword' field.
 * Creates a Lambda Role and Lambda Role Policy for the password generator lambda function
 * Creates a DNS record set to map DB address to a user friendly URL.
 * Creates ingress rules to allow Database Migration Service to access from specific CIDR blocks.
@@ -70,12 +73,12 @@ For each environment (dev, testing, prod), and additional developer environments
 * Creates a Web Security Group for the EC2 instances, containers, and fargate services.
 * Creates Application Load Balancer security group.
 * Creates an DNS record set to map an environment specific URL to the Application Load Balancer.
-* Creates an security group ingress rule to allow Web security group to access RDS cluster.
-* Creates an security group ingress rule to allow Web security group to access itself.
-* Creates an security group ingress rule to allow ELB to access web security group.
-* Creates an security group ingress rule to allow traffic to ELB.
-* Creates an security group ingress rule to allow internal network CIDR blocks to access Web security group.
-* Creates an security group ingress rule to allow internal network CIDR blocks to access ELB security group.
+* Creates a security group ingress rule to allow Web security group to access RDS cluster.
+* Creates a security group ingress rule to allow Web security group to access itself.
+* Creates a security group ingress rule to allow ELB to access web security group.
+* Creates a security group ingress rule to allow traffic to ELB.
+* Creates a security group ingress rule to allow internal network CIDR blocks to access Web security group.
+* Creates a security group ingress rule to allow internal network CIDR blocks to access ELB security group.
 
 
 
