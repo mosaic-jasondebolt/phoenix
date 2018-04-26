@@ -39,10 +39,7 @@
           ]]}
         },
         "Runtime": "python3.6",
-        "Timeout": "25",
-        "TracingConfig": {
-          "Mode": "Active"
-        }
+        "Timeout": "25"
       }
     },
     "LambdaProjectsInvokePermission": {
