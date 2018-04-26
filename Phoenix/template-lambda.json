@@ -1,0 +1,127 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description" : "Deploys all lambda functions for this microservice.",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of the project.",
+      "Type": "String"
+    },
+    "Environment": {
+      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "LambdaProjects": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
+        "Code": {
+          "S3Bucket" : {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "ProjectName"},
+                "microservice",
+                "LambdaBucketName"
+              ]]
+            }
+          },
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "projects",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+    "LambdaProjectsInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaProjects", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com"
+      }
+    },
+    "LambdaRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "dynamodb:*",
+                "s3:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          { "Ref": "ProjectName"},
+          "APILambdaRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    }
+  },
+  "Outputs": {
+    "ProjectsLambdaArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "lambda",
+            {"Ref": "Environment"},
+             "LambdaProjectsArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["LambdaProjects", "Arn"]
+      }
+    }
+  }
+}

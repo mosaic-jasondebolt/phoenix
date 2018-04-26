@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "testing",
+    "ProjectName": "phoenix",
+    "Version": "VERSION_ID"
+  }
+}

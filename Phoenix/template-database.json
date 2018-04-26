@@ -1,0 +1,592 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Generates all database resources required for a microservice.",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
+    "Environment": {
+      "Description": "The environment to deploy the instance to.",
+      "Type": "String"
+    },
+    "Vpc": {
+      "Description": "The name of the VPC to deploy into",
+      "Type": "String"
+    },
+    "DBEngine": {
+      "Description": "The database engine type (aurora-mysql is MySQL 5.7 compatible, aurora is MySQL 5.6 compatible, aurora-postgressql is Postgres compatible)",
+      "Type": "String",
+      "AllowedValues": ["aurora-mysql", "aurora", "aurora-postgressql"],
+      "Default": "aurora-mysql"
+    },
+    "MasterUsername": {
+      "Description": "The username of the database",
+      "Type": "String"
+    },
+    "DBInstanceClass": {
+      "Description": "The db instance class",
+      "AllowedValues": [
+        "db.t2.small",
+        "db.t2.medium",
+        "db.r3.large",
+        "db.r3.xlarge",
+        "db.r3.2xlarge",
+        "db.r3.4xlarge",
+        "db.r3.8xlarge",
+        "db.r4.large",
+        "db.r4.xlarge",
+        "db.r4.2xlarge"
+      ],
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The Lambda function version",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "RDSCluster": {
+      "Type": "AWS::RDS::DBCluster",
+      "DependsOn": ["CustomResourcePasswordRetriever"],
+      "Properties": {
+        "MasterUsername": {
+          "Ref": "MasterUsername"
+        },
+        "StorageEncrypted": true,
+        "MasterUserPassword": {
+          "Fn::GetAtt": ["CustomResourcePasswordRetriever", "Password"]
+        },
+        "Engine": {
+          "Ref": "DBEngine"
+        },
+        "DatabaseName": {
+          "Fn::Join": ["", [{
+              "Ref": "ProjectName"
+            },
+            {
+              "Ref": "Environment"
+            },
+            "DB"
+          ]]
+        },
+        "VpcSecurityGroupIds": [{
+          "Ref": "RDSDBSecurityGroup"
+        }],
+        "DBSubnetGroupName": {
+          "Ref": "DBSubnetGroup"
+        },
+        "DBClusterParameterGroupName": {
+          "Ref": "RDSDBClusterParameterGroup"
+        },
+        "AvailabilityZones": [{
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [{
+                "Ref": "Vpc"
+              },
+              "vpc",
+              "PrivateSubnetAZ1AvailabilityZone"
+            ]]
+          }
+        }, {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [{
+                "Ref": "Vpc"
+              },
+              "vpc",
+              "PrivateSubnetAZ2AvailabilityZone"
+            ]]
+          }
+        }]
+      }
+    },
+    "RDSInstance": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBSubnetGroupName": {
+          "Ref": "DBSubnetGroup"
+        },
+        "DBParameterGroupName": {
+          "Ref": "RDSDBParameterGroup"
+        },
+        "DBClusterIdentifier": {
+          "Ref": "RDSCluster"
+        },
+        "Engine": {
+          "Ref": "DBEngine"
+        },
+        "PubliclyAccessible": "false",
+        "DBInstanceClass": {"Ref": "DBInstanceClass"}
+      }
+    },
+    "DBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": "Microservice DB subnet group",
+        "DBSubnetGroupName": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            {
+              "Ref": "Environment"
+            },
+            "db", "subnet", "group"
+          ]]
+        },
+        "SubnetIds": [{
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [{
+                  "Ref": "Vpc"
+                },
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }
+          },
+          {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [{
+                  "Ref": "Vpc"
+                },
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }
+          }
+        ]
+      }
+    },
+    "RDSDBSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupName": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            {
+              "Ref": "Environment"
+            },
+            "DB",
+            "SG"
+          ]]
+        },
+        "GroupDescription": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            {
+              "Ref": "Environment"
+            },
+            "DB",
+            "SG"
+          ]]
+        },
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              { "Ref": "Vpc" },
+              "vpc",
+              "VPC"
+            ]]
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "rds",
+              {"Ref": "Environment"},
+              "sg"
+            ]]}
+          }
+        ]
+      }
+    },
+    "SolarmosaicDMSToRDSFirstSubnet": {
+      "DependsOn": "RDSCluster",
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "FromPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+        },
+        "GroupId": {"Ref": "RDSDBSecurityGroup"},
+        "IpProtocol": "tcp",
+        "CidrIp": "10.0.250.0/24",
+        "ToPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+        }
+      }
+    },
+    "SolarmosaicDMSToRDSSecondSubnet": {
+      "DependsOn": "RDSCluster",
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "FromPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+        },
+        "GroupId": {"Ref": "RDSDBSecurityGroup"},
+        "IpProtocol": "tcp",
+        "CidrIp": "10.0.251.0/24",
+        "ToPort": {
+          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+        }
+      }
+    },
+    "RDSDBClusterParameterGroup": {
+      "Type": "AWS::RDS::DBClusterParameterGroup",
+      "Properties": {
+        "Description": "Aurora Cluster Parameter Group",
+        "Family": "aurora-mysql5.7",
+        "Parameters": {
+          "time_zone": "US/Pacific"
+        }
+      }
+    },
+    "RDSDBParameterGroup": {
+      "Type": "AWS::RDS::DBParameterGroup",
+      "Properties": {
+        "Description": "Aurora DB Parameter Group",
+        "Family": "aurora-mysql5.7",
+        "Parameters": {
+          "sql_mode": "IGNORE_SPACE"
+        }
+      }
+    },
+    "LambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [{
+            "Action": [
+              "sts:AssumeRole",
+            ],
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [
+                "lambda.amazonaws.com",
+                "s3.amazonaws.com",
+                "apigateway.amazonaws.com",
+                "ssm.amazonaws.com"
+              ]
+            }
+          }],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "LambdaRolePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [{
+            "Action": [
+              "lambda:*",
+              "dynamodb:*",
+              "s3:*",
+              "kms:*",
+              "ssm:*",
+              "logs:*",
+              "xray:*",
+              "sts:AssumeRole",
+              "iam:GetRole",
+              "iam:PassRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          }],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            {
+              "Ref": "Environment"
+            },
+            {
+              "Ref": "AWS::StackName"
+            }
+          ]]
+        },
+        "Roles": [{
+          "Ref": "LambdaRole"
+        }]
+      }
+    },
+    "LambdaPasswordGenerator": {
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": ["LambdaRole", "Arn"]
+        },
+        "Code": {
+          "S3Bucket" : {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "ProjectName"},
+                "microservice",
+                "LambdaBucketName"
+              ]]
+            }
+          },
+          "S3Key": {
+            "Fn::Join": ["/", [{
+                "Ref": "Version"
+              },
+              "password_generator",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+    "CustomResourcePasswordGenerator": {
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+      "Type": "Custom::PasswordGenerator",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
+        },
+        "Type": "encrypt",
+        "PasswordLength": 20,
+        "KMSKeyId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "KMSEncryptionKeyId"
+            ]]
+          }
+        },
+        "ParameterName": {"Fn::Join": ["-", [
+          {"Ref": "ProjectName"},
+          {"Ref": "Environment"},
+          "aurora", "admin", "password"
+        ]]},
+        "ParameterDescription": {"Fn::Join": ["", [
+          "This parameter was created by stack ",
+          {"Ref": "AWS::StackName"},
+          " to store passwords for the ",
+          {"Ref": "ProjectName"},
+          {"Ref": "Environment"},
+          " Aurora DB TEST"
+        ]]}
+      }
+    },
+    "CustomResourcePasswordRetriever": {
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy", "CustomResourcePasswordGenerator"],
+      "Type": "Custom::PasswordRetriever",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
+        },
+        "Type": "decrypt",
+        "PasswordLength": 20,
+        "KMSKeyId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "KMSEncryptionKeyId"
+            ]]
+          }
+        },
+        "ParameterName": {"Fn::Join": ["-", [
+          {"Ref": "ProjectName"},
+          {"Ref": "Environment"},
+          "aurora", "admin", "password"
+        ]]},
+        "ParameterDescription": {"Fn::Join": ["", [
+          "This parameter was created by stack ",
+          {"Ref": "AWS::StackName"},
+          " to store passwords for the ",
+          {"Ref": "ProjectName"},
+          {"Ref": "Environment"},
+          " Aurora DB"
+        ]]}
+      }
+    },
+    "DnsRecordSetGroup": {
+      "Properties": {
+        "HostedZoneId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "HostedZoneId"
+            ]]
+          }
+        },
+        "RecordSets": [
+          {
+            "ResourceRecords": [
+              {
+                "Fn::GetAtt": [
+                  "RDSCluster", "Endpoint.Address"
+                ]
+              }
+            ],
+            "TTL": "60",
+            "Name": {"Fn::Join": ["", [
+              "db",
+              ".",
+              {"Ref": "Environment"},
+              ".",
+              {
+                "Fn::ImportValue": {
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    "microservice",
+                    "Domain"
+                  ]]
+                }
+              }
+            ]]},
+            "Type": "CNAME"
+          },
+          {
+            "ResourceRecords": [
+              {
+                "Fn::GetAtt": [
+                  "RDSCluster", "ReadEndpoint.Address"
+                ]
+              }
+            ],
+            "TTL": "60",
+            "Name": {"Fn::Join": ["", [
+              "read",
+              ".",
+              "db",
+              ".",
+              {"Ref": "Environment"},
+              ".",
+              {
+                "Fn::ImportValue": {
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    "microservice",
+                    "Domain"
+                  ]]
+                }
+              }
+            ]]},
+            "Type": "CNAME"
+          }
+        ]
+      },
+      "Type": "AWS::Route53::RecordSetGroup"
+    }
+  },
+  "Outputs": {
+    "MasterUsername": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "MasterUsername"
+          ]]
+        }
+      },
+      "Value": {
+        "Ref": "MasterUsername"
+      }
+    },
+    "EndpointPort": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "EndpointPort"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+      }
+    },
+    "Endpoint": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "Endpoint"
+          ]]
+        }
+      },
+      "Value": {"Fn::Join": ["", [
+        "db",
+        ".",
+        {"Ref": "Environment"},
+        ".",
+        {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "Domain"
+            ]]
+          }
+        }
+      ]]}
+    },
+    "ReadEndpoint": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "ReadEndpoint"
+          ]]
+        }
+      },
+      "Value": {"Fn::Join": ["", [
+        "read",
+        ".",
+        "db",
+        ".",
+        {"Ref": "Environment"},
+        ".",
+        {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "Domain"
+            ]]
+          }
+        }
+      ]]}
+    },
+    "RDSDBSecurityGroup": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "RDSDBSecurityGroup"
+          ]]
+        }
+      },
+      "Value": {
+        "Ref": "RDSDBSecurityGroup"
+      }
+    }
+  }
+}
