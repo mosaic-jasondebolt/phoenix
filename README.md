@@ -48,7 +48,36 @@ For each environment (dev, testing, prod), and additional developer environments
 * Creates ingress rules to allow Database Migration Service to access from specific CIDR blocks.
 
 ##### Phoenix ECS (template-ecs.json)
-* Jason to fill out
+For each environment (dev, testing, prod), and additional developer environments:
+* Creates an ECS Cluster.
+* Creates an ECS Task Definition.
+* Creates an ECS Service.
+* Creates one or more EC2 instances or a Fargate service (you can choose which one)
+* Creates an EC2 Auto Scalaing Group
+* Creates an EC2 Instance Profile
+* Creates an EC2 Role
+* Creates an Application Load Balancer
+* Creates an Auto Scaling Role
+* Creates a CloudWatch alarm to scale up ECS service counts when receiving HTTP 500 errors.
+* Creates an ApplicationAutoScaling::ScalingPolicy to scale up ECS service tasks when receiving HTTP 500 errors.
+* Creates an ApplicationAutoScaling::ScalableTarget to scale up ECS service tasks.
+* Creates a CloudWatch Logs Group to log ECS container logs.
+* Creates an Elastic Load Balancer S3 logs bucket policy.
+* Creates a V2 Elastic Load Balancer target group.
+* Creates a V2 Elastic Load Balancer listener on port 443.
+* Creates a V2 Elastic Load Balancer listener on port 80.
+* Creates an ECS Task Execution Role.
+* Creates a Web Security Group for the EC2 instances, containers, and fargate services.
+* Creates Application Load Balancer security group.
+* Creates an DNS record set to map an environment specific URL to the Application Load Balancer.
+* Creates an security group ingress rule to allow Web security group to access RDS cluster.
+* Creates an security group ingress rule to allow Web security group to access itself.
+* Creates an security group ingress rule to allow ELB to access web security group.
+* Creates an security group ingress rule to allow traffic to ELB.
+* Creates an security group ingress rule to allow internal network CIDR blocks to access Web security group.
+* Creates an security group ingress rule to allow internal network CIDR blocks to access ELB security group.
+
+
 
 ##### Phoenix Lambda (template-lambda.json)
 * Jason to fill out
