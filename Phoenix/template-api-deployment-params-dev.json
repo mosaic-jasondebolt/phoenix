@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "Environment": "devjason",
+    "Environment": "dev",
     "ProjectName": "phoenix",
     "Version": "VERSION_ID"
   }
