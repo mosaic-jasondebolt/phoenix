@@ -4,7 +4,7 @@ def lambda_handler(event, context):
     return [
       {
         "id": "5767884a-c39a-41e5-bb44-f1a08c62e55d",
-        "name": "PointOfSale",
+        "name": "Hello",
         "description": "The Point-Of-Sale API."
       },
       {

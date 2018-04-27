@@ -8,6 +8,7 @@
     "ELBSubnets": "Private",
     "Scheme": "internal",
     "Environment": "testing",
+    "HealthCheckGracePeriodSeconds": "30",
     "ImageName": "phoenix",
     "ImageVersion": "IMAGE_TAG",
     "InstanceType": "c4.large",
