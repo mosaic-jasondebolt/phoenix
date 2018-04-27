@@ -7,12 +7,12 @@ set -e
 # deploys the locally build docker image to the Dev ECS cluster in AWS.
 
 # USAGE:
-#   ./deploy-ecs-dev.sh [create | update] [location of docker file]
+#   ./deploy-ecs-dev.sh [create | update] [sbt | location of docker file]
 #
 # EXAMPLES:
+#   ./deploy-ecs-dev.sh update sbt --> Always use this command for Play/SBT projects.
 #   ./deploy-ecs-dev.sh update .   --> Dockerfile in project root dir.
 #   ./deploy-ecs-dev.sh update ecs   --> Dockerfile in ecs dir.
-#   ./deploy-ecs-dev.sh create ecs/target/docker/stage
 
 AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 AWS_REGION=`aws configure get region`
@@ -32,10 +32,27 @@ if [ $# -ne 2 ]
     exit 1
 fi
 
+if [ $2 == "sbt" ]
+  then
+    echo 'SBT docker build'
+    # This is a Play app, so use sbt to build the docker image
+    cd ../
+    cp build.sbt build.sbt.backup
+    sed "s/IMAGE_TAG/$IMAGE_TAG/g" build.sbt > temp.sbt && mv temp.sbt build.sbt
+    sbt docker:publishLocal
+    # Restore original sbt file.
+    cp build.sbt.backup build.sbt
+    rm build.sbt.backup
+    cd Phoenix
+else
+  # This is a regular non-play app, so we use docker build directly.
+  echo 'docker build'
+  docker build -t $ECR_REPO $2
+fi
+
 # Obtain auth with AWS Elastic Container Rep
 eval $(aws ecr get-login --no-include-email --region $AWS_REGION)
 
-docker build -t $ECR_REPO $2
 
 # Push the local docker image to AWS Elastic Container Repo
 docker push $ECR_REPO
