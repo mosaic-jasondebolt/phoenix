@@ -583,7 +583,13 @@
                   "ec2:DescribeNetworkInterfaces",
                   "ec2:CreateNetworkInterface",
                   "ec2:DeleteNetworkInterface",
-                  "codecommit:*"
+                  "codecommit:GetRepository",
+                  "iam:CreateServiceSpecificCredential",
+                  "iam:AttachUserPolicy",
+                  "iam:DeleteUser",
+                  "iam:DetachUserPolicy",
+                  "iam:CreateUser",
+                  "iam:DeleteServiceSpecificCredential"
                 ],
                 "Resource": [
                   "*"
