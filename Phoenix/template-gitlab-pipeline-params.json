@@ -1,0 +1,9 @@
+{
+  "Parameters": {
+    "ProjectName": "phoenix",
+    "OutputBucketName": "mosaic-phoenix-gitlab-pipeline",
+    "AllowedIps": "54.175.38.99/32",
+    "ApiSecret": "API_SECRET",
+    "Vpc": "dev"
+  }
+}
