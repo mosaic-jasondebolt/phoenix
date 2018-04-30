@@ -653,7 +653,7 @@
           ]
         },
         "Runtime": "python2.7",
-        "Timeout": "299",
+        "Timeout": "300",
         "VpcConfig": {
           "SecurityGroupIds": [
             {"Ref": "GitlabPipelineLambdaSecurityGroup"}
