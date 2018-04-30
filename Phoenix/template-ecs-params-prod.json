@@ -8,7 +8,7 @@
     "ELBSubnets": "Private",
     "Scheme": "internal",
     "Environment": "prod",
-    "HealthCheckGracePeriodSeconds": "30",
+    "HealthCheckGracePeriodSeconds": "60",
     "ImageName": "phoenix",
     "ImageVersion": "IMAGE_TAG",
     "InstanceType": "c4.large",
