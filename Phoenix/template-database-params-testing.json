@@ -2,6 +2,7 @@
   "Parameters": {
     "Environment": "testing",
     "ProjectName": "phoenix",
+    "DatabaseNamePrefix": "phoenix",
     "Version": "VERSION_ID",
     "Vpc": "testing",
     "DBEngine": "aurora-mysql",

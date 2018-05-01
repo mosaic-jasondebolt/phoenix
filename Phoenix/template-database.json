@@ -7,7 +7,15 @@
       "MinLength": "1",
       "MaxLength": "20",
       "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
-      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "ConstraintDescription": "Use all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
+    "DatabaseNamePrefix": {
+      "Description": "The name of your datbase.",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "[a-z]*",
+      "ConstraintDescription": "Use all lowercase",
       "Type": "String"
     },
     "Environment": {
@@ -66,7 +74,7 @@
         },
         "DatabaseName": {
           "Fn::Join": ["", [{
-              "Ref": "ProjectName"
+              "Ref": "DatabaseNamePrefix"
             },
             {
               "Ref": "Environment"
