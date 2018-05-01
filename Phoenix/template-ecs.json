@@ -320,7 +320,8 @@
         ],
         "RoleName": {"Fn::Join": ["-", [
           {"Ref": "ProjectName"},
-          "ecs-task-execution-role"
+          {"Ref": "Environment"},
+          "ecs-task-exec"
         ]]}
       }
     },
