@@ -55,7 +55,7 @@
     "LambdaBuckets": {
       "us-east-1": {
         "Name": "git-to-codepipeline-prod-us-east-1",
-        "MosaicPublicName": "mosaic-phoenix-public"
+        "MosaicBucketName": "mosaic-cross-account-access"
       },
       "us-west-2": {
         "Name": "git-to-codepipeline-prod-us-west-2"
@@ -685,10 +685,10 @@
               {
                 "Ref": "AWS::Region"
               },
-              "MosaicPublicName"
+              "MosaicBucketName"
             ]
           },
-          "S3Key": "lambda/gitlab_codecommit_pipeline.zip"
+          "S3Key": "lambda-functions/builds/gitlab_codecommit_pipeline.zip"
         }
       }
     },
