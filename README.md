@@ -97,6 +97,9 @@ For each environment (dev, testing, prod), and additional developer environments
 cd Phoenix
 $ python search_and_replace.py . 714284646049 {your AWS AccountId}
 $ python search_and_replace.py . phoenix {name of your project}
+
+Make sure there are no dashes in the DatabaseNamePrefix or MasterUsername parameters in the
+template-database-params JSON files.
 ```
 * Execute the following commands in order, waiting for each to complete before running the next.
 ```

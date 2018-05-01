@@ -34,6 +34,8 @@
     },
     "MasterUsername": {
       "Description": "The username of the database",
+      "AllowedPattern": "^[a-z]+[\\_a-z]*[a-z]+",
+      "ConstraintDescription": "Use all lowercase, optionally separated by underscores",
       "Type": "String"
     },
     "DBInstanceClass": {
