@@ -14,6 +14,11 @@
       "Description": "The environment to deploy the instance to.",
       "Type": "String"
     },
+    "DBEnvironment": {
+      "Description": "The database environment used by this ECS cluster",
+      "AllowedValues": ["dev", "testing", "prod"],
+      "Type": "String"
+    },
     "NetworkMode": {
       "Description": "The Docker networking mode to use for the containers in the task, such as none, bridge, or host. For Fargate launch types, you can specify awsvpc only. The none, bridge, or host option won't work for Fargate launch types.",
       "Default": "awsvpc",
@@ -362,7 +367,7 @@
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
                       "database",
-                      {"Ref": "Environment"},
+                      {"Ref": "DBEnvironment"},
                       "Endpoint"
                     ]]
                   }
@@ -375,7 +380,7 @@
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
                       "database",
-                      {"Ref": "Environment"},
+                      {"Ref": "DBEnvironment"},
                       "ReadEndpoint"
                     ]]
                   }
@@ -388,7 +393,7 @@
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
                       "database",
-                      {"Ref": "Environment"},
+                      {"Ref": "DBEnvironment"},
                       "EndpointPort"
                     ]]
                   }
@@ -1081,7 +1086,7 @@
             "Fn::Join": ["-", [
               {"Ref": "ProjectName"},
               "database",
-              {"Ref": "Environment"},
+              {"Ref": "DBEnvironment"},
               "EndpointPort"
             ]]
           }
@@ -1091,7 +1096,7 @@
             "Fn::Join": ["-", [
               {"Ref": "ProjectName"},
               "database",
-              {"Ref": "Environment"},
+              {"Ref": "DBEnvironment"},
               "RDSDBSecurityGroup"
             ]]
           }
@@ -1105,7 +1110,7 @@
             "Fn::Join": ["-", [
               {"Ref": "ProjectName"},
               "database",
-              {"Ref": "Environment"},
+              {"Ref": "DBEnvironment"},
               "EndpointPort"
             ]]
           }
