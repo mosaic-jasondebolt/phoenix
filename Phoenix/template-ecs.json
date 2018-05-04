@@ -361,6 +361,19 @@
                 }
               },
               {
+                "Name": "DatabasePasswordParameterStoreKey",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "database",
+                      {"Ref": "DBEnvironment"},
+                      "DatabasePasswordParameterStoreKey"
+                    ]]
+                  }
+                }
+              },
+              {
                 "Name": "Endpoint",
                 "Value": {
                   "Fn::ImportValue": {
