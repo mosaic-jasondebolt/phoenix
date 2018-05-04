@@ -512,6 +512,23 @@
         "Ref": "MasterUsername"
       }
     },
+    "DatabasePasswordParameterStoreKey": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "database",
+            {"Ref": "Environment"},
+            "DatabasePasswordParameterStoreKey"
+          ]]
+        }
+      },
+      "Value": {"Fn::Join": ["-", [
+        {"Ref": "ProjectName"},
+        {"Ref": "Environment"},
+        "aurora", "admin", "password"
+      ]]}
+    },
     "EndpointPort": {
       "Export": {
         "Name": {
