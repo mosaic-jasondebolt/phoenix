@@ -206,10 +206,10 @@
             ]
           },
           {
-            "Name": "Review",
+            "Name": "RequestCodeReview",
             "Actions": [
               {
-                "Name": "RequestReview",
+                "Name": "RequestCodeReview",
                 "ActionTypeId": {
                   "Category": "Approval",
                   "Owner": "AWS",
@@ -217,21 +217,6 @@
                   "Provider": "Manual"
                 },
                 "RunOrder": 1
-              },
-              {
-                "Name": "ReviewApproval",
-                "ActionTypeId": {
-                  "Category": "Approval",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "Manual"
-                },
-                "RunOrder": 2,
-                "Configuration": {
-                  "NotificationArn": {
-                    "Ref": "ReviewSNSTopic"
-                  }
-                }
               }
             ]
           }
