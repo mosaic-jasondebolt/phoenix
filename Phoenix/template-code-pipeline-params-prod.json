@@ -1,8 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "prod",
-    "ProjectName": "PROJECT_NAME",
-    "Version": "VERSION_ID",
-    "ReviewNotificationEmail": "jason.debolt@joinmosaic.com"
-  }
-}

@@ -269,6 +269,20 @@
         }]
       }
     },
+    "CodeCommitRepositoryDevAccess": {
+      "Type": "AWS::CodeCommit::Repository",
+      "Properties": {
+        "RepositoryName": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "dev-access"
+          ]]
+        },
+        "RepositoryDescription": {
+          "Ref": "ProjectDescription"
+        }
+      }
+    },
     "ECRRepository": {
       "Type": "AWS::ECR::Repository",
       "Properties": {
@@ -488,6 +502,117 @@
               {
                 "Ref": "ProjectName"
               }
+            ]]
+          }
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
+    "CodeBuildDev": {
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "CodeBuildSecurityGroup"}
+          ],
+          "Subnets": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ],
+          "VpcId":  {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "VPC"
+              ]]
+            }
+          }
+        },
+        "Artifacts": {
+          "Type": "S3",
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
+          "NamespaceType": "BUILD_ID",
+          "Name": {
+            "Fn::Join": ["-", [
+              {
+                "Ref": "ProjectName"
+              },
+              "dev"
+            ]]
+          },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
+        },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [
+            {
+              "Name" : "AWS_ACCOUNT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "AWS::AccountId"}
+            }
+          ],
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "dev"
+          ]]
+        },
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
+        "Source": {
+          "BuildSpec": "Phoenix/buildspec-dev.yml",
+          "Type": "CODECOMMIT",
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {"Ref": "AWS::Region"},
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-dev-access"
             ]]
           }
         },
@@ -1727,60 +1852,6 @@
       "Value": {
         "Ref": "EncryptedSecretsBucket"
       }
-    },
-    "CodeCommitRepositoryURL": {
-      "Description": "The AWS Console URL of the CodeCommit Repository",
-      "Value": {
-        "Fn::Join": ["", ["https://console.aws.amazon.com/codecommit/home?region=",
-          {"Ref": "AWS::Region"},
-          "#/repository/",
-          {
-            "Ref": "ProjectName"
-          }
-        ]]
-      }
-    },
-    "MasterTriggerSNSTopic": {
-      "Description": "The name of this SNS topic",
-      "Value": {
-        "Fn::GetAtt": [
-          "MasterTriggerSNSTopic",
-          "TopicName"
-        ]
-      }
-    },
-    "MasterTriggerSNSTopicInstructions": {
-      "Description": "Instructions for this SNS topic",
-      "Value": "Check your email for an SNS subscription confirmation request"
-    },
-    "CodePipelineApprovalSNSTopic": {
-      "Description": "The name of this SNS topic",
-      "Value": {
-        "Fn::GetAtt": [
-          "CodePipelineApprovalSNSTopic",
-          "TopicName"
-        ]
-      }
-    },
-    "CodePipelineApprovalSNSTopicInstructions": {
-      "Description": "Instructions for this SNS topic",
-      "Value": "Check your email for an SNS subscription confirmation request"
-    },
-    "DockerRepositoryURL": {
-      "Description": "The AWS Console URL of the Docker ECR Repository",
-      "Value": {
-        "Fn::Join": ["", ["https://console.aws.amazon.com/ecs/home?region=",
-          {"Ref": "AWS::Region"},
-          "#/repositories/",
-          {
-            "Ref": "ProjectName"
-          }
-        ]]
-      }
-    },
-    "DockerRepositoryInstructions": {
-      "Description": "Instructions",
-      "Value": "Click on repo link in the DockerRepositoryURL section and then click on the 'View Push Commands' button"
     }
   }
 }
