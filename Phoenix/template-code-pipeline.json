@@ -17,9 +17,9 @@
     "Version": {
       "Description": "The version of the pipeline.",
       "MinLength": "1",
-      "MaxLength": "10",
-      "AllowedPattern": "[a-z]*",
-      "ConstraintDescription": "Use all lowercase",
+      "MaxLength": "16",
+      "AllowedPattern": "[a-z]+[\\-a-z]*[a-z]+",
+      "ConstraintDescription": "Use all lowercase, optionally seperated by dashes, up to 16 characters.",
       "Type": "String"
     },
     "ReviewNotificationEmail": {
