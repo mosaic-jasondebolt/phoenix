@@ -61,7 +61,7 @@ docker push $ECR_REPO
 sed "s/IMAGE_TAG/$IMAGE_TAG/g" template-ecs-params-dev.json > temp1.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py temp1.json > temp2.json
+python parameters_generator.py temp1.json cloudformation > temp2.json
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://template-ecs.json

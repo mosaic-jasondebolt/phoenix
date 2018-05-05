@@ -23,7 +23,7 @@ API_SECRET=`pwgen 32`
 # Replace the API_SECRET string in the dev params file with the $API_SECRET variable
 sed "s/API_SECRET/$API_SECRET/g" template-gitlab-pipeline-params.json > temp1.json
 
-python parameters_generator.py temp1.json > temp2.json
+python parameters_generator.py temp1.json cloudformation > temp2.json
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://template-gitlab-pipeline.json

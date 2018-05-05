@@ -30,7 +30,7 @@ python api_gateway_deployment_rotator.py template-api-deployment-params-dev.json
 sed "s/VERSION_ID/$VERSION_ID/g" template-api-deployment-params-dev.json > temp1.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py temp1.json > temp2.json
+python parameters_generator.py temp1.json cloudformation > temp2.json
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://template-api-deployment.json

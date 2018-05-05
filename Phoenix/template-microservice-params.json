@@ -8,12 +8,12 @@
     "ProjectDescription": "The Mosaic Phoenix project.",
     "NotificationEmail": "jason.debolt@joinmosaic.com",
     "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
-    "LambdaBucketName": "mosaic-phoenix-lambda",
-    "LoadBalancerLogsBucketName": "mosaic-phoenix-load-balancer-logs",
-    "CodeBuildBucketName": "mosaic-phoenix-code-build",
-    "CodePipelineBucketName": "mosaic-phoenix-code-pipeline",
-    "SecretsBucketName": "mosaic-phoenix-encrypted-secrets",
-    "EncryptionKeyName": "mosaic-phoenix-kms-key",
+    "LambdaBucketName": "mosaic-PROJECT_NAME-lambda",
+    "LoadBalancerLogsBucketName": "mosaic-PROJECT_NAME-load-balancer-logs",
+    "CodeBuildBucketName": "mosaic-PROJECT_NAME-code-build",
+    "CodePipelineBucketName": "mosaic-PROJECT_NAME-code-pipeline",
+    "SecretsBucketName": "mosaic-PROJECT_NAME-encrypted-secrets",
+    "EncryptionKeyName": "mosaic-PROJECT_NAME-kms-key",
     "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0"
   }
 }

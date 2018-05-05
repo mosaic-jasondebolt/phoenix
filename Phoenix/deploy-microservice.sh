@@ -18,7 +18,7 @@ PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 MICROSERVICE_STACK_NAME=$PROJECT_NAME-microservice
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py template-microservice-params.json > temp.json
+python parameters_generator.py template-microservice-params.json cloudformation > temp.json
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://template-microservice.json

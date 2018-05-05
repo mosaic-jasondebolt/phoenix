@@ -24,7 +24,9 @@ fi
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-database-params-dev.json`
-LAMBDA_BUCKET_NAME=`jq -r '.Parameters.LambdaBucketName' template-microservice-params.json`
+PRE_LAMBDA_BUCKET_NAME=`jq -r '.Parameters.LambdaBucketName' template-microservice-params.json`
+LAMBDA_BUCKET_NAME="${PRE_LAMBDA_BUCKET_NAME/PROJECT_NAME/$PROJECT_NAME}"
+
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 VERSION_ID=$ENVIRONMENT
 
@@ -46,7 +48,7 @@ done
 sed "s/VERSION_ID/$VERSION_ID/g" template-database-params-dev.json > temp1.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py temp1.json > temp2.json
+python parameters_generator.py temp1.json cloudformation > temp2.json
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://template-database.json
