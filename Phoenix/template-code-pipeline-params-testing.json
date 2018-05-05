@@ -3,6 +3,6 @@
     "Environment": "testing",
     "ProjectName": "PROJECT_NAME",
     "Version": "VERSION_ID",
-    "CodeReviewNotificationEmail": "jason.debolt@joinmosaic.com"
+    "ReviewNotificationEmail": "jason.debolt@joinmosaic.com"
   }
 }
