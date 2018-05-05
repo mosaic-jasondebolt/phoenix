@@ -361,7 +361,20 @@
                 }
               },
               {
-                "Name": "DATABASE_PASSWORD_PARAMETER_STORE_KEY",
+                "Name": "RDS_MASTER_USERNAME",
+                "Value": {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "database",
+                      {"Ref": "DBEnvironment"},
+                      "MasterUsername"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "RDS_PASSWORD_PARAMETER_STORE_KEY",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
@@ -374,7 +387,7 @@
                 }
               },
               {
-                "Name": "WRITE_RDS_ENDPOINT",
+                "Name": "RDS_WRITE_ENDPOINT",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
@@ -387,7 +400,7 @@
                 }
               },
               {
-                "Name": "READ_RDS_ENDPOINT",
+                "Name": "RDS_READ_ENDPOINT",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
