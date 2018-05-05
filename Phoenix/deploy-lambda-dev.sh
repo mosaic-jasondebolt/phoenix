@@ -14,7 +14,7 @@ set -e
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-lambda-params-dev.json`
 PRE_LAMBDA_BUCKET_NAME=`jq -r '.Parameters.LambdaBucketName' template-microservice-params.json`
-LAMBDA_BUCKET_NAME="${PRE_LAMBDA_BUCKET_NAME/PROJECT_NAME/$PROJECT_NAME}"
+LAMBDA_BUCKET_NAME=`sed "s/PROJECT_NAME/$PROJECT_NAME/g" <<< $PRE_LAMBDA_BUCKET_NAME`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 VERSION_ID=$ENVIRONMENT
 

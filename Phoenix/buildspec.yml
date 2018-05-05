@@ -15,7 +15,7 @@ phases:
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
       - PROJECT_NAME=`jq -r '.Parameters.ProjectName' $CODEBUILD_SRC_DIR/Phoenix/template-microservice-params.json`
       - PRE_LAMBDA_BUCKET_NAME=`jq -r '.Parameters.LambdaBucketName' $CODEBUILD_SRC_DIR/Phoenix/template-microservice-params.json`
-      - LAMBDA_BUCKET_NAME="${PRE_LAMBDA_BUCKET_NAME/PROJECT_NAME/$PROJECT_NAME}"
+      - LAMBDA_BUCKET_NAME=`sed "s/PROJECT_NAME/$PROJECT_NAME/g" <<< $PRE_LAMBDA_BUCKET_NAME`
       - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME
       - VERSION_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=$VERSION_ID
