@@ -1,0 +1,511 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Generates all resources required for a microservice.",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
+    "Environment": {
+      "Description": "The environment to deploy the pipeline to.",
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The version of the pipeline.",
+      "MinLength": "1",
+      "MaxLength": "10",
+      "AllowedPattern": "[a-z]*",
+      "ConstraintDescription": "Use all lowercase",
+      "Type": "String"
+    },
+    "CodeReviewNotificationEmail": {
+      "Description": "The email to send code review notifications to.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "CodeReviewSNSTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "CodeReview",
+        "Subscription": [{
+          "Endpoint": {
+            "Ref": "CodeReviewNotificationEmail"
+          },
+          "Protocol": "email"
+        }],
+        "TopicName": {
+          "Fn::Join": ["-", [
+            "code-review-for",
+            {"Ref": "ProjectName"},
+            {"Ref": "Environment"},
+            {"Ref": "Version"}
+          ]]
+        }
+      }
+    },
+    "CodePipeline": {
+      "Type": "AWS::CodePipeline::Pipeline",
+      "Properties": {
+        "RoleArn" : {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "CodePipelineServiceRoleArn"
+            ]]
+          }
+        },
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            {"Ref": "Environment"},
+            {"Ref": "Version"}
+          ]]
+        },
+        "Stages": [{
+            "Name": "Source",
+            "Actions": [{
+              "Name": "SourceAction",
+              "ActionTypeId": {
+                "Category": "Source",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "CodeCommit"
+              },
+              "OutputArtifacts": [{
+                "Name": "SourceOutput"
+              }],
+              "Configuration": {
+                "RepositoryName": {
+                  "Ref": "ProjectName"
+                },
+                "BranchName": {
+                  "Ref": "Environment"
+                }
+              },
+              "RunOrder": 1
+            }]
+          },
+          {
+            "Name": "Build",
+            "Actions": [{
+              "Name": "Build",
+              "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "OutputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "UnitTest",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"},
+                      "unit-test"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "Lint",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"},
+                      "lint"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "CalculateCosts",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"},
+                      "calculate-costs"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "StaticAnalysis",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"},
+                      "static-analysis"
+                    ]]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "Name": "Deploy",
+            "Actions": [
+              {
+                "Name": "Database",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn" : {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "ProjectName"},
+                        "microservice",
+                        "CodePipelineServiceRoleArn"
+                      ]]
+                    }
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "database",
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {
+                    "Fn::Join": ["", [
+                      "BuildOutput::t-",
+                      "database",
+                      "-params-",
+                      {"Ref": "Environment"},
+                      ".json"
+                    ]]
+                  },
+                  "TemplatePath": "BuildOutput::template-database.json"
+                }
+              },
+              {
+                "Name": "ECS",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn" : {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "ProjectName"},
+                        "microservice",
+                        "CodePipelineServiceRoleArn"
+                      ]]
+                    }
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "ecs",
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {
+                    "Fn::Join": ["", [
+                      "BuildOutput::t-",
+                      "ecs",
+                      "-params-",
+                      {"Ref": "Environment"},
+                      ".json"
+                    ]]
+                  },
+                  "TemplatePath": "BuildOutput::template-ecs.json"
+                }
+              },
+              {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn" : {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "ProjectName"},
+                        "microservice",
+                        "CodePipelineServiceRoleArn"
+                      ]]
+                    }
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "lambda",
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {
+                    "Fn::Join": ["", [
+                      "BuildOutput::t-",
+                      "lambda",
+                      "-params-",
+                      {"Ref": "Environment"},
+                      ".json"
+                    ]]
+                  },
+                  "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
+                "Name": "APIGateway",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "RoleArn" : {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "ProjectName"},
+                        "microservice",
+                        "CodePipelineServiceRoleArn"
+                      ]]
+                    }
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api",
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {
+                    "Fn::Join": ["", [
+                      "BuildOutput::t-",
+                      "api",
+                      "-params-",
+                      {"Ref": "Environment"},
+                      ".json"
+                    ]]
+                  },
+                  "TemplatePath": "BuildOutput::template-api.json"
+                }
+              },
+              {
+                "Name": "APIGatewayDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 4,
+                "Configuration": {
+                  "RoleArn" : {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "ProjectName"},
+                        "microservice",
+                        "CodePipelineServiceRoleArn"
+                      ]]
+                    }
+                  },
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-deployment",
+                      {"Ref": "Environment"},
+                      {"Ref": "Version"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {
+                    "Fn::Join": ["", [
+                      "BuildOutput::t-",
+                      "api-deployment",
+                      "-params-",
+                      {"Ref": "Environment"},
+                      ".json"
+                    ]]
+                  },
+                  "TemplatePath": "BuildOutput::template-api-deployment-testing.json"
+                }
+              }
+            ]
+          },
+          {
+            "Name": "Tests",
+            "Actions": [{
+              "Name": "IntegrationTest",
+              "ActionTypeId": {
+                "Category": "Test",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "CodeBuild"
+              },
+              "InputArtifacts": [{
+                "Name": "SourceOutput"
+              }],
+              "RunOrder": 1,
+              "Configuration": {
+                "ProjectName": {
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    {"Ref": "Environment"},
+                    {"Ref": "Version"},
+                    "integration-test"
+                  ]]
+                }
+              }
+            }]
+          },
+          {
+            "Name": "Approval",
+            "Actions": [{
+              "Name": "ManualApproval",
+              "ActionTypeId": {
+                "Category": "Approval",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "Manual"
+              },
+              "RunOrder": 1,
+              "Configuration": {
+                "NotificationArn": {
+                  "Ref": "CodeReviewSNSTopic"
+                }
+              }
+            }]
+          },
+        ],
+        "ArtifactStore": {
+          "Type": "S3",
+          "Location" : {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "ProjectName"},
+                "microservice",
+                "CodePipelineBucketName"
+              ]]
+            }
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "CodeReviewSNSTopic": {
+      "Description": "The name of this SNS topic",
+      "Value": {
+        "Fn::GetAtt": [
+          "CodeReviewSNSTopic",
+          "TopicName"
+        ]
+      }
+    }
+  }
+}

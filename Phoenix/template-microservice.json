@@ -1598,6 +1598,20 @@
       },
       "Value": {"Ref": "HostedZoneId"}
     },
+    "CodePipelineServiceRoleArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "CodePipelineServiceRoleArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
+      }
+    },
     "SSLCertificateARN": {
       "Export": {
         "Name": {
@@ -1633,6 +1647,18 @@
         }
       },
       "Value": {"Ref": "LambdaBucket"}
+    },
+    "CodePipelineBucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "CodePipelineBucketName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "CodePipelineBucket"}
     },
     "LoadBalancerLogsBucketName": {
       "Export": {

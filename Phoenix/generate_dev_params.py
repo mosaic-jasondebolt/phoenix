@@ -32,6 +32,14 @@ def write_dev_param_files(environment_name):
     but there's simply no need to optimize this or tweak any further because
     what is happening here is rather simple.
     """
+
+    # CodePipeline template
+    testing_code_pipeline_template = _parse_json('template-code-pipeline-params-testing.json')
+    dev_code_pipeline_template = copy.deepcopy(testing_code_pipeline_template)
+    dev_code_pipeline_template['Parameters']['Environment'] = environment_name
+    dev_code_pipeline_file_obj = open('template-code-pipeline-params-dev.json', 'w')
+    dev_code_pipeline_file_obj.write(json.dumps(dev_code_pipeline_template, indent=2))
+
     # Database template
     testing_database_template = _parse_json('template-database-params-testing.json')
     dev_database_template = copy.deepcopy(testing_database_template)
