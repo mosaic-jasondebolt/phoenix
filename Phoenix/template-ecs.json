@@ -349,7 +349,7 @@
             "Name": { "Ref": "ContainerName" },
             "Environment": [
               {
-                "Name": "KMSEncryptionKeyId",
+                "Name": "KMS_ENCRYPTION_KEY_ID",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
@@ -361,7 +361,7 @@
                 }
               },
               {
-                "Name": "DatabasePasswordParameterStoreKey",
+                "Name": "DATABASE_PASSWORD_PARAMETER_STORE_KEY",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
@@ -374,7 +374,7 @@
                 }
               },
               {
-                "Name": "Endpoint",
+                "Name": "WRITE_RDS_ENDPOINT",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
@@ -387,7 +387,7 @@
                 }
               },
               {
-                "Name": "ReadEndpoint",
+                "Name": "READ_RDS_ENDPOINT",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
@@ -400,7 +400,7 @@
                 }
               },
               {
-                "Name": "EndpointPort",
+                "Name": "RDS_ENDPOINT_PORT",
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
