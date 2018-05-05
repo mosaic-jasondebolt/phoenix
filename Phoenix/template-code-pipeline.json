@@ -14,8 +14,8 @@
       "Description": "The environment to deploy the pipeline to.",
       "Type": "String"
     },
-    "Version": {
-      "Description": "The version of the pipeline.",
+    "BranchName": {
+      "Description": "The BranchName of the pipeline.",
       "MinLength": "1",
       "MaxLength": "16",
       "AllowedPattern": "[a-z]+[\\-a-z]*[a-z]+",
@@ -43,7 +43,7 @@
             "code-review-for",
             {"Ref": "ProjectName"},
             {"Ref": "Environment"},
-            {"Ref": "Version"}
+            {"Ref": "BranchName"}
           ]]
         }
       }
@@ -64,7 +64,7 @@
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
             {"Ref": "Environment"},
-            {"Ref": "Version"}
+            {"Ref": "BranchName"}
           ]]
         },
         "Stages": [{
@@ -85,7 +85,7 @@
                   "Ref": "ProjectName"
                 },
                 "BranchName": {
-                  "Ref": "Environment"
+                  "Ref": "BranchName"
                 }
               },
               "RunOrder": 1
@@ -110,11 +110,7 @@
                 "RunOrder": 1,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      {"Ref": "Environment"},
-                      {"Ref": "Version"}
-                    ]]
+                    "Ref": "ProjectName"
                   }
                 }
               },
@@ -134,8 +130,6 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      {"Ref": "Environment"},
-                      {"Ref": "Version"},
                       "unit-test"
                     ]]
                   }
@@ -157,8 +151,6 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      {"Ref": "Environment"},
-                      {"Ref": "Version"},
                       "lint"
                     ]]
                   }
@@ -180,8 +172,6 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      {"Ref": "Environment"},
-                      {"Ref": "Version"},
                       "calculate-costs"
                     ]]
                   }
@@ -203,8 +193,6 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      {"Ref": "Environment"},
-                      {"Ref": "Version"},
                       "static-analysis"
                     ]]
                   }
@@ -244,7 +232,7 @@
                       {"Ref": "ProjectName"},
                       "database",
                       {"Ref": "Environment"},
-                      {"Ref": "Version"}
+                      {"Ref": "BranchName"}
                     ]]
                   },
                   "TemplateConfiguration": {
@@ -288,7 +276,7 @@
                       {"Ref": "ProjectName"},
                       "ecs",
                       {"Ref": "Environment"},
-                      {"Ref": "Version"}
+                      {"Ref": "BranchName"}
                     ]]
                   },
                   "TemplateConfiguration": {
@@ -332,7 +320,7 @@
                       {"Ref": "ProjectName"},
                       "lambda",
                       {"Ref": "Environment"},
-                      {"Ref": "Version"}
+                      {"Ref": "BranchName"}
                     ]]
                   },
                   "TemplateConfiguration": {
@@ -376,7 +364,7 @@
                       {"Ref": "ProjectName"},
                       "api",
                       {"Ref": "Environment"},
-                      {"Ref": "Version"}
+                      {"Ref": "BranchName"}
                     ]]
                   },
                   "TemplateConfiguration": {
@@ -420,7 +408,7 @@
                       {"Ref": "ProjectName"},
                       "api-deployment",
                       {"Ref": "Environment"},
-                      {"Ref": "Version"}
+                      {"Ref": "BranchName"}
                     ]]
                   },
                   "TemplateConfiguration": {
@@ -456,7 +444,7 @@
                   "Fn::Join": ["-", [
                     {"Ref": "ProjectName"},
                     {"Ref": "Environment"},
-                    {"Ref": "Version"},
+                    {"Ref": "BranchName"},
                     "integration-test"
                   ]]
                 }
