@@ -6,7 +6,7 @@
     "SSLCertificateARN": "arn:aws:acm:us-east-1:714284646049:certificate/3d18178b-9cbb-48ab-a695-20bf49d930c1",
     "KeyPairName": "us-east-1-714284646049",
     "ProjectDescription": "The Mosaic Phoenix project.",
-    "NotificationEmail": "jason.debolt@joinmosaic.com",
+    "NotificationEmail": "ops@joinmosaic.com",
     "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
     "LambdaBucketName": "mosaic-PROJECT_NAME-lambda",
     "LoadBalancerLogsBucketName": "mosaic-PROJECT_NAME-load-balancer-logs",

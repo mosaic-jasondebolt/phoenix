@@ -17,7 +17,7 @@
     "BranchName": {
       "Description": "The BranchName of the pipeline.",
       "MinLength": "1",
-      "MaxLength": "16",
+      "MaxLength": "20",
       "AllowedPattern": "[a-z]+[\\-a-z]*[a-z]+",
       "ConstraintDescription": "Use all lowercase, optionally seperated by dashes, up to 16 characters.",
       "Type": "String"
@@ -82,7 +82,10 @@
               }],
               "Configuration": {
                 "RepositoryName": {
-                  "Ref": "ProjectName"
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    "dev-access"
+                  ]]
                 },
                 "BranchName": {
                   "Ref": "BranchName"
@@ -206,7 +209,7 @@
             ]
           },
           {
-            "Name": "RequestCodeReview",
+            "Name": "SlackCodeReview",
             "Actions": [
               {
                 "Name": "RequestCodeReview",

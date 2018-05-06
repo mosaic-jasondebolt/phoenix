@@ -9,8 +9,15 @@ username is the developers username. When CloudFormation stacks are lauched
 using these parameter files, many AWS resources will be identifies by this
 environment_name such as URL's, ECS clusters, Lambda functions, etc.
 
+The 'branch_name' is the name of the git branch you working off of locally.
+This is a feature or bug fix branch. The branch name can be up to 20 characters
+in length.
+
 USAGE:
-  python generate_dev_params.py {environment_name}
+  python generate_dev_params.py {environment_name} {branch_name}
+
+ EXAMPLES:
+  python generate_dev_params.py devjason launch-cool-thing
 """
 
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
@@ -25,7 +32,7 @@ def _parse_json(path):
         print('\nYour JSON is not valid! Did you check trailing commas??\n')
         raise(e)
 
-def write_dev_param_files(environment_name):
+def write_dev_param_files(environment_name, branch_name):
     """ Writes the dev param files.
 
     I could have used loops here and made the code look less repetitive,
@@ -33,12 +40,17 @@ def write_dev_param_files(environment_name):
     what is happening here is rather simple.
     """
 
-    # CodePipeline template
-    testing_code_pipeline_template = _parse_json('template-code-pipeline-params-testing.json')
-    dev_code_pipeline_template = copy.deepcopy(testing_code_pipeline_template)
-    dev_code_pipeline_template['Parameters']['Environment'] = environment_name
-    dev_code_pipeline_file_obj = open('template-code-pipeline-params-dev.json', 'w')
-    dev_code_pipeline_file_obj.write(json.dumps(dev_code_pipeline_template, indent=2))
+    # Dev pipeline template
+    dev_pipeline_template = {
+      "Parameters": {
+        "Environment": "dev",
+        "ProjectName": "PROJECT_NAME",
+        "BranchName": branch_name,
+        "ReviewNotificationEmail": "NOTIFICATION_EMAIL"
+      }
+    }
+    dev_pipeline_file_obj = open('template-dev-pipeline-params-dev.json', 'w')
+    dev_pipeline_file_obj.write(json.dumps(dev_pipeline_template, indent=2))
 
     # Database template
     testing_database_template = _parse_json('template-database-params-testing.json')
@@ -81,10 +93,11 @@ def write_dev_param_files(environment_name):
     dev_api_deployment_file_obj.write(json.dumps(dev_api_deployment_template, indent=2))
 
 def main(args):
-    if len(args) != 1:
+    if len(args) != 2:
         raise SystemExit('Invalid arguments!')
     environment_name = args[0]
-    write_dev_param_files(environment_name)
+    branch_name = args[1]
+    write_dev_param_files(environment_name, branch_name)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
