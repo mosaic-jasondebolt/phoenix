@@ -23,6 +23,10 @@
       "Description": "The bucket name in which CodePipeline artifacts will be stored.",
       "Type": "String"
     },
+    "CloudformationBucketName": {
+      "Description": "The bucket name in which cloudformation templates will be stored.",
+      "Type": "String"
+    },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "String"
@@ -1772,6 +1776,18 @@
         }
       },
       "Value": {"Ref": "LambdaBucket"}
+    },
+    "CloudformationBucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "CloudformationBucketName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "CloudformationBucketName"}
     },
     "CodePipelineBucketName": {
       "Export": {
