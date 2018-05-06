@@ -216,6 +216,46 @@
                 "RunOrder": 1
               }
             ]
+          },
+          {
+            "Name": "DeletePipeline",
+            "Actions": [
+              {
+                "Name": "DeletePipeline",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn" : {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "ProjectName"},
+                        "microservice",
+                        "CodePipelineServiceRoleArn"
+                      ]]
+                    }
+                  },
+                  "ActionMode": "DELETE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "code-pipeline",
+                      {"Ref": "Environment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": "SourceOutput::template-code-pipeline-review-params-dev.json",
+                  "TemplatePath": "BuildOutput::template-code-pipeline-review.json"
+                }
+              }
+            ]
           }
         ],
         "ArtifactStore": {
