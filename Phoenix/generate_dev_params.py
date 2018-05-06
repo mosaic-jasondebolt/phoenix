@@ -92,7 +92,7 @@ def write_dev_param_files(environment_name):
 def main(args):
     if len(args) != 1:
         raise SystemExit('Invalid arguments!')
-    environment_name = args[1]
+    environment_name = args[0]
     write_dev_param_files(environment_name)
 
 if __name__ == '__main__':
