@@ -58,6 +58,7 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
+            "review-branch",
             {"Ref": "Environment"}
           ]]
         },
