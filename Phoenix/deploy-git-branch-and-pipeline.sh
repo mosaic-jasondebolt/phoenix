@@ -9,11 +9,14 @@ set -e
 # EXAMPLES:
 #   ./deploy-git-branch-and-pipeline.sh devjason fix-all-the-things
 
+ENVIRONMENT_NAME=$1
+BRANCH_NAME=$2
+
 # Create a new git branch
-git checkout -b $1
+git checkout -b $BRANCH_NAME
 
 # Generate the param files
-python generate_dev_params.py $0 $1
+python generate_dev_params.py $ENVIRONMENT_NAME $BRANCH_NAME
 
 # Create the Cloudformation stack
 /bin/bash deploy-code-pipeline-review-dev.sh create
