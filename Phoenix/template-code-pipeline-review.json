@@ -18,8 +18,8 @@
       "Description": "The BranchName of the pipeline.",
       "MinLength": "1",
       "MaxLength": "20",
-      "AllowedPattern": "[a-z]+[\\-a-z]*[a-z]+",
-      "ConstraintDescription": "Use all lowercase, optionally seperated by dashes, up to 16 characters.",
+      "AllowedPattern": "[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "Use all lowercase, optionally seperated by dashes, up to 20 characters.",
       "Type": "String"
     },
     "ReviewNotificationEmail": {

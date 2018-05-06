@@ -49,7 +49,7 @@ def write_dev_param_files(environment_name, branch_name):
         "ReviewNotificationEmail": "NOTIFICATION_EMAIL"
       }
     }
-    dev_pipeline_file_obj = open('template-dev-pipeline-params-dev.json', 'w')
+    dev_pipeline_file_obj = open('template-code-pipeline-review-params-dev.json', 'w')
     dev_pipeline_file_obj.write(json.dumps(dev_pipeline_template, indent=2))
 
     # Database template
