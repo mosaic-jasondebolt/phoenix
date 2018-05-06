@@ -4,14 +4,12 @@ This script just copies all of the *params-testing.json files and generates
 namespaced *params-dev.json files. Dev param files are used only by developers when
 launching CloudFormation stacks during local development.
 
-The 'environment_name' arg should be something like 'dev{username}' where
-username is the developers username. When CloudFormation stacks are lauched
-using these parameter files, many AWS resources will be identifies by this
+The 'environment_name' arg can be something like 'dev{username}' where
+username is the developers username. When CloudFormation stacks are launched
+using these parameter files, many AWS resources will be identified by this
 environment_name such as URL's, ECS clusters, Lambda functions, etc.
 
-The 'branch_name' is the name of the git branch you working off of locally.
-This is a feature or bug fix branch. The branch name can be up to 20 characters
-in length.
+The name of a git branch may be used for 'environment_name' as well.
 
 USAGE:
   python generate_dev_params.py {environment_name} {branch_name}
@@ -32,7 +30,7 @@ def _parse_json(path):
         print('\nYour JSON is not valid! Did you check trailing commas??\n')
         raise(e)
 
-def write_dev_param_files(environment_name, branch_name):
+def write_dev_param_files(environment_name):
     """ Writes the dev param files.
 
     I could have used loops here and made the code look less repetitive,
@@ -43,7 +41,7 @@ def write_dev_param_files(environment_name, branch_name):
     # Dev pipeline template
     dev_pipeline_template = {
       "Parameters": {
-        "Environment": branch_name,
+        "Environment": environment_name,
         "ProjectName": "PROJECT_NAME",
         "ReviewNotificationEmail": "NOTIFICATION_EMAIL"
       }
@@ -92,11 +90,9 @@ def write_dev_param_files(environment_name, branch_name):
     dev_api_deployment_file_obj.write(json.dumps(dev_api_deployment_template, indent=2))
 
 def main(args):
-    if len(args) != 2:
+    if len(args) != 1:
         raise SystemExit('Invalid arguments!')
-    environment_name = args[0]
-    branch_name = args[1]
-    write_dev_param_files(environment_name, branch_name)
+    write_dev_param_files(environment_name)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
