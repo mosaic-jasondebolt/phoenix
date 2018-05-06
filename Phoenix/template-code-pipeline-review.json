@@ -218,8 +218,18 @@
             ]
           },
           {
-            "Name": "DeletePipeline",
+            "Name": "DeletePipelineAndBranch",
             "Actions": [
+              {
+                "Name": "Delete",
+                "ActionTypeId": {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Manual"
+                },
+                "RunOrder": 1
+              },
               {
                 "Name": "DeletePipeline",
                 "ActionTypeId": {
@@ -231,7 +241,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn" : {
                     "Fn::ImportValue": {
@@ -242,7 +252,7 @@
                       ]]
                     }
                   },
-                  "ActionMode": "DELETE",
+                  "ActionMode": "DELETE_ONLY",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
