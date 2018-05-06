@@ -43,9 +43,8 @@ def write_dev_param_files(environment_name, branch_name):
     # Dev pipeline template
     dev_pipeline_template = {
       "Parameters": {
-        "Environment": "dev",
+        "Environment": branch_name,
         "ProjectName": "PROJECT_NAME",
-        "BranchName": branch_name,
         "ReviewNotificationEmail": "NOTIFICATION_EMAIL"
       }
     }

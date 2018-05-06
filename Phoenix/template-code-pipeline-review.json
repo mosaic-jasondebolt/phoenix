@@ -11,11 +11,7 @@
       "Type": "String"
     },
     "Environment": {
-      "Description": "The environment to deploy the pipeline to.",
-      "Type": "String"
-    },
-    "BranchName": {
-      "Description": "The BranchName of the pipeline.",
+      "Description": "The Environment/BranchName of the pipeline.",
       "MinLength": "1",
       "MaxLength": "20",
       "AllowedPattern": "[a-z]+[\\-a-z0-9]*[a-z0-9]+",
@@ -42,8 +38,7 @@
           "Fn::Join": ["-", [
             "code-review-for",
             {"Ref": "ProjectName"},
-            {"Ref": "Environment"},
-            {"Ref": "BranchName"}
+            {"Ref": "Environment"}
           ]]
         }
       }
@@ -63,8 +58,7 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            {"Ref": "Environment"},
-            {"Ref": "BranchName"}
+            {"Ref": "Environment"}
           ]]
         },
         "Stages": [{
@@ -88,7 +82,7 @@
                   ]]
                 },
                 "BranchName": {
-                  "Ref": "BranchName"
+                  "Ref": "Environment"
                 }
               },
               "RunOrder": 1
