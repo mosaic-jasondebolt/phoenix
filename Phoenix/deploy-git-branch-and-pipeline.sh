@@ -21,4 +21,4 @@ python generate_dev_params.py $ENVIRONMENT_NAME $BRANCH_NAME
 # Create the Cloudformation stack
 /bin/bash deploy-code-pipeline-review-dev.sh create
 
-git push origin
+git push origin $BRANCH_NAME
