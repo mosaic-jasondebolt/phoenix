@@ -18,10 +18,14 @@ PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 MICROSERVICE_STACK_NAME=$PROJECT_NAME-microservice
 CLOUDFORMATION_BUCKET_NAME=`jq -r '.Parameters.CloudformationBucketName' template-microservice-params.json | sed 's/PROJECT_NAME/'$PROJECT_NAME'/g'`
 
-# Generate the cloudformation bucket if it doesn't already exist and upload the
-# microservice template to it. This template is too large to be loaded locally.
+# Generate the cloudformation bucket if it doesn't already exist
 aws s3 mb s3://$CLOUDFORMATION_BUCKET_NAME
-aws s3 cp template-microservice.json s3://$CLOUDFORMATION_BUCKET_NAME/
+
+# Upload all JSON CloudFormation templates.
+# The microservice template must be uploaded to s3 because it is too larged
+# to be used with the 'template-body' params in the CloudFormation CLI.
+# Other templates may be uploaded for access from Lambda functions.
+aws s3 sync . s3://$CLOUDFORMATION_BUCKET_NAME/ --exclude "*" --include "template-*.json" --delete
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-microservice-params.json cloudformation > temp.json
