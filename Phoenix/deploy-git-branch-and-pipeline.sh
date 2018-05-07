@@ -18,6 +18,7 @@ git checkout -b $BRANCH_NAME
 python generate_dev_params.py $BRANCH_NAME
 
 # Create the Cloudformation stack
-/bin/bash deploy-code-pipeline-review-dev.sh create
+# Let Lambda do this. Do not uncomment the following line.
+#/bin/bash deploy-code-pipeline-review-dev.sh create
 
 git push origin $BRANCH_NAME
