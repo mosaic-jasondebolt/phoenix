@@ -20,7 +20,7 @@ def lambda_handler(event, context):
         template_name = custom_obj['TemplateName']
         project_name = custom_obj['ProjectName']
         review_email = custom_obj['ReviewNotificationEmail']
-        template_url = 'https://s3.amazonaws.com/{0}/{1}'.format(bucket_name, template_name)
+        template_url = 'https://s3.amazonaws.com/{0}/cloudformation/{1}'.format(bucket_name, template_name)
 
         print('Stack name: {0}'.format(stack_name))
         print('Bucket name: {0}'.format(bucket_name))
