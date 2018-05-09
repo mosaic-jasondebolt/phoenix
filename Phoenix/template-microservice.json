@@ -291,7 +291,7 @@
           "Ref": "ProjectDescription"
         },
         "Triggers": [{
-          "Name": "DevAccessBranchTrigger",
+          "Name": "DevAccessBranch",
           "CustomData": {
             "Fn::Join": ["", [
               "{\"MicroserviceBucketName\": ",
