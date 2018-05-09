@@ -376,6 +376,18 @@
         }]
       }
     },
+    "LambdaInvokePermissionForDevAccessRepo": {
+      "Type" : "AWS::Lambda::Permission",
+      "DependsOn": ["CodeCommitRepositoryDevAccess"],
+      "Properties" : {
+        "Action" : "lambda:InvokeFunction",
+        "FunctionName" : {"Ref": "LambdaDevAccessBranchPipeline"},
+        "Principal" : "codecommit.amazonaws.com",
+        "SourceArn" : {
+          "Fn::GetAtt": ["CodeCommitRepositoryDevAccess", "Arn"]
+        }
+      }
+    },
     "LambdaDevAccessBranchPipeline": {
       "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
       "Type": "AWS::Lambda::Function",
