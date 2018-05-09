@@ -16,28 +16,43 @@ fi
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 MICROSERVICE_STACK_NAME=$PROJECT_NAME-microservice
-CLOUDFORMATION_BUCKET_NAME=`jq -r '.Parameters.CloudformationBucketName' template-microservice-params.json | sed 's/PROJECT_NAME/'$PROJECT_NAME'/g'`
+MICROSERVICE_BUCKET_NAME=`jq -r '.Parameters.MicroserviceBucketName' template-microservice-params.json | sed 's/PROJECT_NAME/'$PROJECT_NAME'/g'`
+VERSION_ID=`date +"%Y-%m-%d-%H%M%S"`
 
-# Generate the cloudformation bucket if it doesn't already exist
-aws s3 mb s3://$CLOUDFORMATION_BUCKET_NAME
+# Generate the MICROSERVICE bucket if it doesn't already exist
+aws s3 mb s3://$MICROSERVICE_BUCKET_NAME
+aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
+aws s3 sync ./lambda s3://$MICROSERVICE_BUCKET_NAME/lambda/ --include "*" --delete
 
-# Upload all JSON CloudFormation templates.
-# The microservice template must be uploaded to s3 because it is too larged
-# to be used with the 'template-body' params in the CloudFormation CLI.
-# Other templates may be uploaded for access from Lambda functions.
-aws s3 sync . s3://$CLOUDFORMATION_BUCKET_NAME/ --exclude "*" --include "template-*.json" --delete
+# Upload the Lambda functions
+listOfLambdaFunctions='dev_access_branch'
+for functionName in $listOfLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
+  pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$MICROSERVICE_BUCKET_NAME/lambda/$VERSION_ID/$functionName/
+  cd ../../
+  rm -rf builds
+done
+
+# Replace the IMAGE_TAG string in the dev params file with the $IMAGE_TAG variable
+sed "s/VERSION_ID/$VERSION_ID/g" template-microservice-params.json > temp1.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py template-microservice-params.json cloudformation > temp.json
+python parameters_generator.py temp1.json cloudformation > temp2.json
 
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-url https://s3.amazonaws.com/$CLOUDFORMATION_BUCKET_NAME/template-microservice.json
+aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json
 
 aws cloudformation $1-stack \
     --stack-name $MICROSERVICE_STACK_NAME \
-    --template-url https://s3.amazonaws.com/$CLOUDFORMATION_BUCKET_NAME/template-microservice.json \
-    --parameters file://temp.json \
+    --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json \
+    --parameters file://temp2.json \
     --capabilities CAPABILITY_NAMED_IAM
 
 # Cleanup
-rm temp.json
+rm temp1.json
+rm temp2.json

@@ -8,13 +8,14 @@
     "ProjectDescription": "The Mosaic Phoenix project.",
     "NotificationEmail": "ops@joinmosaic.com",
     "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
+    "MicroserviceBucketName": "mosaic-PROJECT_NAME-microservice",
     "LambdaBucketName": "mosaic-PROJECT_NAME-lambda",
     "LoadBalancerLogsBucketName": "mosaic-PROJECT_NAME-load-balancer-logs",
     "CodeBuildBucketName": "mosaic-PROJECT_NAME-code-build",
     "CodePipelineBucketName": "mosaic-PROJECT_NAME-code-pipeline",
-    "CloudformationBucketName": "mosaic-PROJECT_NAME-cloudformation",
     "SecretsBucketName": "mosaic-PROJECT_NAME-encrypted-secrets",
     "EncryptionKeyName": "mosaic-PROJECT_NAME-kms-key",
-    "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0"
+    "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+    "Version": "VERSION_ID"
   }
 }

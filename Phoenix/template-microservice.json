@@ -23,8 +23,8 @@
       "Description": "The bucket name in which CodePipeline artifacts will be stored.",
       "Type": "String"
     },
-    "CloudformationBucketName": {
-      "Description": "The bucket name in which cloudformation templates will be stored.",
+    "MicroserviceBucketName": {
+      "Description": "The bucket name in which cloudformation templates and lambda functions will be stored.",
       "Type": "String"
     },
     "Domain": {
@@ -69,6 +69,10 @@
     },
     "IAMRole": {
       "Description": "The IAM role that has access to all of the projects resources.",
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). Changes in this parameter value will force update the stack with the most recent code.",
       "Type": "String"
     }
   },
@@ -275,6 +279,7 @@
     },
     "CodeCommitRepositoryDevAccess": {
       "Type": "AWS::CodeCommit::Repository",
+      "DependsOn": ["LambdaDevAccessBranchPipeline"],
       "Properties": {
         "RepositoryName": {
           "Fn::Join": ["-", [
@@ -284,7 +289,114 @@
         },
         "RepositoryDescription": {
           "Ref": "ProjectDescription"
+        },
+        "Triggers": [{
+          "Name": "DevAccessBranchTrigger",
+          "CustomData": {
+            "Fn::Join": ["", [
+              "{\"MicroserviceBucketName\": ",
+              "\"", {"Ref": "MicroserviceBucketName"}, "\"",
+              ", \"TemplateName\": \"template-code-pipeline-review.json\"",
+              ", \"ProjectName\": ",
+              "\"", {"Ref": "ProjectName"}, "\"",
+              ", \"ReviewNotificationEmail\": ",
+              "\"", {"Ref": "NotificationEmail"}, "\"",
+              "}"
+            ]]
+          },
+          "DestinationArn": {
+            "Fn::GetAtt": ["LambdaDevAccessBranchPipeline", "Arn"]
+          },
+          "Events": ["createReference", "deleteReference"]
+        }]
+      }
+    },
+    "LambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [{
+            "Action": [
+              "sts:AssumeRole",
+            ],
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [
+                "lambda.amazonaws.com",
+                "codecommit.amazonaws.com"
+              ]
+            }
+          }],
+          "Version": "2012-10-17"
         }
+      }
+    },
+    "LambdaRolePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "codepipeline:*",
+                "codecommit:*",
+                "cloudformation:*",
+                "s3:*",
+                "iam:PassRole",
+                "sns:*"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": "arn:aws:logs:*:*:*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": ["-", [
+            {
+              "Ref": "ProjectName"
+            },
+            {
+              "Ref": "AWS::StackName"
+            },
+            "LambdaRole"
+          ]]
+        },
+        "Roles": [{
+          "Ref": "LambdaRole"
+        }]
+      }
+    },
+    "LambdaDevAccessBranchPipeline": {
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": ["LambdaRole", "Arn"]
+        },
+        "Code": {
+          "S3Bucket" : {"Ref": "MicroserviceBucketName"},
+          "S3Key": {
+            "Fn::Join": ["/", [
+              "lambda",
+              {"Ref": "Version"},
+              "dev_access_branch",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
       }
     },
     "ECRRepository": {
@@ -1777,17 +1889,17 @@
       },
       "Value": {"Ref": "LambdaBucket"}
     },
-    "CloudformationBucketName": {
+    "MicroserviceBucketName": {
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
             "microservice",
-            "CloudformationBucketName"
+            "MicroserviceBucketName"
           ]]
         }
       },
-      "Value": {"Ref": "CloudformationBucketName"}
+      "Value": {"Ref": "MicroserviceBucketName"}
     },
     "CodePipelineBucketName": {
       "Export": {
