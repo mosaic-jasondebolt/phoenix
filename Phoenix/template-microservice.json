@@ -1865,6 +1865,20 @@
         "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
       }
     },
+    "CodeBuildSecurityGroup": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "CodeBuildSecurityGroup"
+          ]]
+        }
+      },
+      "Value": {
+        "Ref": "CodeBuildSecurityGroup"
+      }
+    },
     "SSLCertificateARN": {
       "Export": {
         "Name": {
