@@ -217,6 +217,17 @@
         ]
       }
     },
+    "RDSToRDS": {
+      "DependsOn": "RDSCluster",
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "FromPort": "-1",
+        "GroupId": {"Ref": "RDSDBSecurityGroup"},
+        "IpProtocol": "-1",
+        "SourceSecurityGroupId": {"Ref": "RDSDBSecurityGroup"},
+        "ToPort": "-1"
+      }
+    },
     "SolarmosaicDMSToRDSFirstSubnet": {
       "DependsOn": "RDSCluster",
       "Type": "AWS::EC2::SecurityGroupIngress",
@@ -423,6 +434,135 @@
           {"Ref": "Environment"},
           " Aurora DB"
         ]]}
+      }
+    },
+    "CodeBuildRDSMigration": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "RDSDBSecurityGroup"}
+          ],
+          "Subnets": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "Environment"},
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "Environment"},
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ],
+          "VpcId":  {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "Environment"},
+                "vpc",
+                "VPC"
+              ]]
+            }
+          }
+        },
+        "Artifacts": {
+          "Type": "S3",
+          "Location": {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "ProjectName"},
+                "microservice",
+                "CodeBuildBucketName"
+              ]]
+            }
+          },
+          "NamespaceType": "BUILD_ID",
+          "Name": {
+            "Ref": "ProjectName"
+          },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location": {
+            "Fn::Join": ["", [
+              {"Fn::ImportValue": {
+                  "Fn::Join": ["-", [
+                    {"Ref": "ProjectName"},
+                    "microservice",
+                    "CodeBuildBucketName"
+                  ]]
+                }
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
+        },
+        "Description": {
+          "Ref": "ProjectName"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [
+            {
+              "Name" : "AWS_ACCOUNT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "AWS::AccountId"}
+            }
+          ],
+          "Image": {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "ProjectName"},
+                "microservice",
+                "CodeBuildDockerImage"
+              ]]
+            }
+          },
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "rds-migration",
+            {"Ref": "Environment"}
+          ]]
+        },
+        "ServiceRole": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "CodeBuildServiceRoleArn"
+            ]]
+          }
+        },
+        "Source": {
+          "BuildSpec": "Phoenix/buildspec-rds-migration.yml",
+          "Type": "CODECOMMIT",
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {"Ref": "AWS::Region"},
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
       }
     },
     "DnsRecordSetGroup": {

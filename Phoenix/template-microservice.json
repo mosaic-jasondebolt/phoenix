@@ -1494,6 +1494,29 @@
                 }
               },
               {
+                "Name": "DatabaseMigration",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "rds-migration",
+                      "testing"
+                    ]]
+                  }
+                }
+              },
+              {
                 "Name": "ECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1504,7 +1527,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1533,7 +1556,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1562,7 +1585,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1591,7 +1614,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1687,6 +1710,29 @@
                 }
               },
               {
+                "Name": "DatabaseMigration",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "rds-migration",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
                 "Name": "ECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1697,7 +1743,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1726,7 +1772,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1755,7 +1801,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1784,7 +1830,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1853,6 +1899,20 @@
         "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
       }
     },
+    "CodeBuildServiceRoleArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "CodeBuildServiceRoleArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["CodeBuildServiceRole", "Arn"]
+      }
+    },
     "CodeBuildSecurityGroup": {
       "Export": {
         "Name": {
@@ -1865,6 +1925,20 @@
       },
       "Value": {
         "Ref": "CodeBuildSecurityGroup"
+      }
+    },
+    "CodeBuildDockerImage": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "CodeBuildDockerImage"
+          ]]
+        }
+      },
+      "Value": {
+        "Ref": "CodeBuildDockerImage"
       }
     },
     "SSLCertificateARN": {
@@ -1914,6 +1988,18 @@
         }
       },
       "Value": {"Ref": "MicroserviceBucketName"}
+    },
+    "CodeBuildBucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "CodeBuildBucketName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "CodeBuildBucketName"}
     },
     "CodePipelineBucketName": {
       "Export": {
