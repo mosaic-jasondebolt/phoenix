@@ -252,6 +252,7 @@
     },
     "CodeCommitRepository": {
       "Type": "AWS::CodeCommit::Repository",
+      "DependsOn": ["LambdaDevAccessBranchPipeline"],
       "Properties": {
         "RepositoryName": {
           "Ref": "ProjectName"
@@ -259,56 +260,43 @@
         "RepositoryDescription": {
           "Ref": "ProjectDescription"
         },
-        "Triggers": [{
-          "Name": "MasterTrigger",
-          "CustomData": {
-            "Fn::Join": [" ", [
-              "Project",
-              {
-                "Ref": "ProjectName"
-              }
-            ]]
+        "Triggers": [
+          {
+            "Name": "MasterTrigger",
+            "CustomData": {
+              "Fn::Join": [" ", [
+                "Project",
+                {
+                  "Ref": "ProjectName"
+                }
+              ]]
+            },
+            "DestinationArn": {
+              "Ref": "MasterTriggerSNSTopic"
+            },
+            "Branches": ["master"],
+            "Events": ["all"]
           },
-          "DestinationArn": {
-            "Ref": "MasterTriggerSNSTopic"
-          },
-          "Branches": ["master"],
-          "Events": ["all"]
-        }]
-      }
-    },
-    "CodeCommitRepositoryDevAccess": {
-      "Type": "AWS::CodeCommit::Repository",
-      "DependsOn": ["LambdaDevAccessBranchPipeline"],
-      "Properties": {
-        "RepositoryName": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "dev-access"
-          ]]
-        },
-        "RepositoryDescription": {
-          "Ref": "ProjectDescription"
-        },
-        "Triggers": [{
-          "Name": "DevAccessBranch",
-          "CustomData": {
-            "Fn::Join": ["", [
-              "{\"MicroserviceBucketName\": ",
-              "\"", {"Ref": "MicroserviceBucketName"}, "\"",
-              ", \"TemplateName\": \"template-code-pipeline-review.json\"",
-              ", \"ProjectName\": ",
-              "\"", {"Ref": "ProjectName"}, "\"",
-              ", \"ReviewNotificationEmail\": ",
-              "\"", {"Ref": "NotificationEmail"}, "\"",
-              "}"
-            ]]
-          },
-          "DestinationArn": {
-            "Fn::GetAtt": ["LambdaDevAccessBranchPipeline", "Arn"]
-          },
-          "Events": ["createReference", "deleteReference"]
-        }]
+          {
+            "Name": "DevAccessBranch",
+            "CustomData": {
+              "Fn::Join": ["", [
+                "{\"MicroserviceBucketName\": ",
+                  "\"", {"Ref": "MicroserviceBucketName"}, "\"",
+                  ", \"TemplateName\": \"template-code-pipeline-review.json\"",
+                  ", \"ProjectName\": ",
+                  "\"", {"Ref": "ProjectName"}, "\"",
+                  ", \"ReviewNotificationEmail\": ",
+                  "\"", {"Ref": "NotificationEmail"}, "\"",
+                "}"
+              ]]
+            },
+            "DestinationArn": {
+              "Fn::GetAtt": ["LambdaDevAccessBranchPipeline", "Arn"]
+            },
+            "Events": ["createReference", "deleteReference"]
+          }
+        ]
       }
     },
     "LambdaRole": {
@@ -378,13 +366,13 @@
     },
     "LambdaInvokePermissionForDevAccessRepo": {
       "Type" : "AWS::Lambda::Permission",
-      "DependsOn": ["CodeCommitRepositoryDevAccess"],
+      "DependsOn": ["CodeCommitRepository"],
       "Properties" : {
         "Action" : "lambda:InvokeFunction",
         "FunctionName" : {"Ref": "LambdaDevAccessBranchPipeline"},
         "Principal" : "codecommit.amazonaws.com",
         "SourceArn" : {
-          "Fn::GetAtt": ["CodeCommitRepositoryDevAccess", "Arn"]
+          "Fn::GetAtt": ["CodeCommitRepository", "Arn"]
         }
       }
     },

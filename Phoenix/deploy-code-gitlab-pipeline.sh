@@ -17,8 +17,8 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-gitlab-pipeline-params.json`
-API_SECRET=`pwgen 32`
+PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+API_SECRET=`pwgen 32 -1`
 
 # Replace the API_SECRET string in the dev params file with the $API_SECRET variable
 sed "s/API_SECRET/$API_SECRET/g" template-gitlab-pipeline-params.json > temp1.json
