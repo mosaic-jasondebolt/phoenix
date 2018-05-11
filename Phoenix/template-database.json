@@ -217,31 +217,6 @@
         ]
       }
     },
-    "CodeBuildToRDS": {
-      "DependsOn": ["RDSCluster"],
-      "Properties": {
-        "FromPort": {
-          "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
-        },
-        "GroupId": {
-          "Ref": "RDSDBSecurityGroup"
-        },
-        "IpProtocol": "tcp",
-        "SourceSecurityGroupId": {
-            "Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                {"Ref": "ProjectName"},
-                "microservice",
-                "CodeBuildSecurityGroup"
-              ]]
-            }
-          },
-          "ToPort": {
-            "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
-          }
-        },
-        "Type": "AWS::EC2::SecurityGroupIngress"
-    },
     "SolarmosaicDMSToRDSFirstSubnet": {
       "DependsOn": "RDSCluster",
       "Type": "AWS::EC2::SecurityGroupIngress",
