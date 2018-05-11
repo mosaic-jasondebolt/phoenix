@@ -1,2 +1,2 @@
 # Phoenix Microservice
-See the readme file in the Phoenix folder for details.
+See the README file in the Phoenix folder for details.
