@@ -1003,7 +1003,9 @@
                     "ecr:GetDownloadUrlForLayer",
                     "ecr:BatchGetImage",
                     "logs:CreateLogStream",
-                    "logs:PutLogEvents"
+                    "logs:PutLogEvents",
+                    "ssm:*",
+                    "kms:*"
                   ],
                   "Resource":"*"
                 }
