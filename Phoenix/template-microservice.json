@@ -27,6 +27,10 @@
       "Description": "The bucket name in which cloudformation templates and lambda functions will be stored.",
       "Type": "String"
     },
+    "JenkinsBackupBucketName": {
+      "Description": "The bucket name in which jenkins backups and restores are saved to",
+      "Type": "String"
+    },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "String"
@@ -173,6 +177,20 @@
       "Properties": {
         "BucketName": {
           "Ref": "CodePipelineBucketName"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [{
+            "ExpirationInDays": 180,
+            "Status": "Enabled"
+          }]
+        }
+      }
+    },
+    "JenkinsBackupBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Ref": "JenkinsBackupBucketName"
         },
         "LifecycleConfiguration": {
           "Rules": [{
@@ -1976,6 +1994,18 @@
         }
       },
       "Value": {"Ref": "LambdaBucket"}
+    },
+    "JenkinsBackupBucketName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "microservice",
+            "JenkinsBackupBucketName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "JenkinsBackupBucket"}
     },
     "MicroserviceBucketName": {
       "Export": {

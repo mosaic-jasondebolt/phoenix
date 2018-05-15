@@ -10,6 +10,7 @@
     "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
     "MicroserviceBucketName": "mosaic-PROJECT_NAME-microservice",
     "LambdaBucketName": "mosaic-PROJECT_NAME-lambda",
+    "JenkinsBackupBucketName": "mosaic-PROJECT_NAME-jenkins",
     "LoadBalancerLogsBucketName": "mosaic-PROJECT_NAME-load-balancer-logs",
     "CodeBuildBucketName": "mosaic-PROJECT_NAME-code-build",
     "CodePipelineBucketName": "mosaic-PROJECT_NAME-code-pipeline",
