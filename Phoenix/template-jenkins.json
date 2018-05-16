@@ -265,6 +265,17 @@
     "JenkinsAutoScalingGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Join": ["-", [
+              { "Ref": "ProjectName"},
+              "JenkinsInstance",
+              {"Ref": "Version"}
+            ]]},
+            "PropagateAtLaunch": "true"
+          }
+        ],
         "VPCZoneIdentifier" : [
           {"Fn::ImportValue": { "Fn::Sub": [
             "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ1", {
