@@ -102,30 +102,13 @@
       "Properties": {
         "Policies": [
           {
-            "PolicyName": "S3Access",
+            "PolicyName": "AllAccess",
             "PolicyDocument": {
               "Statement": [
                 {
                   "Effect": "Allow",
-                  "Action": "s3:*",
-                  "Resource": {
-                    "Fn::Join": [
-                      "",
-                      [
-                        "arn:aws:s3:::",
-                        {
-                          "Fn::ImportValue": {
-                            "Fn::Join": ["-", [
-                              {"Ref": "ProjectName"},
-                              "microservice",
-                              "JenkinsBackupBucketName"
-                            ]]
-                          }
-                        },
-                        "/*"
-                      ]
-                    ]
-                  }
+                  "Action": "*",
+                  "Resource": "*"
                 }
               ]
             }
@@ -137,18 +120,6 @@
                 {
                   "Effect": "Allow",
                   "NotAction": "iam:*",
-                  "Resource": "*"
-                }
-              ]
-            }
-          },
-          {
-            "PolicyName": "EC2Access",
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": "ec2:*",
                   "Resource": "*"
                 }
               ]
@@ -201,37 +172,8 @@
           "Version": "2012-10-17",
           "Statement": [
             {
-              "Action": "ec2:*",
+              "Action": "*",
               "Effect": "Allow",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "elasticloadbalancing:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "cloudwatch:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "autoscaling:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": "s3:*",
-              "Resource": "*"
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "iam:PassRole",
-                "iam:ListInstanceProfiles",
-                "ec2:*"
-              ],
               "Resource": "*"
             }
           ]
@@ -523,6 +465,34 @@
               "yum": {
                 "git-all": []
               }
+            },
+            "files": {
+              "/etc/aws.conf": {
+                "content": {
+                  "Fn::Join": [
+                    "\n",
+                    [
+                      "[default]",
+                      "aws_access_key_id={{access_key}}",
+                      "aws_secret_access_key={{secret_key}}"
+                    ]
+                  ]
+                },
+                "context": {
+                  "access_key": {
+                    "Ref": "HostKeys"
+                  },
+                  "secret_key": {
+                    "Fn::GetAtt": [
+                      "HostKeys",
+                      "SecretAccessKey"
+                    ]
+                  }
+                },
+                "mode": "000700",
+                "owner": "root",
+                "group": "root"
+              }
             }
           }
         }
@@ -579,6 +549,17 @@
                 },
                 "    --resource LaunchConfig",
                 "    --configsets install",
+                "    --access-key ",
+                {
+                  "Ref": "HostKeys"
+                },
+                "    --secret-key ",
+                {
+                  "Fn::GetAtt": [
+                    "HostKeys",
+                    "SecretAccessKey"
+                  ]
+                },
                 "    --region ",
                 {
                   "Ref": "AWS::Region"
