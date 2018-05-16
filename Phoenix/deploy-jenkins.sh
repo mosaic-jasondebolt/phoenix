@@ -8,7 +8,10 @@ set -e
 #
 # EXAMPLES:
 #   ./deploy-jenkins.sh create
-#   ./deploy-jenkins.sh update
+#   ./deploy-jenkins.sh update [version_id]
+#
+#   Where,
+#     version_id is the number at the end of the stack name.
 
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
@@ -16,10 +19,21 @@ DOMAIN=`jq -r '.Parameters.Domain' template-microservice-params.json`
 VERSION_ID=`echo $((1 + RANDOM % 10000))`
 
 # Check for valid arguments
-if [ $# -ne 1 ]
+if [ $# -ne 1 ] && [ $1 = "create" ]
   then
     echo "Incorrect number of arguments supplied. Pass in either 'create' or 'update'."
     exit 1
+fi
+
+if [ $# -ne 2 ] && [ $1 = "update" ]
+  then
+    echo "Incorrect number of arguments supplied. For update, pass in the version ID."
+    exit 1
+fi
+
+if [ $1 = "update" ];
+  then
+    VERSION_ID=$2
 fi
 
 # Replace the VERSION_ID string in the params file with the $VERSION_ID variable
