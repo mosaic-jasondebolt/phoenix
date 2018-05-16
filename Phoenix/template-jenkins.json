@@ -435,14 +435,13 @@
                 "owner": "root",
                 "group": "root"
               },
-              "/etc/awslogs/awscli.conf": {
+              "/var/lib/jenkins/.aws/config": {
                 "content": {
                   "Fn::Join": [
-                    "",
+                    "\n",
                     [
-                      "[plugins]\n",
-                      "cwlogs = cwlogs\n",
-                      "[default]\n",
+                      "[default]",
+                      "output = json"
                       "region = ",
                       {
                         "Ref": "AWS::Region"
@@ -451,9 +450,9 @@
                     ]
                   ]
                 },
-                "mode": "000444",
-                "owner": "root",
-                "group": "root"
+                "mode": "000700",
+                "owner": "jenkins",
+                "group": "jenkins"
               }
             }
           },
@@ -467,14 +466,15 @@
               }
             },
             "files": {
-              "/etc/aws.conf": {
+              "/var/lib/jenkins/.aws/credentials": {
                 "content": {
                   "Fn::Join": [
                     "\n",
                     [
                       "[default]",
                       "aws_access_key_id={{access_key}}",
-                      "aws_secret_access_key={{secret_key}}"
+                      "aws_secret_access_key={{secret_key}}",
+                      "\n"
                     ]
                   ]
                 },
@@ -490,8 +490,8 @@
                   }
                 },
                 "mode": "000700",
-                "owner": "root",
-                "group": "root"
+                "owner": "jenkins",
+                "group": "jenkins"
               }
             }
           }

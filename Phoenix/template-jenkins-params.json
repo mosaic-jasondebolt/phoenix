@@ -8,7 +8,7 @@
     "EmailAddress": "jason.debolt@joinmosaic.com",
     "Scheme": "internal",
     "WebSubnets": "Private",
-    "DnsPrefix": "jenkins",
+    "DnsPrefix": "jenkins2",
     "DnsZone": "DOMAIN"
   }
 }
