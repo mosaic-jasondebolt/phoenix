@@ -6,10 +6,6 @@
       "Description": "The name of the project.",
       "Type": "String"
     },
-    "Version": {
-      "Description": "The identifier/version of this Jenkins instance and stack",
-      "Type": "String"
-    },
     "InstanceType": {
       "Description": "EC2 instance type",
       "Type": "String",
@@ -208,7 +204,7 @@
             "Value": {"Fn::Join": ["-", [
               { "Ref": "ProjectName"},
               "JenkinsInstance",
-              {"Ref": "Version"}
+              {"Ref": "DnsPrefix"}
             ]]},
             "PropagateAtLaunch": "true"
           }
@@ -436,18 +432,20 @@
                     "\n",
                     [
                       "[default]",
-                      "output = json"
-                      "region = ",
-                      {
-                        "Ref": "AWS::Region"
-                      },
+                      "output = json",
+                      "region = {{region}}",
                       "\n"
                     ]
                   ]
                 },
+                "context": {
+                  "region": {
+                    "Ref": "AWS::Region"
+                  },
+                },
                 "mode": "000700",
-                "owner": "jenkins",
-                "group": "jenkins"
+                "owner": "root",
+                "group": "root"
               }
             }
           },
@@ -485,8 +483,8 @@
                   }
                 },
                 "mode": "000700",
-                "owner": "jenkins",
-                "group": "jenkins"
+                "owner": "root",
+                "group": "root"
               }
             }
           }
