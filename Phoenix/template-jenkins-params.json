@@ -6,7 +6,7 @@
     "VPCPrefix": "dev",
     "Scheme": "internal",
     "WebSubnets": "Private",
-    "DnsPrefix": "jenkins4",
+    "DnsPrefix": "jenkins5",
     "DnsZone": "DOMAIN"
   }
 }

@@ -88,38 +88,7 @@
         "RetentionInDays": 7
       }
     },
-    "JenkinsUser": {
-      "Type": "AWS::IAM::User",
-      "Properties": {
-        "Policies": [
-          {
-            "PolicyName": "AllAccess",
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "Action": "*",
-                  "Resource": "*"
-                }
-              ]
-            }
-          },
-          {
-            "PolicyName": "IAMAccess",
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Effect": "Allow",
-                  "NotAction": "iam:*",
-                  "Resource": "*"
-                }
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "BuildRole": {
+    "JenkinsRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -171,7 +140,7 @@
         },
         "Roles": [
           {
-            "Ref": "BuildRole"
+            "Ref": "JenkinsRole"
           }
         ]
       }
@@ -182,17 +151,9 @@
         "Path": "/",
         "Roles": [
           {
-            "Ref": "BuildRole"
+            "Ref": "JenkinsRole"
           }
         ]
-      }
-    },
-    "HostKeys": {
-      "Type": "AWS::IAM::AccessKey",
-      "Properties": {
-        "UserName": {
-          "Ref": "JenkinsUser"
-        }
       }
     },
     "JenkinsAutoScalingGroup": {
@@ -441,7 +402,7 @@
                 "context": {
                   "region": {
                     "Ref": "AWS::Region"
-                  },
+                  }
                 },
                 "mode": "000700",
                 "owner": "root",
@@ -456,35 +417,6 @@
               },
               "yum": {
                 "git-all": []
-              }
-            },
-            "files": {
-              "/var/lib/jenkins/.aws/credentials": {
-                "content": {
-                  "Fn::Join": [
-                    "\n",
-                    [
-                      "[default]",
-                      "aws_access_key_id={{access_key}}",
-                      "aws_secret_access_key={{secret_key}}",
-                      "\n"
-                    ]
-                  ]
-                },
-                "context": {
-                  "access_key": {
-                    "Ref": "HostKeys"
-                  },
-                  "secret_key": {
-                    "Fn::GetAtt": [
-                      "HostKeys",
-                      "SecretAccessKey"
-                    ]
-                  }
-                },
-                "mode": "000700",
-                "owner": "root",
-                "group": "root"
               }
             }
           }
@@ -542,17 +474,6 @@
                 },
                 "    --resource LaunchConfig",
                 "    --configsets install",
-                "    --access-key ",
-                {
-                  "Ref": "HostKeys"
-                },
-                "    --secret-key ",
-                {
-                  "Fn::GetAtt": [
-                    "HostKeys",
-                    "SecretAccessKey"
-                  ]
-                },
                 "    --region ",
                 {
                   "Ref": "AWS::Region"
@@ -574,7 +495,11 @@
                 "sudo service jenkins start\n",
                 "sudo chown -R jenkins:jenkins /var/lib/jenkins\n",
                 "sudo chmod -R 755 /var/lib/jenkins\n",
-                "# Start Jenkins\n",
+                "echo Configuring CodeCommit git setup...\n",
+                "sudo -u jenkins git config --global credential.helper '!aws codecommit credential-helper $@'\n",
+                "sudo -u jenkins git config --global credential.useHttpPath true\n",
+                "sudo -u jenkins git config --global user.name \"Jenkins\"\n",
+                "echo Restarting Jenkins...\n",
                 "sudo service jenkins restart\n",
                 "sudo chkconfig jenkins on\n",
                 "sleep 400\n",
