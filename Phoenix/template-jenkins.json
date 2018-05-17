@@ -54,11 +54,6 @@
       "Default": "internal",
       "Type": "String"
     },
-    "EmailAddress": {
-      "Description": "What email address will receive the default Jenkins password",
-      "Type": "String",
-      "Default": ""
-    },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
       "Type": "String"

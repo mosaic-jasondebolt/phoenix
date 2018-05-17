@@ -5,10 +5,9 @@
     "InstanceType": "t2.small",
     "IPWhitelist": "10.0.0.0/8",
     "VPCPrefix": "dev",
-    "EmailAddress": "jason.debolt@joinmosaic.com",
     "Scheme": "internal",
     "WebSubnets": "Private",
-    "DnsPrefix": "jenkins2",
+    "DnsPrefix": "jenkins",
     "DnsZone": "DOMAIN"
   }
 }
