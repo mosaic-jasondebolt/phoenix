@@ -1,12 +1,13 @@
 {
   "Parameters": {
     "ProjectName": "PROJECT_NAME",
-    "InstanceType": "t2.small",
+    "InstanceType": "m5.large",
     "IPWhitelist": "10.0.0.0/8",
     "VPCPrefix": "dev",
     "Scheme": "internal",
     "WebSubnets": "Private",
-    "DnsPrefix": "jenkins5",
-    "DnsZone": "DOMAIN"
+    "DnsPrefix": "jenkins",
+    "DnsZone": "DOMAIN",
+    "SnapshotId": ""
   }
 }

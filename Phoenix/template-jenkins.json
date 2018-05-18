@@ -6,27 +6,17 @@
       "Description": "The name of the project.",
       "Type": "String"
     },
+    "SnapshotId": {
+      "Description": "The snapshot id from which to create the new volume. Use this only if you want to spin up this instance from an existing snapshot.",
+      "Type": "String",
+      "Default": ""
+    },
     "InstanceType": {
       "Description": "EC2 instance type",
       "Type": "String",
-      "Default": "t2.small",
+      "Default": "m5.large",
       "AllowedValues": [
-        "t1.micro",
-        "t2.small",
-        "m1.small",
-        "m1.medium",
-        "m1.large",
-        "m1.xlarge",
-        "m2.xlarge",
-        "m2.2xlarge",
-        "m2.4xlarge",
-        "m3.xlarge",
-        "m3.2xlarge",
-        "c1.medium",
-        "c1.xlarge",
-        "cc1.4xlarge",
-        "cc2.8xlarge",
-        "cg1.4xlarge"
+        "m5.large"
       ],
       "ConstraintDescription": "must be a valid EC2 instance type."
     },
@@ -68,17 +58,19 @@
   "Mappings": {
     "RegionMap": {
       "us-east-1": {
-        "AMI": "ami-6869aa05"
-      },
-      "us-west-1": {
-        "AMI": "ami-7172b611"
-      },
-      "us-west-2": {
-        "AMI": "ami-31490d51"
-      },
-      "eu-west-1": {
-        "AMI": "ami-f9dd458a"
+        "AMI": "ami-14c5486b"
       }
+    }
+  },
+  "Conditions": {
+    "HasSnapshotId": {
+      "Fn::Not": [{
+        "Fn::Equals": ["",
+          {
+            "Ref": "SnapshotId"
+          }
+        ]
+      }]
     }
   },
   "Resources": {
@@ -145,7 +137,7 @@
         ]
       }
     },
-    "BuildInstanceProfile": {
+    "JenkinsInstanceProfile": {
       "Type": "AWS::IAM::InstanceProfile",
       "Properties": {
         "Path": "/",
@@ -156,73 +148,8 @@
         ]
       }
     },
-    "JenkinsAutoScalingGroup": {
-      "Type": "AWS::AutoScaling::AutoScalingGroup",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {"Fn::Join": ["-", [
-              { "Ref": "ProjectName"},
-              "JenkinsInstance",
-              {"Ref": "DnsPrefix"}
-            ]]},
-            "PropagateAtLaunch": "true"
-          }
-        ],
-        "VPCZoneIdentifier" : [
-          {"Fn::ImportValue": { "Fn::Sub": [
-            "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ1", {
-              "VPCPrefix": {"Ref": "VPCPrefix"},
-              "PublicOrPrivate": {"Ref": "WebSubnets"}
-            }]
-          }},
-          {"Fn::ImportValue": { "Fn::Sub": [
-            "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ2", {
-              "VPCPrefix": {"Ref": "VPCPrefix"},
-              "PublicOrPrivate": {"Ref": "WebSubnets"}
-            }]
-          }}
-        ],
-        "AvailabilityZones": [
-          {
-            "Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                {
-                  "Ref": "VPCPrefix"
-                },
-                "vpc",
-                "PrivateSubnetAZ1AvailabilityZone"
-              ]]
-            }
-          },
-          {
-            "Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                {
-                  "Ref": "VPCPrefix"
-                },
-                "vpc",
-                "PrivateSubnetAZ2AvailabilityZone"
-              ]]
-            }
-          }
-        ],
-        "LaunchConfigurationName": {
-          "Ref": "LaunchConfig"
-        },
-        "MinSize": "1",
-        "MaxSize": "1",
-        "DesiredCapacity": "1",
-        "LoadBalancerNames": [
-          {
-            "Ref": "ElasticLoadBalancer"
-          }
-        ]
-      }
-    },
-    "LaunchConfig": {
-      "Type": "AWS::AutoScaling::LaunchConfiguration",
+    "JenkinsInstance": {
+      "Type": "AWS::EC2::Instance",
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
@@ -432,8 +359,44 @@
             ]]
           }
         },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Join": ["-", [
+              { "Ref": "ProjectName"},
+              "JenkinsInstance",
+              {"Ref": "DnsPrefix"}
+            ]]}
+          }
+        ],
+        "SubnetId": {
+          "Fn::ImportValue": { "Fn::Sub": [
+            "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ1", {
+              "VPCPrefix": {"Ref": "VPCPrefix"},
+              "PublicOrPrivate": {"Ref": "WebSubnets"}
+            }]
+          }
+        },
+        "AvailabilityZone": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {
+                "Ref": "VPCPrefix"
+              },
+              "vpc",
+              "PrivateSubnetAZ1AvailabilityZone"
+            ]]
+          }
+        },
+        "BlockDeviceMappings": [{
+          "DeviceName": "/dev/xvda",
+          "Ebs": {
+            "VolumeSize": "40"
+          }
+        }],
+        "EbsOptimized": "false",
         "IamInstanceProfile": {
-          "Ref": "BuildInstanceProfile"
+          "Ref": "JenkinsInstanceProfile"
         },
         "ImageId": {
           "Fn::FindInMap": [
@@ -444,7 +407,7 @@
             "AMI"
           ]
         },
-        "SecurityGroups": [
+        "SecurityGroupIds": [
           {
             "Ref": "ServerSecurityGroup"
           }
@@ -472,7 +435,7 @@
                 {
                   "Ref": "AWS::StackName"
                 },
-                "    --resource LaunchConfig",
+                "    --resource JenkinsInstance",
                 "    --configsets install",
                 "    --region ",
                 {
@@ -480,17 +443,33 @@
                 },
                 " || error_exit 'Failed to run cfn-init'\n",
                 "# Post-cfn work\n",
-
+                {
+                  "Fn::Join": [
+                    "\n", [
+                      "sudo mkdir /jenkins_data",
+                      {
+                        "Fn::If": [
+                          "HasSnapshotId",
+                          "echo skipping formatting since we already have a volume with data in it.",
+                          "sudo mkfs -t ext4 /dev/nvme1n1"
+                        ]
+                      },
+                      "sudo mount /dev/nvme1n1 /jenkins_data/",
+                      "sudo rm -rf /var/lib/jenkins",
+                      "sudo ln -s /jenkins_data /var/lib/jenkins",
+                      "\n"
+                    ]
+                  ]
+                },
                 "# Updating to Java 8\n",
                 "yum install -y java-1.8.0-openjdk.x86_64 || true \n",
                 "sudo /usr/sbin/alternatives --set java /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/java || true\n",
                 "sudo /usr/sbin/alternatives --set javac /usr/lib/jvm/jre-1.8.0-openjdk.x86_64/bin/javac || true \n",
                 "yum remove java-1.7 || true \n",
-
                 "sudo wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins.io/redhat-stable/jenkins.repo\n",
                 "sudo rpm --import http://pkg.jenkins.io/redhat-stable/jenkins.io.key\n",
                 "yum install -y jenkins\n",
-                "sudo mkdir -p /var/lib/jenkins\n",
+                "sudo chown -R jenkins:jenkins /jenkins_data\n",
                 "sudo chown -R jenkins:jenkins /var/lib/jenkins\n",
                 "sudo service jenkins start\n",
                 "sudo chown -R jenkins:jenkins /var/lib/jenkins\n",
@@ -586,15 +565,13 @@
             "Ref": "JenkinsELBSecurityGroup"
           }
         ],
+        "Instances": [{
+          "Ref": "JenkinsInstance"
+        }],
+        "CrossZone": "false",
         "Subnets" : [
           {"Fn::ImportValue": { "Fn::Sub": [
             "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ1", {
-              "VPCPrefix": {"Ref": "VPCPrefix"},
-              "PublicOrPrivate": {"Ref": "WebSubnets"}
-            }]
-          }},
-          {"Fn::ImportValue": { "Fn::Sub": [
-            "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ2", {
               "VPCPrefix": {"Ref": "VPCPrefix"},
               "PublicOrPrivate": {"Ref": "WebSubnets"}
             }]
@@ -630,6 +607,54 @@
           "Timeout": "5"
         }
       }
+    },
+    "VarLibJenkins": {
+      "DeletionPolicy": "Snapshot",
+      "Properties": {
+        "AvailabilityZone": {
+          "Fn::GetAtt": [
+            "JenkinsInstance",
+            "AvailabilityZone"
+          ]
+        },
+        "Iops": "2000",
+        "Size": "50",
+        "SnapshotId": {
+          "Fn::If": [
+            "HasSnapshotId", {
+              "Ref": "SnapshotId"
+            },
+            {
+              "Ref": "AWS::NoValue"
+            }
+          ]
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Join": ["-", [
+              { "Ref": "ProjectName"},
+              "JenkinsInstance",
+              {"Ref": "DnsPrefix"}
+            ]]}
+          }
+        ],
+        "VolumeType": "io1"
+      },
+      "Type": "AWS::EC2::Volume"
+    },
+    "VarLibJenkinsVolumeAttachment": {
+      "DependsOn": "JenkinsInstance",
+      "Properties": {
+        "Device": "/dev/sdf",
+        "InstanceId": {
+          "Ref": "JenkinsInstance"
+        },
+        "VolumeId": {
+          "Ref": "VarLibJenkins"
+        }
+      },
+      "Type": "AWS::EC2::VolumeAttachment"
     },
     "DnsRecord": {
       "Type": "AWS::Route53::RecordSet",
