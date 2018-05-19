@@ -523,6 +523,9 @@
                 "sudo -u jenkins git config --global credential.useHttpPath true\n",
                 "sudo -u jenkins git config --global user.name \"Jenkins\"\n",
 
+                "# Ensure SSH keys have appropriate chmod permission if keys exist.\n",
+                "sudo test -e /var/lib/jenkins/.ssh/id_rsa && chmod 600 /var/lib/jenkins/.ssh/id_rsa* || echo id_rsa does not exist. \n",
+
                 "echo Restarting Jenkins...\n",
                 "sudo service jenkins restart\n",
                 "sudo chkconfig jenkins on\n",
