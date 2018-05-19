@@ -80,12 +80,13 @@ For each environment (dev, testing, prod), and additional developer environments
 * Creates a security group ingress rule to allow internal network CIDR blocks to access Web security group.
 * Creates a security group ingress rule to allow internal network CIDR blocks to access ELB security group.
 
-
-
 ##### Phoenix Lambda (template-lambda.json)
 * Jason to fill out
 
 ##### Phoenix API Gateway (template-api.json)
+* Jason to fill out
+
+##### Phoenix Jenkins (template-jenkins.json)
 * Jason to fill out
 
 
