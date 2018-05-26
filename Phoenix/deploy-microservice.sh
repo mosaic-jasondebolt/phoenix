@@ -24,20 +24,6 @@ aws s3 mb s3://$MICROSERVICE_BUCKET_NAME
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
 aws s3 sync ./lambda s3://$MICROSERVICE_BUCKET_NAME/lambda/ --include "*" --delete
 
-# Upload the Lambda functions
-listOfLambdaFunctions='dev_access_branch'
-for functionName in $listOfLambdaFunctions
-do
-  mkdir -p builds/$functionName
-  cp -rf lambda/$functionName/* builds/$functionName/
-  cd builds/$functionName/
-  pip install -r requirements.txt -t .
-  zip -r lambda_function.zip ./*
-  aws s3 cp lambda_function.zip s3://$MICROSERVICE_BUCKET_NAME/lambda/$VERSION_ID/$functionName/
-  cd ../../
-  rm -rf builds
-done
-
 # Replace the IMAGE_TAG string in the dev params file with the $IMAGE_TAG variable
 sed "s/VERSION_ID/$VERSION_ID/g" template-microservice-params.json > temp1.json
 

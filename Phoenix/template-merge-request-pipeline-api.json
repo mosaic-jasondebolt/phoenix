@@ -161,7 +161,8 @@
                 "Service": [
                   "lambda.amazonaws.com",
                   "s3.amazonaws.com",
-                  "apigateway.amazonaws.com"
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com"
                 ]
               }
             }

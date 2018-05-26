@@ -270,7 +270,6 @@
     },
     "CodeCommitRepository": {
       "Type": "AWS::CodeCommit::Repository",
-      "DependsOn": ["LambdaDevAccessBranchPipeline"],
       "Properties": {
         "RepositoryName": {
           "Ref": "ProjectName"
@@ -294,25 +293,6 @@
             },
             "Branches": ["master"],
             "Events": ["all"]
-          },
-          {
-            "Name": "DevAccessBranch",
-            "CustomData": {
-              "Fn::Join": ["", [
-                "{\"MicroserviceBucketName\": ",
-                  "\"", {"Ref": "MicroserviceBucketName"}, "\"",
-                  ", \"TemplateName\": \"template-code-pipeline-review.json\"",
-                  ", \"ProjectName\": ",
-                  "\"", {"Ref": "ProjectName"}, "\"",
-                  ", \"ReviewNotificationEmail\": ",
-                  "\"", {"Ref": "NotificationEmail"}, "\"",
-                "}"
-              ]]
-            },
-            "DestinationArn": {
-              "Fn::GetAtt": ["LambdaDevAccessBranchPipeline", "Arn"]
-            },
-            "Events": ["createReference", "deleteReference"]
           }
         ]
       }
@@ -380,81 +360,6 @@
         "Roles": [{
           "Ref": "LambdaRole"
         }]
-      }
-    },
-    "LambdaInvokePermissionForDevAccessRepo": {
-      "Type" : "AWS::Lambda::Permission",
-      "DependsOn": ["CodeCommitRepository"],
-      "Properties" : {
-        "Action" : "lambda:InvokeFunction",
-        "FunctionName" : {"Ref": "LambdaDevAccessBranchPipeline"},
-        "Principal" : "codecommit.amazonaws.com",
-        "SourceArn" : {
-          "Fn::GetAtt": ["CodeCommitRepository", "Arn"]
-        }
-      }
-    },
-    "LambdaDevAccessBranchPipeline": {
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Handler": "lambda_function.lambda_handler",
-        "Role": {
-          "Fn::GetAtt": ["LambdaRole", "Arn"]
-        },
-        "Code": {
-          "S3Bucket" : {"Ref": "MicroserviceBucketName"},
-          "S3Key": {
-            "Fn::Join": ["/", [
-              "lambda",
-              {"Ref": "Version"},
-              "dev_access_branch",
-              "lambda_function.zip"
-            ]]
-          }
-        },
-        "Runtime": "python3.6",
-        "Timeout": "25"
-      }
-    },
-    "ECRRepository": {
-      "Type": "AWS::ECR::Repository",
-      "Properties": {
-        "RepositoryName": {
-          "Ref": "ProjectName"
-        },
-        "RepositoryPolicyText": {
-          "Version": "2008-10-17",
-          "Statement": [{
-              "Sid": "AllowPushPull",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": [{
-                  "Ref": "IAMRole"
-                }]
-              },
-              "Action": [
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:PutImage",
-                "ecr:InitiateLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:CompleteLayerUpload"
-              ]
-            },
-            {
-              "Sid": "CodeBuildAccess",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "codebuild.amazonaws.com"
-              },
-              "Action": [
-                "ecr:*"
-              ]
-            }
-          ]
-        }
       }
     },
     "CodeBuildServiceRole": {
