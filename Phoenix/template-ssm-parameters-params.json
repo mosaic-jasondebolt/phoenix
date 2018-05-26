@@ -16,6 +16,6 @@
     "CodePipelineBucketName": "mosaic-PROJECT_NAME-code-pipeline",
     "SecretsBucketName": "mosaic-PROJECT_NAME-encrypted-secrets",
     "EncryptionKeyName": "mosaic-PROJECT_NAME-kms-key",
-    "Version": "VERSION_ID"
+    "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala:2.12"
   }
 }

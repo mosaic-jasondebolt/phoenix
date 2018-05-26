@@ -11,9 +11,8 @@
       "Type": "String"
     },
     "CodeBuildDockerImage": {
-      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
-      "Default": "aws/codebuild/ubuntu-base:14.04",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "code-build-docker-image"
     },
     "CodeBuildBucketName": {
       "Description": "The bucket name in which CodeBuild artifacts will be stored.",

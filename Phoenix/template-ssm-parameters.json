@@ -1,0 +1,235 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Microservice project SSM parameters.",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
+    "CodeBuildDockerImage": {
+      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
+      "Default": "aws/codebuild/ubuntu-base:14.04",
+      "Type": "String"
+    },
+    "CodeBuildBucketName": {
+      "Description": "The bucket name in which CodeBuild artifacts will be stored.",
+      "Type": "String"
+    },
+    "CodePipelineBucketName": {
+      "Description": "The bucket name in which CodePipeline artifacts will be stored.",
+      "Type": "String"
+    },
+    "MicroserviceBucketName": {
+      "Description": "The bucket name in which cloudformation templates and lambda functions will be stored.",
+      "Type": "String"
+    },
+    "JenkinsBackupBucketName": {
+      "Description": "The bucket name in which jenkins backups and restores are saved to",
+      "Type": "String"
+    },
+    "Domain": {
+      "Description": "The domain name that this service will fall under.",
+      "Type": "String"
+    },
+    "SSLCertificateARN": {
+      "Description": "The AWS ACM Certificate ARN.",
+      "Type": "String"
+    },
+    "HostedZoneId": {
+      "Description": "The Route53 hosted zone id that this service will fall under.",
+      "Type": "String"
+    },
+    "KeyPairName":{
+      "Type":"AWS::EC2::KeyPair::KeyName",
+      "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
+    },
+    "LambdaBucketName": {
+      "Description": "The bucket name in which Lambda artifacts will be stored.",
+      "Type": "String"
+    },
+    "LoadBalancerLogsBucketName": {
+      "Description": "The bucket name in which load balancer logs will be stored.",
+      "Type": "String"
+    },
+    "SecretsBucketName": {
+      "Description": "The bucket name in which KMS encrypted secrets will be stored.",
+      "Type": "String"
+    },
+    "EncryptionKeyName": {
+      "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets.",
+      "Type": "String"
+    },
+    "ProjectDescription": {
+      "Description": "A description of your project",
+      "Type": "String"
+    },
+    "NotificationEmail": {
+      "Description": "The email to send notifications to for this microservice",
+      "Type": "String"
+    },
+    "IAMRole": {
+      "Description": "The IAM role that has access to all of the projects resources.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "ProjectNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "project-name",
+        "Type": "String",
+        "Value": {"Ref": "ProjectName"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The microservice name associated with this account"
+      }
+    },
+    "CodeBuildDockerImageParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "code-build-docker-image",
+        "Type": "String",
+        "Value": {"Ref": "CodeBuildDockerImage"},
+        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with."
+      }
+    },
+    "CodeBuildBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "code-build-bucket-name",
+        "Type": "String",
+        "Value": {"Ref": "CodeBuildBucketName"},
+        "Description": "The bucket name in which CodeBuild artifacts will be stored."
+      }
+    },
+    "CodePipelineBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "code-pipeline-bucket-name",
+        "Type": "String",
+        "Value": {"Ref": "CodePipelineBucketName"},
+        "Description": "The bucket name in which CodePipeline artifacts will be stored."
+      }
+    },
+    "MicroserviceBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "microservice-bucket-name",
+        "Type": "String",
+        "Value": {"Ref": "MicroserviceBucketName"},
+        "Description": "The bucket name in which cloudformation templates and lambda functions will be stored."
+      }
+    },
+    "JenkinsBackupBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "jenkins-backup-bucket-name",
+        "Type": "String",
+        "Value": {"Ref": "JenkinsBackupBucketName"},
+        "Description": "The bucket name in which jenkins backups and restores are saved to"
+      }
+    },
+    "DomainParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "domain",
+        "Type": "String",
+        "Value": {"Ref": "Domain"},
+        "Description": "Domain name"
+      }
+    },
+    "SSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "ssl-certificate-arn",
+        "Type": "String",
+        "Value": {"Ref": "SSLCertificateARN"},
+        "Description": "The domain name that this service will fall under."
+      }
+    },
+    "HostedZoneIdParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "hosted-zone-id",
+        "Type": "String",
+        "Value": {"Ref": "HostedZoneId"},
+        "Description": "The Route53 hosted zone id that this service will fall under."
+      }
+    },
+    "KeyPairNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "key-pair-name",
+        "Type": "String",
+        "Value": {"Ref": "KeyPairName"},
+        "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
+      }
+    },
+    "LambdaBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "lambda-bucket-name",
+        "Type": "String",
+        "Value": {"Ref": "LambdaBucketName"},
+        "Description": "The bucket name in which Lambda artifacts will be stored."
+      }
+    },
+    "LoadBalancerLogsBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "load-balancer-logs-bucket-name",
+        "Type": "String",
+        "Value": {"Ref": "LoadBalancerLogsBucketName"},
+        "Description": "The bucket name in which load balancer logs will be stored."
+      }
+    },
+    "SecretsBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "secrets-bucket-name",
+        "Type": "String",
+        "Value": {"Ref": "SecretsBucketName"},
+        "Description": "The bucket name in which KMS encrypted secrets will be stored."
+      }
+    },
+    "EncryptionKeyNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "encryption-key-name",
+        "Type": "String",
+        "Value": {"Ref": "EncryptionKeyName"},
+        "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets."
+      }
+    },
+    "ProjectDescriptionParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "project-description",
+        "Type": "String",
+        "Value": {"Ref": "ProjectDescription"},
+        "Description": "A description of your project."
+      }
+    },
+    "NotificationEmailParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "notification-email",
+        "Type": "String",
+        "Value": {"Ref": "NotificationEmail"},
+        "Description": "The email to send notifications to for this microservice"
+      }
+    },
+    "IAMRoleParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "iam-role",
+        "Type": "String",
+        "Value": {"Ref": "IAMRole"},
+        "Description": "The IAM role that has access to all of the projects resources."
+      }
+    }
+  }
+}
