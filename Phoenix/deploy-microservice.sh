@@ -14,9 +14,9 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-ssm-parameters-params.json`
 MICROSERVICE_STACK_NAME=$PROJECT_NAME-microservice
-MICROSERVICE_BUCKET_NAME=`jq -r '.Parameters.MicroserviceBucketName' template-microservice-params.json | sed 's/PROJECT_NAME/'$PROJECT_NAME'/g'`
+MICROSERVICE_BUCKET_NAME=`jq -r '.Parameters.MicroserviceBucketName' template-ssm-parameters-params.json | sed 's/PROJECT_NAME/'$PROJECT_NAME'/g'`
 VERSION_ID=`date +"%Y-%m-%d-%H%M%S"`
 
 # Generate the MICROSERVICE bucket if it doesn't already exist

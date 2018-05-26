@@ -2,6 +2,14 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Microservice project SSM parameters.",
   "Parameters": {
+    "OrganizationName": {
+      "Description": "The name of your organization.",
+      "MinLength": "1",
+      "MaxLength": "6",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 6 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
     "ProjectName": {
       "Description": "The name of your project.",
       "MinLength": "1",
@@ -17,19 +25,23 @@
     },
     "CodeBuildBucketName": {
       "Description": "The bucket name in which CodeBuild artifacts will be stored.",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "CodePipelineBucketName": {
       "Description": "The bucket name in which CodePipeline artifacts will be stored.",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "MicroserviceBucketName": {
       "Description": "The bucket name in which cloudformation templates and lambda functions will be stored.",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "JenkinsBackupBucketName": {
       "Description": "The bucket name in which jenkins backups and restores are saved to",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
@@ -49,19 +61,23 @@
     },
     "LambdaBucketName": {
       "Description": "The bucket name in which Lambda artifacts will be stored.",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "LoadBalancerLogsBucketName": {
       "Description": "The bucket name in which load balancer logs will be stored.",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "SecretsBucketName": {
       "Description": "The bucket name in which KMS encrypted secrets will be stored.",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "EncryptionKeyName": {
       "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets.",
-      "Type": "String"
+      "Type": "String",
+      "Default": ""
     },
     "ProjectDescription": {
       "Description": "A description of your project",
@@ -75,6 +91,48 @@
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "String"
     }
+  },
+  "Conditions": {
+    "HasCodeBuildBucketName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "CodeBuildBucketName"}, ""
+      ]}
+    ]},
+    "HasCodePipelineBucketName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "CodePipelineBucketName"}, ""
+      ]}
+    ]},
+    "HasMicroserviceBucketName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "MicroserviceBucketName"}, ""
+      ]}
+    ]},
+    "HasJenkinsBackupBucketName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "JenkinsBackupBucketName"}, ""
+      ]}
+    ]},
+    "HasLambdaBucketName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "LambdaBucketName"}, ""
+      ]}
+    ]},
+    "HasLoadBalancerLogsBucketName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "LoadBalancerLogsBucketName"}, ""
+      ]}
+    ]},
+    "HasSecretsBucketName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "SecretsBucketName"}, ""
+      ]}
+    ]},
+    "HasEncryptionKeyName" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "EncryptionKeyName"}, ""
+      ]}
+    ]}
   },
   "Resources": {
     "ProjectNameParam": {
@@ -101,7 +159,15 @@
       "Properties": {
         "Name": "code-build-bucket-name",
         "Type": "String",
-        "Value": {"Ref": "CodeBuildBucketName"},
+        "Value": {"Fn::If": [
+          "HasCodeBuildBucketName",
+          {"Ref": "CodeBuildBucketName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "code-build"
+          ]]}
+        ]},
         "Description": "The bucket name in which CodeBuild artifacts will be stored."
       }
     },
@@ -110,7 +176,15 @@
       "Properties": {
         "Name": "code-pipeline-bucket-name",
         "Type": "String",
-        "Value": {"Ref": "CodePipelineBucketName"},
+        "Value": {"Fn::If": [
+          "HasCodePipelineBucketName",
+          {"Ref": "CodePipelineBucketName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "code-pipeline"
+          ]]}
+        ]},
         "Description": "The bucket name in which CodePipeline artifacts will be stored."
       }
     },
@@ -119,7 +193,15 @@
       "Properties": {
         "Name": "microservice-bucket-name",
         "Type": "String",
-        "Value": {"Ref": "MicroserviceBucketName"},
+        "Value": {"Fn::If": [
+          "HasMicroserviceBucketName",
+          {"Ref": "MicroserviceBucketName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "microservice"
+          ]]}
+        ]},
         "Description": "The bucket name in which cloudformation templates and lambda functions will be stored."
       }
     },
@@ -128,7 +210,15 @@
       "Properties": {
         "Name": "jenkins-backup-bucket-name",
         "Type": "String",
-        "Value": {"Ref": "JenkinsBackupBucketName"},
+        "Value": {"Fn::If": [
+          "HasJenkinsBackupBucketName",
+          {"Ref": "JenkinsBackupBucketName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "jenkins"
+          ]]}
+        ]},
         "Description": "The bucket name in which jenkins backups and restores are saved to"
       }
     },
@@ -138,7 +228,7 @@
         "Name": "domain",
         "Type": "String",
         "Value": {"Ref": "Domain"},
-        "Description": "Domain name"
+        "Description": "The domain name that this service will fall under."
       }
     },
     "SSLCertificateARNParam": {
@@ -147,7 +237,7 @@
         "Name": "ssl-certificate-arn",
         "Type": "String",
         "Value": {"Ref": "SSLCertificateARN"},
-        "Description": "The domain name that this service will fall under."
+        "Description": "The AWS ACM Certificate ARN."
       }
     },
     "HostedZoneIdParam": {
@@ -173,7 +263,15 @@
       "Properties": {
         "Name": "lambda-bucket-name",
         "Type": "String",
-        "Value": {"Ref": "LambdaBucketName"},
+        "Value": {"Fn::If": [
+          "HasLambdaBucketName",
+          {"Ref": "LambdaBucketName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "lambda"
+          ]]}
+        ]},
         "Description": "The bucket name in which Lambda artifacts will be stored."
       }
     },
@@ -182,7 +280,15 @@
       "Properties": {
         "Name": "load-balancer-logs-bucket-name",
         "Type": "String",
-        "Value": {"Ref": "LoadBalancerLogsBucketName"},
+        "Value": {"Fn::If": [
+          "HasLoadBalancerLogsBucketName",
+          {"Ref": "LoadBalancerLogsBucketName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "load-balancer-logs"
+          ]]}
+        ]},
         "Description": "The bucket name in which load balancer logs will be stored."
       }
     },
@@ -191,7 +297,15 @@
       "Properties": {
         "Name": "secrets-bucket-name",
         "Type": "String",
-        "Value": {"Ref": "SecretsBucketName"},
+        "Value": {"Fn::If": [
+          "HasSecretsBucketName",
+          {"Ref": "SecretsBucketName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "encrypted-secrets"
+          ]]}
+        ]},
         "Description": "The bucket name in which KMS encrypted secrets will be stored."
       }
     },
@@ -200,7 +314,15 @@
       "Properties": {
         "Name": "encryption-key-name",
         "Type": "String",
-        "Value": {"Ref": "EncryptionKeyName"},
+        "Value": {"Fn::If": [
+          "HasEncryptionKeyName",
+          {"Ref": "EncryptionKeyName"},
+          {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "kms-key"
+          ]]}
+        ]},
         "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets."
       }
     },
