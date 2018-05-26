@@ -1,5 +1,6 @@
 import json
 import boto3
+import botocore
 
 # Handles GitLab merge request events
 
@@ -80,10 +81,16 @@ def lambda_handler(event, context):
       print('response')
     else:
       print('Creating or Updating stack')
-      response = cloudformation_client.create_stack(
-        StackName=stack_name,
-        TemplateURL=template_url,
-        Parameters=parameters,
-        Capabilities=['CAPABILITY_IAM']
-      )
-      print('response')
+      print('Attempting to create stack')
+      try:
+        response = cloudformation_client.create_stack(
+          StackName=stack_name,
+          TemplateURL=template_url,
+          Parameters=parameters,
+          Capabilities=['CAPABILITY_IAM']
+        )
+        print('response')
+      except Exception as e:
+        print('Stack may have already been created, and that is OK.')
+        print('Error: {0}'.format(e))
+        print('Continuing as normal. There is no need to update the stack once it is deleted')
