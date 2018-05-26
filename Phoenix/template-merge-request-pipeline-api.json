@@ -162,7 +162,8 @@
                   "lambda.amazonaws.com",
                   "s3.amazonaws.com",
                   "apigateway.amazonaws.com",
-                  "codepipeline.amazonaws.com"
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
                 ]
               }
             }
@@ -181,11 +182,14 @@
                 "lambda:*",
                 "dynamodb:*",
                 "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
                 "s3:*",
                 "logs:*",
                 "xray:*",
                 "sts:AssumeRole",
-                "iam:PassRole"
+                "iam:PassRole",
+                "iam:GetRole"
               ],
               "Effect": "Allow",
               "Resource": "*"
