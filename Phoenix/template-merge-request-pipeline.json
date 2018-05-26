@@ -1,195 +1,213 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Deploys an API Gateway endpoint that GitLab merge request events can invoke to setup/teardown a review pipeline.",
+  "Description": "Generates a merge request pipeline.",
   "Parameters": {
     "ProjectName": {
-      "Description": "The name of the project.",
+      "Description": "The name of your project.",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
       "Type": "String"
     },
-    "Environment": {
-      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
+    "PipelineName": {
+      "Description": "The name of the CodePipeline.",
       "Type": "String"
     },
-    "Version": {
-      "Description": "The identifier/version associated with this API.",
+    "RepoName": {
+      "Description": "The name of the CodeCommit git repo",
+      "Type": "String"
+    },
+    "SourceBranch": {
+      "Description": "The name of the source branch which triggers this pipeline",
       "Type": "String"
     }
   },
   "Resources": {
-    "RestAPI": {
-      "Type" : "AWS::ApiGateway::RestApi",
-      "Properties" : {
-        "Description" : {"Fn::Join": ["", [
-          "The ",
-          { "Ref": "ProjectName" },
-          " GitLab Merge Request ",
-          " REST API (Release Candidate ",
-          {"Ref": "Version"},
-          ")"
-        ]]},
-        "Name" : { "Fn::Join": ["-",  [
-          { "Ref": "ProjectName" },
-          "api",
-          "mergerequests",
-          { "Ref": "Environment" }
-        ]]}
-      }
-    },
-    "MergeRequestsResource": {
-      "Type" : "AWS::ApiGateway::Resource",
-      "Properties" : {
-        "ParentId" : { "Fn::GetAtt": ["RestAPI", "RootResourceId"] },
-        "PathPart" : "MergeRequests",
-        "RestApiId" : { "Ref": "RestAPI" }
-      }
-    },
-    "MergeRequestsGet": {
-      "Type" : "AWS::ApiGateway::Method",
-      "DependsOn": ["LambdaMergeRequests"],
-      "Properties" : {
-        "RestApiId" : { "Ref": "RestAPI" },
-        "AuthorizationType" : "NONE",
-        "HttpMethod": "POST",
-        "ResourceId" : { "Ref": "MergeRequestsResource" },
-        "MethodResponses": [
+    "CodePipeline": {
+      "Type": "AWS::CodePipeline::Pipeline",
+      "Properties": {
+        "RoleArn" : {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "microservice",
+              "CodePipelineServiceRoleArn"
+            ]]
+          }
+        },
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "SourceBranch"},
+            "merge-request-branch"
+          ]]
+        },
+        "Stages": [{
+            "Name": "Source",
+            "Actions": [{
+              "Name": "SourceAction",
+              "ActionTypeId": {
+                "Category": "Source",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "CodeCommit"
+              },
+              "OutputArtifacts": [{
+                "Name": "SourceOutput"
+              }],
+              "Configuration": {
+                "RepositoryName": {
+                  "Ref": "RepoName"
+                },
+                "BranchName": {
+                  "Ref": "SourceBranch"
+                }
+              },
+              "RunOrder": 1
+            }]
+          },
           {
-            "StatusCode": "200",
-            "ResponseParameters": {
-              "method.response.header.Access-Control-Allow-Origin": false
-            }
+            "Name": "Build",
+            "Actions": [{
+              "Name": "Build",
+              "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "OutputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {
+                        "Ref": "ProjectName"
+                      },
+                      "merge-request"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "UnitTest",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "unit-test"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "Lint",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "lint"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "CalculateCosts",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "calculate-costs"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "StaticAnalysis",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "static-analysis"
+                    ]]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "Name": "SlackCodeReview",
+            "Actions": [
+              {
+                "Name": "RequestCodeReview",
+                "ActionTypeId": {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Manual"
+                },
+                "RunOrder": 1
+              }
+            ]
           }
         ],
-        "Integration": {
-          "Type" : "AWS",
-          "IntegrationHttpMethod": "POST",
-          "IntegrationResponses": [
-            {
-              "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Origin": "'*'"
-              },
-              "ResponseTemplates" : { "application/json": "" },
-              "StatusCode" : "200"
-            }
-          ],
-          "Uri": {"Fn::Join": ["", [
-            "arn:aws:apigateway:",
-            { "Ref": "AWS::Region" },
-            ":lambda:path/2015-03-31/functions/",
-            { "Fn::GetAtt": [
-              "LambdaMergeRequests",
-              "Arn"
-            ]},
-            "/invocations"
-          ]]}
-        }
-      }
-    },
-    "LambdaMergeRequests": {
-      "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
-      "Properties": {
-        "Handler": "lambda_function.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
-        "Code": {
-          "S3Bucket" : {
+        "ArtifactStore": {
+          "Type": "S3",
+          "Location" : {
             "Fn::ImportValue": {
               "Fn::Join": ["-", [
                 {"Ref": "ProjectName"},
                 "microservice",
-                "MicroserviceBucketName"
+                "CodePipelineBucketName"
               ]]
             }
-          },
-          "S3Key" : {"Fn::Join": ["/", [
-            "lambda",
-            {"Ref": "Version"},
-            "mergerequests",
-            "lambda_function.zip"
-          ]]}
-        },
-        "Runtime": "python3.6",
-        "Timeout": "25"
-      }
-    },
-    "LambdaMergeRequestsInvokePermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [ "LambdaMergeRequests", "Arn" ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com"
-      }
-    },
-    "LambdaRole": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "dynamodb:*",
-                "s3:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName"},
-          "APILambdaRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaRole"
           }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
-    }
-  },
-  "Outputs": {
-    "RestApiId": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "mr-api",
-            {"Ref": "Environment"},
-            "RestApiId"
-          ]]
         }
-      },
-      "Value": {
-        "Ref": "RestAPI"
       }
     }
   }

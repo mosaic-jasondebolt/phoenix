@@ -4,17 +4,17 @@ set -e
 # Deploys a merge request API Gateway endpoint and Lambda handler to dynamically generate merge request pipelines.
 
 # USAGE:
-#   ./deploy-merge-request-pipeline.sh [create | update]
+#   ./deploy-merge-request-pipeline-api.sh [create | update]
 #
 # EXAMPLES:
-#   ./deploy-merge-request-pipeline.sh create
-#   ./deploy-merge-request-pipeline.sh update
+#   ./deploy-merge-request-pipeline-api.sh create
+#   ./deploy-merge-request-pipeline-api.sh update
 
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
-ENVIRONMENT=`jq -r '.Parameters.Environment' template-merge-request-pipeline-params.json`
+ENVIRONMENT=`jq -r '.Parameters.Environment' template-merge-request-pipeline-api-params.json`
 MICROSERVICE_BUCKET_NAME=`jq -r '.Parameters.MicroserviceBucketName' template-microservice-params.json | sed 's/PROJECT_NAME/'$PROJECT_NAME'/g'`
-VERSION_ID=`jq -r '.Parameters.Version' template-merge-request-pipeline-params.json`
+VERSION_ID=`jq -r '.Parameters.Version' template-merge-request-pipeline-api-params.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 
 # Check for valid arguments
@@ -39,17 +39,17 @@ do
 done
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py template-merge-request-pipeline-params.json cloudformation > temp1.json
+python parameters_generator.py template-merge-request-pipeline-api-params.json cloudformation > temp1.json
 
 # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
 sed "s/VERSION_ID/$VERSION_ID/g" temp1.json > temp2.json
 
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-body file://template-merge-request-pipeline.json
+aws cloudformation validate-template --template-body file://template-merge-request-pipeline-api.json
 
 # Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $PROJECT_NAME-merge-request-pipeline-$ENVIRONMENT \
-    --template-body file://template-merge-request-pipeline.json \
+aws cloudformation $1-stack --stack-name $PROJECT_NAME-merge-request-pipeline-api-$ENVIRONMENT \
+    --template-body file://template-merge-request-pipeline-api.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_IAM
 

@@ -643,7 +643,7 @@
         "Tags": []
       }
     },
-    "CodeBuildDev": {
+    "CodeBuildMergeRequest": {
       "Type": "AWS::CodeBuild::Project",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
       "Properties": {
@@ -688,7 +688,7 @@
               {
                 "Ref": "ProjectName"
               },
-              "dev"
+              "merge-request"
             ]]
           },
           "Packaging": "NONE"
@@ -729,14 +729,14 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "dev"
+            "merge-request"
           ]]
         },
         "ServiceRole": {
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
-          "BuildSpec": "Phoenix/buildspec-dev.yml",
+          "BuildSpec": "Phoenix/buildspec-merge-request.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
@@ -745,8 +745,7 @@
               ".amazonaws.com/v1/repos/",
               {
                 "Ref": "ProjectName"
-              },
-              "-dev-access"
+              }
             ]]
           }
         },

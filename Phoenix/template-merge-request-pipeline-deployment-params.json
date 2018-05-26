@@ -1,7 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "create",
-    "ProjectName": "PROJECT_NAME",
-    "Version": "VERSION_ID"
-  }
-}
