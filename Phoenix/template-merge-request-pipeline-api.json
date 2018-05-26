@@ -181,6 +181,8 @@
                 "lambda:*",
                 "dynamodb:*",
                 "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
                 "s3:*",
                 "logs:*",
                 "xray:*",
