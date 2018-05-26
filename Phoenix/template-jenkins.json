@@ -3,8 +3,24 @@
   "Description": "Launches a Jenkins server. This template also spins up an NVMe non-root EBS volume, so only m5, c5, c5d, and i3.metal instances are allowed. To add more AMI's to the region map, use 'aws configure' to switch to the region, then 'aws ec2 describe-images --filters Name=name,Values=amzn-ami-hvm-2018.03.0.20180508-x86_64-gp2'",
   "Parameters": {
     "ProjectName": {
-      "Description": "The name of the project.",
-      "Type": "String"
+      "Description": "The name of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "project-name"
+    },
+    "JenkinsBackupBucketName": {
+      "Description": "The bucket name in which jenkins backups and restores are saved to",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "jenkins-backup-bucket-name"
+    },
+    "SSLCertificateARN": {
+      "Description": "The AWS ACM Certificate ARN.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "ssl-certificate-arn"
+    },
+    "KeyPairName":{
+      "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "key-pair-name"
     },
     "SnapshotId": {
       "Description": "The snapshot id from which to create the new volume. Use this only if you want to spin up this instance from an existing snapshot.",
@@ -48,15 +64,15 @@
     },
     "WebSubnets": {
       "Description": "The type of subnets to place this web service in.",
-      "AllowedValues": ["Public", "Private"],
+      "Type": "String",
       "Default": "Public",
-      "Type": "String"
+      "AllowedValues": ["Public", "Private"]
     },
     "Scheme": {
       "Description": "The elastic load balancer scheme",
-      "AllowedValues": ["internal", "internet-facing"],
+      "Type": "String",
       "Default": "internal",
-      "Type": "String"
+      "AllowedValues": ["internal", "internet-facing"]
     },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
@@ -68,9 +84,9 @@
       "Default": "builds"
     },
     "DnsZone": {
-      "Description": "Route53-hosted zone to use for the DNS record (<prefix>.<zone>)",
-      "Type": "String",
-      "Default": "your-website.com"
+      "Description": "The domain name that this service will fall under.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "domain"
     }
   },
   "Mappings": {
@@ -374,15 +390,7 @@
         }
       },
       "Properties": {
-        "KeyName": {
-          "Fn::ImportValue": {
-            "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
-              "microservice",
-              "KeyPairName"
-            ]]
-          }
-        },
+        "KeyName": {"Ref": "KeyPairName"},
         "Tags": [
           {
             "Key": "Name",
@@ -636,15 +644,7 @@
             "LoadBalancerPort": "443",
             "InstancePort": "8080",
             "Protocol": "HTTPS",
-            "SSLCertificateId" : {
-              "Fn::ImportValue": {
-                "Fn::Join": ["-", [
-                  {"Ref": "ProjectName"},
-                  "microservice",
-                  "SSLCertificateARN"
-                ]]
-              }
-            }
+            "SSLCertificateId" : {"Ref": "SSLCertificateARN"}
           }
         ],
         "HealthCheck": {

@@ -7,7 +7,7 @@
       "MinLength": "1",
       "MaxLength": "6",
       "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
-      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 6 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (my-org) between 1 and 6 characters in length. Must not start with a number, and must not start or end with a dash.",
       "Type": "String"
     },
     "ProjectName": {
