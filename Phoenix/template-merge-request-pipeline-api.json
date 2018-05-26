@@ -16,7 +16,7 @@
     }
   },
   "Resources": {
-    "Deployment": {
+    "Latest": {
       "Type": "AWS::ApiGateway::Deployment",
       "DependsOn": ["MergeRequestsPost"],
       "Properties": {
@@ -226,8 +226,6 @@
           {"Ref": "AWS::Region"},
           ".",
           "amazonaws.com",
-          "/",
-          {"Ref": "Deployment"},
           "/",
           {"Ref": "Environment"},
           "_",
