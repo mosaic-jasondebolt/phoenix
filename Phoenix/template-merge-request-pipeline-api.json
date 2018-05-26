@@ -37,7 +37,7 @@
               {
                 "Ref": "Environment"
               },
-              "V1"
+              {"Ref": "Version"}
             ]
           ]
         }
@@ -228,6 +228,10 @@
           "amazonaws.com",
           "/",
           {"Ref": "Deployment"},
+          "/",
+          {"Ref": "Environment"},
+          "_",
+          {"Ref": "Version"},
           "/",
           "MergeRequests"
         ]]
