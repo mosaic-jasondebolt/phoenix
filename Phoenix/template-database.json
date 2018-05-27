@@ -7,15 +7,15 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "microservice-project-name"
     },
-    "Domain": {
-      "Description": "The domain name that this service will fall under.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-domain"
-    },
     "SnapshotIdentifier": {
       "Description": "The RDS Cluster Snapshot ID if you plan on restoring the DB cluster.",
       "Type": "String",
       "Default": ""
+    },
+    "Domain": {
+      "Description": "The domain name that this service will fall under.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-domain"
     },
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",

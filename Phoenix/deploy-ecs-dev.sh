@@ -16,12 +16,12 @@ set -e
 
 AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 AWS_REGION=`aws configure get region`
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-ecs-params-dev.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 IMAGE_TAG=$ENVIRONMENT-`date +"%Y-%m-%d-%H%M%S"`
 
-IMAGE_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+IMAGE_NAME=$PROJECT_NAME
 ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
 
 
@@ -52,7 +52,6 @@ fi
 
 # Obtain auth with AWS Elastic Container Rep
 eval $(aws ecr get-login --no-include-email --region $AWS_REGION)
-
 
 # Push the local docker image to AWS Elastic Container Repo
 docker push $ECR_REPO

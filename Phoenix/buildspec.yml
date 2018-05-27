@@ -1,5 +1,10 @@
 version: 0.2
 
+env:
+  parameter-store:
+    PROJECT_NAME: microservice-project-name
+    LAMBDA_BUCKET_NAME: microservice-lambda-bucket-name
+
 phases:
   install:
     commands:
@@ -12,9 +17,6 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - PROJECT_NAME=`jq -r '.Parameters.ProjectName' $CODEBUILD_SRC_DIR/Phoenix/template-microservice-params.json`
-      - PRE_LAMBDA_BUCKET_NAME=`jq -r '.Parameters.LambdaBucketName' $CODEBUILD_SRC_DIR/Phoenix/template-microservice-params.json`
-      - LAMBDA_BUCKET_NAME=`echo $PRE_LAMBDA_BUCKET_NAME | sed "s/PROJECT_NAME/$PROJECT_NAME/g"`
       - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME
       - VERSION_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=$VERSION_ID
@@ -26,7 +28,7 @@ phases:
       - echo replacing VERSION_ID in the database params files.
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-testing.json > $CODEBUILD_SRC_DIR/t-database-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-prod.json > $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp
-      - echo replacing PROJECT_NAME and other params in the database params files.
+      - echo replacing params in the database params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
@@ -35,7 +37,7 @@ phases:
       - echo replacing build number in the task definition param files.
       - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-testing.json > $CODEBUILD_SRC_DIR/t-ecs-params-testing.json_temp
       - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-prod.json > $CODEBUILD_SRC_DIR/t-ecs-params-prod.json_temp
-      - echo replacing PROJECT_NAME and other params in the task definition params files.
+      - echo replacing params in the task definition params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs.json $CODEBUILD_SRC_DIR
@@ -47,7 +49,7 @@ phases:
       - echo replacing VERSION_ID in the lambda params files.
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-testing.json > $CODEBUILD_SRC_DIR/t-lambda-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-prod.json > $CODEBUILD_SRC_DIR/t-lambda-params-prod.json_temp
-      - echo replacing PROJECT_NAME and other params in the lambda params files.
+      - echo replacing params in the lambda params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-lambda.json $CODEBUILD_SRC_DIR
@@ -70,7 +72,7 @@ phases:
       - echo replacing VERSION_ID in the api params files.
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-testing.json > $CODEBUILD_SRC_DIR/t-api-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-prod.json > $CODEBUILD_SRC_DIR/t-api-params-prod.json_temp
-      - echo replacing PROJECT_NAME and other params in the api params files.
+      - echo replacing params in the api params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api.json $CODEBUILD_SRC_DIR
@@ -79,7 +81,7 @@ phases:
       - echo replacing VERSION_ID in the api deployment params files.
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-testing.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-prod.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json_temp
-      - echo replacing PROJECT_NAME and other params in the api deployment params files.
+      - echo replacing params in the api deployment params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json
       - # Get the current API Gateway Deployment template from the stack, compare, and generate a new template.
