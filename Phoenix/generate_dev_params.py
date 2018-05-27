@@ -9,13 +9,11 @@ username is the developers username. When CloudFormation stacks are launched
 using these parameter files, many AWS resources will be identified by this
 environment_name such as URL's, ECS clusters, Lambda functions, etc.
 
-The name of a git branch may be used for 'environment_name' as well.
-
 USAGE:
-  python generate_dev_params.py {environment_name} {branch_name}
+  python generate_dev_params.py {environment_name}
 
  EXAMPLES:
-  python generate_dev_params.py devjason launch-cool-thing
+  python generate_dev_params.py devjason
 """
 
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"

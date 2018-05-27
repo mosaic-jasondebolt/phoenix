@@ -11,7 +11,7 @@ set -e
 #   ./deploy-api-deployment-dev.sh update
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-deployment-params-dev.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 VERSION_ID=$ENVIRONMENT

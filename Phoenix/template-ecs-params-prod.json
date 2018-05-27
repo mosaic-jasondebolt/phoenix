@@ -1,7 +1,6 @@
 {
   "Parameters": {
     "AssignPublicIp": "ENABLED",
-    "ContainerName": "PROJECT_NAME",
     "ContainerPort": "5000",
     "DesiredECSInstances": "1",
     "DesiredTaskCount": "1",
@@ -10,7 +9,6 @@
     "Environment": "prod",
     "DBEnvironment": "prod",
     "HealthCheckGracePeriodSeconds": "60",
-    "ImageName": "PROJECT_NAME",
     "ImageVersion": "IMAGE_TAG",
     "InstanceType": "c4.large",
     "LaunchType": "EC2",
@@ -18,8 +16,6 @@
     "MaxTasksToScaleOutInResponseTo500Errors": "2",
     "MinECSInstances": "1",
     "MinTasksToScaleInInResponseToScaleInEvent": "1",
-    "ProjectName": "PROJECT_NAME",
-    "TaskFamily": "PROJECT_NAME",
     "VPCPrefix": "prod",
     "WebSubnets": "Private"
   }

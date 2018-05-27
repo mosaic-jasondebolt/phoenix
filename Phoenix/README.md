@@ -80,12 +80,13 @@ For each environment (dev, testing, prod), and additional developer environments
 * Creates a security group ingress rule to allow internal network CIDR blocks to access Web security group.
 * Creates a security group ingress rule to allow internal network CIDR blocks to access ELB security group.
 
-
-
 ##### Phoenix Lambda (template-lambda.json)
 * Jason to fill out
 
 ##### Phoenix API Gateway (template-api.json)
+* Jason to fill out
+
+##### Phoenix Jenkins (template-jenkins.json)
 * Jason to fill out
 
 
@@ -93,6 +94,10 @@ For each environment (dev, testing, prod), and additional developer environments
 * Update all of the params....json files with your project info
 * The ProjectName should match the name of this Git repo. Use all lower case, optionally with dashes, keep it short.
 ```
+cd Phoenix
+$ python search_and_replace.py . 123456789 {your AWS AccountId}
+$ python search_and_replace.py . acme {name of your project}
+
 Make sure there are no dashes in the DatabaseNamePrefix or MasterUsername parameters in the
 template-database-params JSON files.
 ```

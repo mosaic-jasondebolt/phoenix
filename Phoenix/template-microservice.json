@@ -4,76 +4,83 @@
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
-      "MinLength": "1",
-      "MaxLength": "20",
-      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
-      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-project-name"
     },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
-      "Default": "aws/codebuild/ubuntu-base:14.04",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-code-build-docker-image"
     },
     "CodeBuildBucketName": {
       "Description": "The bucket name in which CodeBuild artifacts will be stored.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-code-build-bucket-name"
     },
     "CodePipelineBucketName": {
       "Description": "The bucket name in which CodePipeline artifacts will be stored.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-code-pipeline-bucket-name"
     },
     "MicroserviceBucketName": {
       "Description": "The bucket name in which cloudformation templates and lambda functions will be stored.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-bucket-name"
+    },
+    "JenkinsBackupBucketName": {
+      "Description": "The bucket name in which jenkins backups and restores are saved to",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-jenkins-backup-bucket-name"
     },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
-      "Type": "String"
-    },
-    "SSLCertificateARN": {
-      "Description": "The AWS ACM Certificate ARN.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-domain"
     },
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-hosted-zone-id"
     },
     "KeyPairName":{
-      "Type":"AWS::EC2::KeyPair::KeyName",
-      "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
+      "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-key-pair-name"
     },
     "LambdaBucketName": {
       "Description": "The bucket name in which Lambda artifacts will be stored.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-lambda-bucket-name"
     },
     "LoadBalancerLogsBucketName": {
       "Description": "The bucket name in which load balancer logs will be stored.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-load-balancer-logs-bucket-name"
     },
     "SecretsBucketName": {
       "Description": "The bucket name in which KMS encrypted secrets will be stored.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-secrets-bucket-name"
     },
     "EncryptionKeyName": {
       "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-encryption-key-name"
     },
     "ProjectDescription": {
       "Description": "A description of your project",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-project-description"
     },
     "NotificationEmail": {
       "Description": "The email to send notifications to for this microservice",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-notification-email"
     },
     "IAMRole": {
       "Description": "The IAM role that has access to all of the projects resources.",
-      "Type": "String"
-    },
-    "Version": {
-      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). Changes in this parameter value will force update the stack with the most recent code.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-iam-role"
     }
   },
   "Resources": {
@@ -140,6 +147,15 @@
         }
       }
     },
+    "EncryptionKeyIdParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "microservice-encryption-key-id",
+        "Type": "String",
+        "Value": {"Ref": "EncryptionKey"},
+        "Description": "The KMS Key ID"
+      }
+    },
     "EncryptedSecretsBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
@@ -173,6 +189,20 @@
       "Properties": {
         "BucketName": {
           "Ref": "CodePipelineBucketName"
+        },
+        "LifecycleConfiguration": {
+          "Rules": [{
+            "ExpirationInDays": 180,
+            "Status": "Enabled"
+          }]
+        }
+      }
+    },
+    "JenkinsBackupBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Ref": "JenkinsBackupBucketName"
         },
         "LifecycleConfiguration": {
           "Rules": [{
@@ -259,56 +289,24 @@
         "RepositoryDescription": {
           "Ref": "ProjectDescription"
         },
-        "Triggers": [{
-          "Name": "MasterTrigger",
-          "CustomData": {
-            "Fn::Join": [" ", [
-              "Project",
-              {
-                "Ref": "ProjectName"
-              }
-            ]]
-          },
-          "DestinationArn": {
-            "Ref": "MasterTriggerSNSTopic"
-          },
-          "Branches": ["master"],
-          "Events": ["all"]
-        }]
-      }
-    },
-    "CodeCommitRepositoryDevAccess": {
-      "Type": "AWS::CodeCommit::Repository",
-      "DependsOn": ["LambdaDevAccessBranchPipeline"],
-      "Properties": {
-        "RepositoryName": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "dev-access"
-          ]]
-        },
-        "RepositoryDescription": {
-          "Ref": "ProjectDescription"
-        },
-        "Triggers": [{
-          "Name": "DevAccessBranch",
-          "CustomData": {
-            "Fn::Join": ["", [
-              "{\"MicroserviceBucketName\": ",
-              "\"", {"Ref": "MicroserviceBucketName"}, "\"",
-              ", \"TemplateName\": \"template-code-pipeline-review.json\"",
-              ", \"ProjectName\": ",
-              "\"", {"Ref": "ProjectName"}, "\"",
-              ", \"ReviewNotificationEmail\": ",
-              "\"", {"Ref": "NotificationEmail"}, "\"",
-              "}"
-            ]]
-          },
-          "DestinationArn": {
-            "Fn::GetAtt": ["LambdaDevAccessBranchPipeline", "Arn"]
-          },
-          "Events": ["createReference", "deleteReference"]
-        }]
+        "Triggers": [
+          {
+            "Name": "MasterTrigger",
+            "CustomData": {
+              "Fn::Join": [" ", [
+                "Project",
+                {
+                  "Ref": "ProjectName"
+                }
+              ]]
+            },
+            "DestinationArn": {
+              "Ref": "MasterTriggerSNSTopic"
+            },
+            "Branches": ["master"],
+            "Events": ["all"]
+          }
+        ]
       }
     },
     "LambdaRole": {
@@ -376,81 +374,6 @@
         }]
       }
     },
-    "LambdaInvokePermissionForDevAccessRepo": {
-      "Type" : "AWS::Lambda::Permission",
-      "DependsOn": ["CodeCommitRepositoryDevAccess"],
-      "Properties" : {
-        "Action" : "lambda:InvokeFunction",
-        "FunctionName" : {"Ref": "LambdaDevAccessBranchPipeline"},
-        "Principal" : "codecommit.amazonaws.com",
-        "SourceArn" : {
-          "Fn::GetAtt": ["CodeCommitRepositoryDevAccess", "Arn"]
-        }
-      }
-    },
-    "LambdaDevAccessBranchPipeline": {
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Handler": "lambda_function.lambda_handler",
-        "Role": {
-          "Fn::GetAtt": ["LambdaRole", "Arn"]
-        },
-        "Code": {
-          "S3Bucket" : {"Ref": "MicroserviceBucketName"},
-          "S3Key": {
-            "Fn::Join": ["/", [
-              "lambda",
-              {"Ref": "Version"},
-              "dev_access_branch",
-              "lambda_function.zip"
-            ]]
-          }
-        },
-        "Runtime": "python3.6",
-        "Timeout": "25"
-      }
-    },
-    "ECRRepository": {
-      "Type": "AWS::ECR::Repository",
-      "Properties": {
-        "RepositoryName": {
-          "Ref": "ProjectName"
-        },
-        "RepositoryPolicyText": {
-          "Version": "2008-10-17",
-          "Statement": [{
-              "Sid": "AllowPushPull",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": [{
-                  "Ref": "IAMRole"
-                }]
-              },
-              "Action": [
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:PutImage",
-                "ecr:InitiateLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:CompleteLayerUpload"
-              ]
-            },
-            {
-              "Sid": "CodeBuildAccess",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "codebuild.amazonaws.com"
-              },
-              "Action": [
-                "ecr:*"
-              ]
-            }
-          ]
-        }
-      }
-    },
     "CodeBuildServiceRole": {
       "Type": "AWS::IAM::Role",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
@@ -495,6 +418,18 @@
         }]
       }
     },
+    "CodeBuildServiceRoleArnParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "microservice-code-build-service-role-arn",
+        "Type": "String",
+        "Value": {"Fn::GetAtt": [
+          "CodeBuildServiceRole",
+          "Arn"
+        ]},
+        "Description": "The Code Build Service Role ARN"
+      }
+    },
     "CodeBuildSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
@@ -533,6 +468,15 @@
             ]]}
           }
         ]
+      }
+    },
+    "CodeBuildSecurityGroupParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "microservice-code-build-security-group",
+        "Type": "String",
+        "Value": {"Ref": "CodeBuildSecurityGroup"},
+        "Description": "The Code Build security group ID"
       }
     },
     "CodeBuild": {
@@ -637,7 +581,7 @@
         "Tags": []
       }
     },
-    "CodeBuildDev": {
+    "CodeBuildMergeRequest": {
       "Type": "AWS::CodeBuild::Project",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
       "Properties": {
@@ -682,7 +626,7 @@
               {
                 "Ref": "ProjectName"
               },
-              "dev"
+              "merge-request"
             ]]
           },
           "Packaging": "NONE"
@@ -723,14 +667,14 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "dev"
+            "merge-request"
           ]]
         },
         "ServiceRole": {
           "Ref": "CodeBuildServiceRole"
         },
         "Source": {
-          "BuildSpec": "Phoenix/buildspec-dev.yml",
+          "BuildSpec": "Phoenix/buildspec-merge-request.yml",
           "Type": "CODECOMMIT",
           "Location": {
             "Fn::Join": ["", [
@@ -739,8 +683,7 @@
               ".amazonaws.com/v1/repos/",
               {
                 "Ref": "ProjectName"
-              },
-              "-dev-access"
+              }
             ]]
           }
         },
@@ -1325,6 +1268,18 @@
         }]
       }
     },
+    "CodePipelineServiceRoleArnParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "microservice-code-pipeline-service-role-arn",
+        "Type": "String",
+        "Value": {"Fn::GetAtt": [
+          "CodePipelineServiceRole",
+          "Arn"
+        ]},
+        "Description": "The Code Pipeline Service Role ARN"
+      }
+    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket", "CodePipelineServiceRole"],
@@ -1506,6 +1461,29 @@
                 }
               },
               {
+                "Name": "DatabaseMigration",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "rds-migration",
+                      "testing"
+                    ]]
+                  }
+                }
+              },
+              {
                 "Name": "ECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1516,7 +1494,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1545,7 +1523,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1574,7 +1552,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1603,7 +1581,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1699,6 +1677,29 @@
                 }
               },
               {
+                "Name": "DatabaseMigration",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "rds-migration",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
                 "Name": "ECS",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1709,7 +1710,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1738,7 +1739,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1767,7 +1768,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1796,7 +1797,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "RoleArn": {
                     "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
@@ -1823,174 +1824,6 @@
             "Ref": "CodePipelineBucket"
           }
         }
-      }
-    }
-  },
-  "Outputs": {
-    "Domain": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "Domain"
-          ]]
-        }
-      },
-      "Value": {"Ref": "Domain"}
-    },
-    "HostedZoneId": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "HostedZoneId"
-          ]]
-        }
-      },
-      "Value": {"Ref": "HostedZoneId"}
-    },
-    "CodePipelineServiceRoleArn": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "CodePipelineServiceRoleArn"
-          ]]
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-      }
-    },
-    "SSLCertificateARN": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "SSLCertificateARN"
-          ]]
-        }
-      },
-      "Value": {"Ref": "SSLCertificateARN"}
-    },
-    "KeyPairName": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "KeyPairName"
-          ]]
-        }
-      },
-      "Value": {"Ref": "KeyPairName"}
-    },
-    "LambdaBucketName": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "LambdaBucketName"
-          ]]
-        }
-      },
-      "Value": {"Ref": "LambdaBucket"}
-    },
-    "MicroserviceBucketName": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "MicroserviceBucketName"
-          ]]
-        }
-      },
-      "Value": {"Ref": "MicroserviceBucketName"}
-    },
-    "CodePipelineBucketName": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "CodePipelineBucketName"
-          ]]
-        }
-      },
-      "Value": {"Ref": "CodePipelineBucket"}
-    },
-    "LoadBalancerLogsBucketName": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "LoadBalancerLogsBucketName"
-          ]]
-        }
-      },
-      "Value": {"Ref": "LoadBalancerLogsBucket"}
-    },
-    "KMSEncryptionKeyArn": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "KMSEncryptionKeyArn"
-          ]]
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": ["EncryptionKey", "Arn"]
-      }
-    },
-    "KMSEncryptionKeyId": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "KMSEncryptionKeyId"
-          ]]
-        }
-      },
-      "Value": {
-        "Ref": "EncryptionKey"
-      }
-    },
-    "KMSEncryptionKeyAlias": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "KMSEncryptionKeyAlias"
-          ]]
-        }
-      },
-      "Value": {
-        "Ref": "EncryptionKeyAlias"
-      }
-    },
-    "EncryptedSecretsBucket": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "microservice",
-            "EncryptedSecretsBucket"
-          ]]
-        }
-      },
-      "Value": {
-        "Ref": "EncryptedSecretsBucket"
       }
     }
   }

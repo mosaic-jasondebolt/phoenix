@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Generates all resources required for a microservice.",
+  "Description": "Generates a merge request pipeline.",
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
@@ -10,39 +10,20 @@
       "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
       "Type": "String"
     },
-    "Environment": {
-      "Description": "The Environment/BranchName of the pipeline.",
-      "MinLength": "1",
-      "MaxLength": "20",
-      "AllowedPattern": "[a-z]+[\\-a-z0-9]*[a-z0-9]+",
-      "ConstraintDescription": "Use all lowercase, optionally seperated by dashes, up to 20 characters.",
+    "PipelineName": {
+      "Description": "The name of the CodePipeline.",
       "Type": "String"
     },
-    "ReviewNotificationEmail": {
-      "Description": "The email to send code review notifications to.",
+    "RepoName": {
+      "Description": "The name of the CodeCommit git repo",
+      "Type": "String"
+    },
+    "SourceBranch": {
+      "Description": "The name of the source branch which triggers this pipeline",
       "Type": "String"
     }
   },
   "Resources": {
-    "ReviewSNSTopic": {
-      "Type": "AWS::SNS::Topic",
-      "Properties": {
-        "DisplayName": "Review",
-        "Subscription": [{
-          "Endpoint": {
-            "Ref": "ReviewNotificationEmail"
-          },
-          "Protocol": "email"
-        }],
-        "TopicName": {
-          "Fn::Join": ["-", [
-            "code-review-for",
-            {"Ref": "ProjectName"},
-            {"Ref": "Environment"}
-          ]]
-        }
-      }
-    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
@@ -57,9 +38,8 @@
         },
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "review-branch",
-            {"Ref": "Environment"}
+            {"Ref": "SourceBranch"},
+            "merge-request-branch"
           ]]
         },
         "Stages": [{
@@ -77,13 +57,10 @@
               }],
               "Configuration": {
                 "RepositoryName": {
-                  "Fn::Join": ["-", [
-                    {"Ref": "ProjectName"},
-                    "dev-access"
-                  ]]
+                  "Ref": "RepoName"
                 },
                 "BranchName": {
-                  "Ref": "Environment"
+                  "Ref": "SourceBranch"
                 }
               },
               "RunOrder": 1
@@ -112,7 +89,7 @@
                       {
                         "Ref": "ProjectName"
                       },
-                      "dev"
+                      "merge-request"
                     ]]
                   }
                 }
@@ -204,17 +181,28 @@
             ]
           },
           {
-            "Name": "SlackCodeReview",
+            "Name": "NotifyGitlab",
             "Actions": [
               {
-                "Name": "RequestCodeReview",
+                "Name": "NotifyGitlab",
                 "ActionTypeId": {
-                  "Category": "Approval",
+                  "Category": "Test",
                   "Owner": "AWS",
                   "Version": "1",
-                  "Provider": "Manual"
+                  "Provider": "CodeBuild"
                 },
-                "RunOrder": 1
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "gitlab-notify"
+                    ]]
+                  }
+                }
               }
             ]
           }
@@ -232,17 +220,137 @@
           }
         }
       }
-    }
-  },
-  "Outputs": {
-    "ReviewSNSTopic": {
-      "Description": "The name of this SNS topic",
-      "Value": {
-        "Fn::GetAtt": [
-          "ReviewSNSTopic",
-          "TopicName"
+    },
+    "CodeBuildSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupName": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            "CodeBuild",
+            "MR",
+            "SG"
+          ]]
+        },
+        "GroupDescription": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            "CodeBuild",
+            "MR",
+            "SG"
+          ]]
+        },
+        "VpcId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              "dev",
+              "vpc",
+              "VPC"
+            ]]
+          }
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "codebuild",
+              "merge-request",
+              "sg"
+            ]]}
+          }
         ]
       }
-    }
+    },
+    "CodeBuildGitlabNotify": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "CodeBuildSecurityGroup"}
+          ],
+          "Subnets": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ],
+          "VpcId":  {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "VPC"
+              ]]
+            }
+          }
+        },
+        "Artifacts": {
+          "Type": "CODEPIPELINE",
+          "NamespaceType": "BUILD_ID",
+          "Name": {
+            "Ref": "ProjectName"
+          },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [
+            {
+              "Name" : "AWS_ACCOUNT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "AWS::AccountId"}
+            }
+          ],
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": {
+          "Fn::Join": ["", [{
+              "Ref": "ProjectName"
+            },
+            "-unit-test"
+          ]]
+        },
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
+        "Source": {
+          "BuildSpec": "Phoenix/buildspec-unit-test.yml",
+          "Type": "CODECOMMIT",
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {"Ref": "AWS::Region"},
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
   }
 }

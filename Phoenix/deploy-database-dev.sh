@@ -22,10 +22,9 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-database-params-dev.json`
-PRE_LAMBDA_BUCKET_NAME=`jq -r '.Parameters.LambdaBucketName' template-microservice-params.json`
-LAMBDA_BUCKET_NAME=`echo $PRE_LAMBDA_BUCKET_NAME | sed "s/PROJECT_NAME/$PROJECT_NAME/g"`
+LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name microservice-lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 VERSION_ID=$ENVIRONMENT

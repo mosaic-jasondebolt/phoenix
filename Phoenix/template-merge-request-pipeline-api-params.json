@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "all",
+    "ProjectName": "PROJECT_NAME",
+    "Version": "latest"
+  }
+}
