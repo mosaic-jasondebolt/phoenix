@@ -4,11 +4,8 @@
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
-      "MinLength": "1",
-      "MaxLength": "20",
-      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
-      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
-      "Type": "String"
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-project-name"
     },
     "PipelineName": {
       "Description": "The name of the CodePipeline.",

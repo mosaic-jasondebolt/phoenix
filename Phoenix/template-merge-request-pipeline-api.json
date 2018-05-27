@@ -3,8 +3,9 @@
   "Description" : "Deploys an API Gateway endpoint that GitLab merge request events can invoke to setup/teardown a review pipeline.",
   "Parameters": {
     "ProjectName": {
-      "Description": "The name of the project.",
-      "Type": "String"
+      "Description": "The name of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-project-name"
     },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
@@ -185,6 +186,7 @@
                 "codepipeline:*",
                 "codebuild:*",
                 "s3:*",
+                "ssm:*",
                 "logs:*",
                 "xray:*",
                 "sts:AssumeRole",

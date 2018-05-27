@@ -53,10 +53,6 @@ def lambda_handler(event, context):
 
     parameters=[
       {
-        'ParameterKey': 'ProjectName',
-        'ParameterValue': repo_name
-      },
-      {
         'ParameterKey': 'PipelineName',
         'ParameterValue': stack_name
       },
