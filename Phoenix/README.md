@@ -151,22 +151,3 @@ trumps all external conventions or style guides.
 
 #### Stack Exports
 * Use the pattern of {ProjectName}-{AWS service or function}-{Environment}-{Resource}. Here's an example:
-```
-"Outputs": {
-    "EndpointAddress": {
-      "Export": {
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
-            "database",
-            {"Ref": "Environment"},
-            "EndpointAddress"
-          ]]
-        }
-      },
-      "Value": {
-        "Fn::GetAtt": ["RDSCluster", "Endpoint.Address"]
-      }
-    }
-  }
-```
