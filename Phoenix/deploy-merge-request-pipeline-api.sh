@@ -11,9 +11,9 @@ set -e
 #   ./deploy-merge-request-pipeline-api.sh update
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-merge-request-pipeline-api-params.json`
-MICROSERVICE_BUCKET_NAME=`jq -r '.Parameters.MicroserviceBucketName' template-microservice-params.json | sed 's/PROJECT_NAME/'$PROJECT_NAME'/g'`
+MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name microservice-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 VERSION_ID=`jq -r '.Parameters.Version' template-merge-request-pipeline-api-params.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 
