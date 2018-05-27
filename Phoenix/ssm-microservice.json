@@ -138,7 +138,7 @@
     "ProjectNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "project-name",
+        "Name": "microservice-project-name",
         "Type": "String",
         "Value": {"Ref": "ProjectName"},
         "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
@@ -148,7 +148,7 @@
     "CodeBuildDockerImageParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "code-build-docker-image",
+        "Name": "microservice-code-build-docker-image",
         "Type": "String",
         "Value": {"Ref": "CodeBuildDockerImage"},
         "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with."
@@ -157,7 +157,7 @@
     "CodeBuildBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "code-build-bucket-name",
+        "Name": "microservice-code-build-bucket-name",
         "Type": "String",
         "Value": {"Fn::If": [
           "HasCodeBuildBucketName",
@@ -174,7 +174,7 @@
     "CodePipelineBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "code-pipeline-bucket-name",
+        "Name": "microservice-code-pipeline-bucket-name",
         "Type": "String",
         "Value": {"Fn::If": [
           "HasCodePipelineBucketName",
@@ -208,7 +208,7 @@
     "JenkinsBackupBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "jenkins-backup-bucket-name",
+        "Name": "microservice-jenkins-backup-bucket-name",
         "Type": "String",
         "Value": {"Fn::If": [
           "HasJenkinsBackupBucketName",
@@ -225,7 +225,7 @@
     "DomainParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "domain",
+        "Name": "microservice-domain",
         "Type": "String",
         "Value": {"Ref": "Domain"},
         "Description": "The domain name that this service will fall under."
@@ -234,7 +234,7 @@
     "SSLCertificateARNParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "ssl-certificate-arn",
+        "Name": "microservice-ssl-certificate-arn",
         "Type": "String",
         "Value": {"Ref": "SSLCertificateARN"},
         "Description": "The AWS ACM Certificate ARN."
@@ -243,7 +243,7 @@
     "HostedZoneIdParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "hosted-zone-id",
+        "Name": "microservice-hosted-zone-id",
         "Type": "String",
         "Value": {"Ref": "HostedZoneId"},
         "Description": "The Route53 hosted zone id that this service will fall under."
@@ -252,7 +252,7 @@
     "KeyPairNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "key-pair-name",
+        "Name": "microservice-key-pair-name",
         "Type": "String",
         "Value": {"Ref": "KeyPairName"},
         "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
@@ -261,7 +261,7 @@
     "LambdaBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "lambda-bucket-name",
+        "Name": "microservice-lambda-bucket-name",
         "Type": "String",
         "Value": {"Fn::If": [
           "HasLambdaBucketName",
@@ -278,7 +278,7 @@
     "LoadBalancerLogsBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "load-balancer-logs-bucket-name",
+        "Name": "microservice-load-balancer-logs-bucket-name",
         "Type": "String",
         "Value": {"Fn::If": [
           "HasLoadBalancerLogsBucketName",
@@ -295,7 +295,7 @@
     "SecretsBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "secrets-bucket-name",
+        "Name": "microservice-secrets-bucket-name",
         "Type": "String",
         "Value": {"Fn::If": [
           "HasSecretsBucketName",
@@ -312,7 +312,7 @@
     "EncryptionKeyNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "encryption-key-name",
+        "Name": "microservice-encryption-key-name",
         "Type": "String",
         "Value": {"Fn::If": [
           "HasEncryptionKeyName",
@@ -329,7 +329,7 @@
     "ProjectDescriptionParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "project-description",
+        "Name": "microservice-project-description",
         "Type": "String",
         "Value": {"Ref": "ProjectDescription"},
         "Description": "A description of your project."
@@ -338,7 +338,7 @@
     "NotificationEmailParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "notification-email",
+        "Name": "microservice-notification-email",
         "Type": "String",
         "Value": {"Ref": "NotificationEmail"},
         "Description": "The email to send notifications to for this microservice"
@@ -347,7 +347,7 @@
     "IAMRoleParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "iam-role",
+        "Name": "microservice-iam-role",
         "Type": "String",
         "Value": {"Ref": "IAMRole"},
         "Description": "The IAM role that has access to all of the projects resources."

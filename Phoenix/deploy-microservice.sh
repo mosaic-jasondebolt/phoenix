@@ -14,8 +14,8 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-MICROSERVICE_STACK_NAME=$PROJECT_NAME-microservice
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+STACK_NAME=$PROJECT_NAME-microservice
 MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name microservice-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 # Generate the MICROSERVICE bucket if it doesn't already exist
@@ -27,6 +27,6 @@ aws s3 sync ./lambda s3://$MICROSERVICE_BUCKET_NAME/lambda/ --include "*" --dele
 aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json
 
 aws cloudformation $1-stack \
-    --stack-name $MICROSERVICE_STACK_NAME \
+    --stack-name $STACK_NAME \
     --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json \
     --capabilities CAPABILITY_NAMED_IAM

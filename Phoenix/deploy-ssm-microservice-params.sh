@@ -14,18 +14,18 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-ssm-parameters-params.json`
-SSM_STACK_NAME=$PROJECT_NAME-ssm-parameters
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' ssm-microservice-params.json)
+STACK_NAME=$PROJECT_NAME-ssm-microservice-params
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py template-ssm-parameters-params.json cloudformation > temp1.json
+python parameters_generator.py ssm-microservice-params.json cloudformation > temp1.json
 
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-body file://template-ssm-parameters.json
+aws cloudformation validate-template --template-body file://ssm-microservice.json
 
 aws cloudformation $1-stack \
-    --stack-name $SSM_STACK_NAME \
-    --template-body file://template-ssm-parameters.json \
+    --stack-name $STACK_NAME \
+    --template-body file://ssm-microservice.json \
     --parameters file://temp1.json \
     --capabilities CAPABILITY_NAMED_IAM
 
