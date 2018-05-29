@@ -345,18 +345,8 @@
           "Ref": "CodeBuildServiceRoleArn"
         },
         "Source": {
-          "BuildSpec": "Phoenix/buildspec-unit-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {
-                "Ref": "ProjectName"
-              }
-            ]]
-          }
+          "BuildSpec": "Phoenix/buildspec-merge-request-gitlab-notify.yml",
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
