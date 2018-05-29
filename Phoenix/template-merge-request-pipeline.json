@@ -39,15 +39,7 @@
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
-        "RoleArn" : {
-          "Fn::ImportValue": {
-            "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
-              "microservice",
-              "CodePipelineServiceRoleArn"
-            ]]
-          }
-        },
+        "RoleArn" : {"Ref": "CodePipelineServiceRoleArn"},
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "SourceBranch"},
