@@ -100,9 +100,8 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {
-                        "Ref": "ProjectName"
-                      },
+                      {"Ref": "ProjectName"},
+                      {"Ref": "SourceBranch"},
                       "merge-request"
                     ]]
                   }
@@ -124,6 +123,7 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
+                      {"Ref": "SourceBranch"},
                       "unit-test"
                     ]]
                   }
@@ -145,6 +145,7 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
+                      {"Ref": "SourceBranch"},
                       "lint"
                     ]]
                   }
@@ -166,6 +167,7 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
+                      {"Ref": "SourceBranch"},
                       "calculate-costs"
                     ]]
                   }
@@ -187,6 +189,7 @@
                   "ProjectName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
+                      {"Ref": "SourceBranch"},
                       "static-analysis"
                     ]]
                   }
@@ -263,6 +266,7 @@
             "Value": {"Fn::Join": ["-", [
               {"Ref": "ProjectName"},
               "codebuild",
+              {"Ref": "SourceBranch"},
               "merge-request",
               "sg"
             ]]}
@@ -331,9 +335,9 @@
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
-          "Fn::Join": ["", [{
-              "Ref": "ProjectName"
-            },
+          "Fn::Join": ["", [
+            {"Ref": "ProjectName"},
+            {"Ref": "SourceBranch"},
             "-unit-test"
           ]]
         },
@@ -342,17 +346,7 @@
         },
         "Source": {
           "BuildSpec": "Phoenix/buildspec-unit-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {
-                "Ref": "ProjectName"
-              }
-            ]]
-          }
+          "Type": "CODECOMMIT"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
