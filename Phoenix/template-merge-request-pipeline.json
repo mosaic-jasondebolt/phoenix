@@ -24,15 +24,25 @@
       "Description": "The name of the source branch which triggers this pipeline",
       "Type": "String"
     },
+    "CodePipelineBucketName": {
+      "Description": "The bucket name in which CodePipeline artifacts will be stored.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-code-pipeline-bucket-name"
+    },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "microservice-code-build-docker-image"
     },
-    "CodeBuildServiceRole": {
+    "CodeBuildServiceRoleArn": {
       "Description": "The CodeBuild service role that CodeBuild jobs assume.",
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "microservice-code-build-service-role-arn"
+    },
+    "CodePipelineServiceRoleArn": {
+      "Description": "The CodePipeline service role that CodePipeline pipelines use.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-code-pipeline-service-role-arn"
     }
   },
   "Resources": {
@@ -213,15 +223,7 @@
         ],
         "ArtifactStore": {
           "Type": "S3",
-          "Location" : {
-            "Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                {"Ref": "ProjectName"},
-                "microservice",
-                "CodePipelineBucketName"
-              ]]
-            }
-          }
+          "Location" : {"Ref": "CodePipelineBucketName"}
         }
       }
     },
@@ -336,7 +338,7 @@
           ]]
         },
         "ServiceRole": {
-          "Ref": "CodeBuildServiceRole"
+          "Ref": "CodeBuildServiceRoleArn"
         },
         "Source": {
           "BuildSpec": "Phoenix/buildspec-unit-test.yml",
