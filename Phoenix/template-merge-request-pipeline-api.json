@@ -183,6 +183,7 @@
                 "codepipeline:*",
                 "codebuild:*",
                 "s3:*",
+                "ec2:*",
                 "ssm:*",
                 "logs:*",
                 "xray:*",
