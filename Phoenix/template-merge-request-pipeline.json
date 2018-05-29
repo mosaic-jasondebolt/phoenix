@@ -7,6 +7,11 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "microservice-project-name"
     },
+    "ProjectDescription": {
+      "Description": "A description of your project",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-project-description"
+    },
     "PipelineName": {
       "Description": "The name of the CodePipeline.",
       "Type": "String"
@@ -18,6 +23,16 @@
     "SourceBranch": {
       "Description": "The name of the source branch which triggers this pipeline",
       "Type": "String"
+    },
+    "CodeBuildDockerImage": {
+      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-code-build-docker-image"
+    },
+    "CodeBuildServiceRole": {
+      "Description": "The CodeBuild service role that CodeBuild jobs assume.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "microservice-code-build-service-role-arn"
     }
   },
   "Resources": {
