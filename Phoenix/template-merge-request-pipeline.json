@@ -239,15 +239,16 @@
             },
             "CodeBuild",
             "MR",
+            {"Ref": "SourceBranch"},
             "SG"
           ]]
         },
         "GroupDescription": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
             "CodeBuild",
             "MR",
+            {"Ref": "SourceBranch"},
             "SG"
           ]]
         },
