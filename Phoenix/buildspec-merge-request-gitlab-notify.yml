@@ -50,7 +50,7 @@ phases:
         ENTRYPOINT ["gitlab", "--config-file", "/python-gitlab.cfg"]
         HERE
       - docker build -t python-gitlab:latest .
-      - docker run -it -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request list --project-id 271
+      - docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request list --project-id 271
   post_build:
     commands:
       - echo Build completed on `date`
