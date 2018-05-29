@@ -315,7 +315,6 @@
           },
           "Packaging": "NONE"
         },
-        "BadgeEnabled": "true",
         "Description": {
           "Ref": "ProjectDescription"
         },
