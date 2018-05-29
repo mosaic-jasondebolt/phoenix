@@ -17,11 +17,40 @@ phases:
       - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME
       - VERSION_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=$VERSION_ID
+      - GITLAB_ACCESS_TOKEN=$(aws ssm get-parameter --name $PROJECT_NAME-gitlab-access-token --with-decryption | jq '.Parameter.Value' | sed -e s/\"//g)
   build:
     commands:
       - echo Build started on `date`
-      - echo Running unit tests on source code...
-      - #sbt test
+      - |-
+        echo "Writing a python-gitlab.cfg config file"
+        cat << HERE >> $CODEBUILD_SRC_DIR/python-gitlab.cfg
+        [global]
+        default = gitlab
+        ssl_verify = true
+        timeout = 5
+        api_version = 3
+
+        [gitlab]
+        url = https://gitlab.intranet.solarmosaic.com
+        private_token = $GITLAB_ACCESS_TOKEN
+        api_version = 4
+        HERE
+      - |-
+        echo "Writing a gitlab API dockerfile"
+        cat << HERE >> $CODEBUILD_SRC_DIR/Dockerfile
+        FROM python:slim
+
+        # Install python-gitlab
+        RUN pip install --upgrade python-gitlab
+
+        # Copy sample configuration file
+        COPY python-gitlab.cfg /
+
+        # Define the entrypoint that enable a configuration file
+        ENTRYPOINT ["gitlab", "--config-file", "/python-gitlab.cfg"]
+        HERE
+      - docker build -t python-gitlab:latest .
+      - docker run -it -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request list --project-id 271
   post_build:
     commands:
       - echo Build completed on `date`
