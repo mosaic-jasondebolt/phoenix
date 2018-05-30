@@ -15,9 +15,9 @@ phases:
       - # We assume that the region that the CodeBuild nodes are running (AWS_DEFAULT_REGION) is the same as all other stack resource.
       - aws --version
       - PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-      - CODEBUILD_RESOLVED_SOURCE_VERSION=123
-      - GITLAB_PROJECT_ID=258
-      - MERGE_REQUEST_INTERNAL_ID=21
+      - CODEBUILD_RESOLVED_SOURCE_VERSION='123'
+      - GITLAB_PROJECT_ID='258'
+      - MERGE_REQUEST_INTERNAL_ID='21'
       - PIPELINE_NAME='phoenix'
   build:
     commands:
