@@ -32,12 +32,12 @@ def lambda_handler(event, context):
     path_with_namespace = obj.project.path_with_namespace               # namespace/reponame
     path_with_namespace_dashes = path_with_namespace.replace('/', '-')  # namespace-reponame
     repo_name = path_with_namespace.split('/')[-1]                      # reponame
-    project_id = obj.project.id        # The numeric ID that identifies the GitLab project
+    project_id = str(obj.project.id)        # The numeric ID that identifies the GitLab project
 
     # See https://docs.gitlab.com/ee/api/merge_requests.html
     merge_state = obj.object_attributes.state             # open, closed, merged
     merge_status = obj.object_attributes.merge_status     # can_be_merged, cannot_be_merged, unchecked
-    merge_request_internal_id = obj.object_attributes.iid # will be 1 when merge request is initialized.
+    merge_request_internal_id = str(obj.object_attributes.iid) # will be 1 when merge request is initialized.
 
     source_branch = obj.object_attributes.source_branch.lower()
 
