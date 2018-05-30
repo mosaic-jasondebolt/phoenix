@@ -61,6 +61,14 @@ def lambda_handler(event, context):
         'ParameterValue': repo_name
       },
       {
+        'ParameterKey': 'GitlabProjectId',
+        'ParameterValue': project_id
+      },
+      {
+        'ParameterKey': 'MergeRequestInternalId',
+        'ParameterValue': merge_request_internal_id
+      },
+      {
         'ParameterKey': 'SourceBranch',
         'ParameterValue': obj.object_attributes.source_branch
       }

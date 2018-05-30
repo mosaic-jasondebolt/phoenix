@@ -20,6 +20,14 @@
       "Description": "The name of the CodeCommit git repo",
       "Type": "String"
     },
+    "GitlabProjectId": {
+      "Description": "The project id if the Gitlab project",
+      "Type": "String"
+    },
+    "MergeRequestInternalId": {
+      "Description": "The merge request internal id of the gitlab merge request",
+      "Type": "String"
+    },
     "SourceBranch": {
       "Description": "The name of the source branch which triggers this pipeline",
       "Type": "String"
@@ -50,12 +58,7 @@
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
         "RoleArn" : {"Ref": "CodePipelineServiceRoleArn"},
-        "Name": {
-          "Fn::Join": ["-", [
-            {"Ref": "SourceBranch"},
-            "merge-request-branch"
-          ]]
-        },
+        "Name": {"Ref": "PipelineName"},
         "Stages": [{
             "Name": "Source",
             "Actions": [{
@@ -100,8 +103,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      {"Ref": "SourceBranch"},
+                      {"Ref": "PipelineName"},
                       "merge-request"
                     ]]
                   }
@@ -122,8 +124,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      {"Ref": "SourceBranch"},
+                      {"Ref": "PipelineName"},
                       "unit-test"
                     ]]
                   }
@@ -144,8 +145,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      {"Ref": "SourceBranch"},
+                      {"Ref": "PipelineName"},
                       "lint"
                     ]]
                   }
@@ -166,8 +166,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      {"Ref": "SourceBranch"},
+                      {"Ref": "PipelineName"},
                       "calculate-costs"
                     ]]
                   }
@@ -188,8 +187,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      {"Ref": "SourceBranch"},
+                      {"Ref": "PipelineName"},
                       "static-analysis"
                     ]]
                   }
@@ -239,7 +237,7 @@
             },
             "CodeBuild",
             "MR",
-            {"Ref": "SourceBranch"},
+            {"Ref": "PipelineName"},
             "SG"
           ]]
         },
@@ -248,7 +246,7 @@
             {"Ref": "ProjectName"},
             "CodeBuild",
             "MR",
-            {"Ref": "SourceBranch"},
+            {"Ref": "PipelineName"},
             "SG"
           ]]
         },
@@ -265,9 +263,8 @@
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
               "codebuild",
-              {"Ref": "SourceBranch"},
+              {"Ref": "PipelineName"},
               "merge-request",
               "sg"
             ]]}
@@ -326,6 +323,21 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "GITLAB_PROJECT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "GitlabProjectId"}
+            },
+            {
+              "Name" : "MERGE_REQUEST_INTERNAL_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "MergeRequestInternalId"}
+            },
+            {
+              "Name" : "PIPELINE_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "PipelineName"}
             }
           ],
           "Image": {
@@ -336,8 +348,7 @@
         },
         "Name": {
           "Fn::Join": ["", [
-            {"Ref": "ProjectName"},
-            {"Ref": "SourceBranch"},
+            {"Ref": "PipelineName"},
             "-unit-test"
           ]]
         },
