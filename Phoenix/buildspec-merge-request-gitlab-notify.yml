@@ -48,7 +48,6 @@ phases:
         HERE
       - docker build -t python-gitlab:latest .
       - |-
-        echo $CODEBUILD_RESOLVED_SOURCE_VERSION
         GITLAB_PROJECT_ID=258
         MERGE_REQUEST_INTERNAL_ID=21
         PIPELINE_NAME='phoenix'
