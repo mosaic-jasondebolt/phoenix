@@ -21,6 +21,7 @@ phases:
   build:
     commands:
       - echo Build started on `date`
+      - #docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id 258 --mr-iid 21 --body '<b>Build Status</b> &nbsp; &nbsp; &nbsp; :thumbsup: :100: @ commit $CODEBUILD_RESOLVED_SOURCE_VERSION'
       - |-
         echo "Writing a python-gitlab.cfg config file"
         cat << HERE >> $CODEBUILD_SRC_DIR/python-gitlab.cfg
@@ -51,7 +52,7 @@ phases:
         HERE
       - docker build -t python-gitlab:latest .
       - |-
-        docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id 258 --mr-iid 21 --body '<b>Build Status</b> &nbsp; &nbsp; &nbsp; :thumbsup: :100: @ commit $CODEBUILD_RESOLVED_SOURCE_VERSION'
+        docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request list --project-id 271
   post_build:
     commands:
       - echo Build completed on `date`
