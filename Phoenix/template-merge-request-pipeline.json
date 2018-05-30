@@ -22,11 +22,11 @@
     },
     "GitlabProjectId": {
       "Description": "The project id if the Gitlab project",
-      "Type": "String"
+      "Type": "Number"
     },
     "MergeRequestInternalId": {
       "Description": "The merge request internal id of the gitlab merge request",
-      "Type": "String"
+      "Type": "Number"
     },
     "SourceBranch": {
       "Description": "The name of the source branch which triggers this pipeline",
