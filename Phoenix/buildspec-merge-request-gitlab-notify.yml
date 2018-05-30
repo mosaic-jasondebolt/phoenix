@@ -3,6 +3,7 @@ version: 0.2
 env:
   parameter-store:
     GITLAB_ACCESS_TOKEN: codebuild-gitlab-access-token
+    PROJECT_NAME: microservice-project-name
 
 phases:
   install:
@@ -14,7 +15,6 @@ phases:
       - # We set AWS_ACCOUNT_ID as an enviornment variable in the CloudFormation template which creates this CodeBuild job.
       - # We assume that the region that the CodeBuild nodes are running (AWS_DEFAULT_REGION) is the same as all other stack resource.
       - aws --version
-      - PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
   build:
     commands:
       - echo Build started on `date`

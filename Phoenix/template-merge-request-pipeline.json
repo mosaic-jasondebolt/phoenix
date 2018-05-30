@@ -103,7 +103,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "PipelineName"},
+                      {"Ref": "ProjectName"},
                       "merge-request"
                     ]]
                   }
@@ -124,7 +124,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "PipelineName"},
+                      {"Ref": "ProjectName"},
                       "unit-test"
                     ]]
                   }
@@ -145,7 +145,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "PipelineName"},
+                      {"Ref": "ProjectName"},
                       "lint"
                     ]]
                   }
@@ -166,7 +166,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "PipelineName"},
+                      {"Ref": "ProjectName"},
                       "calculate-costs"
                     ]]
                   }
@@ -187,7 +187,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "PipelineName"},
+                      {"Ref": "ProjectName"},
                       "static-analysis"
                     ]]
                   }
@@ -213,7 +213,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      {"Ref": "PipelineName"},
                       "gitlab-notify"
                     ]]
                   }
@@ -349,7 +349,7 @@
         "Name": {
           "Fn::Join": ["", [
             {"Ref": "PipelineName"},
-            "-unit-test"
+            "-gitlab-notify"
           ]]
         },
         "ServiceRole": {

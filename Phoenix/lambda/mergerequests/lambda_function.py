@@ -41,7 +41,7 @@ def lambda_handler(event, context):
 
     source_branch = obj.object_attributes.source_branch.lower()
 
-    stack_name = '{repo_name}-{source_branch}-{merge_request_internal_id}'.format(
+    stack_name = '{repo_name}-merge-request-{source_branch}-{merge_request_internal_id}'.format(
       repo_name=repo_name,
       source_branch=source_branch,
       merge_request_internal_id=merge_request_internal_id
