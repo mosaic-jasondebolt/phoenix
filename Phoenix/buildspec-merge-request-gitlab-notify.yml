@@ -1,5 +1,9 @@
 version: 0.2
 
+env:
+  parameter-store:
+    GITLAB_ACCESS_TOKEN: codebuild-gitlab-access-token
+
 phases:
   install:
     commands:
@@ -11,7 +15,7 @@ phases:
       - # We assume that the region that the CodeBuild nodes are running (AWS_DEFAULT_REGION) is the same as all other stack resource.
       - aws --version
       - PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-      - GITLAB_ACCESS_TOKEN=$(aws ssm get-parameter --name $PROJECT_NAME-gitlab-access-token --with-decryption | jq '.Parameter.Value' | sed -e s/\"//g)
+      - #GITLAB_ACCESS_TOKEN=$(aws ssm get-parameter --name $PROJECT_NAME-gitlab-access-token --with-decryption | jq '.Parameter.Value' | sed -e s/\"//g)
   build:
     commands:
       - echo Build started on `date`
@@ -47,7 +51,7 @@ phases:
       - docker build -t python-gitlab:latest .
       - |-
         echo $CODEBUILD_RESOLVED_SOURCE_VERSION
-        docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id 258 --mr-iid 21 --body '<b>Build Status</b> &nbsp; &nbsp; &nbsp; :thumbsup: :godmode: @ commit '$CODEBUILD_RESOLVED_SOURCE_VERSION
+        docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id 258 --mr-iid 21 --body '<b>Build Status</b> &nbsp; &nbsp; &nbsp; :thumbsup: @ commit '$CODEBUILD_RESOLVED_SOURCE_VERSION
   post_build:
     commands:
       - echo Build completed on `date`
