@@ -48,6 +48,7 @@ phases:
         HERE
       - docker build -t python-gitlab:latest .
       - |-
+        CODEBUILD_RESOLVED_SOURCE_VERSION=123
         echo $CODEBUILD_RESOLVED_SOURCE_VERSION
         GITLAB_PROJECT_ID=258
         MERGE_REQUEST_INTERNAL_ID=21
