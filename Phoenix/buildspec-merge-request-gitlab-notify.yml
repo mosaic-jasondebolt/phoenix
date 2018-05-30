@@ -47,7 +47,6 @@ phases:
       - docker build -t python-gitlab:latest .
       - |-
         echo $CODEBUILD_RESOLVED_SOURCE_VERSION
-        docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id 258 --mr-iid 21 --body 'Commit '$CODEBUILD_RESOLVED_SOURCE_VERSION' passed all CodeBuild tests'
         docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id 258 --mr-iid 21 --body '<b>Build Status</b> &nbsp; &nbsp; &nbsp; :thumbsup: :godmode: @ commit '$CODEBUILD_RESOLVED_SOURCE_VERSION
   post_build:
     commands:
