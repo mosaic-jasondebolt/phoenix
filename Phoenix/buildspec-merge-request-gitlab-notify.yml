@@ -51,6 +51,8 @@ phases:
         echo $CODEBUILD_RESOLVED_SOURCE_VERSION
         echo docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id $GITLAB_PROJECT_ID --mr-iid $MERGE_REQUEST_INTERNAL_ID --body '<a href="https://console.aws.amazon.com/codepipeline/home?region='$AWS_DEFAULT_REGION'#/view/'$PIPELINE_NAME'">Build Status</a> &nbsp; &nbsp; :thumbsup: @ commit '$CODEBUILD_RESOLVED_SOURCE_VERSION
         docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id $GITLAB_PROJECT_ID --mr-iid $MERGE_REQUEST_INTERNAL_ID --body '<a href="https://console.aws.amazon.com/codepipeline/home?region='$AWS_DEFAULT_REGION'#/view/'$PIPELINE_NAME'">Build Status</a> &nbsp; &nbsp; :thumbsup: @ commit '$CODEBUILD_RESOLVED_SOURCE_VERSION
+        # Approve the merge request
+        curl -X POST --header "Private-Token: $GITLAB_ACCESS_TOKEN" https://gitlab.intranet.solarmosaic.com/api/v4/projects/$GITLAB_PROJECT_ID/merge_requests/$MERGE_REQUEST_INTERNAL_ID/approve
   post_build:
     commands:
       - echo Build completed on `date`
