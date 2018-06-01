@@ -18,41 +18,7 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - |-
-        echo "Writing a python-gitlab.cfg config file"
-        cat << HERE >> $CODEBUILD_SRC_DIR/python-gitlab.cfg
-        [global]
-        default = gitlab
-        ssl_verify = true
-        timeout = 5
-        api_version = 3
-
-        [gitlab]
-        url = https://gitlab.intranet.solarmosaic.com
-        private_token = $GITLAB_ACCESS_TOKEN
-        api_version = 4
-        HERE
-      - |-
-        echo "Writing a gitlab API dockerfile"
-        cat << HERE >> $CODEBUILD_SRC_DIR/Dockerfile
-        FROM python:slim
-
-        # Install python-gitlab
-        RUN pip install --upgrade python-gitlab
-
-        # Copy sample configuration file
-        COPY python-gitlab.cfg /
-
-        # Define the entrypoint that enable a configuration file
-        ENTRYPOINT ["gitlab", "--config-file", "/python-gitlab.cfg"]
-        HERE
-      - docker build -t python-gitlab:latest .
-      - |-
-        echo $CODEBUILD_RESOLVED_SOURCE_VERSION
-        echo docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id $GITLAB_PROJECT_ID --mr-iid $MERGE_REQUEST_INTERNAL_ID --body '<a href="https://console.aws.amazon.com/codepipeline/home?region='$AWS_DEFAULT_REGION'#/view/'$PIPELINE_NAME'">Build Status</a> &nbsp; &nbsp; :thumbsup: @ commit '$CODEBUILD_RESOLVED_SOURCE_VERSION
-        docker run -i -v $CODEBUILD_SRC_DIR/python-gitlab.cfg:/python-gitlab.cfg python-gitlab:latest project-merge-request-note create --project-id $GITLAB_PROJECT_ID --mr-iid $MERGE_REQUEST_INTERNAL_ID --body '<a href="https://console.aws.amazon.com/codepipeline/home?region='$AWS_DEFAULT_REGION'#/view/'$PIPELINE_NAME'">Build Status</a> &nbsp; &nbsp; :thumbsup: @ commit '$CODEBUILD_RESOLVED_SOURCE_VERSION
-        # Approve the merge request
-        curl -X POST --header "Private-Token: $GITLAB_ACCESS_TOKEN" https://gitlab.intranet.solarmosaic.com/api/v4/projects/$GITLAB_PROJECT_ID/merge_requests/$MERGE_REQUEST_INTERNAL_ID/approve
+      - python notify_gitlab.py
   post_build:
     commands:
       - echo Build completed on `date`
