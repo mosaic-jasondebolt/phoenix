@@ -92,6 +92,9 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
+      - # Notify Gitlab and alter t-ecs-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
+      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py
+      - # Push docker files
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
@@ -104,7 +107,7 @@ artifacts:
       - t-database-params-prod.json
       - # Docker/ECS
       - template-ecs.json
-      - t-ecs-params-testing.json
+      - t-ecs-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
       - t-ecs-params-prod.json
       - # Lambda
       - template-lambda.json

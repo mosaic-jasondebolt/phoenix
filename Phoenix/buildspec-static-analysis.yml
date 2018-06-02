@@ -31,3 +31,5 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
+      - # Notify Gitlab of build status if certain environment variables are present (see the code for details)
+      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py

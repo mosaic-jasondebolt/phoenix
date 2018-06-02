@@ -103,8 +103,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "merge-request"
+                      {"Ref": "ProjectName"}
                     ]]
                   }
                 }
@@ -196,27 +195,33 @@
             ]
           },
           {
-            "Name": "NotifyGitlab",
+            "Name": "DeployToECS",
             "Actions": [
               {
-                "Name": "NotifyGitlab",
+                "Name": "ECS",
                 "ActionTypeId": {
-                  "Category": "Test",
+                  "Category": "Deploy",
                   "Owner": "AWS",
                   "Version": "1",
-                  "Provider": "CodeBuild"
+                  "Provider": "CloudFormation"
                 },
                 "InputArtifacts": [{
-                  "Name": "SourceOutput"
+                  "Name": "BuildOutput"
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": {
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "PipelineName"},
-                      "gitlab-notify"
+                      "ecs",
+                      "deploy"
                     ]]
-                  }
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ecs.json"
                 }
               }
             ]
@@ -272,7 +277,7 @@
         ]
       }
     },
-    "CodeBuildGitlabNotify": {
+    "CodeBuild": {
       "Type": "AWS::CodeBuild::Project",
       "Properties": {
         "VpcConfig": {
@@ -349,14 +354,14 @@
         "Name": {
           "Fn::Join": ["", [
             {"Ref": "PipelineName"},
-            "-gitlab-notify"
+            "-tify"
           ]]
         },
         "ServiceRole": {
           "Ref": "CodeBuildServiceRoleArn"
         },
         "Source": {
-          "BuildSpec": "Phoenix/buildspec-merge-request-gitlab-notify.yml",
+          "BuildSpec": "Phoenix/buildspec.yml",
           "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
