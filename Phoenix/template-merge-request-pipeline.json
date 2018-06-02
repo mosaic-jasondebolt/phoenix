@@ -101,11 +101,7 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"}
-                    ]]
-                  }
+                  "ProjectName": {"Ref": "PipelineName"}
                 }
               },
               {
@@ -353,8 +349,7 @@
         },
         "Name": {
           "Fn::Join": ["", [
-            {"Ref": "PipelineName"},
-            "-tify"
+            {"Ref": "PipelineName"}
           ]]
         },
         "ServiceRole": {
