@@ -35,7 +35,7 @@ def isMergeRequest():
     # CloudFormation environment variable injection
     return (
         os.environ.get('GITLAB_ACCESS_TOKEN') and
-        os.environ.get('PROJECT_ID') and
+        os.environ.get('PROJECT_NAME') and
         os.environ.get('PIPELINE_NAME') and
         os.environ.get('GITLAB_PROJECT_ID') and
         os.environ.get('MERGE_REQUEST_INTERNAL_ID')
@@ -91,7 +91,7 @@ def _parse_json(path):
 def main():
     if isMergeRequest():
         gitlab_token = os.environ.get('GITLAB_ACCESS_TOKEN')
-        project_id = os.environ.get('PROJECT_ID')
+        project_id = os.environ.get('PROJECT_NAME')
         pipeline_name = os.environ.get('PIPELINE_NAME')
         gitlab_project_id = os.environ.get('GITLAB_PROJECT_ID')
         merge_request_id = os.environ.get('MERGE_REQUEST_INTERNAL_ID')

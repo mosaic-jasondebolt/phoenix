@@ -47,6 +47,11 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "microservice-code-build-service-role-arn"
     },
+    "CodeBuildGitlabAccessToken": {
+      "Description": "The Gitlab access token which allows CodeBuild to access the GitLab repo.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "codebuild-gitlab-access-token"
+    },
     "CodePipelineServiceRoleArn": {
       "Description": "The CodePipeline service role that CodePipeline pipelines use.",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -343,6 +348,11 @@
               "Name" : "PIPELINE_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "PipelineName"}
+            },
+            {
+              "Name" : "GITLAB_ACCESS_TOKEN",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "CodeBuildGitlabAccessToken"}
             }
           ],
           "Image": {
