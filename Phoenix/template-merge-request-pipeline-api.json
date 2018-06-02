@@ -117,6 +117,25 @@
         }
       }
     },
+    "LambdaSG": {
+      "Properties": {
+        "GroupDescription": "Merge Request Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
     "LambdaMergeRequests": {
       "Type": "AWS::Lambda::Function",
       "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
@@ -133,6 +152,15 @@
           ]]}
         },
         "Runtime": "python3.6",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
         "Timeout": "25"
       }
     },
