@@ -71,7 +71,10 @@ def _notify_gitlab(code_build_url, gitlab_url):
     print(response)
 
 def _generate_dev_ecs_params():
-    ecs_params = _parse_json('t-ecs-params-testing.json')
+    file_path = os.path.join(
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-params-testing.json'
+    )
+    ecs_params = _parse_json(file_path)
     print(json.dumps(ecs_params, indent=2))
 
     # Swap out the testing environment for a new merge request specific environment
@@ -89,8 +92,6 @@ def _parse_json(path):
         raise(e)
 
 def main():
-    for key in os.environ:
-        print(key, os.environ[key])
     if isMergeRequest():
         gitlab_token = os.environ.get('GITLAB_ACCESS_TOKEN')
         project_id = os.environ.get('PROJECT_NAME')
