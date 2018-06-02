@@ -89,6 +89,8 @@ def _parse_json(path):
         raise(e)
 
 def main():
+    for key in os.environ:
+        print(key, os.environ[key])
     if isMergeRequest():
         gitlab_token = os.environ.get('GITLAB_ACCESS_TOKEN')
         project_id = os.environ.get('PROJECT_NAME')
@@ -106,9 +108,8 @@ def main():
         code_build_body = _get_code_build_body(code_build_url, build_name, source_version)
         gitlab_url = _get_gitlab_url(project_id, merge_request_id, code_build_body)
 
-        #_notify_gitlab(code_build_url, gitlab_url)
+        _notify_gitlab(code_build_url, gitlab_url)
         _generate_dev_ecs_params()
-
     else:
         print('not all environment variable for gitlab notification are present')
 
