@@ -185,6 +185,7 @@
                 "s3:*",
                 "ec2:*",
                 "ssm:*",
+                "kms:*",
                 "logs:*",
                 "xray:*",
                 "sts:AssumeRole",
