@@ -38,7 +38,7 @@ def isMergeRequest():
         os.environ.get('PROJECT_NAME') and
         os.environ.get('PIPELINE_NAME') and
         os.environ.get('GITLAB_PROJECT_ID') and
-        os.environ.get('MERGE_REQUEST_INTERNAL_ID')
+        os.environ.get('MERGE_REQUEST_INTERNAL_ID') # This env variable is inject via cloudformation into the CodeBuild job
     )
 
 def _get_code_build_url(region, build_name, build_id):
