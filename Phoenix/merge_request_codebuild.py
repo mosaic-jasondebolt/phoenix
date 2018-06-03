@@ -56,21 +56,38 @@ def _get_code_build_body(code_build_url, build_name, source_version):
             source_version=source_version)
     return urllib.quote(body)
 
-def _get_gitlab_url(project_id, merge_request_id, code_build_body):
+def _get_gitlab_merge_request_approval_notify_url(
+        gitlab_project_id, merge_request_id, code_build_body):
     return (
-        'https://gitlab.intranet.solarmosaic.com/api/v4/projects/{project_id}/'
+        'https://gitlab.intranet.solarmosaic.com/api/v4/projects/{gitlab_project_id}/'
         'merge_requests/{merge_request_id}/notes?body={body}').format(
-            project_id=project_id, merge_request_id=merge_request_id,
+            gitlab_project_id=gitlab_project_id, merge_request_id=merge_request_id,
             body=code_build_body)
 
-def _notify_gitlab(code_build_url, gitlab_url):
-    print("Notifying gitlab")
+def _get_gitlab_merge_request_approval_url(gitlab_project_id, merge_request_id):
+    return (
+        'https://gitlab.intranet.solarmosaic.com/api/v4/projects/{gitlab_project_id}/'
+        'merge_requests/{merge_request_id}/approve').format(
+            gitlab_project_id=gitlab_project_id,
+            merge_request_id=merge_request_id)
+
+def _send_gitlab_approval_merge_request_note(code_build_url, gitlab_approval_notify_url):
+    print("Sending gitlab approval merge request note")
     headers = {'Private-Token': os.environ.get('GITLAB_ACCESS_TOKEN')}
-    response = requests.post(gitlab_url, headers=headers)
+    print("Gitlab URL: {0}".format(gitlab_approval_notify_url))
+    response = requests.post(gitlab_approval_notify_url, headers=headers)
     print(code_build_url)
     print(response)
 
-def _generate_dev_ecs_params():
+def _execute_merge_request_approval(gitlab_url):
+    print("Executing GitLab merge request approval")
+    headers = {'Private-Token': os.environ.get('GITLAB_ACCESS_TOKEN')}
+    print("Gitlab URL: {0}".format(gitlab_url))
+    response = requests.post(gitlab_url, headers=headers)
+    print(response)
+
+def _generate_ecs_params():
+    print("Saving updated ECS parameter file...")
     file_path = os.path.join(
         os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-params-testing.json'
     )
@@ -94,7 +111,6 @@ def _parse_json(path):
 def main():
     if isMergeRequest():
         gitlab_token = os.environ.get('GITLAB_ACCESS_TOKEN')
-        project_id = os.environ.get('PROJECT_NAME')
         pipeline_name = os.environ.get('PIPELINE_NAME')
         gitlab_project_id = os.environ.get('GITLAB_PROJECT_ID')
         merge_request_id = os.environ.get('MERGE_REQUEST_INTERNAL_ID')
@@ -107,10 +123,18 @@ def main():
 
         code_build_url = _get_code_build_url(code_build_region, build_name, build_id)
         code_build_body = _get_code_build_body(code_build_url, build_name, source_version)
-        gitlab_url = _get_gitlab_url(project_id, merge_request_id, code_build_body)
 
-        _notify_gitlab(code_build_url, gitlab_url)
-        _generate_dev_ecs_params()
+        # Execute GitLab merge request approval
+        gitlab_approval_execution_url = _get_gitlab_merge_request_approval_url(
+            gitlab_project_id, merge_request_id)
+        _execute_merge_request_approval(gitlab_approval_execution_url)
+
+        # Notify GitLab of the CodeBuild approval
+        gitlab_approval_notify_url = _get_gitlab_merge_request_approval_notify_url(
+            gitlab_project_id, merge_request_id, code_build_body)
+        _send_gitlab_approval_merge_request_note(code_build_url, gitlab_approval_notify_url)
+
+        _generate_ecs_params()
     else:
         print('not all environment variable for gitlab notification are present')
 
