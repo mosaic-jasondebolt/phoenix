@@ -133,29 +133,36 @@ def onLintJobCompletion():
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print('You must pass in build, unit-test, or lint as an argument')
+        sys.exit(0)
     # Any of the three following conditions may be met if this is a non-merge request build.
     if not GITLAB_PROJECT_ID:
         print('GITLAB_PROJECT_ID environment variable not set. This might be a non merge-request build.')
+        sys.exit(0)
     if not MERGE_REQUEST_INTERNAL_ID:
         print('MERGE_REQUEST_INTERNAL_ID environment variable not set. This might be a non merge-request build.')
+        sys.exit(0)
 
     arg = sys.argv[1]
 
     if arg == 'build':
         if not GITLAB_ACCESS_TOKEN:
             print('No GITLAB_ACCESS_TOKEN environment variable has been set!')
+            sys.exit(0)
         if not PIPELINE_NAME:
             print('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
+            sys.exit(0)
         print('Running onBuildJobCompletion')
         onBuildJobCompletion()
     elif arg == 'unit-test':
         if not GITLAB_UNIT_TEST_ACCESS_TOKEN:
             print('No GITLAB_UNIT_TEST_ACCESS_TOKEN environment variable has been set!')
+            sys.exit(0)
         print('Running onUnitTestJobCompletion')
         onUnitTestJobCompletion()
     elif arg == 'lint':
         if not GITLAB_LINT_ACCESS_TOKEN:
             print('No GITLAB_LINT_ACCESS_TOKEN environment variable has been set!')
+            sys.exit(0)
         print('Running onLintJobCompletion')
         onLintJobCompletion()
     else:
