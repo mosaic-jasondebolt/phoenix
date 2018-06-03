@@ -131,8 +131,6 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         raise SystemExit('You must pass in build, unit-test, or lint as an argument')
     # Any of the three following conditions may be met if this is a non-merge request build.
-    if not PIPELINE_NAME:
-        raise SystemExit('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
     if not GITLAB_PROJECT_ID:
         raise SystemExit('GITLAB_PROJECT_ID environment variable not set. This might be a non merge-request build.')
     if not MERGE_REQUEST_INTERNAL_ID:
@@ -143,6 +141,8 @@ if __name__ == '__main__':
     if arg == 'build':
         if not GITLAB_ACCESS_TOKEN:
             raise SystemExit('No GITLAB_ACCESS_TOKEN environment variable has been set!')
+        if not PIPELINE_NAME:
+            raise SystemExit('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
         print('Running onBuildJobCompletion')
         onBuildJobCompletion()
     elif arg == 'unit-test':
