@@ -132,31 +132,31 @@ def onLintJobCompletion():
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        raise SystemExit('You must pass in build, unit-test, or lint as an argument')
+        print('You must pass in build, unit-test, or lint as an argument')
     # Any of the three following conditions may be met if this is a non-merge request build.
     if not GITLAB_PROJECT_ID:
-        raise SystemExit('GITLAB_PROJECT_ID environment variable not set. This might be a non merge-request build.')
+        print('GITLAB_PROJECT_ID environment variable not set. This might be a non merge-request build.')
     if not MERGE_REQUEST_INTERNAL_ID:
-        raise SystemExit('MERGE_REQUEST_INTERNAL_ID environment variable not set. This might be a non merge-request build.')
+        print('MERGE_REQUEST_INTERNAL_ID environment variable not set. This might be a non merge-request build.')
 
     arg = sys.argv[1]
 
     if arg == 'build':
         if not GITLAB_ACCESS_TOKEN:
-            raise SystemExit('No GITLAB_ACCESS_TOKEN environment variable has been set!')
+            print('No GITLAB_ACCESS_TOKEN environment variable has been set!')
         if not PIPELINE_NAME:
-            raise SystemExit('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
+            print('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
         print('Running onBuildJobCompletion')
         onBuildJobCompletion()
     elif arg == 'unit-test':
         if not GITLAB_UNIT_TEST_ACCESS_TOKEN:
-            raise SystemExit('No GITLAB_UNIT_TEST_ACCESS_TOKEN environment variable has been set!')
+            print('No GITLAB_UNIT_TEST_ACCESS_TOKEN environment variable has been set!')
         print('Running onUnitTestJobCompletion')
         onUnitTestJobCompletion()
     elif arg == 'lint':
         if not GITLAB_LINT_ACCESS_TOKEN:
-            raise SystemExit('No GITLAB_LINT_ACCESS_TOKEN environment variable has been set!')
+            print('No GITLAB_LINT_ACCESS_TOKEN environment variable has been set!')
         print('Running onLintJobCompletion')
         onLintJobCompletion()
     else:
-        raise SystemExit('Unknown argument: {0}'.format(arg))
+        print('Unknown argument: {0}'.format(arg))

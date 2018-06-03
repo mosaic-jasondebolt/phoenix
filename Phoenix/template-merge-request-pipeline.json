@@ -119,7 +119,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      {"Ref": "PipelineName"},
                       "unit-test"
                     ]]
                   }
@@ -140,7 +140,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      {"Ref": "PipelineName"},
                       "lint"
                     ]]
                   }
@@ -321,5 +321,187 @@
         "Tags": []
       }
     },
+    "CodeBuildUnitTest": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "CodeBuildSecurityGroup"}
+          ],
+          "Subnets": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ],
+          "VpcId":  {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "VPC"
+              ]]
+            }
+          }
+        },
+        "Artifacts": {
+          "Type": "CODEPIPELINE",
+          "NamespaceType": "BUILD_ID",
+          "Name": {
+            "Ref": "ProjectName"
+          },
+          "Packaging": "NONE"
+        },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [
+            {
+              "Name" : "AWS_ACCOUNT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "GITLAB_PROJECT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "GitlabProjectId"}
+            },
+            {
+              "Name" : "MERGE_REQUEST_INTERNAL_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "MergeRequestInternalId"}
+            },
+            {
+              "Name" : "PIPELINE_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "PipelineName"}
+            }
+          ],
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": {
+          "Fn::Join": ["", [
+            {"Ref": "PipelineName"},
+            "unit-test"
+          ]]
+        },
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRoleArn"
+        },
+        "Source": {
+          "BuildSpec": "Phoenix/buildspec-unit-test.yml",
+          "Type": "CODEPIPELINE"
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
+    "CodeBuildLint": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "CodeBuildSecurityGroup"}
+          ],
+          "Subnets": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ],
+          "VpcId":  {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "VPC"
+              ]]
+            }
+          }
+        },
+        "Artifacts": {
+          "Type": "CODEPIPELINE",
+          "NamespaceType": "BUILD_ID",
+          "Name": {
+            "Ref": "ProjectName"
+          },
+          "Packaging": "NONE"
+        },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [
+            {
+              "Name" : "AWS_ACCOUNT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "GITLAB_PROJECT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "GitlabProjectId"}
+            },
+            {
+              "Name" : "MERGE_REQUEST_INTERNAL_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "MergeRequestInternalId"}
+            },
+            {
+              "Name" : "PIPELINE_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "PipelineName"}
+            }
+          ],
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": {
+          "Fn::Join": ["", [
+            {"Ref": "PipelineName"},
+            "lint"
+          ]]
+        },
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRoleArn"
+        },
+        "Source": {
+          "BuildSpec": "Phoenix/buildspec-lint.yml",
+          "Type": "CODEPIPELINE"
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    }
   }
 }
