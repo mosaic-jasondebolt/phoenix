@@ -107,7 +107,8 @@ def _parse_json(path):
 def onBuildJobCompletion():
     sender = RequestSender(GITLAB_ACCESS_TOKEN)
     # Approve the merge request from a build perspective
-    sender.send_request(merge_request_approval_url())
+    if CODEBUILD_BUILD_SUCCEEDING:
+        sender.send_request(merge_request_approval_url())
     # Notify GitLab of the approval
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
     # Generate the ECS CloudFormation stack to create an ECS instance
@@ -116,14 +117,16 @@ def onBuildJobCompletion():
 def onUnitTestJobCompletion():
     sender = RequestSender(GITLAB_UNIT_TEST_ACCESS_TOKEN)
     # Approve the merge request from a unit test perspective
-    sender.send_request(merge_request_approval_url())
+    if CODEBUILD_BUILD_SUCCEEDING:
+        sender.send_request(merge_request_approval_url())
     # Notify GitLab of the approval
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
 
 def onLintJobCompletion():
     sender = RequestSender(GITLAB_LINT_ACCESS_TOKEN)
     # Approve the merge request from a lint perspective
-    sender.send_request(merge_request_approval_url())
+    if CODEBUILD_BUILD_SUCCEEDING:
+        sender.send_request(merge_request_approval_url())
     # Notify GitLab of the approval
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
 
