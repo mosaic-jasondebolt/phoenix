@@ -94,7 +94,7 @@ phases:
     commands:
       - echo Build completed on `date`
       - # Notify Gitlab and alter t-ecs-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
-      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py
+      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py build
       - # Push docker files
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
