@@ -145,48 +145,6 @@
                     ]]
                   }
                 }
-              },
-              {
-                "Name": "CalculateCosts",
-                "ActionTypeId": {
-                  "Category": "Test",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CodeBuild"
-                },
-                "InputArtifacts": [{
-                  "Name": "SourceOutput"
-                }],
-                "RunOrder": 1,
-                "Configuration": {
-                  "ProjectName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "calculate-costs"
-                    ]]
-                  }
-                }
-              },
-              {
-                "Name": "StaticAnalysis",
-                "ActionTypeId": {
-                  "Category": "Test",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CodeBuild"
-                },
-                "InputArtifacts": [{
-                  "Name": "SourceOutput"
-                }],
-                "RunOrder": 1,
-                "Configuration": {
-                  "ProjectName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "static-analysis"
-                    ]]
-                  }
-                }
               }
             ]
           },
