@@ -44,7 +44,7 @@ GITLAB_LINT_ACCESS_TOKEN = os.environ.get('GITLAB_LINT_ACCESS_TOKEN')
 CODE_BUILD_ARN = os.environ.get('CODEBUILD_BUILD_ARN')
 CODE_BUILD_REGION = os.environ.get('AWS_DEFAULT_REGION')
 CODEBUILD_BUILD_SUCCEEDING = int(os.environ.get('CODEBUILD_BUILD_SUCCEEDING', 0))
-SOURCE_VERSION = os.environ.get('CODEBUILD_RESOLVED_SOURCE_VERSION')
+CODEBUILD_RESOLVED_SOURCE_VERSION = os.environ.get('CODEBUILD_RESOLVED_SOURCE_VERSION')
 BUILD_NAME = CODE_BUILD_ARN.split(':')[-2].split('/')[1]
 BUILD_ID = CODE_BUILD_ARN.split(':')[-1]
 BUILD_EMOJI = ':thumbsup:' if CODEBUILD_BUILD_SUCCEEDING else ':bangbang:'
@@ -64,7 +64,7 @@ def merge_request_note(emoji):
         '<a href="{code_build_url}">{build_name}</a> &nbsp; &nbsp; {emoji} '
         '@ commit {source_version}').format(
             code_build_url=get_code_build_url(), build_name=BUILD_NAME,
-            emoji=emoji, source_version=SOURCE_VERSION)
+            emoji=emoji, source_version=CODEBUILD_RESOLVED_SOURCE_VERSION)
     return urllib.quote(body)
 
 def merge_request_note_url(body):
@@ -94,7 +94,7 @@ def generate_ecs_params():
     ecs_params = _parse_json(file_path)
     print(json.dumps(ecs_params, indent=2))
     # Swap out the testing environment for a new merge request specific environment
-    ecs_params['Parameters']['Environment'] = 'merge-request-git-sha1-{0}'.format(SOURCE_VERSION[:7])
+    ecs_params['Parameters']['Environment'] = 'merge-request-git-sha1-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION[:7])
     ecs_params_file = open('t-ecs-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 
