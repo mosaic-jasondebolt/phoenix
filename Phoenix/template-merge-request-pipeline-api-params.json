@@ -1,5 +1,6 @@
 {
   "Parameters": {
-    "Version": "latest"
+    "Version": "latest",
+    "Environment": "all"
   }
 }
