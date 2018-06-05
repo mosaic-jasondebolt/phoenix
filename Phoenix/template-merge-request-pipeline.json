@@ -210,7 +210,7 @@
                   },
                   "RunOrder": 2,
                   "Configuration": {
-                    "FunctionName": {"Ref": "LambdaPostMergeRequest"},
+                    "FunctionName": "lambda-test",
                     "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
                   }
                 }
