@@ -102,6 +102,8 @@ phases:
       - echo Writing image definitions file...
 artifacts:
     files:
+      - # Gitlab config file which will be picked up my Lambda if this is a merge request build.
+      - gitlab.json
       - # Database (Aurora, DynamoDB)
       - template-database.json
       - t-database-params-testing.json

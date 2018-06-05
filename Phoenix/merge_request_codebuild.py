@@ -145,6 +145,13 @@ def onLintJobCompletion():
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
 
 if __name__ == '__main__':
+    # The gitlab.json file is expected by the Lambda function that runs after merge request ECS container deployments.
+    # Creating an empty gitlab.json file here for cases where this is a non-merge request related build.
+    # If this file is not created, the buildspec.yml file cause the 'build' CodeBuild job to fail since it is explicitly listed as an artifact.
+    # See the 'generate_lambda_gitlab_config()' function above for the real gitlab.json file that will overwrite this file if this is a merge request build.
+    gitlab_lambda_config_file = open('gitlab.json', 'w')
+    gitlab_lambda_config_file.write(json.dumps(gitlab_obj, indent=2))
+
     if len(sys.argv) != 2:
         print('You must pass in build, unit-test, or lint as an argument')
         sys.exit(0)
