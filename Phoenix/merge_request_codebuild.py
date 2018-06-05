@@ -127,6 +127,7 @@ def onBuildJobCompletion():
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
     # Generate the ECS CloudFormation stack to create an ECS instance
     generate_ecs_params()
+    generate_lambda_gitlab_config()
 
 def onUnitTestJobCompletion():
     sender = RequestSender(GITLAB_UNIT_TEST_ACCESS_TOKEN)
