@@ -674,6 +674,8 @@
                 "logs:*",
                 "xray:*",
                 "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
                 "iam:PutRolePolicy",
                 "iam:CreateRole",
                 "iam:PassRole",
