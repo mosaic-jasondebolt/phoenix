@@ -47,10 +47,10 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "microservice-code-build-service-role-arn"
     },
-    "MicroserviceBucketName": {
-      "Description": "The bucket name in which cloudformation templates and lambda functions will be stored.",
+    "LambdaBucketName": {
+      "Description": "The bucket name in which versioned lambda functions are stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-bucket-name"
+      "Default": "microservice-lambda-bucket-name"
     },
     "CodePipelineServiceRoleArn": {
       "Description": "The CodePipeline service role that CodePipeline pipelines use.",
@@ -600,9 +600,8 @@
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
         "Code": {
-          "S3Bucket" : {"Ref": "MicroserviceBucketName"},
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
           "S3Key" : {"Fn::Join": ["/", [
-            "lambda",
             {"Ref": "Version"},
             "post_mergerequests",
             "lambda_function.zip"

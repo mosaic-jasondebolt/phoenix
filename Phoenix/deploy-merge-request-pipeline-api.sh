@@ -13,7 +13,7 @@ set -e
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-merge-request-pipeline-api-params.json`
-MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name microservice-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name microservice-lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 VERSION_ID=`jq -r '.Parameters.Version' template-merge-request-pipeline-api-params.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 
@@ -33,7 +33,7 @@ do
   cd builds/$functionName/
   pip install -r requirements.txt -t .
   zip -r lambda_function.zip ./*
-  aws s3 cp lambda_function.zip s3://$MICROSERVICE_BUCKET_NAME/lambda/$VERSION_ID/$functionName/
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
   cd ../../
   rm -rf builds
 done
