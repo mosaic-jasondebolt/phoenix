@@ -18,6 +18,7 @@ from boto3.session import Session
 # https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#merge-request-events
 
 ssm_client = boto3.client('ssm')
+code_pipeline_client = boto3.client('codepipeline')
 
 class JSONObject:
   def __init__(self, dict):
@@ -161,12 +162,39 @@ def get_file_as_string(s3, artifact, file_in_zip):
         with zipfile.ZipFile(tmp_file.name, 'r') as zip:
             return zip.read(file_in_zip)
 
-def lambda_handler(event, context):
-    print(event)
-    json_obj = json.dumps(event, indent=4)
-    print(json_obj)
+def put_job_success(job, message):
+    """Notify CodePipeline of a successful job
 
+    Args:
+        job: The CodePipeline job ID
+        message: A message to be logged relating to the job status
+
+    Raises:
+        Exception: Any exception thrown by .put_job_success_result()
+    """
+    print('Putting job success')
+    print(message)
+    code_pipeline_client.put_job_success_result(jobId=job)
+
+def put_job_failure(job, message):
+    """Notify CodePipeline of a failed job
+
+    Args:
+        job: The CodePipeline job ID
+        message: A message to be logged relating to the job status
+
+    Raises:
+        Exception: Any exception thrown by .put_job_failure_result()
+    """
+    print('Putting job failure')
+    print(message)
+    code_pipeline_client.put_job_failure_result(jobId=job, failureDetails={'message': message, 'type': 'JobFailed'})
+
+def lambda_handler(event, context):
     try:
+        print(event)
+        json_obj = json.dumps(event, indent=4)
+        print(json_obj)
         job_id = event['CodePipeline.job']['id']
         job_data = event['CodePipeline.job']['data']
         params = get_user_params(job_data)
@@ -180,27 +208,38 @@ def lambda_handler(event, context):
         print("data_obj: ")
         print(data_obj)
 
+        repo_name = data_obj['RepoName']
+        source_branch = data_obj['SourceBranch']
+        project_id = data_obj['ProjectId']
+        merge_request_internal_id = data_obj['MergeRequestId']
+        source_version = data_obj['SourceVersion']
+
+        stack_name = '{repo_name}-merge-request-{source_branch}-{merge_request_internal_id}'.format(
+          repo_name=repo_name,
+          source_branch=source_branch,
+          merge_request_internal_id=merge_request_internal_id
+        )
+
+        bucket_name = get_microservice_bucket_name()
+        domain = get_microservice_domain()
+
+        # Notify gitlab
+        region = os.environ['AWS_DEFAULT_REGION']
+        ecs_url = 'https://{stack_name}.{domain}'.format(
+            stack_name=stack_name, domain=domain)
+        request_body = (
+            'View deployed container (<a href="{0}">{1}</a>) @ commit {2}'.format(
+                ecs_url, ecs_url, source_version))
+        notify_gitlab(project_id, merge_request_internal_id, request_body)
+
+        # We must notify CodePipeline of the job status or it will block the pipeline for ages
+        put_job_success(job_id, 'Function complete')
     except Exception as e:
         print('Function failed due to exception.')
+
+        # We must notify CodePipeline of the job status or it will block the pipeline for ages
+        put_job_failure(job_id, 'Function failed')
         print(e)
 
-    repo_name = data_obj['RepoName']
-    source_branch = data_obj['SourceBranch']
-    merge_request_internal_id = data_obj['MergeRequestId']
-
-    stack_name = '{repo_name}-merge-request-{source_branch}-{merge_request_internal_id}'.format(
-      repo_name=repo_name,
-      source_branch=source_branch,
-      merge_request_internal_id=merge_request_internal_id
-    )
-
-    bucket_name = get_microservice_bucket_name()
-    domain = get_microservice_domain()
-
-    # Notify gitlab
-    region = os.environ['AWS_DEFAULT_REGION']
-    ecs_url = 'https://{stack_name}.{domain}'.format(stack_name, domain)
-    request_body = (
-        'View deployed container (<a href="{0}">{1}</a>) @ commit {2}'.format(
-            ecs_url, ecs_url, source_version))
-    notify_gitlab(project_id, merge_request_internal_id, request_body)
+    print('Function complete.')
+    return "Complete."

@@ -32,6 +32,8 @@ import requests
 PIPELINE_NAME = os.environ.get('PIPELINE_NAME')
 GITLAB_PROJECT_ID = os.environ.get('GITLAB_PROJECT_ID')
 MERGE_REQUEST_INTERNAL_ID = os.environ.get('MERGE_REQUEST_INTERNAL_ID')
+REPO_NAME = os.environ.get('REPO_NAME')
+SOURCE_BRANCH = os.environ.get('SOURCE_BRANCH')
 
 # These env variables are sometimes made avaialable in codebuild
 GITLAB_ACCESS_TOKEN = os.environ.get('GITLAB_ACCESS_TOKEN')
@@ -96,6 +98,18 @@ def generate_ecs_params():
     ecs_params_file = open('t-ecs-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 
+def generate_lambda_gitlab_config():
+    print("Saving gitlab.json file for the LambdaPostMergeRequest lambda function to pick up.")
+    gitlab_obj = {
+      'RepoName': PROJECT_NAME,
+      'SourceBranch': SOURCE_BRANCH,
+      'MergeRequestId': MERGE_REQUEST_INTERNAL_ID,
+      'SourceVersion': CODEBUILD_RESOLVED_SOURCE_VERSION,
+      'ProjectId': GITLAB_PROJECT_ID
+    }
+    gitlab_lambda_config_file = open('gitlab.json', 'w')
+    gitlab_lambda_config_file.write(json.dumps(gitlab_obj, indent=2))
+
 def _parse_json(path):
     result = open(os.path.join(sys.path[0], path), 'rb').read()
     try:
@@ -140,6 +154,12 @@ if __name__ == '__main__':
         sys.exit(0)
     if not MERGE_REQUEST_INTERNAL_ID:
         print('MERGE_REQUEST_INTERNAL_ID environment variable not set. This might be a non merge-request build.')
+        sys.exit(0)
+    if not REPO_NAME:
+        print('REPO_NAME environment variable not set. This might be a non merge-request build.')
+        sys.exit(0)
+    if not SOURCE_BRANCH:
+        print('SOURCE_BRANCH environment variable not set. This might be a non merge-request build.')
         sys.exit(0)
 
     arg = sys.argv[1]
