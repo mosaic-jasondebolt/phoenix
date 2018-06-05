@@ -201,18 +201,8 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "Name": "LambdaPostMergeRequest",
-                  "ActionTypeId": {
-                    "Category": "Invoke",
-                    "Owner": "AWS",
-                    "Provider": "Lambda",
-                    "Version": "1"
-                  },
-                  "RunOrder": 2,
-                  "Configuration": {
-                    "FunctionName": "lambda-test",
-                    "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
-                  }
+                  "FunctionName": {"Ref": "LambdaPostMergeRequest"},
+                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
                 }
               }
             ]
