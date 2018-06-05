@@ -674,6 +674,7 @@
                 "logs:*",
                 "xray:*",
                 "sts:AssumeRole",
+                "iam:CreateRole",
                 "iam:PassRole",
                 "iam:GetRole"
               ],
