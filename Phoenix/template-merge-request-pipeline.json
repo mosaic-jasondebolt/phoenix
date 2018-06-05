@@ -211,7 +211,14 @@
                   "RunOrder": 2,
                   "Configuration": {
                     "FunctionName": {"Ref": "LambdaPostMergeRequest"},
-                    "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
+                    "UserParameters": {
+                      "Fn::Join": ["", [
+                        "{\"artifact\": ",
+                        "\"", "BuildOutput", "\"",
+                        ", \"file\": \"gitlab.json\"",
+                        "}"
+                      ]]
+                    }
                   },
                   "InputArtifacts": [
                     {"Name": "BuildOutput"}
