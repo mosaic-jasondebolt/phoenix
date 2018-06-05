@@ -189,7 +189,7 @@
                 }
               },
               {
-                "Name": "LambdaPostMergeRequest",
+                "Name": "PostMergeRequest",
                 "ActionTypeId": {
                   "Category": "Invoke",
                   "Owner": "AWS",
@@ -199,7 +199,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "FunctionName": {"Ref": "LambdaPostMergeRequest"},
                   "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
