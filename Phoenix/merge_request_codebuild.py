@@ -150,7 +150,7 @@ if __name__ == '__main__':
     # If this file is not created, the buildspec.yml file cause the 'build' CodeBuild job to fail since it is explicitly listed as an artifact.
     # See the 'generate_lambda_gitlab_config()' function above for the real gitlab.json file that will overwrite this file if this is a merge request build.
     gitlab_lambda_config_file = open('gitlab.json', 'w')
-    gitlab_lambda_config_file.write(json.dumps(gitlab_obj, indent=2))
+    gitlab_lambda_config_file.write('')
 
     if len(sys.argv) != 2:
         print('You must pass in build, unit-test, or lint as an argument')
