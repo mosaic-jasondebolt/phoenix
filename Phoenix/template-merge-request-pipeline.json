@@ -213,7 +213,6 @@
                     "FunctionName": {"Ref": "LambdaPostMergeRequest"},
                     "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
                   },
-                  "OutputArtifacts": [],
                   "InputArtifacts": [
                     {"Name": "BuildOutput"}
                   ]
