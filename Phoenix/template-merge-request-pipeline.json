@@ -201,7 +201,7 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "Name": {"Ref": "LambdaPostMergeRequest"},
+                  "Name": "LambdaPostMergeRequest",
                   "ActionTypeId": {
                     "Category": "Invoke",
                     "Owner": "AWS",
