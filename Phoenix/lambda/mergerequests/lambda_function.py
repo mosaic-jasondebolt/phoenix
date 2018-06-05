@@ -131,14 +131,6 @@ def lambda_handler(event, context):
         # Notify gitlab
         region = os.environ['AWS_DEFAULT_REGION']
 
-        initial_request_body = 'CodePipeline stack creating :hourglass_flowing_sand: ...'
-        _notify_gitlab(project_id, merge_request_internal_id, initial_request_body)
-
-        # add waiter
-        waiter = cloudformation_client.get_waiter('stack_create_complete')
-        # wait until stack would be created
-        waiter.wait(StackName=stack_name)
-
         request_body = (
             '<a href="https://console.aws.amazon.com/codepipeline/home?region='
             '{region}#/view/{pipeline_name}">View Pipeline</a> &nbsp; &nbsp; '

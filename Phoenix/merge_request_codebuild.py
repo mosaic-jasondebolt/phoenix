@@ -101,7 +101,7 @@ def generate_ecs_params():
 def generate_lambda_gitlab_config():
     print("Saving gitlab.json file for the LambdaPostMergeRequest lambda function to pick up.")
     gitlab_obj = {
-      'RepoName': PROJECT_NAME,
+      'RepoName': REPO_NAME,
       'SourceBranch': SOURCE_BRANCH,
       'MergeRequestId': MERGE_REQUEST_INTERNAL_ID,
       'SourceVersion': CODEBUILD_RESOLVED_SOURCE_VERSION,
