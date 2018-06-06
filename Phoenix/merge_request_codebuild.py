@@ -94,7 +94,8 @@ def generate_ecs_params():
     ecs_params = _parse_json(file_path)
     print(json.dumps(ecs_params, indent=2))
     # Swap out the testing environment for a new merge request specific environment
-    ecs_params['Parameters']['Environment'] = 'merge-request-git-sha1-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION[:7])
+    # NOTE!: If you change the below URL, you must also change this value in the post_mergerequests lambda function.
+    ecs_params['Parameters']['Environment'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
     ecs_params_file = open('t-ecs-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 
