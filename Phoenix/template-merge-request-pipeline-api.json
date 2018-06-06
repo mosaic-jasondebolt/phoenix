@@ -139,7 +139,7 @@
     },
     "LambdaMergeRequests": {
       "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy", "LambdaSG"],
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
@@ -263,7 +263,7 @@
     },
     "LambdaPostMergeRequest": {
       "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaPostMergeRequestRole", "LambdaPostMergeRequestRolePolicy"],
+      "DependsOn": ["LambdaPostMergeRequestRole", "LambdaPostMergeRequestRolePolicy", "LambdaPostMergeRequestSG"],
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaPostMergeRequestRole", "Arn"] },

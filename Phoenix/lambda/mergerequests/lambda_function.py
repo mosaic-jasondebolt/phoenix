@@ -47,6 +47,13 @@ def get_gitlab_url():
     )
     return response['Parameter']['Value']
 
+def get_microservice_bucket_name():
+    response = ssm_client.get_parameter(
+        Name='microservice-bucket-name',
+        WithDecryption=False
+    )
+    return response['Parameter']['Value']
+
 def notify_gitlab(project_id, merge_request_id, request_body):
     print("Notifying gitlab of start of pipeline")
     request_body = urllib.parse.quote(request_body)
@@ -81,9 +88,9 @@ def lambda_handler(event, context):
       merge_request_internal_id=merge_request_internal_id
     )
 
-    bucket_name = 'mosaic-phoenix-microservice'
     template_name = 'template-merge-request-pipeline.json'
-    template_url = 'https://s3.amazonaws.com/{0}/cloudformation/{1}'.format(bucket_name, template_name)
+    template_url = 'https://s3.amazonaws.com/{0}/cloudformation/{1}'.format(
+        get_microservice_bucket_name(), template_name)
 
     parameters=[
       {
