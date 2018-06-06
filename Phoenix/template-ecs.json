@@ -354,8 +354,7 @@
           "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
         ],
         "RoleName": {"Fn::Join": ["-", [
-          {"Ref": "ProjectName"},
-          {"Ref": "Environment"},
+          {"Ref": "AWS::StackName"},
           "ecs-task-exec"
         ]]}
       }
