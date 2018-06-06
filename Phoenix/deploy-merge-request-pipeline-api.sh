@@ -48,7 +48,7 @@ sed "s/VERSION_ID/$VERSION_ID/g" temp1.json > temp2.json
 aws cloudformation validate-template --template-body file://template-merge-request-pipeline-api.json
 
 # Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $PROJECT_NAME-merge-request-pipeline-api-$ENVIRONMENT-5 \
+aws cloudformation $1-stack --stack-name $PROJECT_NAME-merge-request-pipeline-api-$ENVIRONMENT-6 \
     --template-body file://template-merge-request-pipeline-api.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_IAM
