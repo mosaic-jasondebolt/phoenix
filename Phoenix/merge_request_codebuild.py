@@ -94,7 +94,15 @@ def generate_ecs_params():
     ecs_params = _parse_json(file_path)
     print(json.dumps(ecs_params, indent=2))
     # We will use the testing environment by default, but the URL will include the git commit sha1.
+    # Also, we will use the pipeline name as the environment.
+    # If we left the 'Environment' parameter value as the default of 'testing', the underlying EC2
+    # instance would fail to launch as a 'testing' instance already exists.
+    # If we used the git sha1 as the environment, a new EC2 instance would be created for every merge request update,
+    # which is super slow an inefficient.
+    # Ideally, we would spin up an EC2 instance when the MR is created, and tear it down when MR is merged or closed.
+    # The pipeline name a a good environment choice since that name persists throughout the MR.
     # NOTE!: If you change the below URL, you must also change this value in the post_mergerequests lambda function.
+    ecs_params['Parameters']['Environment'] = PIPELINE_NAME
     ecs_params['Parameters']['URLPrefixOverride'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
     ecs_params_file = open('t-ecs-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
