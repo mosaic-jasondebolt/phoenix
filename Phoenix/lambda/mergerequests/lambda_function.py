@@ -70,7 +70,7 @@ def lambda_handler(event, context):
 
     stack_name = '{repo_name}-merge-request-{source_branch}-{merge_request_internal_id}'.format(
       repo_name=repo_name,
-      source_branch=source_branch,
+      source_branch=source_branch.replace('_', '-'),
       merge_request_internal_id=merge_request_internal_id
     )
 
