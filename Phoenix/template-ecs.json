@@ -352,11 +352,7 @@
         },
         "ManagedPolicyArns": [
           "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-        ],
-        "RoleName": {"Fn::Join": ["-", [
-          {"Ref": "AWS::StackName"},
-          "ecs-task-exec"
-        ]]}
+        ]
       }
     },
     "ECSTaskDefinition": {
