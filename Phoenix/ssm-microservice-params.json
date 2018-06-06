@@ -9,6 +9,7 @@
     "ProjectDescription": "The Mosaic Phoenix project.",
     "NotificationEmail": "ops@joinmosaic.com",
     "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
-    "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0"
+    "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
+    "GitlabURL": "https://gitlab.intranet.solarmosaic.com"
   }
 }
