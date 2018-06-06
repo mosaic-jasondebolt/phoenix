@@ -29,12 +29,19 @@ false = False
 true = True
 null = None
 
-def get_gitlab_url(project_id, merge_request_id, body):
+def get_gitlab_merge_request_notes_url(project_id, merge_request_id, body):
     return (
-        'https://gitlab.intranet.solarmosaic.com/api/v4/projects/{project_id}/'
+        '{gitlab_url}/api/v4/projects/{project_id}/'
         'merge_requests/{merge_request_id}/notes?body={body}').format(
-            project_id=project_id, merge_request_id=merge_request_id,
-            body=body)
+            gitlab_url=get_gitlab_url(), project_id=project_id,
+            merge_request_id=merge_request_id, body=body)
+
+def get_gitlab_url():
+    response = ssm_client.get_parameter(
+        Name='microservice-gitlab-url',
+        WithDecryption=False
+    )
+    return response['Parameter']['Value']
 
 def get_gitlab_access_token():
     response = ssm_client.get_parameter(
@@ -60,7 +67,7 @@ def get_microservice_domain():
 def notify_gitlab(project_id, merge_request_id, request_body):
     print("Notifying gitlab of ecs container URL.")
     request_body = urllib.parse.quote(request_body)
-    gitlab_url = get_gitlab_url(project_id, merge_request_id, request_body)
+    gitlab_url = get_gitlab_merge_request_notes_url(project_id, merge_request_id, request_body)
     headers = {'Private-Token': get_gitlab_access_token()}
     response = requests.post(gitlab_url, headers=headers)
     print(response)

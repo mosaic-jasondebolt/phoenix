@@ -26,25 +26,32 @@ false = False
 true = True
 null = None
 
-def _get_gitlab_url(project_id, merge_request_id, body):
+def get_gitlab_merge_request_notes_url(project_id, merge_request_id, body):
     return (
-        'https://gitlab.intranet.solarmosaic.com/api/v4/projects/{project_id}/'
+        '{gitlab_url}/api/v4/projects/{project_id}/'
         'merge_requests/{merge_request_id}/notes?body={body}').format(
-            project_id=project_id, merge_request_id=merge_request_id,
-            body=body)
+            gitlab_url=get_gitlab_url(), project_id=project_id,
+            merge_request_id=merge_request_id, body=body)
 
-def _get_gitlab_access_token():
+def get_gitlab_access_token():
     response = ssm_client.get_parameter(
         Name='codebuild-gitlab-access-token',
         WithDecryption=True
     )
     return response['Parameter']['Value']
 
-def _notify_gitlab(project_id, merge_request_id, request_body):
+def get_gitlab_url():
+    response = ssm_client.get_parameter(
+        Name='microservice-gitlab-url',
+        WithDecryption=False
+    )
+    return response['Parameter']['Value']
+
+def notify_gitlab(project_id, merge_request_id, request_body):
     print("Notifying gitlab of start of pipeline")
     request_body = urllib.parse.quote(request_body)
-    gitlab_url = _get_gitlab_url(project_id, merge_request_id, request_body)
-    headers = {'Private-Token': _get_gitlab_access_token()}
+    gitlab_url = get_gitlab_merge_request_notes_url(project_id, merge_request_id, request_body)
+    headers = {'Private-Token': get_gitlab_access_token()}
     response = requests.post(gitlab_url, headers=headers)
     print(response)
 
@@ -137,7 +144,7 @@ def lambda_handler(event, context):
             ' {emoji} ').format(
                 region=region, pipeline_name=stack_name,
                 emoji=MONTH_EMOJI_MAP.get(datetime.now().month, ':white_check_mark:'))
-        _notify_gitlab(project_id, merge_request_internal_id, request_body)
+        notify_gitlab(project_id, merge_request_internal_id, request_body)
       except Exception as e:
         print('Stack may have already been created, and that is OK.')
         print('Error: {0}'.format(e))

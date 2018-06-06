@@ -5,6 +5,7 @@ env:
     PROJECT_NAME: microservice-project-name
     LAMBDA_BUCKET_NAME: microservice-lambda-bucket-name
     GITLAB_UNIT_TEST_ACCESS_TOKEN: codebuild-unit-test-gitlab-access-token
+    GITLAB_URL: microservice-gitlab-url
 
 phases:
   install:

@@ -39,6 +39,7 @@ SOURCE_BRANCH = os.environ.get('SOURCE_BRANCH')
 GITLAB_ACCESS_TOKEN = os.environ.get('GITLAB_ACCESS_TOKEN')
 GITLAB_UNIT_TEST_ACCESS_TOKEN = os.environ.get('GITLAB_UNIT_TEST_ACCESS_TOKEN')
 GITLAB_LINT_ACCESS_TOKEN = os.environ.get('GITLAB_LINT_ACCESS_TOKEN')
+GITLAB_URL = os.environ.get('GITLAB_URL', '')
 
 # These env variables are always avaialable in AWS CodeBuild
 CODE_BUILD_ARN = os.environ.get('CODEBUILD_BUILD_ARN')
@@ -50,8 +51,7 @@ BUILD_ID = CODE_BUILD_ARN.split(':')[-1]
 BUILD_EMOJI = ':thumbsup:' if CODEBUILD_BUILD_SUCCEEDING else ':bangbang:'
 
 # Gitlab vars
-GITLAB_BASE_URL = 'https://gitlab.intranet.solarmosaic.com'
-GITLAB_API_URL = os.path.join(GITLAB_BASE_URL, 'api/v4/projects')
+GITLAB_API_URL = os.path.join(GITLAB_URL, 'api/v4/projects')
 
 def get_code_build_url():
     return (
@@ -169,6 +169,9 @@ if __name__ == '__main__':
         sys.exit(0)
     if not SOURCE_BRANCH:
         print('SOURCE_BRANCH environment variable not set. This might be a non merge-request build.')
+        sys.exit(0)
+    if not GITLAB_URL:
+        print('GITLAB_URL environment variable not set. This might be a non merge-request build.')
         sys.exit(0)
 
     arg = sys.argv[1]

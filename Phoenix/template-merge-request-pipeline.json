@@ -212,7 +212,6 @@
                         {"Ref": "ProjectName"},
                         "merge-request-pipeline-api",
                         {"Ref": "Environment"},
-                        "6",
                         "LambdaPostMergeRequestFunctionName"
                       ]]
                     }
