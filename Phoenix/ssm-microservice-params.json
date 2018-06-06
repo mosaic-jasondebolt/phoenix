@@ -1,15 +1,15 @@
 {
   "Parameters": {
-    "OrganizationName": "mosaic",
-    "ProjectName": "phoenix",
-    "Domain": "mosaic-phoenix.com",
-    "HostedZoneId": "Z26KY8AGSSM28M",
-    "SSLCertificateARN": "arn:aws:acm:us-east-1:714284646049:certificate/3d18178b-9cbb-48ab-a695-20bf49d930c1",
-    "KeyPairName": "us-east-1-714284646049",
-    "ProjectDescription": "The Mosaic Phoenix project.",
-    "NotificationEmail": "ops@joinmosaic.com",
-    "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
-    "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.0",
-    "GitlabURL": "https://gitlab.intranet.solarmosaic.com"
+    "OrganizationName": "acme",
+    "ProjectName": "foo",
+    "Domain": "acme-foo.com",
+    "HostedZoneId": "",
+    "SSLCertificateARN": "",
+    "KeyPairName": "",
+    "ProjectDescription": "",
+    "NotificationEmail": "",
+    "IAMRole": "arn:aws:iam::{your-aws-account-id}:role/{your-role-name}",
+    "CodeBuildDockerImage": "{your-aws-account-id}.dkr.ecr.{your-region}.amazonaws.com/{your-docker-image}:latest",
+    "GitlabURL": "https://gitlab.yourcompany.com"
   }
 }
