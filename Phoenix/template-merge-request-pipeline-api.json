@@ -82,7 +82,8 @@
       "DependsOn": ["LambdaMergeRequests"],
       "Properties" : {
         "RestApiId" : { "Ref": "RestAPI" },
-        "AuthorizationType" : "NONE",
+        "AuthorizationType" : "CUSTOM",
+        "AuthorizerId": {"Ref": "ApiGatewayCustomLambdaAuth"},
         "HttpMethod": "POST",
         "ResourceId" : { "Ref": "MergeRequestsResource" },
         "MethodResponses": [
