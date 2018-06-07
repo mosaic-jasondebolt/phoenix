@@ -25,7 +25,7 @@ if [ $# -ne 1 ]
 fi
 
 # Upload the Lambda functions
-listOfLambdaFunctions='mergerequests post_mergerequests'
+listOfLambdaFunctions='mergerequests post_mergerequests gitlab_custom_authorizer'
 for functionName in $listOfLambdaFunctions
 do
   mkdir -p builds/$functionName

@@ -365,6 +365,158 @@
         ]
       },
       "Type": "AWS::IAM::Policy"
+    },
+    "LambdaGitlabCustomAuthorizerSG": {
+      "Properties": {
+        "GroupDescription": "Gitlab custom authorizer Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-post-mr-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaGitlabCustomAuthorizer": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaGitlabCustomAuthorizerRole", "LambdaGitlabCustomAuthorizerRolePolicy", "LambdaGitlabCustomAuthorizerSG"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaGitlabCustomAuthorizerRole", "Arn"] },
+        "Code": {
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "gitlab_custom_authorizer",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python2.7",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaGitlabCustomAuthorizerSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
+        "Timeout": "25"
+      }
+    },
+    "LambdaGitlabCustomAuthorizerInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaGitlabCustomAuthorizer", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com"
+      }
+    },
+    "LambdaGitlabCustomAuthorizerRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaGitlabCustomAuthorizerRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "apigateway:*",
+                "dynamodb:*",
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "s3:*",
+                "ec2:*",
+                "ssm:*",
+                "kms:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateRole",
+                "iam:PassRole",
+                "iam:GetRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          { "Ref": "AWS::StackName"},
+          "LambdaGitlabCustomAuthorizerRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaGitlabCustomAuthorizerRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "ApiGatewayCustomLambdaAuth": {
+      "Type": "AWS::ApiGateway::Authorizer",
+      "Properties": {
+        "AuthType": "custom",
+        "AuthorizerCredentials": {
+          "Fn::GetAtt": [
+            "LambdaGitlabCustomAuthorizerRole", "Arn"
+          ]
+        },
+        "AuthorizerResultTtlInSeconds": 0,
+        "AuthorizerUri": {"Fn::Join": ["", [
+          "arn:aws:apigateway:",
+          { "Ref": "AWS::Region" },
+          ":lambda:path/2015-03-31/functions/",
+          { "Fn::GetAtt": [
+            "LambdaGitlabCustomAuthorizer",
+            "Arn"
+            ]},
+            "/invocations"
+          ]]
+        },
+        "IdentitySource" : "method.request.header.X-Gitlab-Token",
+        "Name" : "gitlab-webhook-auth",
+        "RestApiId" : {"Ref": "RestAPI"},
+        "Type" : "TOKEN"
+      }
     }
   },
   "Outputs": {
