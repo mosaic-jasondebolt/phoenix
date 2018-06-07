@@ -35,7 +35,7 @@ def get_gitlab_merge_request_notes_url(project_id, merge_request_id, body):
 
 def get_gitlab_access_token():
     response = ssm_client.get_parameter(
-        Name='codebuild-gitlab-access-token',
+        Name='gitlab-codebuild-access-token',
         WithDecryption=True
     )
     return response['Parameter']['Value']

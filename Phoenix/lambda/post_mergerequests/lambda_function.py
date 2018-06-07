@@ -45,7 +45,7 @@ def get_gitlab_url():
 
 def get_gitlab_access_token():
     response = ssm_client.get_parameter(
-        Name='codebuild-gitlab-access-token',
+        Name='gitlab-codebuild-access-token',
         WithDecryption=True
     )
     return response['Parameter']['Value']
