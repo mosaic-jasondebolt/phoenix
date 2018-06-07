@@ -501,7 +501,7 @@
             "LambdaGitlabCustomAuthorizerRole", "Arn"
           ]
         },
-        "AuthorizerResultTtlInSeconds": 0,
+        "AuthorizerResultTtlInSeconds": 3600,
         "AuthorizerUri": {"Fn::Join": ["", [
           "arn:aws:apigateway:",
           { "Ref": "AWS::Region" },
