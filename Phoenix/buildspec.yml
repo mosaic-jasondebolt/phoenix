@@ -95,13 +95,12 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      - # Notify Gitlab and alter t-ecs-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
-      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py build
       - # Push docker files
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI:latest
       - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
+      - # Notify Gitlab and alter t-ecs-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
+      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py build
 artifacts:
     files:
       - # Gitlab config file which will be picked up my Lambda if this is a merge request build.
