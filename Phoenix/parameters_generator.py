@@ -35,7 +35,7 @@ def convert_parameters_file(obj, conversion_format='cloudformation'):
         value = params[param_key]
         if 'PROJECT_NAME_NO_DASHES' in value:
             # Removes dashes
-            value = value.replace('PROJECT_NAME_NO_DASHES', project_name.replace('-', ''))
+            value = value.replace('PROJECT_NAME_NO_DASHES', project_name.replace('-', ''))[:7]
         elif 'PROJECT_NAME' in value:
             value = value.replace('PROJECT_NAME', project_name)
 
