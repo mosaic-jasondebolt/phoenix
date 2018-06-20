@@ -79,6 +79,11 @@
       "Default": "latest",
       "Type": "String"
     },
+    "ImageIsInECR": {
+      "Description": "Whether the docker image is hosted in AWS ECR.",
+      "Type": "String",
+      "Default": "true"
+    },
     "ContainerName": {
       "Description": "A name for the container",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -298,6 +303,9 @@
     "IsInternalELB": {"Fn::Equals": [
       {"Ref": "Scheme"}, "internal"
     ]},
+    "IsECRImage": {"Fn::Equals": [
+      {"Ref": "ImageIsInECR"}, "true"
+    ]},
     "IsProd" : {"Fn::Equals" : [
       {"Ref" : "Environment"},
       "prod"
@@ -453,18 +461,25 @@
                 }
               }
             ],
-            "Image": { "Fn::Join" : [ "", [
-              {"Fn::Join": ["", [
-                {"Ref": "AWS::AccountId"},
-                ".dkr.ecr.",
-                {"Ref": "AWS::Region"},
-                ".amazonaws.com",
-              ]]},
-              "/",
-              { "Ref": "ImageName"},
-              ":",
-              { "Ref": "ImageVersion" }
-              ] ] },
+            "Image": {
+              "Fn::If": [
+                "IsECRImage",
+                { "Fn::Join" : [ "", [
+                  {"Fn::Join": ["", [
+                    {"Ref": "AWS::AccountId"},
+                    ".dkr.ecr.",
+                    {"Ref": "AWS::Region"},
+                    ".amazonaws.com"
+                  ]]},
+                  "/",
+                  { "Ref": "ImageName"},
+                  ":",
+                  { "Ref": "ImageVersion" }
+                  ]]
+                },
+                {"Ref": "ImageName"}
+              ]
+            },
             "LogConfiguration": {
               "LogDriver":"awslogs",
               "Options": {
