@@ -579,7 +579,7 @@
               ".",
               {"Ref": "Environment"},
               ".",
-              {"Ref": "Domain"},
+              {"Ref": "Domain"}
             ]]},
             "Type": "CNAME"
           },
