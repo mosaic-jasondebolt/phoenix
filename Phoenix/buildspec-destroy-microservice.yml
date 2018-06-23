@@ -21,6 +21,37 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Destroying $PROJECT_NAME microservice
+      - # Delete API Gateway deployments first
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-testing
+      - # Delete API Gateways
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-testing
+      - # Delete Lambda
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-testing
+      - # Delete ECS
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-testing
+      - # Delete Database
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
+      - # Delete Microservice
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-microservice
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-microservice
+      - # Delete SSM Params
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ssm-microservice-params
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-microservice-params
+      - # Delete Microservice cleanup
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-microservice-cleanup
   post_build:
     commands:
       - echo Build completed on `date`
