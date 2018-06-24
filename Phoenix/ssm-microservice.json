@@ -38,11 +38,6 @@
       "Type": "String",
       "Default": ""
     },
-    "JenkinsBackupBucketName": {
-      "Description": "The bucket name in which jenkins backups and restores are saved to",
-      "Type": "String",
-      "Default": ""
-    },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "String"
@@ -112,11 +107,6 @@
         {"Ref" : "MicroserviceBucketName"}, ""
       ]}
     ]},
-    "HasJenkinsBackupBucketName" : {"Fn::Not": [
-      {"Fn::Equals" : [
-        {"Ref" : "JenkinsBackupBucketName"}, ""
-      ]}
-    ]},
     "HasLambdaBucketName" : {"Fn::Not": [
       {"Fn::Equals" : [
         {"Ref" : "LambdaBucketName"}, ""
@@ -139,6 +129,16 @@
     ]}
   },
   "Resources": {
+    "OrganizationNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "microservice-organization-name",
+        "Type": "String",
+        "Value": {"Ref": "OrganizationName"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The organization name associated with this account"
+      }
+    },
     "ProjectNameParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
@@ -207,23 +207,6 @@
           ]]}
         ]},
         "Description": "The bucket name in which cloudformation templates and lambda functions will be stored."
-      }
-    },
-    "JenkinsBackupBucketNameParam": {
-      "Type": "AWS::SSM::Parameter",
-      "Properties": {
-        "Name": "microservice-jenkins-backup-bucket-name",
-        "Type": "String",
-        "Value": {"Fn::If": [
-          "HasJenkinsBackupBucketName",
-          {"Ref": "JenkinsBackupBucketName"},
-          {"Fn::Join": ["-", [
-            {"Ref": "OrganizationName"},
-            {"Ref": "ProjectName"},
-            "jenkins"
-          ]]}
-        ]},
-        "Description": "The bucket name in which jenkins backups and restores are saved to"
       }
     },
     "DomainParam": {

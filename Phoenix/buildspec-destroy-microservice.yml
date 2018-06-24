@@ -2,6 +2,7 @@ version: 0.2
 
 env:
   parameter-store:
+    ORGANIZATION_NAME: microservice-organization-name
     PROJECT_NAME: microservice-project-name
 
 phases:
@@ -44,6 +45,15 @@ phases:
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
+      - # Empty Microservice buckets
+      - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-pipeline --recursive
+      - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-build --recursive
+      - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-lambda --recursive
+      - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-microservice --recursive
+      - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-encrypted-secrets --recursive
+      - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-load-balancer-logs --recursive
+      - # Delete the Project ECR repository
+      - aws ecr delete-repository --repository-name $PROJECT_NAME --force
       - # Delete Microservice
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-microservice
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-microservice
