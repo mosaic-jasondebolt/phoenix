@@ -14,9 +14,9 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-phoenix-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-microservice
-MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name microservice-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name microservice-phoenix-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 # Generate the MICROSERVICE bucket if it doesn't already exist
 aws s3 mb s3://$MICROSERVICE_BUCKET_NAME

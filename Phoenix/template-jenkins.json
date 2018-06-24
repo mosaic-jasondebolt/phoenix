@@ -5,22 +5,22 @@
     "ProjectName": {
       "Description": "The name of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-project-name"
+      "Default": "microservice-phoenix-project-name"
     },
     "JenkinsBackupBucketName": {
       "Description": "The bucket name in which jenkins backups and restores are saved to",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-jenkins-backup-bucket-name"
+      "Default": "microservice-phoenix-jenkins-backup-bucket-name"
     },
     "SSLCertificateARN": {
       "Description": "The AWS ACM Certificate ARN.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-ssl-certificate-arn"
+      "Default": "microservice-phoenix-ssl-certificate-arn"
     },
     "KeyPairName":{
       "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-key-pair-name"
+      "Default": "microservice-phoenix-key-pair-name"
     },
     "SnapshotId": {
       "Description": "The snapshot id from which to create the new volume. Use this only if you want to spin up this instance from an existing snapshot.",
@@ -86,7 +86,7 @@
     "DnsZone": {
       "Description": "The domain name that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-domain"
+      "Default": "microservice-phoenix-domain"
     }
   },
   "Mappings": {

@@ -5,77 +5,77 @@
     "ProjectName": {
       "Description": "The name of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-project-name"
+      "Default": "microservice-phoenix-project-name"
     },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-code-build-docker-image"
+      "Default": "microservice-phoenix-code-build-docker-image"
     },
     "CodeBuildBucketName": {
       "Description": "The bucket name in which CodeBuild artifacts will be stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-code-build-bucket-name"
+      "Default": "microservice-phoenix-code-build-bucket-name"
     },
     "CodePipelineBucketName": {
       "Description": "The bucket name in which CodePipeline artifacts will be stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-code-pipeline-bucket-name"
+      "Default": "microservice-phoenix-code-pipeline-bucket-name"
     },
     "MicroserviceBucketName": {
       "Description": "The bucket name in which cloudformation templates and lambda functions will be stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-bucket-name"
+      "Default": "microservice-phoenix-bucket-name"
     },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-domain"
+      "Default": "microservice-phoenix-domain"
     },
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-hosted-zone-id"
+      "Default": "microservice-phoenix-hosted-zone-id"
     },
     "KeyPairName":{
       "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-key-pair-name"
+      "Default": "microservice-phoenix-key-pair-name"
     },
     "LambdaBucketName": {
       "Description": "The bucket name in which Lambda artifacts will be stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-lambda-bucket-name"
+      "Default": "microservice-phoenix-lambda-bucket-name"
     },
     "LoadBalancerLogsBucketName": {
       "Description": "The bucket name in which load balancer logs will be stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-load-balancer-logs-bucket-name"
+      "Default": "microservice-phoenix-load-balancer-logs-bucket-name"
     },
     "SecretsBucketName": {
       "Description": "The bucket name in which KMS encrypted secrets will be stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-secrets-bucket-name"
+      "Default": "microservice-phoenix-secrets-bucket-name"
     },
     "EncryptionKeyName": {
       "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-encryption-key-name"
+      "Default": "microservice-phoenix-encryption-key-name"
     },
     "ProjectDescription": {
       "Description": "A description of your project",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-project-description"
+      "Default": "microservice-phoenix-project-description"
     },
     "NotificationEmail": {
       "Description": "The email to send notifications to for this microservice",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-notification-email"
+      "Default": "microservice-phoenix-notification-email"
     },
     "IAMRole": {
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-iam-role"
+      "Default": "microservice-phoenix-iam-role"
     }
   },
   "Resources": {
@@ -145,7 +145,7 @@
     "EncryptionKeyIdParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "microservice-encryption-key-id",
+        "Name": "microservice-phoenix-encryption-key-id",
         "Type": "String",
         "Value": {"Ref": "EncryptionKey"},
         "Description": "The KMS Key ID"
@@ -442,7 +442,7 @@
     "CodeBuildServiceRoleArnParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "microservice-code-build-service-role-arn",
+        "Name": "microservice-phoenix-code-build-service-role-arn",
         "Type": "String",
         "Value": {"Fn::GetAtt": [
           "CodeBuildServiceRole",
@@ -494,7 +494,7 @@
     "CodeBuildSecurityGroupParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "microservice-code-build-security-group",
+        "Name": "microservice-phoenix-code-build-security-group",
         "Type": "String",
         "Value": {"Ref": "CodeBuildSecurityGroup"},
         "Description": "The Code Build security group ID"
@@ -970,7 +970,7 @@
     "CodePipelineServiceRoleArnParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "microservice-code-pipeline-service-role-arn",
+        "Name": "microservice-phoenix-code-pipeline-service-role-arn",
         "Type": "String",
         "Value": {"Fn::GetAtt": [
           "CodePipelineServiceRole",

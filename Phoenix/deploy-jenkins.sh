@@ -25,7 +25,7 @@ set -e
 #     version_id is the number at the end of the stack name.
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-phoenix-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 DNS_PREFIX=$(jq -r '.Parameters.DnsPrefix' template-jenkins-params.json)
 
 # Check for valid arguments

@@ -14,9 +14,9 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name microservice-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name microservice-phoenix-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-microservice-cleanup
-MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name microservice-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name microservice-phoenix-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-microservice-cleanup.json" --delete
 
