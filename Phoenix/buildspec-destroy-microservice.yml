@@ -60,8 +60,6 @@ phases:
       - # Delete SSM Params
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ssm-microservice-params
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-microservice-params
-      - # Delete Microservice cleanup
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-microservice-cleanup
   post_build:
     commands:
       - echo Build completed on `date`
