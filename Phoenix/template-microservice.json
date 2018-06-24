@@ -27,11 +27,6 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "microservice-bucket-name"
     },
-    "JenkinsBackupBucketName": {
-      "Description": "The bucket name in which jenkins backups and restores are saved to",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-jenkins-backup-bucket-name"
-    },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -189,20 +184,6 @@
       "Properties": {
         "BucketName": {
           "Ref": "CodePipelineBucketName"
-        },
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
-    "JenkinsBackupBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {
-          "Ref": "JenkinsBackupBucketName"
         },
         "LifecycleConfiguration": {
           "Rules": [{
