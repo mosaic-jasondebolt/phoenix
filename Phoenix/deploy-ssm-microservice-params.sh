@@ -29,5 +29,7 @@ aws cloudformation $1-stack \
     --parameters file://temp1.json \
     --capabilities CAPABILITY_NAMED_IAM
 
+aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
+
 # Cleanup
 rm temp1.json

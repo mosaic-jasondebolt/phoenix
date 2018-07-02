@@ -399,15 +399,6 @@
       "Type": "AWS::IAM::Role",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
       "Properties": {
-        "RoleName": {
-          "Fn::Join": ["-", [
-            "code-build",
-            {
-              "Ref": "ProjectName"
-            },
-            "service-role"
-          ]]
-        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [{
@@ -924,15 +915,6 @@
       "Type": "AWS::IAM::Role",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
       "Properties": {
-        "RoleName": {
-          "Fn::Join": ["-", [
-            "code-pipeline",
-            {
-              "Ref": "ProjectName"
-            },
-            "service-role"
-          ]]
-        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [{

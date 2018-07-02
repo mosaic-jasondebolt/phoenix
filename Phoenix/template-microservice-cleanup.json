@@ -22,16 +22,6 @@
     "CodeBuildServiceRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": {
-          "Fn::Join": ["-", [
-            "code-build",
-            {
-              "Ref": "ProjectName"
-            },
-            "cleanup",
-            "service-role"
-          ]]
-        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [{

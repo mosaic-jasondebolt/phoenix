@@ -15,6 +15,7 @@ PROJECT_NAME=$(aws ssm get-parameter --name __microservice-phoenix-project-name 
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-merge-request-pipeline-api-params.json`
 LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name __microservice-phoenix-lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 VERSION_ID=`jq -r '.Parameters.Version' template-merge-request-pipeline-api-params.json`
+STACK_NAME=$PROJECT_NAME-merge-request-pipeline-api-$ENVIRONMENT
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 
 # Check for valid arguments
@@ -48,10 +49,12 @@ sed "s/VERSION_ID/$VERSION_ID/g" temp1.json > temp2.json
 aws cloudformation validate-template --template-body file://template-merge-request-pipeline-api.json
 
 # Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $PROJECT_NAME-merge-request-pipeline-api-$ENVIRONMENT \
+aws cloudformation $1-stack --stack-name $STACK_NAME \
     --template-body file://template-merge-request-pipeline-api.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_IAM
+
+aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 
 # Cleanup
 rm temp1.json
