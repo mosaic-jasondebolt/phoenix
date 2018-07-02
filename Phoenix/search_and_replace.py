@@ -44,7 +44,7 @@ def search_and_replace(directory, find, replace, filePattern=None):
             filename.endswith('.jpg') or
             filename.endswith('.jpeg') or
             filename.endswith('.svg')):
-            return
+            continue
         with open(filename) as f:
             s_old = f.read()
         s_new = s_old.replace(find, replace)
