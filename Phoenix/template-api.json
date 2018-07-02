@@ -5,7 +5,7 @@
     "ProjectName": {
       "Description": "The name of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "microservice-phoenix-project-name"
+      "Default": "__microservice-phoenix-project-name"
     },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",

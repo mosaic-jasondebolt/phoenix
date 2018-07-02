@@ -42,14 +42,14 @@ def get_gitlab_access_token():
 
 def get_gitlab_url():
     response = ssm_client.get_parameter(
-        Name='microservice-phoenix-gitlab-url',
+        Name='__microservice-phoenix-gitlab-url',
         WithDecryption=False
     )
     return response['Parameter']['Value']
 
 def get_microservice_bucket_name():
     response = ssm_client.get_parameter(
-        Name='microservice-phoenix-bucket-name',
+        Name='__microservice-phoenix-bucket-name',
         WithDecryption=False
     )
     return response['Parameter']['Value']

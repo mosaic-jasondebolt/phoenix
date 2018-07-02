@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   parameter-store:
-    ORGANIZATION_NAME: microservice-phoenix-organization-name
-    PROJECT_NAME: microservice-phoenix-project-name
+    ORGANIZATION_NAME: __microservice-phoenix-organization-name
+    PROJECT_NAME: __microservice-phoenix-project-name
 
 phases:
   install:

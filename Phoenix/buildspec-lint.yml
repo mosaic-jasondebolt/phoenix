@@ -2,10 +2,10 @@ version: 0.2
 
 env:
   parameter-store:
-    PROJECT_NAME: microservice-phoenix-project-name
-    LAMBDA_BUCKET_NAME: microservice-phoenix-lambda-bucket-name
+    PROJECT_NAME: __microservice-phoenix-project-name
+    LAMBDA_BUCKET_NAME: __microservice-phoenix-lambda-bucket-name
     GITLAB_LINT_ACCESS_TOKEN: gitlab-codebuild-lint-access-token
-    GITLAB_URL: microservice-phoenix-gitlab-url
+    GITLAB_URL: __microservice-phoenix-gitlab-url
 
 phases:
   install:
