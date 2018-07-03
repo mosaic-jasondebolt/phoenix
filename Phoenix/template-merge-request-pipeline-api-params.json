@@ -1,6 +1,7 @@
 {
   "Parameters": {
     "Version": "latest",
+    "VPCPrefix": "dev",
     "Environment": "all"
   }
 }

@@ -73,7 +73,7 @@
               ],
               "Condition": {
                 "StringEquals": {
-                  "aws:sourceVpce": "vpce-02416250034968d2d"
+                  "aws:sourceVpce": "vpce-002e83c06799b358b"
                 }
               }
             }

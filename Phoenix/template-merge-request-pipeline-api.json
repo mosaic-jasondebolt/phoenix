@@ -17,6 +17,10 @@
       "Type": "String",
       "Default": "all"
     },
+    "VPCPrefix": {
+      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
+      "Type": "String"
+    },
     "Version": {
       "Description": "The identifier/version associated with this API.",
       "Type": "String"
@@ -61,12 +65,55 @@
           {"Ref": "Version"},
           ")"
         ]]},
+        "EndpointConfiguration": {
+          "Types" : [
+            "PRIVATE"
+          ]
+        },
         "Name" : { "Fn::Join": ["-",  [
           { "Ref": "ProjectName" },
           "api",
           "mergerequests",
           { "Ref": "Environment" }
-        ]]}
+        ]]},
+        "Policy": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": "execute-api:Invoke",
+              "Resource": [
+                  "execute-api:/*"
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "aws:sourceVpce": {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "VPCPrefix"},
+                        "vpc-endpoints-ApiGatewayVPCEndpoint"
+                      ]]
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": "execute-api:Invoke",
+              "Resource": [
+                  "execute-api:/*"
+              ],
+              "Condition": {
+                "StringEquals": {
+                  "aws:sourceVpce": "vpce-002e83c06799b358b"
+                }
+              }
+            }
+          ]
+        }
       }
     },
     "MergeRequestsResource": {
