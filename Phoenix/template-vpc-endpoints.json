@@ -77,5 +77,19 @@
       },
       "Type": "AWS::EC2::SecurityGroupIngress"
     }
+  },
+  "Outputs": {
+    "ApiGatewayVPCEndpoint": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["", [{
+            "Ref": "AWS::StackName"
+          }, "-", "ApiGatewayVPCEndpoint"]]
+        }
+      },
+      "Value": {
+        "Ref": "ApiGatewayVPCEndpoint"
+      }
+    }
   }
 }

@@ -77,6 +77,7 @@ def write_dev_param_files(environment_name):
     testing_api_template = _parse_json('template-api-params-testing.json')
     dev_api_template = copy.deepcopy(testing_api_template)
     dev_api_template['Parameters']['Environment'] = environment_name
+    dev_ecs_template['Parameters']['VPCPrefix'] = 'dev'
     dev_api_file_obj = open('template-api-params-dev.json', 'w')
     dev_api_file_obj.write(json.dumps(dev_api_template, indent=2))
 
