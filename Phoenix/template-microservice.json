@@ -911,6 +911,112 @@
         "Tags": []
       }
     },
+    "CodeBuildPostProdDeploy": {
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "Properties": {
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "CodeBuildSecurityGroup"}
+          ],
+          "Subnets": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ],
+          "VpcId":  {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                "dev",
+                "vpc",
+                "VPC"
+              ]]
+            }
+          }
+        },
+        "Artifacts": {
+          "Type": "S3",
+          "Location": {
+            "Ref": "CodeBuildBucketName"
+          },
+          "NamespaceType": "BUILD_ID",
+          "Name": {
+            "Ref": "ProjectName"
+          },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location": {
+            "Fn::Join": ["", [{
+                "Ref": "CodeBuildBucketName"
+              },
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
+        },
+        "Description": {
+          "Ref": "ProjectDescription"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [
+            {
+              "Name" : "AWS_ACCOUNT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "AWS::AccountId"}
+            }
+          ],
+          "Image": {
+            "Ref": "CodeBuildDockerImage"
+          },
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            "post-prod-deploy"
+          ]]
+        },
+        "ServiceRole": {
+          "Ref": "CodeBuildServiceRole"
+        },
+        "Source": {
+          "BuildSpec": "Phoenix/buildspec-post-prod-deploy.yml",
+          "Type": "CODECOMMIT",
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {"Ref": "AWS::Region"},
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
     "CodePipelineServiceRole": {
       "Type": "AWS::IAM::Role",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
@@ -1450,6 +1556,28 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-api-deployment-params-prod.json",
                   "TemplatePath": "BuildOutput::template-api-deployment-prod.json"
+                }
+              },
+              {
+                "Name": "PostProdDeploy",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 6,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [{
+                        "Ref": "ProjectName"
+                      },
+                      "post-prod-deploy"
+                    ]]
+                  }
                 }
               }
             ]

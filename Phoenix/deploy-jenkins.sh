@@ -45,7 +45,8 @@ aws cloudformation validate-template --template-body file://template-jenkins.jso
 aws cloudformation create-stack --stack-name $PROJECT_NAME-jenkins-$DNS_PREFIX \
     --template-body file://template-jenkins.json \
     --parameters file://temp1.json \
-    --capabilities CAPABILITY_IAM
+    --capabilities CAPABILITY_IAM \
+    --enable-termination-protection
 
 # Cleanup
 rm temp1.json

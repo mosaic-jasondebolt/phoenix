@@ -11,6 +11,7 @@ set -e
 #   ./deploy-lambda-dev.sh update
 
 # Extract JSON properties for a file into a local variable
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
 PROJECT_NAME=$(aws ssm get-parameter --name __microservice-phoenix-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-lambda-params-dev.json`
 LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name __microservice-phoenix-lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
@@ -51,7 +52,9 @@ aws cloudformation validate-template --template-body file://template-lambda.json
 aws cloudformation $1-stack --stack-name $PROJECT_NAME-lambda-$ENVIRONMENT \
     --template-body file://template-lambda.json \
     --parameters file://temp2.json \
-    --capabilities CAPABILITY_IAM
+    --capabilities CAPABILITY_IAM \
+    --enable-termination-protection \
+    --role-arn $CLOUDFORMATION_ROLE
 
 # Cleanup
 rm temp1.json

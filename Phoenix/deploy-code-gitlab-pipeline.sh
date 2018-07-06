@@ -17,6 +17,7 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-microservice-params.json`
 API_SECRET=`pwgen 32 -1`
 VERSION_ID=`echo $((1 + RANDOM % 10000))`
@@ -34,7 +35,9 @@ aws cloudformation $1-stack \
     --stack-name $PROJECT_NAME-gitlab-pipeline-$VERSION_ID \
     --template-body file://template-gitlab-pipeline.json \
     --parameters file://temp3.json \
-    --capabilities CAPABILITY_IAM
+    --capabilities CAPABILITY_IAM \
+    --enable-termination-protection \
+    --role-arn $CLOUDFORMATION_ROLE
 
 # Cleanup
 rm temp1.json

@@ -14,6 +14,7 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
 PROJECT_NAME=$(jq -r '.Parameters.ProjectName' ssm-microservice-params.json)
 STACK_NAME=$PROJECT_NAME-ssm-microservice-params
 
@@ -27,7 +28,9 @@ aws cloudformation $1-stack \
     --stack-name $STACK_NAME \
     --template-body file://ssm-microservice.json \
     --parameters file://temp1.json \
-    --capabilities CAPABILITY_NAMED_IAM
+    --capabilities CAPABILITY_NAMED_IAM \
+    --enable-termination-protection \
+    --role-arn $CLOUDFORMATION_ROLE
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 

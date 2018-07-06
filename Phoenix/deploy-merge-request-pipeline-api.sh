@@ -11,6 +11,7 @@ set -e
 #   ./deploy-merge-request-pipeline-api.sh update
 
 # Extract JSON properties for a file into a local variable
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
 PROJECT_NAME=$(aws ssm get-parameter --name __microservice-phoenix-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-merge-request-pipeline-api-params.json`
 LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name __microservice-phoenix-lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
@@ -52,7 +53,9 @@ aws cloudformation validate-template --template-body file://template-merge-reque
 aws cloudformation $1-stack --stack-name $STACK_NAME \
     --template-body file://template-merge-request-pipeline-api.json \
     --parameters file://temp2.json \
-    --capabilities CAPABILITY_IAM
+    --capabilities CAPABILITY_IAM \
+    --enable-termination-protection \
+    --role-arn $CLOUDFORMATION_ROLE
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 
