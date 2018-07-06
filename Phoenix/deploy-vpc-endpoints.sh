@@ -27,17 +27,29 @@ aws cloudformation $1-stack \
     --template-body file://template-vpc-endpoints.json \
     --parameters file://temp_dev.json
 
+if [[ $1 == 'create' ]]; then
+  aws cloudformation update-termination-protection --enable-termination-protection --stack-name dev-vpc-endpoints
+fi
+
 # Create or update the testing VPC Endpoint.
 aws cloudformation $1-stack \
     --stack-name testing-vpc-endpoints \
     --template-body file://template-vpc-endpoints.json \
     --parameters file://temp_testing.json
 
+if [[ $1 == 'create' ]]; then
+  aws cloudformation update-termination-protection --enable-termination-protection --stack-name testing-vpc-endpoints
+fi
+
 # Create or update the prod VPC Endpoint.
 aws cloudformation $1-stack \
     --stack-name prod-vpc-endpoints \
     --template-body file://template-vpc-endpoints.json \
     --parameters file://temp_prod.json
+
+if [[ $1 == 'create' ]]; then
+  aws cloudformation update-termination-protection --enable-termination-protection --stack-name prod-vpc-endpoints
+fi
 
 # Cleanup
 rm temp_dev.json
