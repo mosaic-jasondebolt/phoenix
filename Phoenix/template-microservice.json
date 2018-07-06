@@ -395,50 +395,12 @@
         }]
       }
     },
-    "CodeBuildServiceRole": {
-      "Type": "AWS::IAM::Role",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": {
-              "Service": "codebuild.amazonaws.com"
-            },
-            "Action": "sts:AssumeRole"
-          }]
-        },
-        "Policies": [{
-          "PolicyName": {
-            "Fn::Join": ["-", [
-              "code-build",
-              {
-                "Ref": "ProjectName"
-              },
-              "service-policy"
-            ]]
-          },
-          "PolicyDocument": {
-            "Version": "2012-10-17",
-            "Statement": [{
-              "Effect": "Allow",
-              "Action": "*",
-              "Resource": "*"
-            }]
-          }
-        }]
-      }
-    },
     "CodeBuildServiceRoleArnParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
         "Name": "__microservice-phoenix-code-build-service-role-arn",
         "Type": "String",
-        "Value": {"Fn::GetAtt": [
-          "CodeBuildServiceRole",
-          "Arn"
-        ]},
+        "Value": {"Ref": "IAMRole"},
         "Description": "The Code Build Service Role ARN"
       }
     },
@@ -573,7 +535,7 @@
           "Ref": "ProjectName"
         },
         "ServiceRole": {
-          "Ref": "CodeBuildServiceRole"
+          "Ref": "IAMRole"
         },
         "Source": {
           "BuildSpec": "Phoenix/buildspec.yml",
@@ -679,7 +641,7 @@
           ]]
         },
         "ServiceRole": {
-          "Ref": "CodeBuildServiceRole"
+          "Ref": "IAMRole"
         },
         "Source": {
           "BuildSpec": "Phoenix/buildspec-unit-test.yml",
@@ -785,7 +747,7 @@
           ]]
         },
         "ServiceRole": {
-          "Ref": "CodeBuildServiceRole"
+          "Ref": "IAMRole"
         },
         "Source": {
           "BuildSpec": "Phoenix/buildspec-lint.yml",
@@ -891,7 +853,7 @@
           ]]
         },
         "ServiceRole": {
-          "Ref": "CodeBuildServiceRole"
+          "Ref": "IAMRole"
         },
         "Source": {
           "BuildSpec": "Phoenix/buildspec-integration-test.yml",
@@ -997,7 +959,7 @@
           ]]
         },
         "ServiceRole": {
-          "Ref": "CodeBuildServiceRole"
+          "Ref": "IAMRole"
         },
         "Source": {
           "BuildSpec": "Phoenix/buildspec-post-prod-deploy.yml",
@@ -1017,63 +979,20 @@
         "Tags": []
       }
     },
-    "CodePipelineServiceRole": {
-      "Type": "AWS::IAM::Role",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": {
-              "Service": [
-                "codepipeline.amazonaws.com",
-                "cloudformation.amazonaws.com"
-              ]
-            },
-            "Action": "sts:AssumeRole"
-          }]
-        },
-        "Policies": [{
-          "PolicyName": {
-            "Fn::Join": ["-", [
-              "code-pipeline",
-              {
-                "Ref": "ProjectName"
-              },
-              "service-policy"
-            ]]
-          },
-          "PolicyDocument": {
-            "Version": "2012-10-17",
-            "Statement": [{
-              "Effect": "Allow",
-              "Action": "*",
-              "Resource": "*"
-            }]
-          }
-        }]
-      }
-    },
     "CodePipelineServiceRoleArnParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
         "Name": "__microservice-phoenix-code-pipeline-service-role-arn",
         "Type": "String",
-        "Value": {"Fn::GetAtt": [
-          "CodePipelineServiceRole",
-          "Arn"
-        ]},
+        "Value": {"Ref": "IAMRole"},
         "Description": "The Code Pipeline Service Role ARN"
       }
     },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket", "CodePipelineServiceRole"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
       "Properties": {
-        "RoleArn": {
-          "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-        },
+        "RoleArn": {"Ref": "IAMRole"},
         "Name": {
           "Ref": "ProjectName"
         },
@@ -1187,11 +1106,9 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1239,11 +1156,9 @@
                 }],
                 "RunOrder": 3,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1268,11 +1183,9 @@
                 }],
                 "RunOrder": 3,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1297,11 +1210,9 @@
                 }],
                 "RunOrder": 4,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1326,11 +1237,9 @@
                 }],
                 "RunOrder": 5,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1403,11 +1312,9 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1455,11 +1362,9 @@
                 }],
                 "RunOrder": 3,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1484,11 +1389,9 @@
                 }],
                 "RunOrder": 3,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1513,11 +1416,9 @@
                 }],
                 "RunOrder": 4,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1542,11 +1443,9 @@
                 }],
                 "RunOrder": 5,
                 "Configuration": {
-                  "RoleArn": {
-                    "Fn::GetAtt": ["CodePipelineServiceRole", "Arn"]
-                  },
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
