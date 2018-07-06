@@ -30,7 +30,10 @@ aws cloudformation $1-stack \
     --stack-name $STACK_NAME \
     --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json \
     --capabilities CAPABILITY_NAMED_IAM \
-    --enable-termination-protection \
     --role-arn $CLOUDFORMATION_ROLE
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
+
+if [[ $1 == 'create' ]]; then
+  aws cloudformation update-termination-protection --enable-termination-protection --stack-name $STACK_NAME
+fi

@@ -29,10 +29,13 @@ aws cloudformation $1-stack \
     --template-body file://ssm-microservice.json \
     --parameters file://temp1.json \
     --capabilities CAPABILITY_NAMED_IAM \
-    --enable-termination-protection \
     --role-arn $CLOUDFORMATION_ROLE
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
+
+if [[ $1 == 'create' ]]; then
+  aws cloudformation update-termination-protection --enable-termination-protection --stack-name $STACK_NAME
+fi
 
 # Cleanup
 rm temp1.json

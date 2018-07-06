@@ -36,7 +36,6 @@ aws cloudformation $1-stack \
     --template-body file://template-gitlab-pipeline.json \
     --parameters file://temp3.json \
     --capabilities CAPABILITY_IAM \
-    --enable-termination-protection \
     --role-arn $CLOUDFORMATION_ROLE
 
 # Cleanup

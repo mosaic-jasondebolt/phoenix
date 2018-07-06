@@ -53,7 +53,6 @@ aws cloudformation $1-stack --stack-name $PROJECT_NAME-lambda-$ENVIRONMENT \
     --template-body file://template-lambda.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_IAM \
-    --enable-termination-protection \
     --role-arn $CLOUDFORMATION_ROLE
 
 # Cleanup

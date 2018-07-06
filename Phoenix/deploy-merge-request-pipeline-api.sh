@@ -54,10 +54,13 @@ aws cloudformation $1-stack --stack-name $STACK_NAME \
     --template-body file://template-merge-request-pipeline-api.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_IAM \
-    --enable-termination-protection \
     --role-arn $CLOUDFORMATION_ROLE
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
+
+if [[ $1 == 'create' ]]; then
+  aws cloudformation update-termination-protection --enable-termination-protection --stack-name $STACK_NAME
+fi
 
 # Cleanup
 rm temp1.json
