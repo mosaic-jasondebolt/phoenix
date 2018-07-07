@@ -13,11 +13,15 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
+# Replace any phoenix SSM parameter keys if they exist. Useful for overwriting files after Phoenix repo merges.
+PROJECT_NAME=`jq -r '.Parameters.ProjectName' ssm-microservice-params.json`
+python search_and_replace.py . /microservice/phoenix/ /microservice/$PROJECT_NAME/
+
 # Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
-PROJECT_NAME=$(aws ssm get-parameter --name __microservice-phoenix-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-microservice
-MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name __microservice-phoenix-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 # Generate the MICROSERVICE bucket if it doesn't already exist
 aws s3 mb s3://$MICROSERVICE_BUCKET_NAME

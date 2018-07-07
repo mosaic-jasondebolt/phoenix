@@ -16,7 +16,7 @@ set -e
 
 AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 AWS_REGION=`aws configure get region`
-PROJECT_NAME=$(aws ssm get-parameter --name __microservice-phoenix-project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-ecs-params-dev.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 IMAGE_TAG=$ENVIRONMENT-`date +"%Y-%m-%d-%H%M%S"`

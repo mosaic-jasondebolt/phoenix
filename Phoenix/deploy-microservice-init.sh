@@ -6,6 +6,10 @@ set -e
 # USAGE
 #   ./deploy-microservice-init.sh
 
+# Replace any phoenix SSM parameter keys if they exist
+PROJECT_NAME=`jq -r '.Parameters.ProjectName' ssm-microservice-params.json`
+python search_and_replace.py . /microservice/phoenix/ /microservice/$PROJECT_NAME/
+
 echo "Deploying SSM parameters"
 ./deploy-ssm-microservice-params.sh create
 
