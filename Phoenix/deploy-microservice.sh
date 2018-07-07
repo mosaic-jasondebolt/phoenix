@@ -15,7 +15,8 @@ fi
 
 # Replace any phoenix SSM parameter keys if they exist. Useful for overwriting files after Phoenix repo merges.
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' ssm-microservice-params.json`
-python search_and_replace.py . /microservice/phoenix/ /microservice/$PROJECT_NAME/
+PHOENIX_PREFIX='phoenix'
+python search_and_replace.py . /microservice/$PHOENIX_PREFIX/ /microservice/$PROJECT_NAME/
 
 # Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
