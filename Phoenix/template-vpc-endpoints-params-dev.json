@@ -1,6 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "dev",
-    "VPCPrefix": "dev"
-  }
-}
