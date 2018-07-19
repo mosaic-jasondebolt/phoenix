@@ -1121,6 +1121,33 @@
                 }
               },
               {
+                "Name": "APIGatewayDomain",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-custom-domain",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                }
+              },
+              {
                 "Name": "DatabaseMigration",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -1195,33 +1222,6 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
                   "TemplatePath": "BuildOutput::template-lambda.json"
-                }
-              },
-              {
-                "Name": "APIGatewayDomain",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "api-custom-domain",
-                      "testing"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
                 }
               },
               {
@@ -1354,6 +1354,33 @@
                 }
               },
               {
+                "Name": "APIGatewayDomain",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-custom-domain",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                }
+              },
+              {
                 "Name": "DatabaseMigration",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -1428,33 +1455,6 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
                   "TemplatePath": "BuildOutput::template-lambda.json"
-                }
-              },
-              {
-                "Name": "APIGatewayDomain",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "api-custom-domain",
-                      "prod"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
                 }
               },
               {

@@ -7,6 +7,11 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/project-name"
     },
+    "IAMRole": {
+      "Description": "The IAM role that has access to all of the projects resources.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/iam-role"
+    },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
@@ -20,9 +25,16 @@
       "Type": "String"
     }
   },
+  "Conditions": {
+    "IsProd" : {"Fn::Equals" : [
+      {"Ref" : "Environment"},
+      "prod"
+    ]}
+  },
   "Resources": {
     "RestAPI": {
       "Type" : "AWS::ApiGateway::RestApi",
+      "DependsOn": ["APIUser"],
       "Properties" : {
         "Description" : {"Fn::Join": ["", [
           "The ",
@@ -35,7 +47,61 @@
           { "Ref": "ProjectName" },
           "api",
           { "Ref": "Environment" }
-        ]]}
+        ]]},
+        "Policy": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [
+                  {"Fn::Join": ["", [
+                    "arn:aws:iam::",
+                    {"Ref": "AWS::AccountId"},
+                    ":root"
+                  ]]},
+                  {"Ref": "IAMRole"},
+                  {"Fn::Join": ["", [
+                    "arn:aws:iam::",
+                    {"Ref": "AWS::AccountId"},
+                    ":role/",
+                    "PhoenixUIAdmins"
+                  ]]},
+                  {"Fn::If": [
+                    "IsProd",
+                    { "Ref" : "AWS::NoValue" },
+                    {"Fn::GetAtt": [
+                      "APIUser",
+                      "Arn"
+                    ]}
+                  ]}
+                ]
+              },
+              "Action": "execute-api:Invoke",
+              "Resource": [
+                "execute-api:/*/*/*"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "RestAPIDoc": {
+      "Type" : "AWS::ApiGateway::DocumentationPart",
+      "Properties" : {
+        "Location" : {
+          "Type" : "API"
+        },
+        "Properties": {
+          "Fn::Join": ["\n", [
+            "{",
+              "\t\"info\": {",
+                "\t\t\"description\": \"The Phoenix API.\"",
+              "\t}",
+            "}"
+          ]]
+        },
+        "RestApiId" : {"Ref": "RestAPI"}
       }
     },
     "ProjectsResource": {
@@ -50,7 +116,7 @@
       "Type" : "AWS::ApiGateway::Method",
       "Properties" : {
         "RestApiId" : { "Ref": "RestAPI" },
-        "AuthorizationType" : "NONE",
+        "AuthorizationType" : "AWS_IAM",
         "HttpMethod": "GET",
         "ResourceId" : { "Ref": "ProjectsResource" },
         "MethodResponses": [
@@ -58,14 +124,11 @@
             "StatusCode": "200",
             "ResponseParameters": {
               "method.response.header.Access-Control-Allow-Origin": false
-            },
-            "ResponseModels": {
-              "application/json": { "Ref": "ProjectsArrayModel"}
             }
           }
         ],
         "Integration": {
-          "Type" : "AWS",
+          "Type": "AWS_PROXY",
           "IntegrationHttpMethod": "POST",
           "IntegrationResponses": [
             {
@@ -76,6 +139,8 @@
               "StatusCode" : "200"
             }
           ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "ContentHandling": "CONVERT_TO_TEXT",
           "Uri": {"Fn::Join": ["", [
             "arn:aws:apigateway:",
             { "Ref": "AWS::Region" },
@@ -95,27 +160,160 @@
         }
       }
     },
-    "ProjectsArrayModel": {
-      "Type" : "AWS::ApiGateway::Model",
+    "ProjectsGetDoc": {
+      "Type" : "AWS::ApiGateway::DocumentationPart",
       "Properties" : {
-        "ContentType" : "application/json",
-        "Description" : "An array of Project resources.",
-        "Name" : "ProjectsArray",
-        "RestApiId" : {"Ref": "RestAPI"},
-        "Schema" : {
-          "$schema": "http://json-schema.org/draft-04/schema#",
-          "title": "PostsDataArray",
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {"type": "string"},
-              "name": {"type": "string"},
-              "description": {"type": "string"}
+        "Location" : {
+          "Type": "METHOD",
+          "Path": "/projects",
+          "Method": "GET"
+        },
+        "Properties": {
+          "Fn::Join": ["\n", [
+            "{",
+              "\t\"info\": {",
+                "\t\t\"description\": \"Gets a list of all project account-roles (i.e [3818471741-ProjectAdmins, ...])\"",
+              "\t}",
+            "}"
+          ]]
+        },
+        "RestApiId" : {"Ref": "RestAPI"}
+      }
+    },
+    "ProjectResource": {
+      "Type" : "AWS::ApiGateway::Resource",
+      "DependsOn": ["ProjectsResource"],
+      "Properties" : {
+        "ParentId" : {"Ref": "ProjectsResource"},
+        "PathPart" : "{project-account-role}",
+        "RestApiId" : { "Ref": "RestAPI" }
+      }
+    },
+    "ProjectGet": {
+      "Type" : "AWS::ApiGateway::Method",
+      "Properties" : {
+        "RestApiId" : { "Ref": "RestAPI" },
+        "AuthorizationType" : "AWS_IAM",
+        "HttpMethod": "GET",
+        "ResourceId" : { "Ref": "ProjectResource" },
+        "RequestParameters": {
+          "method.request.path.project-account-role": true
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false
             },
-            "required": ["id", "name", "description"]
+            "ResponseModels": {
+              "application/json": "Empty"
+            }
           }
+        ],
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "ResponseTemplates" : { "application/json": "" },
+              "StatusCode" : "200"
+            }
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "Uri": {"Fn::Join": ["", [
+            "arn:aws:apigateway:",
+            { "Ref": "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/",
+            {
+              "Fn::ImportValue": {
+                "Fn::Join": ["-", [
+                  {"Ref": "ProjectName"},
+                  "lambda",
+                  {"Ref": "Environment"},
+                  "LambdaProjectsArn"
+                ]]
+              }
+            },
+            "/invocations"
+          ]]}
         }
+      }
+    },
+    "ProjectPutValidator": {
+      "Type" : "AWS::ApiGateway::RequestValidator",
+      "Properties" : {
+        "Name": "ProjectPutValidator",
+        "RestApiId": {"Ref": "RestAPI"},
+        "ValidateRequestBody": false,
+        "ValidateRequestParameters": true,
+      }
+    },
+    "ProjectPut": {
+      "Type" : "AWS::ApiGateway::Method",
+      "Properties" : {
+        "RestApiId" : { "Ref": "RestAPI" },
+        "AuthorizationType" : "AWS_IAM",
+        "HttpMethod": "PUT",
+        "ResourceId" : { "Ref": "ProjectResource" },
+        "RequestValidatorId": {"Ref": "ProjectPutValidator"},
+        "RequestParameters": {
+          "method.request.path.project-account-role": true
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false
+            },
+            "ResponseModels": {
+              "application/json": "Empty"
+            }
+          }
+        ],
+        "Integration": {
+          "Type": "AWS_PROXY",
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "ResponseTemplates" : { "application/json": "" },
+              "StatusCode" : "200"
+            }
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "Uri": {"Fn::Join": ["", [
+            "arn:aws:apigateway:",
+            { "Ref": "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/",
+            {
+              "Fn::ImportValue": {
+                "Fn::Join": ["-", [
+                  {"Ref": "ProjectName"},
+                  "lambda",
+                  {"Ref": "Environment"},
+                  "LambdaProjectsArn"
+                ]]
+              }
+            },
+            "/invocations"
+          ]]}
+        }
+      }
+    },
+    "APIUser": {
+      "Type": "AWS::IAM::User"
+    },
+    "APIUserCredentials": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": {"Ref": "APIUser"}
       }
     }
   },
@@ -133,6 +331,47 @@
       },
       "Value": {
         "Ref": "RestAPI"
+      }
+    },
+    "APIUserAccessKeyId": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "api",
+            {"Ref": "Environment"},
+            "APIUserAccessKeyId"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::If": [
+          "IsProd",
+          "No IAM user credentials can access prod resources",
+          {"Ref": "APIUserCredentials"}
+        ]
+      }
+    },
+    "APIUserNotSoSecretAccessKey": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "api",
+            {"Ref": "Environment"},
+            "APIUserNotSoSecretAccessKey"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::If": [
+          "IsProd",
+          "No IAM user credentials can access prod resources",
+          {"Fn::GetAtt": [
+            "APIUserCredentials",
+            "SecretAccessKey"
+          ]}
+        ]
       }
     }
   }
