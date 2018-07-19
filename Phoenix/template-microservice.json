@@ -79,6 +79,49 @@
     }
   },
   "Resources": {
+    "ECRMainRepository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "RepositoryName": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "main"
+          ]]
+        },
+        "RepositoryPolicyText": {
+          "Version": "2008-10-17",
+          "Statement": [{
+              "Sid": "AllowPushPull",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": [{
+                  "Ref": "IAMRole"
+                }]
+              },
+              "Action": [
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:PutImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload"
+              ]
+            },
+            {
+              "Sid": "CodeBuildAccess",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "codebuild.amazonaws.com"
+              },
+              "Action": [
+                "ecr:*"
+              ]
+            }
+          ]
+        }
+      }
+    },
     "EncryptionKeyAlias": {
       "Type": "AWS::KMS::Alias",
       "Properties": {
@@ -288,46 +331,6 @@
             "Events": ["all"]
           }
         ]
-      }
-    },
-    "ECRRepository": {
-      "Type": "AWS::ECR::Repository",
-      "Properties": {
-        "RepositoryName": {
-          "Ref": "ProjectName"
-        },
-        "RepositoryPolicyText": {
-          "Version": "2008-10-17",
-          "Statement": [{
-              "Sid": "AllowPushPull",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": [{
-                  "Ref": "IAMRole"
-                }]
-              },
-              "Action": [
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:PutImage",
-                "ecr:InitiateLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:CompleteLayerUpload"
-              ]
-            },
-            {
-              "Sid": "CodeBuildAccess",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "codebuild.amazonaws.com"
-              },
-              "Action": [
-                "ecr:*"
-              ]
-            }
-          ]
-        }
       }
     },
     "LambdaRole": {
@@ -1181,7 +1184,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1222,6 +1225,34 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
                   "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
+                "Name": "ECSMainService",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "ecs",
+                      "main",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ecs-main-task-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ecs-main-task.json"
                 }
               },
               {
@@ -1414,7 +1445,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1455,6 +1486,34 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
                   "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
+                "Name": "ECSMainService",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "ecs",
+                      "main",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ecs-main-task-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-ecs-main-task.json"
                 }
               },
               {

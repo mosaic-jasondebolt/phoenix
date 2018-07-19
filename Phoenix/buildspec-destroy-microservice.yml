@@ -44,6 +44,12 @@ phases:
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-testing
+      - # Delete ECS Main Task
+      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ecs-main-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-testing
       - # Delete ECS
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ecs-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-prod
@@ -63,8 +69,8 @@ phases:
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-microservice --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-encrypted-secrets --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-load-balancer-logs --recursive
-      - # Delete the Project ECR repository
-      - aws ecr delete-repository --repository-name $PROJECT_NAME --force
+      - # Delete the Project ECR repositories.
+      - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
       - # Delete Microservice
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-microservice
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-microservice

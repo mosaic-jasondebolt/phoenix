@@ -35,15 +35,21 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
-      - # Docker/ECS
-      - echo ===== DOCKER BUILD =====
-      - echo replacing build number in the task definition param files.
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-testing.json > $CODEBUILD_SRC_DIR/t-ecs-params-testing.json_temp
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-prod.json > $CODEBUILD_SRC_DIR/t-ecs-params-prod.json_temp
+      - # ECS resources
+      - echo ===== ECS BUILD =====
       - echo replacing params in the task definition params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs.json $CODEBUILD_SRC_DIR
+      - # ECS Main Service resources
+      - echo ===== DOCKER BUILD =====
+      - echo replacing build number in the task definition param files.
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-main-task-params-testing.json > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-testing.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-main-task-params-prod.json > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json_temp
+      - echo replacing params in the task definition params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-main-task-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-main-task.json $CODEBUILD_SRC_DIR
       - echo Building the Docker image from the Dockerfile.
       - docker build -t $REPOSITORY_URI:latest $CODEBUILD_SRC_DIR/Phoenix/ecs
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
@@ -108,10 +114,14 @@ artifacts:
       - template-database.json
       - t-database-params-testing.json
       - t-database-params-prod.json
-      - # Docker/ECS
+      - # ECS
       - template-ecs.json
       - t-ecs-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
       - t-ecs-params-prod.json
+      - # ECS Main Task
+      - template-ecs-main-task.json
+      - t-ecs-main-task-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
+      - t-ecs-main-task-params-prod.json
       - # Lambda
       - template-lambda.json
       - t-lambda-params-testing.json
