@@ -38,8 +38,8 @@ phases:
       - # ECS resources
       - echo ===== ECS BUILD =====
       - echo replacing params in the task definition params files.
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-testing.json
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs.json $CODEBUILD_SRC_DIR
       - # ECS Main Service resources
       - echo ===== DOCKER BUILD =====
