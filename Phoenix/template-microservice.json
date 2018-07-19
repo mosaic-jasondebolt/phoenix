@@ -1202,6 +1202,17 @@
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
@@ -1424,6 +1435,17 @@
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
