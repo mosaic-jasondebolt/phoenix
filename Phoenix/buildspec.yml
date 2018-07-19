@@ -70,6 +70,12 @@ phases:
           cd $CODEBUILD_SRC_DIR
           rm -rf $CODEBUILD_SRC_DIR/Phoenix/builds
         done
+      - # API Gateway Custom Domain
+      - echo ===== API GATEWAY CUSTOM DOMAIN BUILD =====
+      - echo replacing params in the api custom domain params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain.json $CODEBUILD_SRC_DIR/template-api-custom-domain.json
       - # API Gateway (Changes current API at HEAD, but does not deploy the API distrubtion to the API Endpoint)
       - echo ===== API GATEWAY BUILD =====
       - echo replacing VERSION_ID in the api params files.
@@ -81,17 +87,10 @@ phases:
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api.json $CODEBUILD_SRC_DIR
       - # API Gateway Deployment (Deploys the current API configuration to the API Endpoint)
       - echo ===== API GATEWAY DEPLOYMENT BUILD =====
-      - echo replacing VERSION_ID in the api deployment params files.
-      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-testing.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json_temp
-      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-prod.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json_temp
       - echo replacing params in the api deployment params files.
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json
-      - # Get the current API Gateway Deployment template from the stack, compare, and generate a new template.
-      - # We need to generate 2 differnt templates (NOT param templates) for testing and prod.
-      - # The reason for this is because these two templates will actually have different numbers of API deployment resources.
-      - python $CODEBUILD_SRC_DIR/Phoenix/api_gateway_deployment_rotator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-testing.json > $CODEBUILD_SRC_DIR/template-api-deployment-testing.json
-      - python $CODEBUILD_SRC_DIR/Phoenix/api_gateway_deployment_rotator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-prod.json > $CODEBUILD_SRC_DIR/template-api-deployment-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment.json $CODEBUILD_SRC_DIR/template-api-deployment.json
   post_build:
     commands:
       - echo Build completed on `date`
@@ -117,12 +116,15 @@ artifacts:
       - template-lambda.json
       - t-lambda-params-testing.json
       - t-lambda-params-prod.json
+      - # API Gateway Custom Domain
+      - template-api-custom-domain.json
+      - t-api-custom-domain-params-testing.json
+      - t-api-custom-domain-params-prod.json
       - # API Gateway
       - template-api.json
       - t-api-params-testing.json
       - t-api-params-prod.json
       - # API Gateway Deployment
-      - template-api-deployment-testing.json
-      - template-api-deployment-prod.json
+      - template-api-deployment.json
       - t-api-deployment-params-testing.json
       - t-api-deployment-params-prod.json

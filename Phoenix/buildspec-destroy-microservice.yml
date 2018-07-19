@@ -34,6 +34,12 @@ phases:
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-testing
+      - # Delete API Gateway Custom Domain
+      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-testing
       - # Delete Lambda
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod

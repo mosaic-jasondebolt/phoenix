@@ -15,6 +15,7 @@ PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name |
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-params-dev.json`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 VERSION_ID=$ENVIRONMENT
+STACK_NAME=$PROJECT_NAME-api-$ENVIRONMENT
 
 # Check for valid arguments
 if [ $# -ne 1 ]
@@ -33,10 +34,13 @@ python parameters_generator.py temp1.json cloudformation > temp2.json
 aws cloudformation validate-template --template-body file://template-api.json
 
 # Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $PROJECT_NAME-api-$ENVIRONMENT \
+aws cloudformation $1-stack --stack-name $STACK_NAME \
     --template-body file://template-api.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_IAM
+
+aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
+
 
 # Cleanup
 rm temp1.json

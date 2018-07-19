@@ -1198,6 +1198,22 @@
                 }
               },
               {
+                "Name": "APIGatewayDomain",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-custom-domain",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                }
+              },
+              {
                 "Name": "APIGateway",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1248,7 +1264,7 @@
                     ]]
                   },
                   "TemplateConfiguration": "BuildOutput::t-api-deployment-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api-deployment-testing.json"
+                  "TemplatePath": "BuildOutput::template-api-deployment.json"
                 }
               }
             ]
@@ -1404,6 +1420,22 @@
                 }
               },
               {
+                "Name": "APIGatewayDomain",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-custom-domain",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                }
+              },
+              {
                 "Name": "APIGateway",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1454,7 +1486,7 @@
                     ]]
                   },
                   "TemplateConfiguration": "BuildOutput::t-api-deployment-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api-deployment-prod.json"
+                  "TemplatePath": "BuildOutput::template-api-deployment.json"
                 }
               },
               {

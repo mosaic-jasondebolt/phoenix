@@ -1,0 +1,228 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys an API (RESTful or not)",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/project-name"
+    },
+    "Environment": {
+      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "v0DocumentationVersion": {
+      "Type": "AWS::ApiGateway::DocumentationVersion",
+      "Properties": {
+        "Description": "v0 API",
+        "DocumentationVersion": "v0",
+        "RestApiId": {
+          "Fn::ImportValue": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "api",
+                {
+                  "Ref": "Environment"
+                },
+                "RestApiId"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "v0DeploymentStage": {
+        "Type": "AWS::ApiGateway::Stage",
+        "DependsOn": ["v0Deployment", "v0DocumentationVersion"],
+        "Properties": {
+            "StageName": "v0",
+            "Description": {
+              "Fn::Join": [" ", [
+                {"Ref": "Environment"},
+                "Stage"
+              ]]
+            },
+            "RestApiId": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "ProjectName"
+                    },
+                    "api",
+                    {
+                      "Ref": "Environment"
+                    },
+                    "RestApiId"
+                  ]
+                ]
+              }
+            },
+            "DocumentationVersion": "v0",
+            "DeploymentId": {
+                "Ref": "v0Deployment"
+            }
+        }
+    },
+    "v0Deployment": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Fn::ImportValue": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "api",
+                {
+                  "Ref": "Environment"
+                },
+                "RestApiId"
+              ]
+            ]
+          }
+        },
+        "Description": {"Fn::Join": [" ", [
+          "v0",
+          "Deployment"
+        ]]}
+      }
+    },
+    "v0BasePathMapping": {
+      "Type" : "AWS::ApiGateway::BasePathMapping",
+      "Properties" : {
+        "BasePath" : "v0",
+        "DomainName" : {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "api-custom-domain",
+              {"Ref": "Environment"},
+              "CustomDomain"
+            ]]
+          }
+        },
+        "RestApiId" : {
+          "Fn::ImportValue": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "api",
+                {
+                  "Ref": "Environment"
+                },
+                "RestApiId"
+              ]
+            ]
+          }
+        },
+        "Stage" : {"Ref": "v0DeploymentStage"}
+      }
+    },
+    "v1DeploymentStage": {
+        "Type": "AWS::ApiGateway::Stage",
+        "DependsOn": ["v1Deployment"],
+        "Properties": {
+            "StageName": "v1",
+            "Description": {
+              "Fn::Join": [" ", [
+                {"Ref": "Environment"},
+                "Stage"
+              ]]
+            },
+            "RestApiId": {
+              "Fn::ImportValue": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "ProjectName"
+                    },
+                    "api",
+                    {
+                      "Ref": "Environment"
+                    },
+                    "RestApiId"
+                  ]
+                ]
+              }
+            },
+            "DeploymentId": {
+                "Ref": "v1Deployment"
+            }
+        }
+    },
+    "v1Deployment": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "Properties": {
+        "RestApiId": {
+          "Fn::ImportValue": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "api",
+                {
+                  "Ref": "Environment"
+                },
+                "RestApiId"
+              ]
+            ]
+          }
+        },
+        "Description": {"Fn::Join": [" ", [
+          "v1",
+          "Deployment"
+        ]]}
+      }
+    },
+    "v1BasePathMapping": {
+      "Type" : "AWS::ApiGateway::BasePathMapping",
+      "Properties" : {
+        "BasePath" : "v1",
+        "DomainName" : {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "api-custom-domain",
+              {"Ref": "Environment"},
+              "CustomDomain"
+            ]]
+          }
+        },
+        "RestApiId" : {
+          "Fn::ImportValue": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "ProjectName"
+                },
+                "api",
+                {
+                  "Ref": "Environment"
+                },
+                "RestApiId"
+              ]
+            ]
+          }
+        },
+        "Stage" : {"Ref": "v1DeploymentStage"}
+      }
+    }
+  }
+}

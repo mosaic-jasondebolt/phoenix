@@ -1,0 +1,115 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys an API (RESTful or not)",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/project-name"
+    },
+    "Environment": {
+      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
+      "Type": "String"
+    },
+    "HostedZoneId": {
+      "Description": "The Route53 hosted zone id that this service will fall under.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/hosted-zone-id"
+    },
+    "Domain": {
+      "Description": "The domain name that this service will fall under.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/domain"
+    },
+    "SSLCertificateARN": {
+      "Description": "The AWS ACM Certificate ARN.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/ssl-certificate-arn"
+    },
+    "URLPrefixOverride": {
+      "Description": "The URL prefix to override the environment prefix with. Works only for non-production environments.",
+      "Type": "String",
+      "Default": ""
+    }
+  },
+  "Conditions": {
+    "IsProd" : {"Fn::Equals" : [
+      {"Ref" : "Environment"},
+      "prod"
+    ]},
+    "HasURLPrefixOverride" : {"Fn::Not": [
+      {"Fn::Equals" : [
+        {"Ref" : "URLPrefixOverride"}, ""
+      ]}
+    ]}
+  },
+  "Resources": {
+    "CustomDomain": {
+      "Type": "AWS::ApiGateway::DomainName",
+      "Properties": {
+        "CertificateArn": {"Ref": "SSLCertificateARN"},
+        "DomainName": {"Fn::Join": ["", [
+          { "Fn::If": [
+            "IsProd",
+            "",
+            {
+              "Fn::If": [
+                "HasURLPrefixOverride",
+                {"Fn::Join": ["", [ {"Ref": "URLPrefixOverride"}, "." ]] },
+                {"Fn::Join": ["", [ {"Ref": "Environment"}, "." ]] }
+              ]
+            }
+          ]},
+          {"Ref": "Domain"}
+        ]]}
+      }
+    },
+    "DnsRecordSetGroup": {
+      "Type": "AWS::Route53::RecordSetGroup",
+      "DependsOn": ["CustomDomain"],
+      "Properties": {
+        "HostedZoneId": {"Ref": "HostedZoneId"},
+        "RecordSets": [
+          {
+            "Name": {"Fn::Join": ["", [
+              { "Fn::If": [
+                "IsProd",
+                "",
+                {
+                  "Fn::If": [
+                    "HasURLPrefixOverride",
+                    {"Fn::Join": ["", [ {"Ref": "URLPrefixOverride"}, "." ]] },
+                    {"Fn::Join": ["", [ {"Ref": "Environment"}, "." ]] }
+                  ]
+                }
+              ]},
+              {"Ref": "Domain"}
+            ]]},
+            "AliasTarget" : {
+                "HostedZoneId" : "Z2FDTNDATAQYW2",
+                "DNSName" : { "Fn::GetAtt": ["CustomDomain", "DistributionDomainName"] }
+            },
+            "Type" : "A"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "CustomDomain": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "api-custom-domain",
+            {"Ref": "Environment"},
+            "CustomDomain"
+          ]]
+        }
+      },
+      "Value": {
+        "Ref": "CustomDomain"
+      }
+    }
+  }
+}

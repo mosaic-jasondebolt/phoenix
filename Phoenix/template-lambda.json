@@ -7,6 +7,11 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/project-name"
     },
+    "IAMRole": {
+      "Description": "The role of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/iam-role"
+    },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
@@ -24,10 +29,9 @@
   "Resources": {
     "LambdaProjects": {
       "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
+        "Role": {"Ref": "IAMRole"},
         "Code": {
           "S3Bucket" : {"Ref": "LambdaBucketName"},
           "S3Key" : {"Fn::Join": ["/", [
@@ -49,60 +53,6 @@
         "Action": "lambda:InvokeFunction",
         "Principal": "apigateway.amazonaws.com"
       }
-    },
-    "LambdaRole": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "dynamodb:*",
-                "s3:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName"},
-          "APILambdaRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaRole"
-          }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
     }
   },
   "Outputs": {
