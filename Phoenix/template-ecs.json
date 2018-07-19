@@ -32,10 +32,10 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/load-balancer-logs-bucket-name"
     },
-    "SSLCertificateARN": {
+    "ECSSSLCertificateARN": {
       "Description": "The AWS ACM Certificate ARN.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/ssl-certificate-arn"
+      "Default": "/microservice/phoenix/ssl-certificate-arn-ecs"
     },
     "Environment": {
       "Description": "The environment to deploy the instance to.",
@@ -676,7 +676,7 @@
       "Properties": {
         "Certificates": [
           {
-            "CertificateArn": {"Ref": "SSLCertificateARN"}
+            "CertificateArn": {"Ref": "ECSSSLCertificateARN"}
           }
         ],
         "DefaultActions": [
@@ -1223,6 +1223,8 @@
                   ]
                 }
               ]},
+              "ecs",
+              ".",
               {"Ref": "Domain"}
             ]]},
             "Type": "A"
@@ -1248,6 +1250,8 @@
             ]
           }
         ]},
+        "ecs",
+        ".",
         {"Ref": "Domain"}
       ]]}
     }
