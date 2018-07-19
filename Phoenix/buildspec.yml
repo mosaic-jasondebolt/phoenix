@@ -20,7 +20,7 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws --version
       - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
-      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME
+      - MAIN_REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME-main
       - VERSION_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - IMAGE_TAG=$VERSION_ID
   build:
@@ -51,8 +51,8 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-main-task.json $CODEBUILD_SRC_DIR
       - echo Building the Docker image from the Dockerfile.
-      - docker build -t $REPOSITORY_URI:latest $CODEBUILD_SRC_DIR/Phoenix/ecs
-      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+      - docker build -t $MAIN_REPOSITORY_URI:latest $CODEBUILD_SRC_DIR/Phoenix/ecs
+      - docker tag $MAIN_REPOSITORY_URI:latest $MAIN_REPOSITORY_URI:$IMAGE_TAG
       - # Lambda
       - echo ===== LAMBDA BUILD =====
       - echo replacing VERSION_ID in the lambda params files.
@@ -104,8 +104,8 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py build
       - # Push docker files
       - echo Pushing the Docker images...
-      - docker push $REPOSITORY_URI:latest
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $MAIN_REPOSITORY_URI:latest
+      - docker push $MAIN_REPOSITORY_URI:$IMAGE_TAG
 artifacts:
     files:
       - # Gitlab config file which will be picked up my Lambda if this is a merge request build.
