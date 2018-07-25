@@ -194,6 +194,34 @@
                 }
               },
               {
+                "Name": "ECSMainService",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "ecs",
+                      "main",
+                      "deploy"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ecs-task.json"
+                }
+              },
+              {
                 "Name": "PostMergeRequest",
                 "ActionTypeId": {
                   "Category": "Invoke",
@@ -204,7 +232,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "FunctionName": {
                     "Fn::ImportValue": {
