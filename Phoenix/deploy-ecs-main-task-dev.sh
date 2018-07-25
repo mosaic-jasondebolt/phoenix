@@ -7,15 +7,15 @@ set -e
 # deploys the locally build docker image to the Dev ECS cluster in AWS.
 
 # USAGE:
-#   ./deploy-ecs-main-task-def.sh [create | update] [sbt | location of docker file]
+#   ./deploy-ecs-task-main-def.sh [create | update] [sbt | location of docker file]
 #
 # EXAMPLES:
-#   ./deploy-ecs-main-task-def.sh update sbt --> Always use this command for Play/SBT projects.
-#   ./deploy-ecs-main-task-def.sh update .   --> Dockerfile in project root dir.
-#   ./deploy-ecs-main-task-def.sh update ecs   --> Dockerfile in ecs dir.
+#   ./deploy-ecs-task-main-def.sh update sbt --> Always use this command for Play/SBT projects.
+#   ./deploy-ecs-task-main-def.sh update .   --> Dockerfile in project root dir.
+#   ./deploy-ecs-task-main-def.sh update ecs   --> Dockerfile in ecs dir.
 
-ECS_PARAM_FILE='template-ecs-main-task-params-dev.json'
-ECS_FILE='template-ecs-main-task.json'
+ECS_PARAM_FILE='template-ecs-task-main-params-dev.json'
+ECS_FILE='template-ecs-task.json'
 TASK_FAMILY='main'
 
 AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`

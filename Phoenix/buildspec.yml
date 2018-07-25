@@ -44,12 +44,12 @@ phases:
       - # ECS Main Service resources
       - echo ===== DOCKER BUILD =====
       - echo replacing build number in the task definition param files.
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-main-task-params-testing.json > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-testing.json_temp
-      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-main-task-params-prod.json > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-testing.json > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-prod.json > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json_temp
       - echo replacing params in the task definition params files.
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-main-task-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-testing.json
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-main-task-params-prod.json
-      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-main-task.json $CODEBUILD_SRC_DIR
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task.json $CODEBUILD_SRC_DIR
       - echo Building the Docker image from the Dockerfile.
       - docker build -t $MAIN_REPOSITORY_URI:latest $CODEBUILD_SRC_DIR/Phoenix/ecs
       - docker tag $MAIN_REPOSITORY_URI:latest $MAIN_REPOSITORY_URI:$IMAGE_TAG
@@ -119,9 +119,9 @@ artifacts:
       - t-ecs-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
       - t-ecs-params-prod.json
       - # ECS Main Task
-      - template-ecs-main-task.json
-      - t-ecs-main-task-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
-      - t-ecs-main-task-params-prod.json
+      - template-ecs-task.json
+      - t-ecs-task-main-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
+      - t-ecs-task-main-params-prod.json
       - # Lambda
       - template-lambda.json
       - t-lambda-params-testing.json
