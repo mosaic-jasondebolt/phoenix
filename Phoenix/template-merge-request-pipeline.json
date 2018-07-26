@@ -164,6 +164,19 @@
             ]
           },
           {
+            "Name": "Approval",
+            "Actions": [{
+              "Name": "ManualApproval",
+              "ActionTypeId": {
+                "Category": "Approval",
+                "Owner": "AWS",
+                "Version": "1",
+                "Provider": "Manual"
+              },
+              "RunOrder": 1
+            }]
+          },
+          {
             "Name": "DeployToECS",
             "Actions": [
               {
