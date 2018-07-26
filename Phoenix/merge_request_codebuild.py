@@ -112,7 +112,7 @@ def generate_ecs_params():
 def generate_ecs_task_main_params():
     print("Saving updated ECS task main parameter file...")
     file_path = os.path.join(
-        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-params-task-main-testing.json'
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-task-main-params-testing.json'
     )
     ecs_params = _parse_json(file_path)
     print(json.dumps(ecs_params, indent=2))
@@ -121,7 +121,7 @@ def generate_ecs_task_main_params():
     ecs_params['Parameters']['DBEnvironment'] = 'dev'
     ecs_params['Parameters']['VPCPrefix'] = 'dev'
     ecs_params['Parameters']['URLPrefixOverride'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
-    ecs_params_file = open('t-ecs-params-task-main-testing.json', 'w')
+    ecs_params_file = open('t-ecs-task-main-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 
 def generate_lambda_gitlab_config():
