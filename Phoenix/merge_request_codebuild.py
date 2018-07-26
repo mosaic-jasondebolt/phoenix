@@ -105,7 +105,6 @@ def generate_ecs_params():
     ecs_params['Parameters']['Environment'] = PIPELINE_NAME
     ecs_params['Parameters']['DBEnvironment'] = 'dev'
     ecs_params['Parameters']['VPCPrefix'] = 'dev'
-    ecs_params['Parameters']['URLPrefixOverride'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
     ecs_params_file = open('t-ecs-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 
