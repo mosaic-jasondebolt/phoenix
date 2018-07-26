@@ -166,7 +166,7 @@
             {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
           ]
         },
-        "Timeout": "25"
+        "Timeout": "300"
       }
     },
     "LambdaMergeRequestsInvokePermission": {
