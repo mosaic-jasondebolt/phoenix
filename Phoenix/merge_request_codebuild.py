@@ -89,7 +89,7 @@ class RequestSender(object):
 def generate_ecs_params():
     print("Saving updated ECS parameter file...")
     file_path = os.path.join(
-        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-params-testing.json'
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-task-main-params-testing.json'
     )
     ecs_params = _parse_json(file_path)
     print(json.dumps(ecs_params, indent=2))
@@ -104,7 +104,7 @@ def generate_ecs_params():
     # NOTE!: If you change the below URL, you must also change this value in the post_mergerequests lambda function.
     ecs_params['Parameters']['Environment'] = PIPELINE_NAME
     ecs_params['Parameters']['URLPrefixOverride'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
-    ecs_params_file = open('t-ecs-params-testing.json', 'w')
+    ecs_params_file = open('t-ecs-task-main-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 
 def generate_lambda_gitlab_config():
