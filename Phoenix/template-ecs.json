@@ -512,7 +512,7 @@
           "Subnets": [
             {"Fn::ImportValue": {
               "Fn::Join": ["-", [
-                {"Ref": "Environment"},
+                {"Ref": "VPCPrefix"},
                 "vpc",
                 "PrivateSubnetAZ1"
               ]]
