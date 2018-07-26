@@ -224,7 +224,7 @@
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      {"Ref": "PipelineName"},
                       "ecs",
                       "main",
                       "deploy"

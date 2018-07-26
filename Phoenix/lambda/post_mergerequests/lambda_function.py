@@ -232,7 +232,7 @@ def lambda_handler(event, context):
 
         # Notify gitlab
         region = os.environ['AWS_DEFAULT_REGION']
-        ecs_url = 'https://mr-{source_version}.{domain}'.format(
+        ecs_url = 'https://mr-{source_version}.ecs.{domain}'.format(
             source_version=source_version, domain=domain)
         request_body = (
             'View deployed container (<a href="{0}">{1}</a>) @ commit {2}'.format(
