@@ -1782,10 +1782,13 @@
         "EventPattern" : {
           "source": [ "aws.codepipeline" ],
           "detail-type": [ "CodePipeline Pipeline Execution State Change" ],
-          "detail": {"state": ["FAILED"]}
+          "detail": {"state": ["FAILED"]},
+          "resources": [{"Ref": "CodePipeline"}]
         },
         "State" : "ENABLED",
-        "Targets" : [ {"Ref": "CodePipelineFailedSNSTopic"} ]
+        "Targets" : [ {"Arn": {"Ref": "CodePipelineFailedSNSTopic"},
+          "Id": {"Fn::Join": ["-", ["event-pipeline-failed-for", {"Ref": "ProjectName"}] ]
+          } } ]
       }
     }
   }
