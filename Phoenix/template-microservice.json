@@ -284,6 +284,26 @@
         }
       }
     },
+    "CodePipelineFailedSNSTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "PipelineFailed",
+        "Subscription": [{
+          "Endpoint": {
+            "Ref": "NotificationEmail"
+          },
+          "Protocol": "email"
+        }],
+        "TopicName": {
+          "Fn::Join": ["-", [
+            "pipeline-failed-for",
+            {
+              "Ref": "ProjectName"
+            }
+          ]]
+        }
+      }
+    },
     "CodePipelineApprovalSNSTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
@@ -1753,6 +1773,22 @@
             "Ref": "CodePipelineBucket"
           }
         }
+      }
+    },
+    "CodePipelineFailedCloudWatchRule": {
+      "Type" : "AWS::Events::Rule",
+      "Properties" : {
+        "Description" : "CodePipelineFailEvent",
+        "EventPattern" : {
+          "source": [ "aws.codepipeline" ],
+          "detail-type": [ "CodePipeline Pipeline Execution State Change" ],
+          "detail": {"state": ["FAILED"]},
+          "resources": [{"Ref": "CodePipeline"}]
+        },
+        "State" : "ENABLED",
+        "Targets" : [ {"Arn": {"Ref": "CodePipelineFailedSNSTopic"},
+          "Id": {"Fn::Join": ["-", ["event-pipeline-failed-for", {"Ref": "ProjectName"}] ]
+          } } ]
       }
     }
   }
