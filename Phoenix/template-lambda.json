@@ -21,12 +21,128 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/lambda-bucket-name"
     },
+    "VPCPrefix": {
+      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
+      "Type": "String"
+    },
     "Version": {
       "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
       "Type": "String"
     }
   },
   "Resources": {
+    "LambdaVPCProxy": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.handler",
+        "Role": {"Ref": "IAMRole"},
+        "MemorySize": 128,
+        "Code": {
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "vpc_proxy",
+            "lambda_function.zip"
+          ]]}
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaVPCProxySecurityGroup"}
+          ],
+          "SubnetIds": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "VPCPrefix"},
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "VPCPrefix"},
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ]
+        },
+        "Runtime": "nodejs6.10",
+        "Timeout": "29"
+      }
+    },
+    "LambdaVPCProxySecurityGroup": {
+      "Properties": {
+        "GroupDescription": "Lambda VPC proxy security group.",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-vpcproxy-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": {"Fn::Sub": [
+            "${VPCPrefix}-vpc-VPC", {"VPCPrefix": {"Ref": "VPCPrefix"}}
+          ]}
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "VPCProxyToELB": {
+      "Properties": {
+        "FromPort": "-1",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "ecs",
+              {"Ref": "Environment"},
+              "ApplicationELBSG"
+            ]]
+          }
+        },
+        "IpProtocol": "-1",
+        "SourceSecurityGroupId": {
+          "Ref": "LambdaVPCProxySecurityGroup"
+        },
+        "ToPort": "-1"
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
+    },
+    "VPCProxyToWeb": {
+      "Properties": {
+        "FromPort": "-1",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "ecs",
+              {"Ref": "Environment"},
+              "WebSG"
+            ]]
+          }
+        },
+        "IpProtocol": "-1",
+        "SourceSecurityGroupId": {
+          "Ref": "LambdaVPCProxySecurityGroup"
+        },
+        "ToPort": "-1"
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
+    },
+    "LambdaVPCProxyInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaVPCProxy", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com"
+      }
+    },
     "LambdaProjects": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
@@ -56,6 +172,21 @@
     }
   },
   "Outputs": {
+    "VPCProxyLambdaArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "lambda",
+            {"Ref": "Environment"},
+             "LambdaVPCProxyArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["LambdaVPCProxy", "Arn"]
+      }
+    },
     "ProjectsLambdaArn": {
       "Export": {
         "Name": {

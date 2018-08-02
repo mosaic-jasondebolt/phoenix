@@ -70,6 +70,7 @@ def write_dev_param_files(environment_name):
     testing_lambda_template = _parse_json('template-lambda-params-testing.json')
     dev_lambda_template = copy.deepcopy(testing_lambda_template)
     dev_lambda_template['Parameters']['Environment'] = environment_name
+    dev_lambda_template['Parameters']['VPCPrefix'] = 'dev'
     dev_lambda_file_obj = open('template-lambda-params-dev.json', 'w')
     dev_lambda_file_obj.write(json.dumps(dev_lambda_template, indent=2))
 

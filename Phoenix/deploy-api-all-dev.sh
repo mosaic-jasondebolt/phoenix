@@ -16,6 +16,7 @@ set -e
 
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+DOMAIN_NAME=$(aws ssm get-parameter --name /microservice/phoenix/domain | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-deployment-params-dev.json`
 API_DEPLOYMENT_STACK_NAME=$PROJECT_NAME-api-deployment-$ENVIRONMENT
 
@@ -55,13 +56,13 @@ if [ $1 == "update" ] && [ $2 == "api-deploy" ]
   then
     ./deploy-api-dev.sh update
 
-    aws apigateway delete-base-path-mapping --domain-name devjason.api.mosaic-phoenix.com --base-path $VERSION
+    aws apigateway delete-base-path-mapping --domain-name $ENVIRONMENT.$DOMAIN_NAME --base-path $VERSION
     aws apigateway delete-stage --rest-api-id $API_ID --stage-name $VERSION
     aws apigateway delete-documentation-version --rest-api-id $API_ID --documentation-version $VERSION
 
     aws apigateway create-deployment --rest-api-id $API_ID --stage-name $VERSION
     aws apigateway create-documentation-version --rest-api-id $API_ID --stage-name $VERSION --documentation-version $VERSION
-    aws apigateway create-base-path-mapping --domain-name devjason.api.mosaic-phoenix.com --base-path $VERSION --rest-api-id $API_ID --stage $VERSION
+    aws apigateway create-base-path-mapping --domain-name $ENVIRONMENT.$DOMAIN_NAME --base-path $VERSION --rest-api-id $API_ID --stage $VERSION
 
     # The CloudFormation is super slow, hence the CLI calls above with do something similar but much faster.
     #./deploy-api-deployment-dev.sh delete

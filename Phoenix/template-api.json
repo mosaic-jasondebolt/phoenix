@@ -249,7 +249,7 @@
         "Name": "ProjectPutValidator",
         "RestApiId": {"Ref": "RestAPI"},
         "ValidateRequestBody": false,
-        "ValidateRequestParameters": true,
+        "ValidateRequestParameters": true
       }
     },
     "ProjectPut": {
@@ -314,6 +314,199 @@
       "Type": "AWS::IAM::AccessKey",
       "Properties": {
         "UserName": {"Ref": "APIUser"}
+      }
+    },
+    "MainGet": {
+      "Type" : "AWS::ApiGateway::Method",
+      "Properties" : {
+        "RestApiId" : { "Ref": "RestAPI" },
+        "AuthorizationType" : "AWS_IAM",
+        "HttpMethod": "GET",
+        "ResourceId" : { "Fn::GetAtt": ["RestAPI", "RootResourceId"] },
+        "RequestParameters": {
+          "method.request.querystring.error": false
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false,
+              "method.response.header.content-length": false,
+              "method.response.header.date": false,
+              "method.response.header.etag": false,
+              "method.response.header.x-powered-by": false
+            },
+            "ResponseModels": {
+              "application/json": {"Ref": "EnvironmentModel"}
+            }
+          },
+          {"StatusCode": "400"},
+          {"StatusCode": "401"},
+          {"StatusCode": "403"},
+          {"StatusCode": "404"},
+          {"StatusCode": "500"}
+        ],
+        "Integration": {
+          "Type": "AWS",
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "StatusCode" : "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.content-length": "integration.response.body.headers.content-length",
+                "method.response.header.date": "integration.response.body.headers.date",
+                "method.response.header.etag": "integration.response.body.headers.etag",
+                "method.response.header.x-powered-by": "integration.response.body.headers.x-powered-by"
+              },
+              "ResponseTemplates" : {
+                "application/json": "$input.json('$.bodyJson')"
+              }
+            },
+            {
+              "StatusCode" : "400",
+              "SelectionPattern": "\\{\\\"status\\\"\\:400.*",
+              "ResponseTemplates" : {
+                "application/json": "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n$errorMessageObj.bodyJson"
+              }
+            },
+            {
+              "StatusCode" : "401",
+              "SelectionPattern": "\\{\\\"status\\\"\\:401.*",
+              "ResponseTemplates" : {
+                "application/json": "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n$errorMessageObj.bodyJson"
+              }
+            },
+            {
+              "StatusCode" : "403",
+              "SelectionPattern": "\\{\\\"status\\\"\\:403.*",
+              "ResponseTemplates" : {
+                "application/json": "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n$errorMessageObj.bodyJson"
+              }
+            },
+            {
+              "StatusCode" : "404",
+              "SelectionPattern": "\\{\\\"status\\\"\\:404.*",
+              "ResponseTemplates" : {
+                "application/json": "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n$errorMessageObj.bodyJson"
+              }
+            },
+            {
+              "StatusCode" : "500",
+              "SelectionPattern": "\\{\\\"status\\\"\\:500.*",
+              "ResponseTemplates" : {
+                "application/json": "#set ($errorMessageObj = $util.parseJson($input.path('$.errorMessage')))\n$errorMessageObj.bodyJson"
+              }
+            }
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "Uri": {"Fn::Join": ["", [
+            "arn:aws:apigateway:",
+            { "Ref": "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/",
+            {
+              "Fn::ImportValue": {
+                "Fn::Join": ["-", [
+                  {"Ref": "ProjectName"},
+                  "lambda",
+                  {"Ref": "Environment"},
+                  "LambdaVPCProxyArn"
+                ]]
+              }
+            },
+            "/invocations"
+          ]]},
+          "RequestTemplates": {
+            "application/json": {"Fn::Join": ["", [
+              "#set($allParams = $input.params())\n",
+              "{\n",
+                "  \"requestParams\" : {\n",
+                "    \"hostname\" : \"",
+                {
+                  "Fn::ImportValue": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "ecs-main",
+                      {"Ref": "Environment"},
+                      "ServiceHostname"
+                    ]]
+                  }
+                },
+                "\",\n",
+                "    \"port\" : \"",
+                "80",
+                "\",\n",
+                "    \"path\" : \"$context.resourcePath\",\n",
+                "    \"method\" : \"$context.httpMethod\"\n",
+                "  },\n",
+                "  \"bodyJson\" : $input.json('$'),\n",
+                "  \"params\" : {\n",
+                "    #foreach($type in $allParams.keySet())\n",
+                "      #set($params = $allParams.get($type))\n",
+                "      \"$type\" : {\n",
+                "        #foreach($paramName in $params.keySet())\n",
+                "          \"$paramName\" : \"$util.escapeJavaScript($params.get($paramName))\"\n",
+                "          #if($foreach.hasNext),#end\n",
+                "        #end\n",
+                "      }\n",
+                "      #if($foreach.hasNext),#end\n",
+                "    #end\n",
+                "  },\n",
+                "  \"stage-variables\" : {\n",
+                "    #foreach($key in $stageVariables.keySet())\n",
+                "      \"$key\" : \"$util.escapeJavaScript($stageVariables.get($key))\"\n",
+                "      #if($foreach.hasNext),#end\n",
+                "    #end\n",
+                "  },\n",
+                "  \"context\" : {\n",
+                "    \"account-id\" : \"$context.identity.accountId\",\n",
+                "    \"api-id\" : \"$context.apiId\",\n",
+                "    \"api-key\" : \"$context.identity.apiKey\",\n",
+                "    \"authorizer-principal-id\" : \"$context.authorizer.principalId\",\n",
+                "    \"caller\" : \"$context.identity.caller\",\n",
+                "    \"cognito-authentication-provider\" : \"$context.identity.cognitoAuthenticationProvider\",\n",
+                "    \"cognito-authentication-type\" : \"$context.identity.cognitoAuthenticationType\",\n",
+                "    \"cognito-identity-id\" : \"$context.identity.cognitoIdentityId\",\n",
+                "    \"cognito-identity-pool-id\" : \"$context.identity.cognitoIdentityPoolId\",\n",
+                "    \"http-method\" : \"$context.httpMethod\",\n",
+                "    \"stage\" : \"$context.stage\",\n",
+                "    \"source-ip\" : \"$context.identity.sourceIp\",\n",
+                "    \"user\" : \"$context.identity.user\",\n",
+                "    \"user-agent\" : \"$context.identity.userAgent\",\n",
+                "    \"user-arn\" : \"$context.identity.userArn\",\n",
+                "    \"request-id\" : \"$context.requestId\",\n",
+                "    \"resource-id\" : \"$context.resourceId\",\n",
+                "    \"resource-path\" : \"$context.resourcePath\"\n",
+                "  }\n",
+                "}\n"
+            ]]}
+          }
+        }
+      }
+    },
+    "EnvironmentModel": {
+      "Type": "AWS::ApiGateway::Model",
+      "Properties": {
+        "RestApiId": { "Ref": "RestAPI" },
+        "ContentType": "application/json",
+        "Description": "Schema environment variables.",
+        "Name": "EnvironmentModel",
+        "Schema": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "title": "EnvironmentModel",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "HOME": { "type": "string" },
+              "HOSTNAME": { "type": "string" },
+              "PATH": { "type": "string" },
+              "RDS_READ_ENDPOINT": { "type": "string" },
+              "RDS_WRITE_ENDPOINT": { "type": "string" }
+            }
+          }
+        }
       }
     }
   },

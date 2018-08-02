@@ -925,6 +925,46 @@
         ".",
         {"Ref": "Domain"}
       ]]}
+    },
+    "ServiceHostname" : {
+      "Description" : "The hostname of the service",
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "ecs",
+            {"Ref": "TaskFamily"},
+            {"Ref": "Environment"},
+            "ServiceHostname"
+          ]]
+        }
+      },
+      "Value": {"Fn::Join": ["", [
+        { "Fn::If": [
+          "IsProd",
+          {"Fn::Join": ["", [
+            {"Ref": "TaskFamily"},
+            "."
+            ]]
+          },
+          {
+            "Fn::If": [
+              "HasURLPrefixOverride",
+              {"Fn::Join": ["", [ {"Ref": "URLPrefixOverride"}, "." ]] },
+              {"Fn::Join": ["", [
+                {"Fn::Join": ["-", [
+                  {"Ref": "TaskFamily"},
+                  {"Ref": "Environment"}
+                  ]]}, "."
+                ]]
+              }
+            ]
+          }
+        ]},
+        "ecs",
+        ".",
+        {"Ref": "Domain"}
+      ]]}
     }
   }
 }

@@ -26,14 +26,27 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
-# Upload the Lambda functions
-listOfLambdaFunctions='projects'
-for functionName in $listOfLambdaFunctions
+# Upload the Python Lambda functions
+listOfPythonLambdaFunctions='projects'
+for functionName in $listOfPythonLambdaFunctions
 do
   mkdir -p builds/$functionName
   cp -rf lambda/$functionName/* builds/$functionName/
   cd builds/$functionName/
   pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
+  cd ../../
+  rm -rf builds
+done
+
+# Upload the NodeJS Lambda functions
+listOfNodeJSLambdaFunctions='vpc_proxy'
+for functionName in $listOfNodeJSLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
   zip -r lambda_function.zip ./*
   aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
   cd ../../
