@@ -62,15 +62,28 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-lambda.json $CODEBUILD_SRC_DIR
-      - # Upload the Lambda functions
-      - listOfLambdaFunctions='projects password_generator'
+      - # Upload the Python Lambda functions
+      - listOfPythonLambdaFunctions='projects password_generator'
       - |-
-        for functionName in $listOfLambdaFunctions
+        for functionName in $listOfPythonLambdaFunctions
         do
           mkdir -p $CODEBUILD_SRC_DIR/Phoenix/builds/$functionName
           cp -rf $CODEBUILD_SRC_DIR/Phoenix/lambda/$functionName/* $CODEBUILD_SRC_DIR/Phoenix/builds/$functionName/
           cd $CODEBUILD_SRC_DIR/Phoenix/builds/$functionName/
           pip install -r requirements.txt -t .
+          zip -r lambda_function.zip ./*
+          aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
+          cd $CODEBUILD_SRC_DIR
+          rm -rf $CODEBUILD_SRC_DIR/Phoenix/builds
+        done
+      - # Upload the NodeJS Lambda functions
+      - listOfNodeJSLambdaFunctions='vpc_proxy'
+      - |-
+        for functionName in $listOfNodeJSLambdaFunctions
+        do
+          mkdir -p $CODEBUILD_SRC_DIR/Phoenix/builds/$functionName
+          cp -rf $CODEBUILD_SRC_DIR/Phoenix/lambda/$functionName/* $CODEBUILD_SRC_DIR/Phoenix/builds/$functionName/
+          cd $CODEBUILD_SRC_DIR/Phoenix/builds/$functionName/
           zip -r lambda_function.zip ./*
           aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
           cd $CODEBUILD_SRC_DIR
