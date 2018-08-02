@@ -124,6 +124,9 @@
             "StatusCode": "200",
             "ResponseParameters": {
               "method.response.header.Access-Control-Allow-Origin": false
+            },
+            "ResponseModels": {
+              "application/json": {"Ref": "StacksModel"}
             }
           }
         ],
@@ -360,7 +363,15 @@
                 "method.response.header.x-powered-by": "integration.response.body.headers.x-powered-by"
               },
               "ResponseTemplates" : {
-                "application/json": "$input.json('$.bodyJson')"
+                "application/json": {"Fn::Join": ["\n", [
+                  "{",
+                  "\t \"HOME\" : $input.json('$.bodyJson.HOME'),",
+                  "\t \"HOSTNAME\" : $input.json('$.bodyJson.HOSTNAME'),",
+                  "\t \"PATH\" : $input.json('$.bodyJson.PATH'),",
+                  "\t \"RDS_READ_ENDPOINT\" : $input.json('$.bodyJson.RDS_READ_ENDPOINT'),",
+                  "\t \"RDS_WRITE_ENDPOINT\" : $input.json('$.bodyJson.RDS_WRITE_ENDPOINT')",
+                  "}"
+                ]]}
               }
             },
             {
@@ -506,6 +517,203 @@
               "RDS_WRITE_ENDPOINT": { "type": "string" }
             }
           }
+        }
+      }
+    },
+    "StacksModel": {
+      "Type": "AWS::ApiGateway::Model",
+      "Properties": {
+        "RestApiId": { "Ref": "RestAPI" },
+        "ContentType": "application/json",
+        "Description": "Schema CloudFormation stacks",
+        "Name": "StacksModel",
+        "Schema": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "title": "StacksModel",
+          "type": "object",
+          "properties": {
+            "Stacks": {
+              "type": "array",
+              "uniqueItems": true,
+              "minItems": 1,
+              "items": {
+                "required": [
+                  "StackId",
+                  "StackName",
+                  "Description",
+                  "CreationTime",
+                  "LastUpdatedTime",
+                  "StackStatus",
+                  "DisableRollback",
+                  "RoleARN"
+                ],
+                "properties": {
+                  "StackId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "StackName": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "Description": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "Parameters": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                      "required": [
+                        "ParameterKey",
+                        "ParameterValue",
+                        "ResolvedValue"
+                      ],
+                      "properties": {
+                        "ParameterKey": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "ParameterValue": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "ResolvedValue": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  },
+                  "CreationTime": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "LastUpdatedTime": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "RollbackConfiguration": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "StackStatus": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "DisableRollback": {
+                    "type": "boolean"
+                  },
+                  "NotificationARNs": {
+                    "type": "array",
+                    "items": {
+                      "properties": {}
+                    }
+                  },
+                  "Capabilities": {
+                    "type": "array",
+                    "items": {
+                      "properties": {}
+                    }
+                  },
+                  "Outputs": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "minItems": 1,
+                    "items": {
+                      "required": [
+                        "OutputKey",
+                        "OutputValue",
+                        "ExportName"
+                      ],
+                      "properties": {
+                        "OutputKey": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "OutputValue": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "ExportName": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  },
+                  "RoleARN": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "Tags": {
+                    "type": "array",
+                    "items": {
+                      "properties": {}
+                    }
+                  }
+                }
+              }
+            },
+            "ResponseMetadata": {
+              "type": "object",
+              "properties": {
+                "RequestId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "HTTPStatusCode": {
+                  "type": "number"
+                },
+                "HTTPHeaders": {
+                  "type": "object",
+                  "properties": {
+                    "x-amzn-requestid": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "content-type": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "content-length": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "vary": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "date": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "required": [
+                    "x-amzn-requestid",
+                    "content-type",
+                    "content-length",
+                    "vary",
+                    "date"
+                  ]
+                },
+                "RetryAttempts": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "RequestId",
+                "HTTPStatusCode",
+                "HTTPHeaders",
+                "RetryAttempts"
+              ]
+            }
+          },
+          "required": [
+            "Stacks",
+            "ResponseMetadata"
+          ]
         }
       }
     }
