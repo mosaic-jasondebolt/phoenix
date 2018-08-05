@@ -19,6 +19,7 @@ USAGE:
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
 
 import sys, os, json, copy
+from glob import glob
 
 def _parse_json(path):
     result = open(os.path.join(sys.path[0], path), 'rb').read()
@@ -96,6 +97,16 @@ def write_dev_param_files(environment_name):
     dev_api_deployment_template['Parameters']['Environment'] = environment_name
     dev_api_deployment_file_obj = open('template-api-deployment-params-dev.json', 'w')
     dev_api_deployment_file_obj.write(json.dumps(dev_api_deployment_template, indent=2))
+
+    # API Documentation buckets templates
+    for testing_file in glob('template-api-docs-bucket-params-v*-testing.json'):
+        testing_api_docs_bucket_template = _parse_json(testing_file)
+        dev_api_docs_bucket_template = copy.deepcopy(testing_api_docs_bucket_template)
+        dev_api_docs_bucket_template['Parameters']['DomainPrefix'] = dev_api_docs_bucket_template[
+            'Parameters']['DomainPrefix'].replace('testing', 'dev')
+        dev_file = testing_file.replace('testing', 'dev')
+        dev_api_docs_bucket_file_obj = open(dev_file, 'w')
+        dev_api_docs_bucket_file_obj.write(json.dumps(dev_api_docs_bucket_template, indent=2))
 
 def main(args):
     if len(args) != 1:

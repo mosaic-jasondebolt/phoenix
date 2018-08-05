@@ -1,0 +1,222 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys an S3 static website",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/project-name"
+    },
+    "IAMRole": {
+      "Description": "The role of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/iam-role"
+    },
+    "HostedZoneId": {
+      "Description": "The Route53 hosted zone id that this service will fall under.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/hosted-zone-id"
+    },
+    "Domain": {
+      "Description": "The domain name for the static S3 bucket website.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/domain"
+    },
+    "APIDocsUserAgent": {
+      "Description": "The user agent used for API Documentation access",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "api-docs-user-agent"
+    },
+    "DomainPrefix": {
+      "Description": "The prefix name for the bucket (i.e some.prefix.{PROJECT_DOMAIN}).",
+      "Type": "String"
+    }
+  },
+  "Mappings": {
+    "RegionMap": {
+      "us-east-1": {
+        "S3hostedzoneID": "Z3AQBSTGFYJSTF",
+        "websiteendpoint": "s3-website-us-east-1.amazonaws.com"
+      },
+      "us-west-1": {
+        "S3hostedzoneID": "Z2F56UZL2M1ACD",
+        "websiteendpoint": "s3-website-us-west-1.amazonaws.com"
+      },
+      "us-west-2": {
+        "S3hostedzoneID": "Z3BJ6K6RIION7M",
+        "websiteendpoint": "s3-website-us-west-2.amazonaws.com"
+      },
+      "eu-west-1": {
+        "S3hostedzoneID": "Z1BKCTXD74EZPE",
+        "websiteendpoint": "s3-website-eu-west-1.amazonaws.com"
+      },
+      "ap-southeast-1": {
+        "S3hostedzoneID": "Z3O0J2DXBE1FTB",
+        "websiteendpoint": "s3-website-ap-southeast-1.amazonaws.com"
+      },
+      "ap-southeast-2": {
+        "S3hostedzoneID": "Z1WCIGYICN2BYD",
+        "websiteendpoint": "s3-website-ap-southeast-2.amazonaws.com"
+      },
+      "ap-northeast-1": {
+        "S3hostedzoneID": "Z2M4EHUR26P7ZW",
+        "websiteendpoint": "s3-website-ap-northeast-1.amazonaws.com"
+      },
+      "sa-east-1": {
+        "S3hostedzoneID": "Z31GFT0UA1I2HV",
+        "websiteendpoint": "s3-website-sa-east-1.amazonaws.com"
+      }
+    }
+  },
+  "Resources": {
+    "RootBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [".", [{
+              "Ref": "DomainPrefix"
+            },
+            {
+              "Ref": "Domain"
+            }
+          ]]
+        },
+        "AccessControl": "PublicRead",
+        "WebsiteConfiguration": {
+          "IndexDocument": "index.html"
+        }
+      }
+    },
+    "RootBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "RootBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": ["s3:GetObject"],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": ["", [
+                  "arn:aws:s3:::",
+                  {
+                    "Ref": "RootBucket"
+                  },
+                  "/*"
+                ]]
+              },
+              "Principal": "*",
+              "Condition": {
+                "StringLike": {
+                  "aws:UserAgent": {
+                    "Ref": "APIDocsUserAgent"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "WWWBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": ["", ["www.", {
+            "Fn::Join": [".", [{
+                "Ref": "DomainPrefix"
+              },
+              {
+                "Ref": "Domain"
+              }
+            ]]
+          }]]
+        },
+        "AccessControl": "BucketOwnerFullControl",
+        "WebsiteConfiguration": {
+          "RedirectAllRequestsTo": {
+            "HostName": {
+              "Ref": "RootBucket"
+            }
+          }
+        }
+      }
+    },
+    "DnsRecordSetGroup": {
+      "Type": "AWS::Route53::RecordSetGroup",
+      "Properties": {
+        "HostedZoneId": {
+          "Ref": "HostedZoneId"
+        },
+        "RecordSets": [{
+            "Name": {
+              "Fn::Join": [".", [{
+                  "Ref": "DomainPrefix"
+                },
+                {
+                  "Ref": "Domain"
+                }
+              ]]
+            },
+            "Type": "A",
+            "AliasTarget": {
+              "HostedZoneId": {
+                "Fn::FindInMap": ["RegionMap", {
+                  "Ref": "AWS::Region"
+                }, "S3hostedzoneID"]
+              },
+              "DNSName": {
+                "Fn::FindInMap": ["RegionMap", {
+                  "Ref": "AWS::Region"
+                }, "websiteendpoint"]
+              }
+            }
+          },
+          {
+            "Name": {
+              "Fn::Join": ["", ["www.", {
+                "Fn::Join": [".", [{
+                    "Ref": "DomainPrefix"
+                  },
+                  {
+                    "Ref": "Domain"
+                  }
+                ]]
+              }]]
+            },
+            "Type": "CNAME",
+            "TTL": "60",
+            "ResourceRecords": [{
+              "Fn::GetAtt": ["WWWBucket", "DomainName"]
+            }]
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WebsiteURL": {
+      "Value": {
+        "Fn::Join": ["", [
+          "http://",
+          {
+            "Ref": "DomainPrefix"
+          },
+          ".",
+          {
+            "Ref": "Domain"
+          }
+        ]]
+      },
+      "Description": "URL for website hosted on S3"
+    },
+    "S3WebsiteURL": {
+      "Value": {
+        "Fn::GetAtt": ["RootBucket", "WebsiteURL"]
+      },
+      "Description": "URL for website hosted on S3"
+    }
+  }
+}
