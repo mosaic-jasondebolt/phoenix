@@ -1463,7 +1463,7 @@
                 }
               },
               {
-                "Name": "APIDocumentation",
+                "Name": "PublishAPIDocumentation",
                 "ActionTypeId": {
                   "Category": "Build",
                   "Owner": "AWS",
@@ -1774,7 +1774,7 @@
                 }
               },
               {
-                "Name": "APIDocumentation",
+                "Name": "PublishAPIDocumentation",
                 "ActionTypeId": {
                   "Category": "Build",
                   "Owner": "AWS",
