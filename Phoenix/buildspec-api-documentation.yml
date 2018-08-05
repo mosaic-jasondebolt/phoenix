@@ -34,8 +34,9 @@ phases:
       - echo S3 bucket is $S3_BUCKET
       - aws s3 cp $CODEBUILD_SRC_DIR/swagger_out/. s3://$S3_BUCKET/ --recursive
       - CLOUDFRONT_DISTRIBUTION_ID=$(aws cloudfront list-distributions | jq '.DistributionList.Items[] | select(.Aliases.Items[0] == "'$S3_BUCKET'")' | jq '.Id' --raw-output)
+      - echo cloudfront distribution is $CLOUDFRONT_DISTRIBUTION_ID
       - # Invalidate the cloudfront cache so our static content is updated.
-      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID
+      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/index.html"
   build:
     commands:
       - echo Build started on `date`
