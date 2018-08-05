@@ -15,7 +15,7 @@ phases:
       - timeout 15s sh -c "until docker info; do echo .; sleep 1; done"
       - pip install requests
       - npm install -g spectacle-docs
-      - yum install -y jq
+      - apt-get install -y jq
       - PROJECT_ENVIRONMENT=$PROJECT_NAME-api-$ENVIRONMENT
   pre_build:
     commands:
