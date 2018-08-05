@@ -1,0 +1,286 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Deploys versioned API documentation using static S3 website, CloudFront distribution, and Web Application Firewall ACL + rules for managing API documentation access.",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/project-name"
+    },
+    "IAMRole": {
+      "Description": "The role of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/iam-role"
+    },
+    "HostedZoneId": {
+      "Description": "The Route53 hosted zone id that this service will fall under.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/hosted-zone-id"
+    },
+    "Domain": {
+      "Description": "The domain name for the static S3 bucket website.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/domain"
+    },
+    "APIDocsSSLCertificateARN": {
+      "Description": "The API Docs AWS ACM Certificate ARN.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/ssl-certificate-arn-api-docs"
+    },
+    "APIDocsUserAgent": {
+      "Description": "The user agent used for API Documentation access",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "api-docs-user-agent"
+    },
+    "DomainPrefix": {
+      "Description": "The prefix name for the bucket (i.e some.prefix.{PROJECT_DOMAIN}).",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [".", [{
+              "Ref": "DomainPrefix"
+            },
+            {
+              "Ref": "Domain"
+            }
+          ]]
+        },
+        "AccessControl": "PublicRead",
+        "WebsiteConfiguration": {
+          "IndexDocument": "index.html"
+        }
+      }
+    },
+    "BucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "DependsOn": "CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "Bucket": {
+          "Ref": "Bucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": ["s3:GetObject"],
+              "Effect": "Allow",
+              "Principal":{
+                "CanonicalUser": {"Fn::GetAtt": ["CloudFrontOriginAccessIdentity", "S3CanonicalUserId"]}
+              },
+              "Resource": {
+                "Fn::Join": ["", [
+                  "arn:aws:s3:::",
+                  {
+                    "Ref": "Bucket"
+                  },
+                  "/*"
+                ]]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "CloudFrontOriginAccessIdentity": {
+      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+      "Properties": {
+        "CloudFrontOriginAccessIdentityConfig": {
+          "Comment": {
+            "Fn::Join": ["-", [
+              { "Ref": "DomainPrefix" },
+              { "Ref": "Domain" }
+            ]]
+          }
+        }
+      }
+    },
+    "CloudFrontDistribution": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [{
+            "Fn::Join": [".", [
+              { "Ref": "DomainPrefix" },
+              { "Ref": "Domain" }
+            ]]
+          }],
+          "DefaultRootObject": "index.html",
+          "Origins": [
+            {
+              "Id": {
+                "Fn::Join": [".", [
+                  { "Ref": "DomainPrefix" },
+                  { "Ref": "Domain" },
+                  "s3.amazonaws.com"
+                ]]
+              },
+              "DomainName": {
+                "Fn::Join": [".", [
+                  { "Ref": "DomainPrefix" },
+                  { "Ref": "Domain" },
+                  "s3.amazonaws.com"
+                ]]
+              },
+              "OriginPath": "",
+              "S3OriginConfig": {
+                "OriginAccessIdentity": {
+                  "Fn::Join": ["", [
+                    "origin-access-identity/cloudfront/",
+                    {
+                      "Ref": "CloudFrontOriginAccessIdentity"
+                    }
+                  ]]
+                }
+              }
+            }
+          ],
+          "DefaultCacheBehavior": {
+            "TargetOriginId": {
+              "Fn::Join": [".", [
+                { "Ref": "DomainPrefix" },
+                { "Ref": "Domain" },
+                "s3.amazonaws.com"
+              ]]
+            },
+            "ForwardedValues": {
+              "QueryString": false
+            },
+            "ViewerProtocolPolicy": "redirect-to-https",
+            "MinTTL": 0,
+            "DefaultTTL": 0,
+            "MaxTTL": 0,
+            "AllowedMethods": [
+              "HEAD",
+              "GET"
+            ],
+            "Compress": true,
+            "CachedMethods": [
+              "HEAD",
+              "GET"
+            ]
+          },
+          "PriceClass": "PriceClass_All",
+          "Enabled": true,
+          "ViewerCertificate": {
+            "AcmCertificateArn": {"Ref": "APIDocsSSLCertificateARN"},
+            "SslSupportMethod": "sni-only",
+            "MinimumProtocolVersion": "TLSv1.1_2016"
+          },
+          "WebACLId": "15cbe7cb-72a7-4988-a3b5-fa9be9a00893",
+          "HttpVersion": "http2",
+          "IPV6Enabled": true
+        },
+        "Tags": [{
+          "Key": "Name",
+          "Value": {
+            "Fn::Join": [".", [
+              { "Ref": "DomainPrefix" },
+              { "Ref": "Domain" }
+            ]]
+          }
+        }]
+      }
+    },
+    "WebApplicationFirewallACL": {
+      "Type" : "AWS::WAF::WebACL",
+      "Properties" : {
+        "Name": {"Fn::Join": ["", {
+          "Fn::Split" : [ "-", {"Ref": "AWS::StackName"} ]
+        }]},
+        "MetricName": {"Fn::Join": ["", {
+          "Fn::Split" : [ "-", {"Ref": "AWS::StackName"} ]
+        }]},
+        "DefaultAction": {
+          "Type": "BLOCK"
+        },
+        "Rules": [
+          {
+            "Priority": 1,
+            "RuleId": {"Ref": "WebApplicationFirewallRule"},
+            "Action": {
+              "Type": "ALLOW"
+            }
+          }
+        ]
+      }
+    },
+    "WebApplicationFirewallRule": {
+      "Type" : "AWS::WAF::Rule",
+      "Properties" : {
+        "Name": {"Fn::Join": ["", {
+          "Fn::Split" : [ "-", {"Ref": "AWS::StackName"} ]
+        }]},
+        "MetricName": {"Fn::Join": ["", {
+          "Fn::Split" : [ "-", {"Ref": "AWS::StackName"} ]
+        }]},
+        "Predicates": [
+          {
+            "Negated": false,
+            "Type": "ByteMatch",
+            "DataId": {"Ref": "UserAgentAccessTokenMatchPredicate"}
+          }
+        ]
+      }
+    },
+    "UserAgentAccessTokenMatchPredicate": {
+      "Type" : "AWS::WAF::ByteMatchSet",
+      "Properties" : {
+        "ByteMatchTuples" : [
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "user-agent"
+            },
+            "TargetString": {"Ref": "APIDocsUserAgent"},
+            "TextTransformation": "NONE",
+            "PositionalConstraint": "EXACTLY"
+          }
+        ],
+        "Name": {
+          "Fn::Join": [".", [
+            { "Ref": "DomainPrefix" },
+            { "Ref": "Domain" }
+          ]]
+        }
+      }
+    },
+    "DnsRecordSetGroup": {
+      "Type" : "AWS::Route53::RecordSetGroup",
+      "Properties" : {
+        "HostedZoneId": {"Ref": "HostedZoneId"},
+        "RecordSets" : [
+          {
+            "Name": {
+              "Fn::Join": [".", [
+                {"Ref": "DomainPrefix"},
+                {"Ref": "Domain"}
+              ]]
+            },
+            "Type" : "A",
+            "AliasTarget" : {
+              "HostedZoneId" : "Z2FDTNDATAQYW2",
+              "DNSName" : { "Ref" : "CloudFrontDistribution" }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "APIDocURL" : {
+      "Description" : "The URL API Documentation",
+      "Value": {
+        "Fn::Join": ["", [
+          "https://",
+          {"Ref": "DomainPrefix"},
+          ".",
+          {"Ref": "Domain"}
+        ]]
+      }
+    }
+  }
+}

@@ -95,6 +95,12 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain.json $CODEBUILD_SRC_DIR/template-api-custom-domain.json
+      - # V0 API Documentation
+      - echo ===== API DOCUMENTATION BUILD =====
+      - echo replacing params in the api documentation params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation.json $CODEBUILD_SRC_DIR/template-api-documentation.json
       - # API Gateway (Changes current API at HEAD, but does not deploy the API distrubtion to the API Endpoint)
       - echo ===== API GATEWAY BUILD =====
       - echo replacing VERSION_ID in the api params files.
