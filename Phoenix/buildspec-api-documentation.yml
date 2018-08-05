@@ -28,14 +28,13 @@ phases:
       - REST_API_ID=aws apigateway get-rest-apis | jq '.items[] | select(.name == "'$PROJECT_ENVIRONMENT'")' | jq '.id' --raw-output
       - echo Publishing V0 API documentation for API $REST_API_ID
       - STAGE_V0='v0'
-      - aws apigateway get-export --parameters extensions='integrations' --rest-api-id $REST_API_ID \
-      -     --stage-name $STAGE_V0 --export-type swagger $CODEBUILD_SRC_DIR/swagger_integrations.json
+      - aws apigateway get-export --parameters extensions='integrations' --rest-api-id $REST_API_ID --stage-name $STAGE_V0 --export-type swagger $CODEBUILD_SRC_DIR/swagger_integrations.json
       - spectacle $CODEBUILD_SRC_DIR/swagger_integrations.json --target-dir $CODEBUILD_SRC_DIR/swagger_out
       - S3_BUCKET=$STAGE_V0-$ENVIRONMENT.docs.$DOMAIN/
       - echo S3 bucket is $S3_BUCKET
       - aws s3 cp $CODEBUILD_SRC_DIR/swagger_out/. s3://$S3_BUCKET --recursive
-      - CLOUDFRONT_DISTRIBUTION_ID=aws cloudfront list-distributions | jq '.DistributionList.Items[] | \
-      -      select(.Aliases.Items[0] == "v1-dev.docs.api.mosaic-phoenix.com")' | jq '.Id' --raw-output
+      - CLOUDFRONT_DISTRIBUTION_ID=aws cloudfront list-distributions | jq '.DistributionList.Items[] | select(.Aliases.Items[0] == "v1-dev.docs.api.mosaic-phoenix.com")' | jq '.Id' --raw-output
+      - # Invalidate the cloudfront cache so our static content is updated.
       - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID
   build:
     commands:
