@@ -149,6 +149,10 @@ artifacts:
       - template-api-custom-domain.json
       - t-api-custom-domain-params-testing.json
       - t-api-custom-domain-params-prod.json
+      - # V0 API Documentation
+      - template-api-documentation.json
+      - t-api-documentation-v0-params-testing.json
+      - t-api-documentation-v0-params-prod.json
       - # API Gateway
       - template-api.json
       - t-api-params-testing.json
