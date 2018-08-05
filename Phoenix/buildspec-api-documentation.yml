@@ -14,8 +14,6 @@ phases:
       - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay&
       - timeout 15s sh -c "until docker info; do echo .; sleep 1; done"
       - pip install requests
-      - npm install -g spectacle-docs
-      - apt-get install -y jq
       - PROJECT_ENVIRONMENT=$PROJECT_NAME-api-$ENVIRONMENT
   pre_build:
     commands:
@@ -36,6 +34,9 @@ phases:
       - S3_BUCKET=$STAGE_V0-$ENVIRONMENT.docs.$DOMAIN/
       - echo S3 bucket is $S3_BUCKET
       - aws s3 cp $CODEBUILD_SRC_DIR/swagger_out/. s3://$S3_BUCKET --recursive
+      - CLOUDFRONT_DISTRIBUTION_ID=aws cloudfront list-distributions | jq '.DistributionList.Items[] | \
+      -      select(.Aliases.Items[0] == "v1-dev.docs.api.mosaic-phoenix.com")' | jq '.Id' --raw-output
+      - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID
   build:
     commands:
       - echo Build started on `date`

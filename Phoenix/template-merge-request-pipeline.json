@@ -38,7 +38,7 @@
       "Default": "/microservice/phoenix/code-pipeline-bucket-name"
     },
     "CodeBuildDockerImage": {
-      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
+      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/code-build-docker-image"
     },

@@ -19,8 +19,13 @@
       "Type": "String"
     },
     "CodeBuildDockerImage": {
-      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with.",
+      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Default": "aws/codebuild/ubuntu-base:14.04",
+      "Type": "String"
+    },
+    "NodeJSBuildDockerImage": {
+      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
+      "Default": "aws/codebuild/nodejs:10.1.0",
       "Type": "String"
     },
     "CodeBuildBucketName": {
@@ -163,7 +168,16 @@
         "Name": "/microservice/phoenix/code-build-docker-image",
         "Type": "String",
         "Value": {"Ref": "CodeBuildDockerImage"},
-        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to biuld the image with."
+        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with."
+      }
+    },
+    "NodeJSBuildDockerImageParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/microservice/phoenix/code-build-docker-image-nodejs",
+        "Type": "String",
+        "Value": {"Ref": "NodeJSBuildDockerImage"},
+        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with."
       }
     },
     "CodeBuildBucketNameParam": {
