@@ -20,7 +20,7 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
-listOfVersions='v0'
+listOfVersions='v2'
 for docVersion in $listOfVersions
 do
   STACK_NAME=$PROJECT_NAME-api-documentation-$docVersion-dev

@@ -250,6 +250,7 @@
     },
     "DnsRecordSetGroup": {
       "Type" : "AWS::Route53::RecordSetGroup",
+      "DependsOn": "CloudFrontDistribution",
       "Properties" : {
         "HostedZoneId": {"Ref": "HostedZoneId"},
         "RecordSets" : [
@@ -263,7 +264,9 @@
             "Type" : "A",
             "AliasTarget" : {
               "HostedZoneId" : "Z2FDTNDATAQYW2",
-              "DNSName" : { "Ref" : "CloudFrontDistribution" }
+              "DNSName" : {
+                "Fn::GetAtt": ["CloudFrontDistribution", "DomainName"]
+              }
             }
           }
         ]
