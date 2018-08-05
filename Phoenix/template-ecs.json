@@ -575,7 +575,7 @@
               "Value" : {"Ref": "Environment"}
             }
           ],
-          "Image": {"Ref": "CodeBuildDockerImage"},
+          "Image": "aws/codebuild/nodejs:10.1.0",
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
