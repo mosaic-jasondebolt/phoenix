@@ -4,6 +4,7 @@ env:
   parameter-store:
     ORGANIZATION_NAME: /microservice/phoenix/organization-name
     PROJECT_NAME: /microservice/phoenix/project-name
+    DOMAIN: /microservice/phoenix/domain
 
 phases:
   install:
@@ -69,6 +70,13 @@ phases:
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-microservice --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-encrypted-secrets --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-load-balancer-logs --recursive
+      - # Empty V0 API Documentation buckets
+      - aws s3 rm s3://v0.docs.$DOMAIN --recursive # Prod
+      - aws s3 rm s3://v0-testing.docs.$DOMAIN --recursive
+      - # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
+      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-documentation-v0-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-testing
       - # Delete the Project ECR repositories.
       - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
       - # Delete Microservice

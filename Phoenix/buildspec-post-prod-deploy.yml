@@ -33,6 +33,8 @@ phases:
       - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-api-custom-domain-prod
       - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-api-prod
       - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-api-deployment-prod
+      - # V0 API Documentation
+      - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-api-documentation-v0-prod
       #- sbt scalastyle
   post_build:
     commands:
