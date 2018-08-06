@@ -170,7 +170,7 @@
             "SslSupportMethod": "sni-only",
             "MinimumProtocolVersion": "TLSv1.1_2016"
           },
-          "WebACLId": "15cbe7cb-72a7-4988-a3b5-fa9be9a00893",
+          "WebACLId": {"Ref": "WebApplicationFirewallACL"},
           "HttpVersion": "http2",
           "IPV6Enabled": true
         },
