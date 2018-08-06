@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "Environment": "testing",
     "DomainPrefix": "v0-testing.docs"
   }
 }

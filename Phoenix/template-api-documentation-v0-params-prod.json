@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "Environment": "prod",
     "DomainPrefix": "v0.docs"
   }
 }

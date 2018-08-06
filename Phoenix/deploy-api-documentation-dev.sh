@@ -23,7 +23,8 @@ fi
 listOfVersions='v0'
 for docVersion in $listOfVersions
 do
-  STACK_NAME=$PROJECT_NAME-api-documentation-$docVersion-dev
+  ENVIRONMENT=$(jq -r '.Parameters.Environment' template-api-documentation-$docVersion-params-dev.json)
+  STACK_NAME=$PROJECT_NAME-api-documentation-$docVersion-$ENVIRONMENT
 
   # Regenerate the dev params file into a format the the CloudFormation CLI expects.
   python parameters_generator.py template-api-documentation-$docVersion-params-dev.json cloudformation > temp1.json
