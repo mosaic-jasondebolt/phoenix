@@ -27,10 +27,16 @@ phases:
       - IMAGE_TAG=$VERSION_ID
       - REST_API_ID=$(aws apigateway get-rest-apis | jq '.items[] | select(.name == "'$PROJECT_ENVIRONMENT'")' | jq '.id' --raw-output)
       - echo Publishing V0 API documentation for API $REST_API_ID
+      - # V0 API Documentation...
       - STAGE_V0='v0'
       - aws apigateway get-export --parameters extensions='integrations' --rest-api-id $REST_API_ID --stage-name $STAGE_V0 --export-type swagger $CODEBUILD_SRC_DIR/swagger_integrations.json
       - spectacle $CODEBUILD_SRC_DIR/swagger_integrations.json --target-dir $CODEBUILD_SRC_DIR/swagger_out
       - S3_BUCKET=$STAGE_V0-$ENVIRONMENT.docs.$DOMAIN
+      - |-
+        if [ "$ENVIRONMENT" = 'prod' ]
+        then
+          S3_BUCKET=$STAGE_V0.docs.$DOMAIN
+        fi
       - echo S3 bucket is $S3_BUCKET
       - aws s3 cp $CODEBUILD_SRC_DIR/swagger_out/. s3://$S3_BUCKET/ --recursive
       - CLOUDFRONT_DISTRIBUTION_ID=$(aws cloudfront list-distributions | jq '.DistributionList.Items[] | select(.Aliases.Items[0] == "'$S3_BUCKET'")' | jq '.Id' --raw-output)
