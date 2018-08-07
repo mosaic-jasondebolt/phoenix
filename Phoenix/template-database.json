@@ -637,10 +637,11 @@
           ]]
         }
       },
-      "Value": {"Fn::Join": ["-", [
+      "Value": {"Fn::Join": ["/", [
+        "/microservice",
         {"Ref": "ProjectName"},
         {"Ref": "Environment"},
-        "aurora", "admin", "password"
+        "aurora-admin-password"
       ]]}
     },
     "EndpointPort": {
