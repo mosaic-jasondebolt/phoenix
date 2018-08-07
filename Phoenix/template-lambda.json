@@ -147,7 +147,7 @@
       "Type": "AWS::Events::Rule",
       "Properties": {
         "Description": "Periodically invokes the VPCProxy function to reduce initial response times.",
-        "ScheduleExpression": "rate(5 minute)",
+        "ScheduleExpression": "rate(5 minutes)",
         "State": "ENABLED",
         "Targets": [
           {

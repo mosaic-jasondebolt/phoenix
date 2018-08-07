@@ -423,10 +423,11 @@
         "Type": "encrypt",
         "PasswordLength": 20,
         "KMSKeyId": {"Ref": "EncryptionKeyId"},
-        "ParameterName": {"Fn::Join": ["-", [
+        "ParameterName": {"Fn::Join": ["/", [
+          "/microservice",
           {"Ref": "ProjectName"},
           {"Ref": "Environment"},
-          "aurora", "admin", "password"
+          "aurora-admin-password"
         ]]},
         "ParameterDescription": {"Fn::Join": ["", [
           "This parameter was created by stack ",
@@ -448,10 +449,11 @@
         "Type": "decrypt",
         "PasswordLength": 20,
         "KMSKeyId": {"Ref": "EncryptionKeyId"},
-        "ParameterName": {"Fn::Join": ["-", [
+        "ParameterName": {"Fn::Join": ["/", [
+          "/microservice",
           {"Ref": "ProjectName"},
           {"Ref": "Environment"},
-          "aurora", "admin", "password"
+          "aurora-admin-password"
         ]]},
         "ParameterDescription": {"Fn::Join": ["", [
           "This parameter was created by stack ",
