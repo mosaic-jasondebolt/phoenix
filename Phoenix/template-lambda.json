@@ -143,6 +143,31 @@
         "Principal": "apigateway.amazonaws.com"
       }
     },
+    "LambdaProxyCloudWatchWarmer": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "Periodically invokes the VPCProxy function to reduce initial response times.",
+        "ScheduleExpression": "rate(1 minute)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {"Fn::GetAtt": ["LambdaVPCProxy", "Arn"]},
+            "Id": {"Ref": "AWS::StackName"},
+            "Input": "{\"name\": \"pinger\"}"
+          }
+        ]
+      }
+    },
+    "PermissionForEventsToInvokeLambda": {
+      "Type": "AWS::Lambda::Permission",
+      "DependsOn": "LambdaProxyCloudWatchWarmer",
+      "Properties": {
+        "FunctionName": { "Ref": "LambdaVPCProxy" },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": { "Fn::GetAtt": ["LambdaProxyCloudWatchWarmer", "Arn"] }
+      }
+    },
     "LambdaProjects": {
       "Type": "AWS::Lambda::Function",
       "Properties": {

@@ -1,8 +1,28 @@
 var http = require('http');
 
+let containerId;
+
 exports.handler = function(event, context, callback) {
     // setup request options and parameters
     console.log(event);
+
+    if (!containerId) {
+        containerId = context.awsRequestId;
+    }
+    console.log('containerId', containerId);
+
+    // If this a schedule pre-warming ping request, respond and exit function.
+    // https://read.acloud.guru/how-to-keep-your-lambda-functions-warm-9d7e1aa6e2f0
+    if (event.name  == 'pinger') {
+        console.log('Request from pinger');
+        return callback(null, {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: 'Pong',
+            })
+        })
+    }
+
     var options = {
       host: event.requestParams.hostname,
       port: event.requestParams.port,
