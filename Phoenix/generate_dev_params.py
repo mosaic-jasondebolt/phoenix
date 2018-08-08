@@ -67,6 +67,15 @@ def write_dev_param_files(environment_name):
     dev_ecs_file_obj = open('template-ecs-params-dev.json', 'w')
     dev_ecs_file_obj.write(json.dumps(dev_ecs_template, indent=2))
 
+    # ECS Task Main template
+    testing_ecs_task_main_template = _parse_json('template-ecs-task-main-params-testing.json')
+    dev_ecs_task_main_template = copy.deepcopy(testing_ecs_task_main_template)
+    dev_ecs_task_main_template['Parameters']['Environment'] = environment_name
+    dev_ecs_task_main_template['Parameters']['DBEnvironment'] = 'dev'
+    dev_ecs_task_main_template['Parameters']['VPCPrefix'] = 'dev'
+    dev_ecs_file_obj = open('template-ecs-task-main-params-dev.json', 'w')
+    dev_ecs_file_obj.write(json.dumps(dev_ecs_task_main_template, indent=2))
+
     # Lambda template
     testing_lambda_template = _parse_json('template-lambda-params-testing.json')
     dev_lambda_template = copy.deepcopy(testing_lambda_template)
