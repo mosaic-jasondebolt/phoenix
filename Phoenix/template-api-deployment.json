@@ -166,6 +166,7 @@
     },
     "v1Deployment": {
       "Type": "AWS::ApiGateway::Deployment",
+      "DependsOn": "v0Deployment",
       "Properties": {
         "RestApiId": {
           "Fn::ImportValue": {
