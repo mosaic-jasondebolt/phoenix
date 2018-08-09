@@ -40,12 +40,8 @@ if [ $2 == "sbt" ]
     echo 'SBT docker build'
     # This is a Play app, so use sbt to build the docker image
     cd ../
-    cp build.sbt build.sbt.backup
-    sed "s/IMAGE_TAG/$IMAGE_TAG/g" build.sbt > temp.sbt && mv temp.sbt build.sbt
-    sbt docker:publishLocal
-    # Restore original sbt file.
-    cp build.sbt.backup build.sbt
-    rm build.sbt.backup
+    sbt docker:stage
+    docker build -t $ECR_REPO server/target/docker/stage
     cd Phoenix
 else
   # This is a regular non-play app, so we use docker build directly.
