@@ -1162,7 +1162,7 @@
                 "Name": "SourceOutput"
               }],
               "Configuration": {
-                "RepositoryName": {"Ref": "ProjectName"},
+                "RepositoryName": {"Ref": "GitRepoName"},
                 "BranchName": {"Ref": "GitCurrentProjectBranch"}
               },
               "RunOrder": 1
