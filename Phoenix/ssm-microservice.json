@@ -18,6 +18,26 @@
       "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
       "Type": "String"
     },
+    "GitRepoName": {
+      "Description": "The name of the git repo for this project.",
+      "Type": "String"
+    },
+    "GitRootProjectBranch": {
+      "Description": "The main git branch associated with your main pipeline (i.e master, main, etc.)",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
+    "GitCurrentProjectBranch": {
+      "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+      "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
+      "Type": "String"
+    },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Default": "aws/codebuild/ubuntu-base:14.04",
@@ -160,6 +180,35 @@
         "Value": {"Ref": "ProjectName"},
         "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
         "Description": "The microservice name associated with this account"
+      }
+    },
+    "GitRepoNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/microservice/phoenix/git-repo-name",
+        "Type": "String",
+        "Value": {"Ref": "GitRepoName"},
+        "Description": "The name of the git repo used by this project."
+      }
+    },
+    "GitRootProjectBranchParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/microservice/phoenix/git-root-project-branch",
+        "Type": "String",
+        "Value": {"Ref": "GitRootProjectBranch"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The main git branch associated with your main pipeline (i.e master, main, etc.)",
+      }
+    },
+    "GitCurrentProjectBranchParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/microservice/phoenix/git-current-project-branch",
+        "Type": "String",
+        "Value": {"Ref": "GitCurrentProjectBranch"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
       }
     },
     "CodeBuildDockerImageParam": {

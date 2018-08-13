@@ -7,6 +7,21 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/project-name"
     },
+    "GitRepoName": {
+      "Description": "The name of the git repo for this project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/git-repo-name"
+    },
+    "GitRootProjectBranch": {
+      "Description": "The main git branch associated with your main pipeline (i.e master, main, etc.)",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/git-root-project-branch"
+    },
+    "GitCurrentProjectBranch": {
+      "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/git-current-project-branch"
+    },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -77,6 +92,11 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/iam-role"
     }
+  },
+  "Conditions": {
+    "ProjectUsesRootGitBranch" : {"Fn::Equals" : [
+      {"Ref" : "GitRootProjectBranch"}, {"Ref": "GitCurrentProjectBranch"}
+    ]}
   },
   "Resources": {
     "ECRMainRepository": {
@@ -326,9 +346,10 @@
     },
     "CodeCommitRepository": {
       "Type": "AWS::CodeCommit::Repository",
+      "Condition": "ProjectUsesRootGitBranch",
       "Properties": {
         "RepositoryName": {
-          "Ref": "ProjectName"
+          "Ref": "GitRepoName"
         },
         "RepositoryDescription": {
           "Ref": "ProjectDescription"
@@ -347,7 +368,9 @@
             "DestinationArn": {
               "Ref": "MasterTriggerSNSTopic"
             },
-            "Branches": ["master"],
+            "Branches": [
+              {"Ref": "GitCurrentProjectBranch"}
+            ],
             "Events": ["all"]
           }
         ]
@@ -1139,13 +1162,8 @@
                 "Name": "SourceOutput"
               }],
               "Configuration": {
-                "RepositoryName": {
-                  "Fn::GetAtt": [
-                    "CodeCommitRepository",
-                    "Name"
-                  ]
-                },
-                "BranchName": "master"
+                "RepositoryName": {"Ref": "ProjectName"},
+                "BranchName": {"Ref": "GitCurrentProjectBranch"}
               },
               "RunOrder": 1
             }]

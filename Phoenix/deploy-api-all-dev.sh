@@ -4,15 +4,15 @@ set -e
 # Update a full Lambda + API ApiGateway deployment.
 
 # USAGE:
-#   ./deploy-lambda-api-dev.sh ..
+#   ./deploy-api-all-dev.sh ..
 #        [create |
 #         update api-deploy {rest-api-id} {stage-name} |
 #         update swagger-postman {rest-api-id} {stage-name}]
 #
 # EXAMPLES:
-#   ./deploy-lambda-api-dev.sh create
-#   ./deploy-lambda-api-dev.sh update api-deploy l1l5pcj1xc v0
-#   ./deploy-lambda-api-dev.sh update swagger-postman l1l5pcj1xc v0
+#   ./deploy-api-all-dev.sh create
+#   ./deploy-api-all-dev.sh update api-deploy l1l5pcj1xc v0
+#   ./deploy-api-all-dev.sh update swagger-postman l1l5pcj1xc v0
 
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)

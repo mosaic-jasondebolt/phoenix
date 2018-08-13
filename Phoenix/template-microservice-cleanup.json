@@ -7,6 +7,16 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/project-name"
     },
+    "GitRepoName": {
+      "Description": "The name of the git repo for this project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/git-repo-name"
+    },
+    "GitCurrentProjectBranch": {
+      "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/git-current-project-branch"
+    },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -169,7 +179,7 @@
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
               {
-                "Ref": "ProjectName"
+                "Ref": "GitRepoName"
               }
             ]]
           }

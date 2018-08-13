@@ -1,7 +1,10 @@
-{
+  {
   "Parameters": {
     "OrganizationName": "mosaic",
     "ProjectName": "phoenix",
+    "GitRepoName": "phoenix",
+    "GitRootProjectBranch": "master",
+    "GitCurrentProjectBranch": "master",
     "Domain": "mosaic-phoenix.com",
     "HostedZoneId": "Z26KY8AGSSM28M",
     "SSLCertificateARN": "arn:aws:acm:us-east-1:714284646049:certificate/3d18178b-9cbb-48ab-a695-20bf49d930c1",
