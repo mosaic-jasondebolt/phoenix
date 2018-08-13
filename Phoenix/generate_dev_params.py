@@ -37,17 +37,6 @@ def write_dev_param_files(environment_name):
     what is happening here is rather simple.
     """
 
-    # Dev pipeline template
-    dev_pipeline_template = {
-      "Parameters": {
-        "Environment": environment_name,
-        "ProjectName": "PROJECT_NAME",
-        "ReviewNotificationEmail": "NOTIFICATION_EMAIL"
-      }
-    }
-    dev_pipeline_file_obj = open('template-code-pipeline-review-params-dev.json', 'w')
-    dev_pipeline_file_obj.write(json.dumps(dev_pipeline_template, indent=2))
-
     # Database template
     testing_database_template = _parse_json('template-database-params-testing.json')
     dev_database_template = copy.deepcopy(testing_database_template)
