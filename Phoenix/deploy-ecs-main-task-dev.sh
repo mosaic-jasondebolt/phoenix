@@ -22,6 +22,7 @@ AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 AWS_REGION=`aws configure get region`
 PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' $ECS_PARAM_FILE`
+STACK_NAME = $PROJECT_NAME-ecs-$TASK_FAMILY-$ENVIRONMENT
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 IMAGE_TAG=$TASK_FAMILY-$ENVIRONMENT-`date +"%Y-%m-%d-%H%M%S"`
 IMAGE_NAME=$PROJECT_NAME-$TASK_FAMILY
@@ -65,10 +66,12 @@ python parameters_generator.py temp1.json cloudformation > temp2.json
 aws cloudformation validate-template --template-body file://$ECS_FILE
 
 # Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $PROJECT_NAME-ecs-$TASK_FAMILY-$ENVIRONMENT \
+aws cloudformation $1-stack --stack-name $STACK_NAME \
     --template-body file://$ECS_FILE \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_NAMED_IAM
+
+aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 
 # Cleanup
 rm temp1.json
