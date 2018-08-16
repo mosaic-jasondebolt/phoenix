@@ -1,0 +1,69 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Adds additional, fine grained configuration to a given API Gateway API.",
+  "Parameters": {
+    "ProjectName": {
+      "Description": "The name of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/project-name"
+    },
+    "IAMRole": {
+      "Description": "The role of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/iam-role"
+    },
+    "Environment": {
+      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
+      "Type": "String"
+    },
+    "LambdaBucketName": {
+      "Description": "The bucket name in which Lambda artifacts will be stored.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/lambda-bucket-name"
+    },
+    "Version": {
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "LambdaAPIInternals": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Code": {
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key": {
+            "Fn::Join": ["/", [
+              {"Ref": "Version"},
+              "api_internals",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+    "CustomResourceAPIInternals": {
+      "Type": "Custom::APIInternals",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": ["LambdaAPIInternals", "Arn"]
+        },
+        "LambdaVersion": {"Ref": "Version"},
+        "RestApiId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "api",
+              {"Ref": "Environment"},
+              "RestApiId"
+            ]]
+          }
+        }
+      }
+    }
+  }
+}

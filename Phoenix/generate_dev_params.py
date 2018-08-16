@@ -81,6 +81,13 @@ def write_dev_param_files(environment_name):
     dev_api_custom_domain_file_obj = open('template-api-custom-domain-params-dev.json', 'w')
     dev_api_custom_domain_file_obj.write(json.dumps(dev_api_custom_domain_template, indent=2))
 
+    # API Internals template
+    testing_api_internals_template = _parse_json('template-api-internals-params-testing.json')
+    dev_api_internals_template = copy.deepcopy(testing_api_internals_template)
+    dev_api_internals_template['Parameters']['Environment'] = environment_name
+    dev_api_file_obj = open('template-api-internals-params-dev.json', 'w')
+    dev_api_file_obj.write(json.dumps(dev_api_internals_template, indent=2))
+
     # API template
     testing_api_template = _parse_json('template-api-params-testing.json')
     dev_api_template = copy.deepcopy(testing_api_template)

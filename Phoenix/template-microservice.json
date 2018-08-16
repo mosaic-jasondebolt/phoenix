@@ -1454,7 +1454,7 @@
                 }
               },
               {
-                "Name": "APIGatewayDeploy",
+                "Name": "APIGatewayInternals",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1465,6 +1465,33 @@
                   "Name": "BuildOutput"
                 }],
                 "RunOrder": 5,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-internals",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-internals-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api-internals.json"
+                }
+              },
+              {
+                "Name": "APIGatewayDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 6,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1491,7 +1518,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 7,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1789,7 +1816,7 @@
                 }
               },
               {
-                "Name": "APIGatewayDeploy",
+                "Name": "APIGatewayInternals",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1800,6 +1827,33 @@
                   "Name": "BuildOutput"
                 }],
                 "RunOrder": 5,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api-internals",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-internals-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api-internals.json"
+                }
+              },
+              {
+                "Name": "APIGatewayDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 6,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1826,7 +1880,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 7,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1849,7 +1903,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 8,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{

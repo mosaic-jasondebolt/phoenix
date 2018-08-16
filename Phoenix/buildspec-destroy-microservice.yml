@@ -29,7 +29,13 @@ phases:
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-testing
-      - # Delete API Gateways
+      - # Delete API Gateway API Internals
+      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-internals-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-testing
+      - # Delete API Gateway API
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-testing

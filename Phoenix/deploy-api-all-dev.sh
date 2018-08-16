@@ -25,6 +25,7 @@ if [ $1 == "create" ]
     ./deploy-lambda-dev.sh $1
     ./deploy-api-custom-domain-dev.sh $1
     ./deploy-api-dev.sh $1
+    ./deploy-api-internals-dev.sh $1
     ./deploy-api-deployment-dev.sh $1
 fi
 
