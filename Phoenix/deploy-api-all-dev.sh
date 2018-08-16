@@ -56,6 +56,7 @@ fi
 if [ $1 == "update" ] && [ $2 == "api-deploy" ]
   then
     ./deploy-api-dev.sh update
+    ./deploy-api-internals-dev.sh update
 
     aws apigateway delete-base-path-mapping --domain-name $ENVIRONMENT.$DOMAIN_NAME --base-path $VERSION
     aws apigateway delete-stage --rest-api-id $API_ID --stage-name $VERSION

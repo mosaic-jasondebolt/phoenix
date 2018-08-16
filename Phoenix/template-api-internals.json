@@ -8,13 +8,18 @@
       "Default": "/microservice/phoenix/project-name"
     },
     "IAMRole": {
-      "Description": "The role of your project.",
+      "Description": "The role of your project",
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/iam-role"
     },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
+    },
+    "Port": {
+      "Description": "The TCP Port that the VPC Proxy will send requests to. Use 443 for HTTPS.",
+      "Type": "String",
+      "Default": "80"
     },
     "LambdaBucketName": {
       "Description": "The bucket name in which Lambda artifacts will be stored.",
@@ -48,11 +53,23 @@
     },
     "CustomResourceAPIInternals": {
       "Type": "Custom::APIInternals",
+      "DependsOn": "LambdaAPIInternals",
       "Properties": {
         "ServiceToken": {
           "Fn::GetAtt": ["LambdaAPIInternals", "Arn"]
         },
         "LambdaVersion": {"Ref": "Version"},
+        "Hostname": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "ecs-main",
+              {"Ref": "Environment"},
+              "ServiceHostname"
+            ]]
+          }
+        },
+        "Port": {"Ref": "Port"},
         "RestApiId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
