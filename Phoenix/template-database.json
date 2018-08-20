@@ -17,6 +17,11 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/domain"
     },
+    "LambdaPasswordGeneratorArn": {
+      "Description": "The ARN of the Lambda password generator",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/lambda-password-generator-arn"
+    },
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -106,7 +111,7 @@
   "Resources": {
     "RDSCluster": {
       "Type": "AWS::RDS::DBCluster",
-      "DependsOn": ["CustomResourcePasswordRetriever"],
+      "DependsOn": ["RDSPasswordRetriever"],
       "Properties": {
         "SnapshotIdentifier": {
           "Fn::If": [
@@ -120,7 +125,7 @@
         },
         "StorageEncrypted": true,
         "MasterUserPassword": {
-          "Fn::GetAtt": ["CustomResourcePasswordRetriever", "Password"]
+          "Fn::GetAtt": ["RDSPasswordRetriever", "Password"]
         },
         "Engine": {
           "Ref": "DBEngine"
@@ -329,96 +334,11 @@
         }
       }
     },
-    "LambdaRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [{
-            "Action": [
-              "sts:AssumeRole"
-            ],
-            "Effect": "Allow",
-            "Principal": {
-              "Service": [
-                "lambda.amazonaws.com",
-                "s3.amazonaws.com",
-                "apigateway.amazonaws.com",
-                "ssm.amazonaws.com"
-              ]
-            }
-          }],
-          "Version": "2012-10-17"
-        }
-      }
-    },
-    "LambdaRolePolicy": {
-      "Type": "AWS::IAM::Policy",
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [{
-            "Action": [
-              "lambda:*",
-              "dynamodb:*",
-              "s3:*",
-              "kms:*",
-              "ssm:*",
-              "logs:*",
-              "xray:*",
-              "sts:AssumeRole",
-              "iam:GetRole",
-              "iam:PassRole"
-            ],
-            "Effect": "Allow",
-            "Resource": "*"
-          }],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
-            {
-              "Ref": "Environment"
-            },
-            {
-              "Ref": "AWS::StackName"
-            }
-          ]]
-        },
-        "Roles": [{
-          "Ref": "LambdaRole"
-        }]
-      }
-    },
-    "LambdaPasswordGenerator": {
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Handler": "lambda_function.lambda_handler",
-        "Role": {
-          "Fn::GetAtt": ["LambdaRole", "Arn"]
-        },
-        "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
-          "S3Key": {
-            "Fn::Join": ["/", [{
-                "Ref": "Version"
-              },
-              "password_generator",
-              "lambda_function.zip"
-            ]]
-          }
-        },
-        "Runtime": "python3.6",
-        "Timeout": "25"
-      }
-    },
-    "CustomResourcePasswordGenerator": {
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+    "RDSPasswordGenerator": {
       "Type": "Custom::PasswordGenerator",
       "Properties": {
         "ServiceToken": {
-          "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
+          "Ref": "LambdaPasswordGeneratorArn",
         },
         "Type": "encrypt",
         "PasswordLength": 20,
@@ -439,12 +359,11 @@
         ]]}
       }
     },
-    "CustomResourcePasswordRetriever": {
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy", "CustomResourcePasswordGenerator"],
+    "RDSPasswordRetriever": {
       "Type": "Custom::PasswordRetriever",
       "Properties": {
         "ServiceToken": {
-          "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
+          "Ref": "LambdaPasswordGeneratorArn",
         },
         "Type": "decrypt",
         "PasswordLength": 20,

@@ -23,10 +23,25 @@ CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
 PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-microservice
 MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 # Generate the MICROSERVICE bucket if it doesn't already exist
 aws s3 mb s3://$MICROSERVICE_BUCKET_NAME
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
+
+# Upload the Lambda functions
+listOfLambdaFunctions='password_generator'
+for functionName in $listOfLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
+  pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/latest/$functionName/
+  cd ../../
+  rm -rf builds
+done
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json

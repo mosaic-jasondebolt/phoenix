@@ -1940,6 +1940,98 @@
           "Id": {"Fn::Join": ["-", ["event-pipeline-failed-for", {"Ref": "ProjectName"}] ]
           } } ]
       }
+    },
+    "LambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [{
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Principal": {
+              "Service": [
+                "lambda.amazonaws.com",
+                "s3.amazonaws.com",
+                "apigateway.amazonaws.com",
+                "ssm.amazonaws.com"
+              ]
+            }
+          }],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "LambdaRolePolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [{
+            "Action": [
+              "lambda:*",
+              "dynamodb:*",
+              "s3:*",
+              "kms:*",
+              "ssm:*",
+              "logs:*",
+              "xray:*",
+              "sts:AssumeRole",
+              "iam:GetRole",
+              "iam:PassRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          }],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": {
+          "Fn::Join": ["-", [{
+              "Ref": "ProjectName"
+            },
+            {
+              "Ref": "AWS::StackName"
+            }
+          ]]
+        },
+        "Roles": [{
+          "Ref": "LambdaRole"
+        }]
+      }
+    },
+    "LambdaPasswordGenerator": {
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": ["LambdaRole", "Arn"]
+        },
+        "Code": {
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key": {
+            "Fn::Join": ["/", [
+              "latest",
+              "password_generator",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+    "LambdaPasswordGeneratorArnParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "LambdaPasswordGenerator",
+      "Properties": {
+        "Name": "/microservice/phoenix/lambda-password-generator-arn",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
+        },
+        "Description": "The Lambda password generator ARN"
+      }
     }
   }
 }

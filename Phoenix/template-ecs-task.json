@@ -191,6 +191,11 @@
       "Type":"Number",
       "Default": 14,
       "Description":"Number of days to retain container logs for"
+    },
+    "LambdaPasswordGeneratorArn": {
+      "Description": "The ARN of the Lambda password generator",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/lambda-password-generator-arn"
     }
   },
   "Mappings":{
@@ -283,6 +288,7 @@
     },
     "ECSTaskDefinition": {
       "Type": "AWS::ECS::TaskDefinition",
+      "DependsOn": ["RDSPasswordRetriever"],
       "Properties": {
         "RequiresCompatibilities": [
           { "Ref": "LaunchType" }
@@ -373,6 +379,12 @@
                     ]]
                   }
                 }
+              },
+              {
+                "Name": "RDS_PASSWORD",
+                "Value": {
+                  "Fn::GetAtt": ["RDSPasswordRetriever", "Password"]
+                }
               }
             ],
             "Image": {
@@ -417,6 +429,31 @@
             "Essential": { "Ref": "Essential" }
           }
         ]
+      }
+    },
+    "RDSPasswordRetriever": {
+      "Type": "Custom::PasswordRetriever",
+      "Properties": {
+        "ServiceToken": {
+          "Ref": "LambdaPasswordGeneratorArn",
+        },
+        "Type": "decrypt",
+        "PasswordLength": 20,
+        "KMSKeyId": {"Ref": "EncryptionKeyId"},
+        "ParameterName": {"Fn::Join": ["/", [
+          "/microservice",
+          {"Ref": "ProjectName"},
+          {"Ref": "DBEnvironment"},
+          "aurora-admin-password"
+        ]]},
+        "ParameterDescription": {"Fn::Join": ["", [
+          "Password for the ",
+          {"Ref": "ProjectName"},
+          {"Ref": "DBEnvironment"},
+          " Aurora DB from ECS ",
+          {"Ref": "Environment"},
+          " stack."
+        ]]}
       }
     },
     "ECSService": {
