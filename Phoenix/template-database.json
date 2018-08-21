@@ -338,7 +338,7 @@
       "Type": "Custom::PasswordGenerator",
       "Properties": {
         "ServiceToken": {
-          "Ref": "LambdaPasswordGeneratorArn",
+          "Ref": "LambdaPasswordGeneratorArn"
         },
         "Type": "encrypt",
         "PasswordLength": 20,
@@ -363,7 +363,7 @@
       "Type": "Custom::PasswordRetriever",
       "Properties": {
         "ServiceToken": {
-          "Ref": "LambdaPasswordGeneratorArn",
+          "Ref": "LambdaPasswordGeneratorArn"
         },
         "Type": "decrypt",
         "PasswordLength": 20,
@@ -386,6 +386,7 @@
     },
     "CodeBuildRDSMigration": {
       "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["RDSCluster", "RDSPasswordRetriever"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -450,6 +451,54 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "ENVIRONMENT",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "Environment"}
+            },
+            {
+              "Name": "RDS_MASTER_USERNAME",
+              "Type" : "PLAINTEXT",
+              "Value": {"Ref": "MasterUsername"}
+            },
+            {
+              "Name": "RDS_WRITE_ENDPOINT",
+              "Value": {"Fn::Join": ["", [
+                "db",
+                ".",
+                {"Ref": "Environment"},
+                ".",
+                {"Ref": "Domain"}
+              ]]}
+            },
+            {
+              "Name": "RDS_READ_ENDPOINT",
+              "Value": {"Fn::Join": ["", [
+                "read",
+                ".",
+                "db",
+                ".",
+                {"Ref": "Environment"},
+                ".",
+                {"Ref": "Domain"}
+              ]]}
+            },
+            {
+              "Name": "RDS_ENDPOINT_PORT",
+              "Value": {
+                "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+              }
+            },
+            {
+              "Name": "RDS_PASSWORD",
+              "Type": "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                {"Ref": "Environment"},
+                "aurora-admin-password"
+              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
