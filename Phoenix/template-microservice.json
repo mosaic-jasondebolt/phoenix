@@ -256,20 +256,6 @@
         }
       }
     },
-    "LambdaBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {
-          "Ref": "LambdaBucketName"
-        },
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
     "LoadBalancerLogsBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
@@ -501,7 +487,7 @@
     },
     "CodeBuild": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -603,7 +589,7 @@
     },
     "CodeBuildUnitTest": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -709,7 +695,7 @@
     },
     "CodeBuildLint": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -815,7 +801,7 @@
     },
     "CodeBuildIntegrationTest": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -921,7 +907,7 @@
     },
     "CodeBuildE2ETest": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -1027,7 +1013,7 @@
     },
     "CodeBuildPostProdDeploy": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -1142,7 +1128,7 @@
     },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket", "LambdaBucket"],
+      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "RoleArn": {"Ref": "IAMRole"},
         "Name": {

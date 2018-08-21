@@ -16,6 +16,11 @@ fi
 # Replace any phoenix SSM parameter keys if they exist. Useful for overwriting files after Phoenix repo merges.
 PROJECT_NAME=`jq -r '.Parameters.ProjectName' ssm-microservice-params.json`
 PHOENIX_PREFIX='phoenix'
+
+if [ -d "builds" ]; then
+  echo deleting builds dir
+  rm -rf builds
+fi
 python search_and_replace.py . /microservice/$PHOENIX_PREFIX/ /microservice/$PROJECT_NAME/
 
 # Extract JSON properties for a file into a local variable
@@ -28,6 +33,7 @@ LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/lambda-b
 # Generate the MICROSERVICE bucket if it doesn't already exist
 aws s3 mb s3://$MICROSERVICE_BUCKET_NAME
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
+aws s3 mb s3://$LAMBDA_BUCKET_NAME
 
 # Upload the Lambda functions
 listOfLambdaFunctions='password_generator'
