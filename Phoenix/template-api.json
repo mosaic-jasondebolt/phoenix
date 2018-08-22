@@ -349,9 +349,7 @@
                   "{",
                   "\t \"HOME\" : $input.json('$.bodyJson.HOME'),",
                   "\t \"HOSTNAME\" : $input.json('$.bodyJson.HOSTNAME'),",
-                  "\t \"PATH\" : $input.json('$.bodyJson.PATH'),",
-                  "\t \"RDS_READ_ENDPOINT\" : $input.json('$.bodyJson.RDS_READ_ENDPOINT'),",
-                  "\t \"RDS_WRITE_ENDPOINT\" : $input.json('$.bodyJson.RDS_WRITE_ENDPOINT')",
+                  "\t \"MESSAGE\" : $input.json('$.bodyJson.MESSAGE')",
                   "}"
                 ]]}
               }
@@ -388,9 +386,7 @@
             "properties": {
               "HOME": { "type": "string" },
               "HOSTNAME": { "type": "string" },
-              "PATH": { "type": "string" },
-              "RDS_READ_ENDPOINT": { "type": "string" },
-              "RDS_WRITE_ENDPOINT": { "type": "string" }
+              "MESSAGE": { "type": "string" }
             }
           }
         }
