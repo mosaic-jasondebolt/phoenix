@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "Environment": "e2e",
+    "DomainPrefix": "v0-e2e.docs"
+  }
+}

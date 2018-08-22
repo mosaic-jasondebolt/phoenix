@@ -25,50 +25,65 @@ phases:
       - echo Destroying $PROJECT_NAME microservice
       - # Delete API Gateway deployments first
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-deployment-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-prod
       - # Delete API Gateway API Internals
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-internals-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-prod
       - # Delete API Gateway API
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
       - # Delete API Gateway Custom Domain
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-custom-domain-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
       - # Delete Lambda
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-testing
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod
       - # Delete ECS Main Task
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ecs-main-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-prod
       - # Delete ECS
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ecs-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-prod
       - # Delete Database
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-database-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
       - # Empty Microservice buckets
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-pipeline --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-build --recursive
@@ -77,12 +92,14 @@ phases:
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-encrypted-secrets --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-load-balancer-logs --recursive
       - # Empty V0 API Documentation buckets
-      - aws s3 rm s3://v0.docs.$DOMAIN --recursive # Prod
       - aws s3 rm s3://v0-testing.docs.$DOMAIN --recursive
+      - aws s3 rm s3://v0-e2e.docs.$DOMAIN --recursive
+      - aws s3 rm s3://v0.docs.$DOMAIN --recursive # Prod
       - # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-documentation-v0-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-testing
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-prod
       - # Delete the Project ECR repositories.
       - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
       - # Delete Microservice
