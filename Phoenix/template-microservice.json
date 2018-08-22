@@ -91,6 +91,10 @@
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/iam-role"
+    },
+    "Version": {
+      "Description": "The identifier/version used to tag some resources within the microservice stack, such as Lambda function version. Version also allow us to force update source code for Lambda functions.",
+      "Type": "String"
     }
   },
   "Conditions": {
@@ -1997,7 +2001,8 @@
           "S3Bucket" : {"Ref": "LambdaBucketName"},
           "S3Key": {
             "Fn::Join": ["/", [
-              "latest",
+              "microservice",
+              {"Ref": "Version"},
               "password_generator",
               "lambda_function.zip"
             ]]
@@ -2017,6 +2022,39 @@
           "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
         },
         "Description": "The Lambda password generator ARN"
+      }
+    },
+    "LambdaDeleteNetworkInterface": {
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy"],
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Code": {
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key": {
+            "Fn::Join": ["/", [
+              "microservice",
+              {"Ref": "Version"},
+              "delete_network_interface",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "120"
+      }
+    },
+    "LambdaDeleteNetworkInterfaceArnParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "LambdaDeleteNetworkInterface",
+      "Properties": {
+        "Name": "/microservice/phoenix/lambda-delete-network-interface-arn",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": ["LambdaDeleteNetworkInterface", "Arn"]
+        },
+        "Description": "The Lambda delete networking interface ARN"
       }
     }
   }

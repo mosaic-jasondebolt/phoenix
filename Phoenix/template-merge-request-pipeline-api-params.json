@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "Version": "latest",
+    "Version": "microservice",
     "VPCPrefix": "dev",
     "Environment": "all"
   }

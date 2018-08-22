@@ -27,6 +27,7 @@ python search_and_replace.py . /microservice/$PHOENIX_PREFIX/ /microservice/$PRO
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
 PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-microservice
+VERSION_ID='microservice'-'v0' # Increment this version whenever you make a change to a Lambda function to force code update
 MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
@@ -36,7 +37,8 @@ aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --incl
 aws s3 mb s3://$LAMBDA_BUCKET_NAME
 
 # Upload the Lambda functions
-listOfLambdaFunctions='password_generator'
+listOfLambdaFunctions='password_generator delete_network_interface'
+# Increment this version to force Lambda functions to use new code when you make a change to a Lambda function
 for functionName in $listOfLambdaFunctions
 do
   mkdir -p builds/$functionName
@@ -44,7 +46,7 @@ do
   cd builds/$functionName/
   pip install -r requirements.txt -t .
   zip -r lambda_function.zip ./*
-  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/latest/$functionName/
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/microservice/$VERSION_ID/$functionName/
   cd ../../
   rm -rf builds
 done
@@ -52,9 +54,16 @@ done
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json
 
+# Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
+sed "s/VERSION_ID/$VERSION_ID/g" template-microservice-params.json > temp1.json
+
+# Regenerate the dev params file into a format the the CloudFormation CLI expects.
+python parameters_generator.py temp1.json cloudformation > temp2.json
+
 aws cloudformation $1-stack \
     --stack-name $STACK_NAME \
     --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json \
+    --parameters file://temp2.json \
     --capabilities CAPABILITY_NAMED_IAM \
     --role-arn $CLOUDFORMATION_ROLE
 
