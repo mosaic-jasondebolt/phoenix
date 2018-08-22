@@ -7,9 +7,11 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    my_dict = copy.deepcopy(os.environ)
-    my_dict['Hello'] = 'Blah'
-    return jsonify(my_dict)
+    return jsonify({
+        'MESSAGE': 'Hello',
+        'HOSTNAME': os.environ['HOSTNAME'],
+        'HOME': os.environ['HOME']
+    })
 
 if __name__ == '__main__':
     app.run(debug=True,host='0.0.0.0')
