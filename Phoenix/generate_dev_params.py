@@ -43,7 +43,7 @@ def write_dev_param_files(environment_name):
     # All developers will share the dev RDS instance, so we hard code 'dev'
     # rather than use the 'environment_name' here.
     dev_database_template['Parameters']['Environment'] = 'dev'
-    dev_database_template['Parameters']['Vpc'] = 'dev'
+    dev_database_template['Parameters']['VPCPrefix'] = 'dev'
     dev_database_file_obj = open('template-database-params-dev.json', 'w')
     dev_database_file_obj.write(json.dumps(dev_database_template, indent=2))
 
@@ -92,7 +92,7 @@ def write_dev_param_files(environment_name):
     testing_api_template = _parse_json('template-api-params-testing.json')
     dev_api_template = copy.deepcopy(testing_api_template)
     dev_api_template['Parameters']['Environment'] = environment_name
-    dev_ecs_template['Parameters']['VPCPrefix'] = 'dev'
+    dev_api_template['Parameters']['VPCPrefix'] = 'dev'
     dev_api_file_obj = open('template-api-params-dev.json', 'w')
     dev_api_file_obj.write(json.dumps(dev_api_template, indent=2))
 

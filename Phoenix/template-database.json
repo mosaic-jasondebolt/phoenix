@@ -39,8 +39,8 @@
       "Description": "The environment to deploy the instance to.",
       "Type": "String"
     },
-    "Vpc": {
-      "Description": "The name of the VPC to deploy into",
+    "VPCPrefix": {
+      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
       "Type": "String"
     },
     "DBEngine": {
@@ -152,7 +152,7 @@
         "AvailabilityZones": [{
           "Fn::ImportValue": {
             "Fn::Join": ["-", [{
-                "Ref": "Vpc"
+                "Ref": "VPCPrefix"
               },
               "vpc",
               "PrivateSubnetAZ1AvailabilityZone"
@@ -161,7 +161,7 @@
         }, {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [{
-                "Ref": "Vpc"
+                "Ref": "VPCPrefix"
               },
               "vpc",
               "PrivateSubnetAZ2AvailabilityZone"
@@ -206,7 +206,7 @@
         "SubnetIds": [{
             "Fn::ImportValue": {
               "Fn::Join": ["-", [{
-                  "Ref": "Vpc"
+                  "Ref": "VPCPrefix"
                 },
                 "vpc",
                 "PrivateSubnetAZ1"
@@ -216,7 +216,7 @@
           {
             "Fn::ImportValue": {
               "Fn::Join": ["-", [{
-                  "Ref": "Vpc"
+                  "Ref": "VPCPrefix"
                 },
                 "vpc",
                 "PrivateSubnetAZ2"
@@ -254,7 +254,7 @@
         "VpcId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              { "Ref": "Vpc" },
+              { "Ref": "VPCPrefix" },
               "vpc",
               "VPC"
             ]]
@@ -395,14 +395,14 @@
           "Subnets": [
             {"Fn::ImportValue": {
               "Fn::Join": ["-", [
-                {"Ref": "Environment"},
+                {"Ref": "VPCPrefix"},
                 "vpc",
                 "PrivateSubnetAZ1"
               ]]
             }},
             {"Fn::ImportValue": {
               "Fn::Join": ["-", [
-                {"Ref": "Environment"},
+                {"Ref": "VPCPrefix"},
                 "vpc",
                 "PrivateSubnetAZ2"
               ]]
@@ -411,7 +411,7 @@
           "VpcId":  {
             "Fn::ImportValue": {
               "Fn::Join": ["-", [
-                {"Ref": "Environment"},
+                {"Ref": "VPCPrefix"},
                 "vpc",
                 "VPC"
               ]]

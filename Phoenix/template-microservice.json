@@ -1228,7 +1228,7 @@
             ]
           },
           {
-            "Name": "DeployToTestingEnvironments",
+            "Name": "DeployToTesting",
             "Actions": [
               {
                 "Name": "Database",
@@ -1568,7 +1568,7 @@
             }]
           },
           {
-            "Name": "DeployToEndToEndEnvironments",
+            "Name": "DeployToEndToEnd",
             "Actions": [
               {
                 "Name": "Database",
@@ -1866,7 +1866,7 @@
             "Name": "EndToEndTests",
             "Actions": [
               {
-                "Name": "End2EndTest",
+                "Name": "EndToEndTest",
                 "ActionTypeId": {
                   "Category": "Test",
                   "Owner": "AWS",
@@ -1890,7 +1890,7 @@
             ]
           },
           {
-            "Name": "End2EndApproval",
+            "Name": "EndToEndApproval",
             "Actions": [{
               "Name": "ManualApproval",
               "ActionTypeId": {
