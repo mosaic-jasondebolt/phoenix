@@ -1546,26 +1546,23 @@
                     ]]
                   }
                 }
-              }
-            ]
-          },
-          {
-            "Name": "Approval",
-            "Actions": [{
-              "Name": "ManualApproval",
-              "ActionTypeId": {
-                "Category": "Approval",
-                "Owner": "AWS",
-                "Version": "1",
-                "Provider": "Manual"
               },
-              "RunOrder": 1,
-              "Configuration": {
-                "NotificationArn": {
-                  "Ref": "CodePipelineApprovalSNSTopic"
+              {
+                "Name": "ManualApproval",
+                "ActionTypeId": {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Manual"
+                },
+                "RunOrder": 2,
+                "Configuration": {
+                  "NotificationArn": {
+                    "Ref": "CodePipelineApprovalSNSTopic"
+                  }
                 }
               }
-            }]
+            ]
           },
           {
             "Name": "DeployToEndToEnd",
@@ -1876,7 +1873,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 1,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1886,26 +1883,23 @@
                     ]]
                   }
                 }
-              }
-            ]
-          },
-          {
-            "Name": "EndToEndApproval",
-            "Actions": [{
-              "Name": "ManualApproval",
-              "ActionTypeId": {
-                "Category": "Approval",
-                "Owner": "AWS",
-                "Version": "1",
-                "Provider": "Manual"
               },
-              "RunOrder": 1,
-              "Configuration": {
-                "NotificationArn": {
-                  "Ref": "CodePipelineApprovalSNSTopic"
+              {
+                "Name": "ManualApproval",
+                "ActionTypeId": {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Manual"
+                },
+                "RunOrder": 2,
+                "Configuration": {
+                  "NotificationArn": {
+                    "Ref": "CodePipelineApprovalSNSTopic"
+                  }
                 }
               }
-            }]
+            ]
           },
           {
             "Name": "DeployToProduction",
