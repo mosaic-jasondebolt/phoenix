@@ -180,7 +180,7 @@
             "Name": "DeployToECS",
             "Actions": [
               {
-                "Name": "ECS",
+                "Name": "EC2",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
