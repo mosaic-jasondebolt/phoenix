@@ -18,7 +18,6 @@
     },
     "DBEnvironment": {
       "Description": "The database environment used by this ECS cluster",
-      "AllowedValues": ["dev", "testing", "prod"],
       "Type": "String"
     },
     "LaunchType": {
