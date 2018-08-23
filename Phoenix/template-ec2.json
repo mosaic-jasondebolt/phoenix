@@ -408,45 +408,6 @@
       },
       "Type": "AWS::EC2::SecurityGroupIngress"
     },
-    "WebToRDS": {
-      "Properties": {
-        "FromPort": {
-          "Fn::ImportValue": {
-            "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
-              "database",
-              {"Ref": "DBEnvironment"},
-              "EndpointPort"
-            ]]
-          }
-        },
-        "GroupId": {
-          "Fn::ImportValue": {
-            "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
-              "database",
-              {"Ref": "DBEnvironment"},
-              "RDSDBSecurityGroup"
-            ]]
-          }
-        },
-        "IpProtocol": "tcp",
-        "SourceSecurityGroupId": {
-          "Ref": "WebSG"
-        },
-        "ToPort": {
-          "Fn::ImportValue": {
-            "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
-              "database",
-              {"Ref": "DBEnvironment"},
-              "EndpointPort"
-            ]]
-          }
-        }
-      },
-      "Type": "AWS::EC2::SecurityGroupIngress"
-    },
     "MainVPCToWeb": {
       "Properties": {
         "FromPort": "-1",
