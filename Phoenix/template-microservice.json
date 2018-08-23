@@ -1519,12 +1519,7 @@
                     ]]
                   }
                 }
-              }
-            ]
-          },
-          {
-            "Name": "Tests",
-            "Actions": [
+              },
               {
                 "Name": "IntegrationTest",
                 "ActionTypeId": {
@@ -1536,7 +1531,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 7,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1555,7 +1550,7 @@
                   "Version": "1",
                   "Provider": "Manual"
                 },
-                "RunOrder": 2,
+                "RunOrder": 7,
                 "Configuration": {
                   "NotificationArn": {
                     "Ref": "CodePipelineApprovalSNSTopic"
@@ -1856,12 +1851,7 @@
                     ]]
                   }
                 }
-              }
-            ]
-          },
-          {
-            "Name": "EndToEndTests",
-            "Actions": [
+              },
               {
                 "Name": "EndToEndTest",
                 "ActionTypeId": {
@@ -1873,7 +1863,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 7,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1892,7 +1882,7 @@
                   "Version": "1",
                   "Provider": "Manual"
                 },
-                "RunOrder": 2,
+                "RunOrder": 7,
                 "Configuration": {
                   "NotificationArn": {
                     "Ref": "CodePipelineApprovalSNSTopic"
