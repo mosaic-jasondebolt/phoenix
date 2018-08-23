@@ -588,7 +588,63 @@
           ]
         }
       }
-    }
+    },
+    "VPCProxyToELB": {
+      "Properties": {
+        "FromPort": "-1",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "ec2",
+              {"Ref": "Environment"},
+              "ApplicationELBSG"
+            ]]
+          }
+        },
+        "IpProtocol": "-1",
+        "SourceSecurityGroupId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "lambda",
+              {"Ref": "Environment"},
+              "LambdaVPCProxySecurityGroup"
+            ]]
+          }
+        },
+        "ToPort": "-1"
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
+    },
+    "VPCProxyToWeb": {
+      "Properties": {
+        "FromPort": "-1",
+        "GroupId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "ec2",
+              {"Ref": "Environment"},
+              "WebSG"
+            ]]
+          }
+        },
+        "IpProtocol": "-1",
+        "SourceSecurityGroupId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "lambda",
+              {"Ref": "Environment"},
+              "LambdaVPCProxySecurityGroup"
+            ]]
+          }
+        },
+        "ToPort": "-1"
+      },
+      "Type": "AWS::EC2::SecurityGroupIngress"
+    },
   },
   "Outputs": {
     "RestApiId": {

@@ -904,7 +904,14 @@
         },
         "IpProtocol": "tcp",
         "SourceSecurityGroupId": {
-          "Ref": "WebSG"
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"Ref": "ProjectName"},
+              "ec2",
+              {"Ref": "Environment"},
+              "WebSG"
+            ]]
+          }
         },
         "ToPort": {
           "Fn::ImportValue": {

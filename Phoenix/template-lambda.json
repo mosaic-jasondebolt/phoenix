@@ -105,48 +105,6 @@
         "SecurityGroupId": {"Ref": "LambdaVPCProxySecurityGroup"}
       }
     },
-    "VPCProxyToELB": {
-      "Properties": {
-        "FromPort": "-1",
-        "GroupId": {
-          "Fn::ImportValue": {
-            "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
-              "ec2",
-              {"Ref": "Environment"},
-              "ApplicationELBSG"
-            ]]
-          }
-        },
-        "IpProtocol": "-1",
-        "SourceSecurityGroupId": {
-          "Ref": "LambdaVPCProxySecurityGroup"
-        },
-        "ToPort": "-1"
-      },
-      "Type": "AWS::EC2::SecurityGroupIngress"
-    },
-    "VPCProxyToWeb": {
-      "Properties": {
-        "FromPort": "-1",
-        "GroupId": {
-          "Fn::ImportValue": {
-            "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
-              "ec2",
-              {"Ref": "Environment"},
-              "WebSG"
-            ]]
-          }
-        },
-        "IpProtocol": "-1",
-        "SourceSecurityGroupId": {
-          "Ref": "LambdaVPCProxySecurityGroup"
-        },
-        "ToPort": "-1"
-      },
-      "Type": "AWS::EC2::SecurityGroupIngress"
-    },
     "LambdaVPCProxyInvokePermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
@@ -225,6 +183,19 @@
       "Value": {
         "Fn::GetAtt": ["LambdaVPCProxy", "Arn"]
       }
+    },
+    "VPCProxySecurityGroup": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "lambda",
+            {"Ref": "Environment"},
+             "LambdaVPCProxySecurityGroup"
+          ]]
+        }
+      },
+      "Value": {"Ref": "LambdaVPCProxySecurityGroup"}
     },
     "ProjectsLambdaArn": {
       "Export": {

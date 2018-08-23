@@ -1285,6 +1285,33 @@
                 }
               },
               {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "lambda",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
                 "Name": "APIGatewayDomain",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1339,6 +1366,33 @@
                 }
               },
               {
+                "Name": "APIGateway",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
+                }
+              },
+              {
                 "Name": "DatabaseMigration",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -1359,33 +1413,6 @@
                       "testing"
                     ]]
                   }
-                }
-              },
-              {
-                "Name": "Lambda",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 2,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "lambda",
-                      "testing"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               },
               {
@@ -1414,33 +1441,6 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
-                }
-              },
-              {
-                "Name": "APIGateway",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "api",
-                      "testing"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api.json"
                 }
               },
               {
