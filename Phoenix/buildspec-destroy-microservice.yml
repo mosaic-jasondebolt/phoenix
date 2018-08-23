@@ -47,11 +47,6 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
-      - # Delete Lambda
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod
       - # Delete ECS Main Task
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ecs-main-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-testing
@@ -68,6 +63,11 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-prod
+      - # Delete Lambda
+      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-testing
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod
       - # Delete Database
       - #aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-database-prod
       - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-testing

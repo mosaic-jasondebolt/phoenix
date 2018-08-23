@@ -1590,6 +1590,60 @@
                 }
               },
               {
+                "Name": "EC2",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "ec2",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
+                }
+              },
+              {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "lambda",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
                 "Name": "APIGatewayDomain",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -1644,6 +1698,33 @@
                 }
               },
               {
+                "Name": "APIGateway",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
+                }
+              },
+              {
                 "Name": "DatabaseMigration",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -1667,7 +1748,7 @@
                 }
               },
               {
-                "Name": "EC2",
+                "Name": "ECSMainService",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1685,60 +1766,6 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "ec2",
-                      "e2e"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-ec2-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-ec2.json"
-                }
-              },
-              {
-                "Name": "Lambda",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "lambda",
-                      "e2e"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-lambda.json"
-                }
-              },
-              {
-                "Name": "ECSMainService",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
                       "ecs",
                       "main",
                       "e2e"
@@ -1746,33 +1773,6 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-e2e.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
-                }
-              },
-              {
-                "Name": "APIGateway",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 4,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "api",
-                      "e2e"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-api.json"
                 }
               },
               {
@@ -1786,7 +1786,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1813,7 +1813,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1840,7 +1840,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 7,
+                "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1863,7 +1863,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 7,
+                "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1882,7 +1882,7 @@
                   "Version": "1",
                   "Provider": "Manual"
                 },
-                "RunOrder": 7,
+                "RunOrder": 5,
                 "Configuration": {
                   "NotificationArn": {
                     "Ref": "CodePipelineApprovalSNSTopic"
@@ -1919,6 +1919,60 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-database-params-prod.json",
                   "TemplatePath": "BuildOutput::template-database.json"
+                }
+              },
+              {
+                "Name": "EC2",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "ec2",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
+                }
+              },
+              {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "lambda",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               },
               {
@@ -1976,6 +2030,33 @@
                 }
               },
               {
+                "Name": "APIGateway",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": {"Ref": "IAMRole"},
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "ProjectName"},
+                      "api",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
+                }
+              },
+              {
                 "Name": "DatabaseMigration",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -1999,7 +2080,7 @@
                 }
               },
               {
-                "Name": "EC2",
+                "Name": "ECSMainService",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -2017,60 +2098,6 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "ec2",
-                      "prod"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-ec2-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-ec2.json"
-                }
-              },
-              {
-                "Name": "Lambda",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "lambda",
-                      "prod"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-lambda.json"
-                }
-              },
-              {
-                "Name": "ECSMainService",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
                       "ecs",
                       "main",
                       "prod"
@@ -2078,33 +2105,6 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-prod.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
-                }
-              },
-              {
-                "Name": "APIGateway",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 4,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": {"Ref": "IAMRole"},
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
-                      "api",
-                      "prod"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api.json"
                 }
               },
               {
@@ -2118,7 +2118,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2145,7 +2145,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2172,7 +2172,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 7,
+                "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -2195,7 +2195,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 8,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
