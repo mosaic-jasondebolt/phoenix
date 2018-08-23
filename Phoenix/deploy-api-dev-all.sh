@@ -4,15 +4,19 @@ set -e
 # Update a full Lambda + API ApiGateway deployment.
 
 # USAGE:
-#   ./deploy-api-all-dev.sh ..
+#   ./deploy-api-dev-all.sh ..
 #        [create |
+#        [create_all |
+#         create_without_domain |
 #         update api-deploy {rest-api-id} {stage-name} |
 #         update swagger-postman {rest-api-id} {stage-name}]
 #
 # EXAMPLES:
-#   ./deploy-api-all-dev.sh create
-#   ./deploy-api-all-dev.sh update api-deploy l1l5pcj1xc v0
-#   ./deploy-api-all-dev.sh update swagger-postman l1l5pcj1xc v0
+#   ./deploy-api-dev-all.sh create
+#   ./deploy-api-dev-all.sh create_all
+#   ./deploy-api-dev-all.sh create_without_domain
+#   ./deploy-api-dev-all.sh update api-deploy l1l5pcj1xc v0
+#   ./deploy-api-dev-all.sh update swagger-postman l1l5pcj1xc v0
 
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
@@ -27,6 +31,26 @@ if [ $1 == "create" ]
     ./deploy-api-dev.sh $1
     ./deploy-api-internals-dev.sh $1
     ./deploy-api-deployment-dev.sh $1
+fi
+
+if [ $1 == "create_all" ]
+  then
+    ./deploy-database-dev.sh create
+    ./deploy-ec2-dev.sh create
+    ./deploy-ecs-main-task-dev.sh create
+    ./deploy-lambda-dev.sh create
+    ./deploy-api-custom-domain-dev.sh create
+    ./deploy-api-dev.sh create
+    ./deploy-api-internals-dev.sh create
+    ./deploy-api-deployment-dev.sh create
+fi
+
+if [ $1 == "create_without_domain" ]
+  then
+    ./deploy-lambda-dev.sh create
+    ./deploy-api-dev.sh create
+    ./deploy-api-internals-dev.sh create
+    ./deploy-api-deployment-dev.sh create
 fi
 
 API_ID=$3

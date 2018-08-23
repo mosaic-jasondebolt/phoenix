@@ -47,14 +47,6 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
-      - # Delete API Gateway Custom Domain
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-custom-domain-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-prod
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-e2e
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
       - # Delete Lambda
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-testing
@@ -84,6 +76,14 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
+      - # Delete API Gateway Custom Domain
+      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-testing
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
       - # Empty Microservice buckets
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-pipeline --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-build --recursive
