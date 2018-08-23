@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Generates all resources required to run one or more ECS tasks/services in a given environment.",
+  "Description" : "Generates EC2 resources, some of which may run one or more ECS tasks/services in a given environment.",
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
@@ -343,7 +343,7 @@
         "Path":"/",
         "Policies":[
           {
-            "PolicyName":"ecs-service",
+            "PolicyName":"ec2-service",
             "PolicyDocument":{
               "Statement":[
                 {
@@ -618,7 +618,7 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "ecs",
+            "ec2",
             {"Ref": "Environment"},
             "Cluster"
           ]]
@@ -631,7 +631,7 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "ecs",
+            "ec2",
             {"Ref": "Environment"},
             "TaskExecutionRoleArn"
           ]]
@@ -644,7 +644,7 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "ecs",
+            "ec2",
             {"Ref": "Environment"},
             "ApplicationELBSG"
           ]]
@@ -657,7 +657,7 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "ecs",
+            "ec2",
             {"Ref": "Environment"},
             "WebSG"
           ]]

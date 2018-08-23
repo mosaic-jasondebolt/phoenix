@@ -127,7 +127,7 @@ def lambda_handler(event, context):
       print(response)
 
       print('Deleting ECS Main Deploy Stack')
-      # Delete the ECS deploy stack
+      # Delete the ECS MAIN Task deploy stack
       main_deploy_stack_name = '{0}-{1}-{2}-{3}'.format(stack_name, 'ecs', 'main', 'deploy')
       print(main_deploy_stack_name)
       response = cloudformation_client.delete_stack(
@@ -139,10 +139,10 @@ def lambda_handler(event, context):
       main_deploy_waiter = cloudformation_client.get_waiter('stack_delete_complete')
       main_deploy_waiter.wait(StackName=main_deploy_stack_name)
 
-      print('Deleting ECS Deploy Stack')
-      # Delete the ECS deploy stack
+      print('Deleting EC2 Deploy Stack')
+      # Delete the EC2 deploy stack
       response = cloudformation_client.delete_stack(
-        StackName='{0}-{1}-{2}'.format(stack_name, 'ecs', 'deploy')
+        StackName='{0}-{1}-{2}'.format(stack_name, 'ec2', 'deploy')
       )
       print(response)
     else:

@@ -28,7 +28,7 @@ phases:
       - echo Build started on `date`
       - echo Enabling CloudFormation stack termination protection on production stacks.
       - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-database-prod
-      - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-ecs-prod
+      - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-ec2-prod
       - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-ecs-main-prod
       - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
       - aws cloudformation update-termination-protection --enable-termination-protection --stack-name $PROJECT_NAME-api-custom-domain-prod

@@ -37,13 +37,13 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
-      - # ECS resources
-      - echo ===== ECS BUILD =====
+      - # EC2 resources
+      - echo ===== EC2 BUILD =====
       - echo replacing params in the task definition params files.
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-testing.json
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-e2e.json
-      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ecs-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-ecs-params-prod.json
-      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs.json $CODEBUILD_SRC_DIR
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ec2.json $CODEBUILD_SRC_DIR
       - # ECS Main Service resources
       - echo ===== DOCKER BUILD =====
       - echo replacing build number in the task definition param files.
@@ -142,7 +142,7 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      - # Notify Gitlab and alter t-ecs-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
+      - # Notify Gitlab and alter t-ec2-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
       - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py build
       - # Push docker files
       - echo Pushing the Docker images...
@@ -158,10 +158,10 @@ artifacts:
       - t-database-params-e2e.json
       - t-database-params-prod.json
       - # ECS
-      - template-ecs.json
-      - t-ecs-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
-      - t-ecs-params-e2e.json
-      - t-ecs-params-prod.json
+      - template-ec2.json
+      - t-ec2-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
+      - t-ec2-params-e2e.json
+      - t-ec2-params-prod.json
       - # ECS Main Task
       - template-ecs-task.json
       - t-ecs-task-main-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.

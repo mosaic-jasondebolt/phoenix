@@ -86,13 +86,13 @@ class RequestSender(object):
         response = requests.post(url, headers=headers)
         print(response)
 
-def generate_ecs_params():
+def generate_ec2_params():
     print("Saving updated ECS parameter file...")
     file_path = os.path.join(
-        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-params-testing.json'
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-ec2-params-testing.json'
     )
-    ecs_params = _parse_json(file_path)
-    print(json.dumps(ecs_params, indent=2))
+    ec2_params = _parse_json(file_path)
+    print(json.dumps(ec2_params, indent=2))
     # We will use the dev environment by default, but the URL will include the git commit sha1.
     # Also, we will use the pipeline name as the environment.
     # If we left the 'Environment' parameter value as the default of 'testing' or 'dev', the underlying EC2
@@ -102,11 +102,11 @@ def generate_ecs_params():
     # Ideally, we would spin up an EC2 instance when the MR is created, and tear it down when MR is merged or closed.
     # The pipeline name a a good environment choice since that name persists throughout the MR.
     # NOTE!: If you change the below URL, you must also change this value in the post_mergerequests lambda function.
-    ecs_params['Parameters']['Environment'] = PIPELINE_NAME
-    ecs_params['Parameters']['DBEnvironment'] = 'dev'
-    ecs_params['Parameters']['VPCPrefix'] = 'dev'
-    ecs_params_file = open('t-ecs-params-testing.json', 'w')
-    ecs_params_file.write(json.dumps(ecs_params, indent=2))
+    ec2_params['Parameters']['Environment'] = PIPELINE_NAME
+    ec2_params['Parameters']['DBEnvironment'] = 'dev'
+    ec2_params['Parameters']['VPCPrefix'] = 'dev'
+    ec2_params_file = open('t-ec2-params-testing.json', 'w')
+    ec2_params_file.write(json.dumps(ec2_params, indent=2))
 
 def generate_ecs_task_main_params():
     print("Saving updated ECS task main parameter file...")
@@ -115,7 +115,7 @@ def generate_ecs_task_main_params():
     )
     ecs_params = _parse_json(file_path)
     print(json.dumps(ecs_params, indent=2))
-    # NOTE!: Comments in the 'generate_ecs_params' function above apply to this function as well.
+    # NOTE!: Comments in the 'generate_ec2_params' function above apply to this function as well.
     ecs_params['Parameters']['Environment'] = PIPELINE_NAME
     ecs_params['Parameters']['DBEnvironment'] = 'dev'
     ecs_params['Parameters']['VPCPrefix'] = 'dev'
@@ -151,7 +151,7 @@ def onBuildJobCompletion():
     # Notify GitLab of the approval
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
     # Generate the ECS CloudFormation stack to create an ECS instance
-    generate_ecs_params()
+    generate_ec2_params()
     generate_ecs_task_main_params()
     generate_lambda_gitlab_config()
 

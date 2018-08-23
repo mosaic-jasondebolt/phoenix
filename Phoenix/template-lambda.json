@@ -112,7 +112,7 @@
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
               {"Ref": "ProjectName"},
-              "ecs",
+              "ec2",
               {"Ref": "Environment"},
               "ApplicationELBSG"
             ]]
@@ -133,7 +133,7 @@
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
               {"Ref": "ProjectName"},
-              "ecs",
+              "ec2",
               {"Ref": "Environment"},
               "WebSG"
             ]]

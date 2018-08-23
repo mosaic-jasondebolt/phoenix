@@ -47,14 +47,14 @@ def write_dev_param_files(environment_name):
     dev_database_file_obj = open('template-database-params-dev.json', 'w')
     dev_database_file_obj.write(json.dumps(dev_database_template, indent=2))
 
-    # ECS template
-    testing_ecs_template = _parse_json('template-ecs-params-testing.json')
-    dev_ecs_template = copy.deepcopy(testing_ecs_template)
-    dev_ecs_template['Parameters']['Environment'] = environment_name
-    dev_ecs_template['Parameters']['DBEnvironment'] = 'dev'
-    dev_ecs_template['Parameters']['VPCPrefix'] = 'dev'
-    dev_ecs_file_obj = open('template-ecs-params-dev.json', 'w')
-    dev_ecs_file_obj.write(json.dumps(dev_ecs_template, indent=2))
+    # EC2 template
+    testing_ec2_template = _parse_json('template-ec2-params-testing.json')
+    dev_ec2_template = copy.deepcopy(testing_ec2_template)
+    dev_ec2_template['Parameters']['Environment'] = environment_name
+    dev_ec2_template['Parameters']['DBEnvironment'] = 'dev'
+    dev_ec2_template['Parameters']['VPCPrefix'] = 'dev'
+    dev_ec2_file_obj = open('template-ec2-params-dev.json', 'w')
+    dev_ec2_file_obj.write(json.dumps(dev_ec2_template, indent=2))
 
     # ECS Task Main template
     testing_ecs_task_main_template = _parse_json('template-ecs-task-main-params-testing.json')

@@ -14,6 +14,6 @@ ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-deployment-params-dev.
 if [ $1 == "create" ]
   then
     ./deploy-database-dev.sh $1
-    ./deploy-ecs-dev.sh $1
+    ./deploy-ec2-dev.sh $1
     ./deploy-ecs-main-task-dev.sh $1
 fi

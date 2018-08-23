@@ -198,12 +198,12 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "PipelineName"},
-                      "ecs",
+                      "ec2",
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-ecs.json"
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
               {

@@ -1335,7 +1335,7 @@
                 }
               },
               {
-                "Name": "ECS",
+                "Name": "EC2",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1353,12 +1353,12 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "ecs",
+                      "ec2",
                       "testing"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-ecs.json"
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
               {
@@ -1667,7 +1667,7 @@
                 }
               },
               {
-                "Name": "ECS",
+                "Name": "EC2",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1685,12 +1685,12 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "ecs",
+                      "ec2",
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-ecs.json"
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
               {
@@ -1999,7 +1999,7 @@
                 }
               },
               {
-                "Name": "ECS",
+                "Name": "EC2",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -2017,12 +2017,12 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "ProjectName"},
-                      "ecs",
+                      "ec2",
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-ecs.json"
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
               {

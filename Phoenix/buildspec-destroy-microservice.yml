@@ -69,13 +69,13 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-prod
       - # Delete ECS
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ecs-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-prod
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-e2e
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-prod
+      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ec2-prod
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ec2-testing
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ec2-e2e
+      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ec2-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-prod
       - # Delete Database
       - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-database-prod
       - aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-testing

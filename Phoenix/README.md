@@ -50,7 +50,7 @@ For each environment (dev, testing, prod), and additional developer environments
 * Creates a DNS record set to map DB address to a user friendly URL.
 * Creates ingress rules to allow Database Migration Service to access from specific CIDR blocks.
 
-##### Phoenix ECS (template-ecs.json)
+##### Phoenix ECS (template-ec2.json)
 For each environment (dev, testing, prod), and additional developer environments:
 * Creates an ECS Cluster.
 * Creates an ECS Task Definition.
@@ -107,7 +107,7 @@ cd Phoenix
 ./deploy-vpc.sh create
 ./deploy-microservice.sh create
 ./deploy-database-dev.sh create
-./deploy-ecs-dev.sh create ecs
+./deploy-ec2-dev.sh create ecs
 ./deploy-lambda-dev.sh create
 ./deploy-api-dev.sh create
 ./deploy-api-deployment-dev.sh create
@@ -133,7 +133,7 @@ cd Phoenix
 * Update all of the template-ecs-{environment} param files with your information.
 * Don't forget to specify which port you want to open on the container in the ecs param files.
 ```
-./deploy-ecs-dev.sh [create | update] [path location of folder containing dockerfile]
+./deploy-ec2-dev.sh [create | update] [path location of folder containing dockerfile]
 ```
 
 ### Deploying the entire microservice to production.
