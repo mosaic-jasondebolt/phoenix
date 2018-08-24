@@ -343,7 +343,6 @@
           "S3Bucket" : {"Ref": "LambdaBucketName"},
           "S3Key": {
             "Fn::Join": ["/", [
-              "microservice",
               {"Ref": "Version"},
               "password_generator",
               "lambda_function.zip"
@@ -359,7 +358,7 @@
       "DependsOn": "LambdaPasswordGenerator",
       "Properties": {
         "ServiceToken": {
-          "GetAtt": ["LambdaPasswordGenerator", "Arn"]
+          "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
         },
         "Type": "encrypt",
         "PasswordLength": 20,
@@ -385,7 +384,7 @@
       "DependsOn": "LambdaPasswordGenerator",
       "Properties": {
         "ServiceToken": {
-          "GetAtt": ["LambdaPasswordGenerator", "Arn"]
+          "Fn::GetAtt": ["LambdaPasswordGenerator", "Arn"]
         },
         "Type": "decrypt",
         "PasswordLength": 20,

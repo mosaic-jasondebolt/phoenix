@@ -145,7 +145,6 @@
           "S3Bucket" : {"Ref": "LambdaBucketName"},
           "S3Key": {
             "Fn::Join": ["/", [
-              "microservice",
               {"Ref": "Version"},
               "delete_network_interface",
               "lambda_function.zip"
