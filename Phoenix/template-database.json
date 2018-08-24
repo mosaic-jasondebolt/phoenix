@@ -17,11 +17,6 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/domain"
     },
-    "LambdaPasswordGeneratorArn": {
-      "Description": "The ARN of the Lambda password generator",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/lambda-password-generator-arn"
-    },
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -99,6 +94,11 @@
     "Version": {
       "Description": "The Lambda function version",
       "Type": "String"
+    },
+    "IAMRole": {
+      "Description": "The role of your project.",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/microservice/phoenix/iam-role"
     }
   },
   "Conditions": {
@@ -334,11 +334,32 @@
         }
       }
     },
+    "LambdaPasswordGenerator": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Code": {
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key": {
+            "Fn::Join": ["/", [
+              "microservice",
+              {"Ref": "Version"},
+              "password_generator",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
     "RDSPasswordGenerator": {
       "Type": "Custom::PasswordGenerator",
+      "DependsOn": "LambdaPasswordGenerator",
       "Properties": {
         "ServiceToken": {
-          "Ref": "LambdaPasswordGeneratorArn"
+          "GetAtt": ["LambdaPasswordGenerator", "Arn"]
         },
         "Type": "encrypt",
         "PasswordLength": 20,
@@ -361,9 +382,10 @@
     },
     "RDSPasswordRetriever": {
       "Type": "Custom::PasswordRetriever",
+      "DependsOn": "LambdaPasswordGenerator",
       "Properties": {
         "ServiceToken": {
-          "Ref": "LambdaPasswordGeneratorArn"
+          "GetAtt": ["LambdaPasswordGenerator", "Arn"]
         },
         "Type": "decrypt",
         "PasswordLength": 20,

@@ -36,21 +36,6 @@ aws s3 mb s3://$MICROSERVICE_BUCKET_NAME
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
 aws s3 mb s3://$LAMBDA_BUCKET_NAME
 
-# Upload the Lambda functions
-listOfLambdaFunctions='password_generator delete_network_interface'
-# Increment this version to force Lambda functions to use new code when you make a change to a Lambda function
-for functionName in $listOfLambdaFunctions
-do
-  mkdir -p builds/$functionName
-  cp -rf lambda/$functionName/* builds/$functionName/
-  cd builds/$functionName/
-  pip install -r requirements.txt -t .
-  zip -r lambda_function.zip ./*
-  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/microservice/$VERSION_ID/$functionName/
-  cd ../../
-  rm -rf builds
-done
-
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice.json
 

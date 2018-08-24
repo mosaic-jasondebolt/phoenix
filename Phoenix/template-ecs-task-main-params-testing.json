@@ -16,6 +16,7 @@
     "MaxTasksToScaleOutInResponseTo500Errors": "2",
     "MinTasksToScaleInInResponseToScaleInEvent": "1",
     "VPCPrefix": "testing",
-    "WebSubnets": "Private"
+    "WebSubnets": "Private",
+    "Version": "VERSION_ID"
   }
 }

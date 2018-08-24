@@ -28,11 +28,6 @@
     "Version": {
       "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
       "Type": "String"
-    },
-    "LambdaDeleteNetworkInterfaceArn": {
-      "Description": "The ARN of the Delete Network Interface Lambda.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/lambda-delete-network-interface-arn"
     }
   },
   "Resources": {
@@ -96,15 +91,6 @@
       },
       "Type": "AWS::EC2::SecurityGroup"
     },
-    "DeleteVPCProxyNetworkInterfaceOnStackDelete": {
-      "Type": "Custom::DeleteVPCProxyNetworkInterfaceOnStackDelete",
-      "Properties": {
-        "ServiceToken": {
-          "Ref": "LambdaDeleteNetworkInterfaceArn"
-        },
-        "SecurityGroupId": {"Ref": "LambdaVPCProxySecurityGroup"}
-      }
-    },
     "LambdaVPCProxyInvokePermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
@@ -138,6 +124,36 @@
         "Action": "lambda:InvokeFunction",
         "Principal": "events.amazonaws.com",
         "SourceArn": { "Fn::GetAtt": ["LambdaVPCProxyCloudWatchWarmer", "Arn"] }
+      }
+    },
+    "DeleteVPCProxyNetworkInterfaceOnStackDelete": {
+      "Type": "Custom::DeleteVPCProxyNetworkInterfaceOnStackDelete",
+      "DependsOn": "LambdaDeleteNetworkInterface",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [ "LambdaDeleteNetworkInterface", "Arn" ]
+        },
+        "SecurityGroupId": {"Ref": "LambdaVPCProxySecurityGroup"}
+      }
+    },
+    "LambdaDeleteNetworkInterface": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Code": {
+          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Key": {
+            "Fn::Join": ["/", [
+              "microservice",
+              {"Ref": "Version"},
+              "delete_network_interface",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "120"
       }
     },
     "LambdaProjects": {

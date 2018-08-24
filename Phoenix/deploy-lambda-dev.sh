@@ -27,7 +27,7 @@ if [ $# -ne 1 ]
 fi
 
 # Upload the Python Lambda functions
-listOfPythonLambdaFunctions='projects'
+listOfPythonLambdaFunctions='projects delete_network_interface'
 for functionName in $listOfPythonLambdaFunctions
 do
   mkdir -p builds/$functionName
