@@ -24,63 +24,63 @@ phases:
       - echo Build started on `date`
       - echo Destroying $PROJECT_NAME microservice
       - # Delete API Gateway deployments first
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-deployment-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-deployment-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-deployment-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-deployment-testing
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-deployment-e2e
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-deployment-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-prod
       - # Delete API Gateway API Internals
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-internals-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-internals-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-internals-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-internals-testing
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-internals-e2e
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-internals-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-internals-prod
       - # Delete API Gateway API
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-testing
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-e2e
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
       - # Delete ECS Main Task
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ecs-main-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ecs-main-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ecs-main-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ecs-main-testing
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ecs-main-e2e
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ecs-main-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-prod
       - # Delete ECS
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ec2-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ec2-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ec2-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ec2-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ec2-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ec2-testing
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ec2-e2e
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ec2-prod
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-prod
       - # Delete Lambda
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-lambda-prod
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-testing
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-e2e
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-lambda-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-lambda-prod
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-testing
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-e2e
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-prod
       - # Delete Database
-      - #aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-database-prod
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-testing
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-e2e
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-database-prod
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-database-prod
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-testing
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-e2e
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-prod
       - #aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
       - #aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-e2e
       - #aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
       - # Delete API Gateway Custom Domain
-      - #aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-custom-domain-prod
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-testing
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-e2e
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-custom-domain-prod
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-testing
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-e2e
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-prod
       - #aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-testing
       - #aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-e2e
       - #aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
@@ -96,19 +96,19 @@ phases:
       - aws s3 rm s3://v0-e2e.docs.$DOMAIN --recursive
       - aws s3 rm s3://v0.docs.$DOMAIN --recursive # Prod
       - # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
-      - #aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-api-documentation-v0-prod
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-testing
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-e2e
-      - #aws cloudformation delete-stack --stack-name $PROJECT_NAME-api-documentation-v0-prod
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-documentation-v0-prod
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-testing
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-e2e
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-prod
       - # Delete the Project ECR repositories.
       - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
       - # Delete Microservice
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-microservice
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-microservice
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-microservice
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-microservice
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-microservice
       - # Delete SSM Params
-      - aws cloudformation update-termination-protection --no-enable-termination-protection --stack-name $PROJECT_NAME-ssm-microservice-params
-      - aws cloudformation delete-stack --stack-name $PROJECT_NAME-ssm-microservice-params
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-microservice-params
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-microservice-params
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-microservice-params
   post_build:
     commands:
