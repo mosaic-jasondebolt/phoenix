@@ -49,7 +49,7 @@ For each environment (dev, testing, prod), and additional developer environments
 * Creates a DNS record set to map DB address to a user friendly URL.
 * Creates ingress rules to allow Database Migration Service to access from specific CIDR blocks.
 
-##### Phoenix ECS (template-ec2.json)
+##### Phoenix EC2 (template-ec2.json)
 For each environment (dev, testing, prod), and additional developer environments:
 * Creates an ECS Cluster.
 * Creates an ECS Task Definition.
