@@ -68,6 +68,9 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-testing
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-e2e
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-prod
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-lambda-testing
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-lambda-e2e
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-lambda-prod
       - # Delete Database
       - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-database-prod
       - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-testing
