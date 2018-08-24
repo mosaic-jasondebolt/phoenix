@@ -79,7 +79,7 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
-      -  Delete API Gateway Custom Domain
+      - # Delete API Gateway Custom Domain
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-custom-domain-prod
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-testing
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-e2e
