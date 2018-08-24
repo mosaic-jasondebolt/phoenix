@@ -37,7 +37,7 @@ if [ $1 == "create_all" ]
   then
     ./deploy-database-dev.sh create
     ./deploy-ec2-dev.sh create
-    ./deploy-ecs-main-task-dev.sh create
+    ./deploy-ecs-main-task-dev.sh create ecs
     ./deploy-lambda-dev.sh create
     ./deploy-api-custom-domain-dev.sh create
     ./deploy-api-dev.sh create
