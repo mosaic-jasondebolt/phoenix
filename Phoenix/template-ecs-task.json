@@ -7,11 +7,6 @@
       "Type": "AWS::SSM::Parameter::Value<String>",
       "Default": "/microservice/phoenix/project-name"
     },
-    "EncryptionKeyId": {
-      "Description": "The encryption Key ID.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/encryption-key-id"
-    },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -320,10 +315,6 @@
             "Name": { "Ref": "ContainerName" },
             "Environment": [
               {
-                "Name": "KMS_ENCRYPTION_KEY_ID",
-                "Value": {"Ref": "EncryptionKeyId"}
-              },
-              {
                 "Name": "RDS_MASTER_USERNAME",
                 "Value": {
                   "Fn::ImportValue": {
@@ -467,7 +458,7 @@
         },
         "Type": "decrypt",
         "PasswordLength": 20,
-        "KMSKeyId": {"Ref": "EncryptionKeyId"},
+        "KMSKeyId": "alias/aws/ssm",
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
           {"Ref": "ProjectName"},

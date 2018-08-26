@@ -29,7 +29,7 @@ IMAGE_TAG=$TASK_FAMILY-$ENVIRONMENT-`date +"%Y-%m-%d-%H%M%S"`
 IMAGE_NAME=$PROJECT_NAME-$TASK_FAMILY
 ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
 
-VERSION_ID=$ENVIRONMENT
+VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 
 # Upload the Python Lambda functions
 listOfPythonLambdaFunctions='password_generator'

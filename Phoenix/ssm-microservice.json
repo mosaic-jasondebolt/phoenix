@@ -97,16 +97,6 @@
       "Type": "String",
       "Default": ""
     },
-    "SecretsBucketName": {
-      "Description": "The bucket name in which KMS encrypted secrets will be stored.",
-      "Type": "String",
-      "Default": ""
-    },
-    "EncryptionKeyName": {
-      "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets.",
-      "Type": "String",
-      "Default": ""
-    },
     "ProjectDescription": {
       "Description": "A description of your project",
       "Type": "String"
@@ -148,16 +138,6 @@
     "HasLoadBalancerLogsBucketName" : {"Fn::Not": [
       {"Fn::Equals" : [
         {"Ref" : "LoadBalancerLogsBucketName"}, ""
-      ]}
-    ]},
-    "HasSecretsBucketName" : {"Fn::Not": [
-      {"Fn::Equals" : [
-        {"Ref" : "SecretsBucketName"}, ""
-      ]}
-    ]},
-    "HasEncryptionKeyName" : {"Fn::Not": [
-      {"Fn::Equals" : [
-        {"Ref" : "EncryptionKeyName"}, ""
       ]}
     ]}
   },
@@ -393,42 +373,6 @@
           ]]}
         ]},
         "Description": "The bucket name in which load balancer logs will be stored."
-      }
-    },
-    "SecretsBucketNameParam": {
-      "Type": "AWS::SSM::Parameter",
-      "DependsOn": "LambdaBucketNameParam",
-      "Properties": {
-        "Name": "/microservice/phoenix/secrets-bucket-name",
-        "Type": "String",
-        "Value": {"Fn::If": [
-          "HasSecretsBucketName",
-          {"Ref": "SecretsBucketName"},
-          {"Fn::Join": ["-", [
-            {"Ref": "OrganizationName"},
-            {"Ref": "ProjectName"},
-            "encrypted-secrets"
-          ]]}
-        ]},
-        "Description": "The bucket name in which KMS encrypted secrets will be stored."
-      }
-    },
-    "EncryptionKeyNameParam": {
-      "Type": "AWS::SSM::Parameter",
-      "DependsOn": "LambdaBucketNameParam",
-      "Properties": {
-        "Name": "/microservice/phoenix/encryption-key-name",
-        "Type": "String",
-        "Value": {"Fn::If": [
-          "HasEncryptionKeyName",
-          {"Ref": "EncryptionKeyName"},
-          {"Fn::Join": ["-", [
-            {"Ref": "OrganizationName"},
-            {"Ref": "ProjectName"},
-            "kms-key"
-          ]]}
-        ]},
-        "Description": "The name of the encryption key used by the microservice to encrypt/decrypt secrets."
       }
     },
     "ProjectDescriptionParam": {

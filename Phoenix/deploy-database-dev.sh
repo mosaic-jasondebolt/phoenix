@@ -7,8 +7,8 @@ set -e
 # encrypted, and stored in AWS SSM Parameter Store for later retrieval.
 #
 # The password in returned to the CloudFormation stack and used in the MasterUserPassword
-# parameter. All authored EC2 instances, ECS containers, etc. can then use the project
-# KMS Key found in the microservice stack to decrypt the MasterPassword and
+# parameter. All authored EC2 instances, ECS containers, etc. can then use the
+# default KMS SSM service Key to decrypt the MasterPassword and
 # initiate a database connection
 #
 # USAGE
@@ -28,7 +28,7 @@ LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/lambda-b
 STACK_NAME=$PROJECT_NAME-database-$ENVIRONMENT
 
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
-VERSION_ID=$ENVIRONMENT
+VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 
 # Upload the Python Lambda functions
 listOfPythonLambdaFunctions='password_generator'

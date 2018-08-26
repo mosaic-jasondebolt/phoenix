@@ -12,13 +12,10 @@ A full CI/CD solution for continuously building and deploying RDS, ECS, Lambda, 
 * Creates an AWS CodePipeline which will CI/CD any changes pushed to master.
 * Creates an S3 bucket to store Lambda functions.
 * Creates an S3 bucket to store load balancer logs.
-* Creates an S3 bucket to store encrypted secrets using KMS.
-* Creates an S3 bucket to store encrypted secrets using KMS.
 * Creates an S3 bucket to store CodePipeline artifacts.
 * Creates an S3 bucket to store CodeBuild artifacts.
 * Creates an SNS topic which triggers on master branch commits.
 * Creates an SNS topic which triggers on master branch commits.
-* Creates a KMS key and KMS alias.
 * Creates a CodePipeline service role.
 * Creates a CodeBuild service role.
 * Creates a CodePipeline approval SNS topic to notify pipeline approvers.

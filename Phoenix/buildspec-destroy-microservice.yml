@@ -71,23 +71,23 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-lambda-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-lambda-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-lambda-prod
-      - # Delete Database
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-database-prod
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-testing
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-e2e
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-prod
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-e2e
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
-      - # Delete API Gateway Custom Domain
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-custom-domain-prod
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-testing
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-e2e
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-prod
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-testing
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-e2e
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
-      - # Empty Microservice buckets
+      - # # Delete Database
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-database-prod
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-testing
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-e2e
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-prod
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-testing
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-e2e
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-prod
+      - # # Delete API Gateway Custom Domain
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-custom-domain-prod
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-testing
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-e2e
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-prod
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-testing
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-e2e
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-prod
+      - # # Empty Microservice buckets
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-pipeline --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-code-build --recursive
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-lambda --recursive
@@ -98,12 +98,12 @@ phases:
       - aws s3 rm s3://v0-testing.docs.$DOMAIN --recursive
       - aws s3 rm s3://v0-e2e.docs.$DOMAIN --recursive
       - aws s3 rm s3://v0.docs.$DOMAIN --recursive # Prod
-      - # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-documentation-v0-prod
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-testing
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-e2e
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-prod
-      - # Delete the Project ECR repositories.
+      - # # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-documentation-v0-prod
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-testing
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-e2e
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-prod
+      - # # Delete the Project ECR repositories.
       - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
       - # Delete Microservice
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-microservice
