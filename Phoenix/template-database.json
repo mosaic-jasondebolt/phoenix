@@ -102,7 +102,7 @@
         {"Ref" : "SnapshotIdentifier"}, ""
       ]}
     ]},
-    "IsNewDatabase" : {"Fn::Equals" : [
+    "IsNotRestoredFromSnapshot" : {"Fn::Equals" : [
       {"Ref" : "SnapshotIdentifier"}, ""
     ]}
   },
@@ -110,6 +110,7 @@
     "RDSCluster": {
       "Type": "AWS::RDS::DBCluster",
       "DependsOn": ["RDSPasswordRetriever"],
+      "DeletionPolicy": "Snapshot",
       "Properties": {
         "SnapshotIdentifier": {
           "Fn::If": [
@@ -120,21 +121,21 @@
         },
         "MasterUsername": {
           "Fn::If": [
-            "IsNewDatabase",
+            "IsNotRestoredFromSnapshot",
             {"Ref": "MasterUsername"},
             {"Ref": "AWS::NoValue"}
           ]
         },
         "StorageEncrypted": {
           "Fn::If": [
-            "IsNewDatabase",
+            "IsNotRestoredFromSnapshot",
             true,
             {"Ref": "AWS::NoValue"}
           ]
         },
         "MasterUserPassword": {
           "Fn::If": [
-            "IsNewDatabase",
+            "IsNotRestoredFromSnapshot",
             {"Fn::GetAtt": ["RDSPasswordRetriever", "Password"]},
             {"Ref": "AWS::NoValue"}
           ]
@@ -375,7 +376,7 @@
         "Type": "encrypt",
         "PasswordLength": 20,
         "KMSKeyId": "alias/aws/ssm",
-        "IsNewDatabase": {"Fn::If": ["IsNewDatabase", 1, 0]},
+        "SnapshotIdentifier": {"Ref": "SnapshotIdentifier"},
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
           {"Ref": "ProjectName"},
@@ -402,7 +403,7 @@
         "Type": "decrypt",
         "PasswordLength": 20,
         "KMSKeyId": "alias/aws/ssm",
-        "IsNewDatabase": {"Fn::If": ["IsNewDatabase", 1, 0]},
+        "SnapshotIdentifier": {"Ref": "SnapshotIdentifier"},
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
           {"Ref": "ProjectName"},

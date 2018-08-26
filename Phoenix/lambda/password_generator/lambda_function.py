@@ -1,3 +1,11 @@
+"""Generates, encrypts, and stores RDS instance MasterUser passwords in SSM parameter store.
+
+Also retrieves said passwords and returns to a Cloudformation stack.
+
+Please make sure to perform the following testing plan when making changes to this Lambda function:
+
+https://docs.google.com/document/d/16UUY3h-4wU372XF8D0Fs1IQ3ABLrO-Vjn5ao2YkB84M/edit#heading=h.ww33z0t9wm7h
+"""
 import json
 import logging
 import uuid
@@ -71,16 +79,32 @@ def lambda_handler(event, context):
     param_name = event['ResourceProperties']['ParameterName']
     param_description = event['ResourceProperties']['ParameterDescription']
     password_length = int(event['ResourceProperties']['PasswordLength'])
-    is_new_database = bool(int(event['ResourceProperties'].get('IsNewDatabase', 0)))
+    snapshot_identifier = event['ResourceProperties'].get('SnapshotIdentifier', "")
     reason = 'N/A'
 
-    if event['RequestType'] != 'Delete':
-        if event['ResourceProperties']['Type'] == 'encrypt' and is_new_database:
-            db_password = get_random_password(password_length)
-            put_password_to_ssm(param_name, param_description, kms_key_id, db_password)
-            reason = 'The value was successfully encrypted'
-        else:
+    if event['RequestType'] == 'Create':
+        if event['ResourceProperties']['Type'] == 'encrypt':
+            # DB is created either brand new/empty or from a snapshot.
+            # If from snapshot, no new password is generated or persisted to SSM parameter store.
+            # The ONLY case where we want to generate and store a password is upon stack creation of brand new RDS instance (empty snapshot ID).
+            if snapshot_identifier == "":
+                db_password = get_random_password(password_length)
+                put_password_to_ssm(param_name, param_description, kms_key_id, db_password)
+                reason = 'The value was successfully encrypted'
+        elif event['ResourceProperties']['Type'] == 'decrypt':
+            # Return the decrypted password to any stack that wants it and has the correct
+            # permissions to decrypt for a stack create operation.
+            # If this is a create+decrypt operation from a new RDS instance, the returned value will be used in the MasterUserName
+            # If this is a create+decrypt operation from a snapshot restored RDS instance, the returned password will be RDS Cluster resource.
             response_data['Password'] = get_password_from_ssm(param_name, kms_key_id)
             reason = 'The value was successfully decrypted'
+    elif event['RequestType'] == 'Update':
+        # The MasterUserPassword cannot be updated in Cloudformation templates, so the returned values gets ignored by the AWS::RDS::DBCluster resource in all cases.
+        # If this is an update+decrypt operation from another client, it will do whatever it wants with the returned value.
+        if event['ResourceProperties']['Type'] == 'decrypt':
+            response_data['Password'] = get_password_from_ssm(param_name, kms_key_id)
+            reason = 'The value was successfully decrypted'
+    elif event['RequestType'] == 'Delete':
+        print('Delete stack operation, Lambda NoOp.')
 
     return send_response(event, context, 'SUCCESS', response_data, reason)
