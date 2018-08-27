@@ -35,21 +35,21 @@ def get_gitlab_merge_request_notes_url(project_id, merge_request_id, body):
 
 def get_gitlab_access_token():
     response = ssm_client.get_parameter(
-        Name='gitlab-codebuild-access-token',
+        Name='/global/gitlab/codebuild/access-token',
         WithDecryption=True
     )
     return response['Parameter']['Value']
 
 def get_gitlab_url():
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/gitlab-url',
+        Name='/microservice/phoenix/global/gitlab-url',
         WithDecryption=False
     )
     return response['Parameter']['Value']
 
 def get_microservice_bucket_name():
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/bucket-name',
+        Name='/microservice/phoenix/global/bucket-name',
         WithDecryption=False
     )
     return response['Parameter']['Value']

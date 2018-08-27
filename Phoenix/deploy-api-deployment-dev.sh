@@ -12,7 +12,7 @@ set -e
 #   ./deploy-api-deployment-dev.sh delete
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-deployment-params-dev.json`
 STACK_NAME=$PROJECT_NAME-api-deployment-$ENVIRONMENT
 

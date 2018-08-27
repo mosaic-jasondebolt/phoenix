@@ -5,32 +5,32 @@
     "ProjectName": {
       "Description": "The name of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/project-name"
+      "Default": "/microservice/phoenix/global/project-name"
     },
     "IAMRole": {
       "Description": "The role of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/iam-role"
+      "Default": "/microservice/phoenix/global/iam-role"
     },
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/hosted-zone-id"
+      "Default": "/microservice/phoenix/global/hosted-zone-id"
     },
     "Domain": {
       "Description": "The domain name for the static S3 bucket website.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/domain"
+      "Default": "/microservice/phoenix/global/domain"
     },
     "APIDocsSSLCertificateARN": {
       "Description": "The API Docs AWS ACM Certificate ARN.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/ssl-certificate-arn-api-docs"
+      "Default": "/microservice/phoenix/global/ssl-certificate-arn-api-docs"
     },
     "APIDocsUserAgent": {
       "Description": "The user agent used for API Documentation access",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "api-docs-user-agent"
+      "Default": "/global/api-docs-user-agent"
     },
     "Environment": {
       "Description": "The environment associated with this API documentation.",

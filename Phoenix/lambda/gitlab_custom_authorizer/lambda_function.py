@@ -13,7 +13,7 @@ ssm_client = boto3.client('ssm')
 
 def get_gitlab_webhook_secret_token():
     response = ssm_client.get_parameter(
-        Name='gitlab-webhook-secret-token',
+        Name='/global/gitlab/webhook-secret-token',
         WithDecryption=True
     )
     return response['Parameter']['Value']

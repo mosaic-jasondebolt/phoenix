@@ -11,7 +11,7 @@ set -e
 #   ./deploy-api-documentations-dev.sh update
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 # Check for valid arguments
 if [ $# -ne 1 ]

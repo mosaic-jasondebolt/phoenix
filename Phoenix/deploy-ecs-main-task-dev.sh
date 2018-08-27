@@ -20,9 +20,9 @@ TASK_FAMILY='main'
 
 AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 AWS_REGION=`aws configure get region`
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 ENVIRONMENT=`jq -r '.Parameters.Environment' $ECS_PARAM_FILE`
-LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-ecs-$TASK_FAMILY-$ENVIRONMENT
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 IMAGE_TAG=$TASK_FAMILY-$ENVIRONMENT-`date +"%Y-%m-%d-%H%M%S"`

@@ -5,7 +5,7 @@
     "ProjectName": {
       "Description": "The name of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/project-name"
+      "Default": "/microservice/phoenix/global/project-name"
     },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
@@ -14,17 +14,17 @@
     "HostedZoneId": {
       "Description": "The Route53 hosted zone id that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/hosted-zone-id"
+      "Default": "/microservice/phoenix/global/hosted-zone-id"
     },
     "Domain": {
       "Description": "The domain name that this service will fall under.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/domain"
+      "Default": "/microservice/phoenix/global/domain"
     },
     "SSLCertificateARN": {
       "Description": "The AWS ACM Certificate ARN.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/ssl-certificate-arn"
+      "Default": "/microservice/phoenix/global/ssl-certificate-arn"
     },
     "URLPrefixOverride": {
       "Description": "The URL prefix to override the environment prefix with. Works only for non-production environments.",

@@ -21,15 +21,15 @@ if [ -d "builds" ]; then
   echo deleting builds dir
   rm -rf builds
 fi
-python search_and_replace.py . /microservice/$PHOENIX_PREFIX/ /microservice/$PROJECT_NAME/
+python search_and_replace.py . /microservice/$PHOENIX_PREFIX/global/ /microservice/$PROJECT_NAME/global/
 
 # Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-microservice
 VERSION_ID='microservice'-'v0' # Increment this version whenever you make a change to a Lambda function to force code update
-MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
-LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 
 # Generate the MICROSERVICE bucket if it doesn't already exist
 aws s3 mb s3://$MICROSERVICE_BUCKET_NAME

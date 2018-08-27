@@ -5,12 +5,12 @@
     "ProjectName": {
       "Description": "The name of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/project-name"
+      "Default": "/microservice/phoenix/global/project-name"
     },
     "KeyPairName":{
       "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/key-pair-name"
+      "Default": "/microservice/phoenix/global/key-pair-name"
     },
     "Environment": {
       "Description": "The environment to deploy the instance to.",
@@ -94,22 +94,22 @@
     "CodeBuildBucketName": {
       "Description": "The bucket name in which CodeBuild artifacts will be stored.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/code-build-bucket-name"
+      "Default": "/microservice/phoenix/global/code-build-bucket-name"
     },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/code-build-docker-image"
+      "Default": "/microservice/phoenix/global/code-build-docker-image"
     },
     "NodeJSBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/code-build-docker-image-nodejs"
+      "Default": "/microservice/phoenix/global/code-build-docker-image-nodejs"
     },
     "CodeBuildServiceRoleArn": {
       "Description": "The ARN of the CodeBuild service role.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/code-build-service-role-arn"
+      "Default": "/microservice/phoenix/global/code-build-service-role-arn"
     }
   },
   "Mappings":{

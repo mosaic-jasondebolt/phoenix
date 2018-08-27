@@ -5,12 +5,12 @@
     "ProjectName": {
       "Description": "The name of your project.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/project-name"
+      "Default": "/microservice/phoenix/global/project-name"
     },
     "IAMRole": {
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/iam-role"
+      "Default": "/microservice/phoenix/global/iam-role"
     },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
