@@ -158,7 +158,7 @@ def get_resource_methods(rest_api_id):
         limit=100)
     items = []
     for item in resources_response['items']:
-        for method in item['resourceMethods']:
+        for method in item.get('resourceMethods', []):
             items.append({
                 'id': item['id'],
                 'method': method
