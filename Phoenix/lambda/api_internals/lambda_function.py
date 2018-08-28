@@ -16,7 +16,7 @@ def get_application_json(hostname, port):
           "requestParams" : {
             "hostname" : "%s",
             "port" : "%s",
-            "path" : "$context.resouggrcePath",
+            "path" : "$context.resourcePath",
             "method" : "$context.httpMethod"
           },
           "bodyJson" : $input.json('$'),
