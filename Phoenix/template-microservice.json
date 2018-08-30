@@ -1385,10 +1385,10 @@
             ]
           },
           {
-            "Name": "Testing Approval Stage",
+            "Name": "TestingApprovalStage",
             "Actions": [
               {
-                "Name": "Testing Manual Approval Step",
+                "Name": "TestingManualApprovalStep",
                 "ActionTypeId": {
                   "Category": "Approval",
                   "Owner": "AWS",
@@ -1725,7 +1725,7 @@
           "Name": "ProdApprovalStage",
           "Actions": [
           {
-            "Name": "Prod Manual Approval Step",
+            "Name": "ProdManualApprovalStep",
             "ActionTypeId": {
               "Category": "Approval",
               "Owner": "AWS",
