@@ -60,7 +60,7 @@ VERSION=$4
 # 2. Generates a ~/swagger_postman.json that can be imported into Postman for testing purposes.
 # 3. Opens a local browser tab with API docs.
 swagger_postman() {
-  aws apigateway get-export --parameters extensions='integrations' --rest-api-id $API_ID \
+  aws apigateway get-export --parameters extensions='apigateway' --rest-api-id $API_ID \
       --stage-name $VERSION --export-type swagger $HOME/swagger_integrations.json
 
   aws apigateway get-export --parameters extensions='postman' --rest-api-id $API_ID \
