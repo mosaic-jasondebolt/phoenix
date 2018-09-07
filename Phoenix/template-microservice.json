@@ -642,218 +642,6 @@
         "Tags": []
       }
     },
-    "CodeBuildIntegrationTest": {
-      "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
-      "Properties": {
-        "VpcConfig": {
-          "SecurityGroupIds": [
-            {"Ref": "CodeBuildSecurityGroup"}
-          ],
-          "Subnets": [
-            {"Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                "dev",
-                "vpc",
-                "PrivateSubnetAZ1"
-              ]]
-            }},
-            {"Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                "dev",
-                "vpc",
-                "PrivateSubnetAZ2"
-              ]]
-            }}
-          ],
-          "VpcId":  {
-            "Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                "dev",
-                "vpc",
-                "VPC"
-              ]]
-            }
-          }
-        },
-        "Artifacts": {
-          "Type": "S3",
-          "Location": {
-            "Ref": "CodeBuildBucketName"
-          },
-          "NamespaceType": "BUILD_ID",
-          "Name": {
-            "Ref": "ProjectName"
-          },
-          "Packaging": "NONE"
-        },
-        "BadgeEnabled": "true",
-        "Cache": {
-          "Location": {
-            "Fn::Join": ["", [{
-                "Ref": "CodeBuildBucketName"
-              },
-              "/",
-              {
-                "Ref": "ProjectName"
-              },
-              "-cache"
-            ]]
-          },
-          "Type": "S3"
-        },
-        "Description": {
-          "Ref": "ProjectDescription"
-        },
-        "Environment": {
-          "ComputeType": "BUILD_GENERAL1_LARGE",
-          "EnvironmentVariables": [
-            {
-              "Name" : "AWS_ACCOUNT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "AWS::AccountId"}
-            }
-          ],
-          "Image": {
-            "Ref": "CodeBuildDockerImage"
-          },
-          "PrivilegedMode": "true",
-          "Type": "LINUX_CONTAINER"
-        },
-        "Name": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
-            "integration-test"
-          ]]
-        },
-        "ServiceRole": {
-          "Ref": "IAMRole"
-        },
-        "Source": {
-          "BuildSpec": "Phoenix/buildspec-integration-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {
-                "Ref": "ProjectName"
-              }
-            ]]
-          }
-        },
-        "TimeoutInMinutes": 60,
-        "Tags": []
-      }
-    },
-    "CodeBuildE2ETest": {
-      "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
-      "Properties": {
-        "VpcConfig": {
-          "SecurityGroupIds": [
-            {"Ref": "CodeBuildSecurityGroup"}
-          ],
-          "Subnets": [
-            {"Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                "dev",
-                "vpc",
-                "PrivateSubnetAZ1"
-              ]]
-            }},
-            {"Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                "dev",
-                "vpc",
-                "PrivateSubnetAZ2"
-              ]]
-            }}
-          ],
-          "VpcId":  {
-            "Fn::ImportValue": {
-              "Fn::Join": ["-", [
-                "dev",
-                "vpc",
-                "VPC"
-              ]]
-            }
-          }
-        },
-        "Artifacts": {
-          "Type": "S3",
-          "Location": {
-            "Ref": "CodeBuildBucketName"
-          },
-          "NamespaceType": "BUILD_ID",
-          "Name": {
-            "Ref": "ProjectName"
-          },
-          "Packaging": "NONE"
-        },
-        "BadgeEnabled": "true",
-        "Cache": {
-          "Location": {
-            "Fn::Join": ["", [{
-                "Ref": "CodeBuildBucketName"
-              },
-              "/",
-              {
-                "Ref": "ProjectName"
-              },
-              "-cache"
-            ]]
-          },
-          "Type": "S3"
-        },
-        "Description": {
-          "Ref": "ProjectDescription"
-        },
-        "Environment": {
-          "ComputeType": "BUILD_GENERAL1_LARGE",
-          "EnvironmentVariables": [
-            {
-              "Name" : "AWS_ACCOUNT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "AWS::AccountId"}
-            }
-          ],
-          "Image": {
-            "Ref": "CodeBuildDockerImage"
-          },
-          "PrivilegedMode": "true",
-          "Type": "LINUX_CONTAINER"
-        },
-        "Name": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
-            "e2e-test"
-          ]]
-        },
-        "ServiceRole": {
-          "Ref": "IAMRole"
-        },
-        "Source": {
-          "BuildSpec": "Phoenix/buildspec-e2e-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {
-                "Ref": "ProjectName"
-              }
-            ]]
-          }
-        },
-        "TimeoutInMinutes": 60,
-        "Tags": []
-      }
-    },
     "CodeBuildPostProdDeploy": {
       "Type": "AWS::CodeBuild::Project",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
@@ -1293,7 +1081,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1320,7 +1108,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1347,7 +1135,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
@@ -1370,18 +1158,18 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{
                         "Ref": "ProjectName"
                       },
-                      "integration-test"
+                      "integration-test",
+                      "testing"
                     ]]
                   }
                 }
               }
-
             ]
           },
           {
@@ -1698,7 +1486,7 @@
                 }
               },
               {
-                "Name": "EndToEndTest",
+                "Name": "IntegrationTest",
                 "ActionTypeId": {
                   "Category": "Test",
                   "Owner": "AWS",
@@ -1714,7 +1502,8 @@
                     "Fn::Join": ["-", [{
                         "Ref": "ProjectName"
                       },
-                      "e2e-test"
+                      "integration-test",
+                      "e2e"
                     ]]
                   }
                 }

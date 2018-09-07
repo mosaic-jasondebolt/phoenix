@@ -567,6 +567,153 @@
         "Tags": []
       }
     },
+    "CodeBuildIntegrationTest": {
+      "Type": "AWS::CodeBuild::Project",
+      "DependsOn": ["RDSCluster", "RDSPasswordRetriever"],
+      "Properties": {
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "RDSDBSecurityGroup"}
+          ],
+          "Subnets": [
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "VPCPrefix"},
+                "vpc",
+                "PrivateSubnetAZ1"
+              ]]
+            }},
+            {"Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "VPCPrefix"},
+                "vpc",
+                "PrivateSubnetAZ2"
+              ]]
+            }}
+          ],
+          "VpcId":  {
+            "Fn::ImportValue": {
+              "Fn::Join": ["-", [
+                {"Ref": "VPCPrefix"},
+                "vpc",
+                "VPC"
+              ]]
+            }
+          }
+        },
+        "Artifacts": {
+          "Type": "S3",
+          "Location": {"Ref": "CodeBuildBucketName"},
+          "NamespaceType": "BUILD_ID",
+          "Name": {
+            "Ref": "ProjectName"
+          },
+          "Packaging": "NONE"
+        },
+        "BadgeEnabled": "true",
+        "Cache": {
+          "Location": {
+            "Fn::Join": ["", [
+              {"Ref": "CodeBuildBucketName"},
+              "/",
+              {
+                "Ref": "ProjectName"
+              },
+              "-cache"
+            ]]
+          },
+          "Type": "S3"
+        },
+        "Description": {
+          "Ref": "ProjectName"
+        },
+        "Environment": {
+          "ComputeType": "BUILD_GENERAL1_LARGE",
+          "EnvironmentVariables": [
+            {
+              "Name" : "AWS_ACCOUNT_ID",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "ENVIRONMENT",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "Environment"}
+            },
+            {
+              "Name": "RDS_MASTER_USERNAME",
+              "Type" : "PLAINTEXT",
+              "Value": {"Ref": "MasterUsername"}
+            },
+            {
+              "Name": "RDS_WRITE_ENDPOINT",
+              "Value": {"Fn::Join": ["", [
+                "db",
+                ".",
+                {"Ref": "Environment"},
+                ".",
+                {"Ref": "Domain"}
+              ]]}
+            },
+            {
+              "Name": "RDS_READ_ENDPOINT",
+              "Value": {"Fn::Join": ["", [
+                "read",
+                ".",
+                "db",
+                ".",
+                {"Ref": "Environment"},
+                ".",
+                {"Ref": "Domain"}
+              ]]}
+            },
+            {
+              "Name": "RDS_ENDPOINT_PORT",
+              "Value": {
+                "Fn::GetAtt": ["RDSCluster", "Endpoint.Port"]
+              }
+            },
+            {
+              "Name": "RDS_PASSWORD",
+              "Type": "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                {"Ref": "Environment"},
+                "aurora-admin-password"
+              ]]}
+            }
+          ],
+          "Image": {"Ref": "CodeBuildDockerImage"},
+          "PrivilegedMode": "true",
+          "Type": "LINUX_CONTAINER"
+        },
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "integration-test",
+            {"Ref": "Environment"}
+          ]]
+        },
+        "ServiceRole": {"Ref": "CodeBuildServiceRoleArn"},
+        "Source": {
+          "BuildSpec": "Phoenix/buildspec-integration-test.yml",
+          "Type": "CODECOMMIT",
+          "Location": {
+            "Fn::Join": ["", [
+              "https://git-codecommit.",
+              {"Ref": "AWS::Region"},
+              ".amazonaws.com/v1/repos/",
+              {
+                "Ref": "ProjectName"
+              }
+            ]]
+          }
+        },
+        "TimeoutInMinutes": 60,
+        "Tags": []
+      }
+    },
     "DnsRecordSetGroup": {
       "Properties": {
         "HostedZoneId": {"Ref": "HostedZoneId"},
