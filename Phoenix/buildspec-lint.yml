@@ -1,13 +1,11 @@
 version: 0.2
 
 env:
-  variables:
-    ENVIRONMENT: /microservice/phoenix/
   parameter-store:
-    PROJECT_NAME: $ENVIRONMENT"global/project-name"
-    LAMBDA_BUCKET_NAME: $ENVIRONMENT"global/lambda-bucket-name"
+    PROJECT_NAME: /microservice/phoenix/global/project-name
+    LAMBDA_BUCKET_NAME: /microservice/phoenix/global/lambda-bucket-name
     GITLAB_LINT_ACCESS_TOKEN: /global/gitlab/codebuild/lint-access-token
-    GITLAB_URL: $ENVIRONMENT"global/gitlab-url
+    GITLAB_URL: /microservice/phoenix/global/gitlab-url
 
 phases:
   install:
