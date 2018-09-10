@@ -1,0 +1,230 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Microservice project SSM parameters. Random usage of 'DependsOn' attribute within this template avoids SSM parmater store rate limiting in 'all-at-once' parameter deployments.",
+  "Transform" : ["ProjectLambdaMacro"],
+  "Resources": {
+    "OrganizationNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/organization-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_ORGANIZATION_NAME",
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The organization name associated with this account"
+      }
+    },
+    "ProjectNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "OrganizationNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/project-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_PROJECT_NAME",
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The microservice name associated with this account"
+      }
+    },
+    "GitRepoNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "ProjectNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/git-repo-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_GIT_REPO_NAME",
+        "Description": "The name of the git repo used by this project."
+      }
+    },
+    "GitRootProjectBranchParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRepoNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/git-root-project-branch",
+        "Type": "String",
+        "Value": "PHX_MACRO_GIT_ROOT_PROJECT_BRANCH",
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The main git branch associated with your main pipeline (i.e master, main, etc.)",
+      }
+    },
+    "GitCurrentProjectBranchParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/git-current-project-branch",
+        "Type": "String",
+        "Value": "PHX_MACRO_GIT_CURRENT_PROJECT_BRANCH",
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
+      }
+    },
+    "CodeBuildDockerImageParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/code-build-docker-image",
+        "Type": "String",
+        "Value": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with."
+      }
+    },
+    "NodeJSBuildDockerImageParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/code-build-docker-image-nodejs",
+        "Type": "String",
+        "Value": "PHX_MACRO_NODEJS_BUILD_DOCKER_IMAGE",
+        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with."
+      }
+    },
+    "CodeBuildBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/code-build-bucket-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+        "Description": "The bucket name in which CodeBuild artifacts will be stored."
+      }
+    },
+    "CodePipelineBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/code-pipeline-bucket-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME",
+        "Description": "The bucket name in which CodePipeline artifacts will be stored."
+      }
+    },
+    "MicroserviceBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/bucket-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_MICROSERVICE_BUCKET_NAME",
+        "Description": "The bucket name in which cloudformation templates and lambda functions will be stored."
+      }
+    },
+    "DomainParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/domain",
+        "Type": "String",
+        "Value": "PHX_MACRO_DOMAIN",
+        "Description": "The domain name that this service will fall under."
+      }
+    },
+    "SSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/ssl-certificate-arn",
+        "Type": "String",
+        "Value": "PHX_MACRO_SSL_CERTIFICATE_ARN",
+        "Description": "The AWS ACM Certificate ARN."
+      }
+    },
+    "ECSSSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/ssl-certificate-arn-ecs",
+        "Type": "String",
+        "Value": "PHX_MACRO_ECS_SSL_CERTIFICATE_ARN",
+        "Description": "The AWS ACM Certificate ARN used by ECS tasks."
+      }
+    },
+    "APIDocsSSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/ssl-certificate-arn-api-docs",
+        "Type": "String",
+        "Value": "PHX_MACRO_API_DOCS_SSL_CERTIFICATE_ARN",
+        "Description": "The AWS ACM Certificate ARN used by API documentation."
+      }
+    },
+    "HostedZoneIdParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/hosted-zone-id",
+        "Type": "String",
+        "Value": "PHX_MACRO_HOSTED_ZONE_ID",
+        "Description": "The Route53 hosted zone id that this service will fall under."
+      }
+    },
+    "GitlabURLParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/gitlab-url",
+        "Type": "String",
+        "Value": "PHX_MACRO_GITLAB_URL",
+        "Description": "The Gitlab URL of your organization."
+      }
+    },
+    "KeyPairNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/key-pair-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_KEY_PAIR_NAME",
+        "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
+      }
+    },
+    "LambdaBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/lambda-bucket-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_LAMBDA_BUCKET_NAME",
+        "Description": "The bucket name in which Lambda artifacts will be stored."
+      }
+    },
+    "LoadBalancerLogsBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "LambdaBucketNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/load-balancer-logs-bucket-name",
+        "Type": "String",
+        "Value": "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME",
+        "Description": "The bucket name in which load balancer logs will be stored."
+      }
+    },
+    "ProjectDescriptionParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "LambdaBucketNameParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/project-description",
+        "Type": "String",
+        "Value": "PHX_MACRO_PROJECT_DESCRIPTION",
+        "Description": "A description of your project."
+      }
+    },
+    "NotificationEmailParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "ProjectDescriptionParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/notification-email",
+        "Type": "String",
+        "Value": "PHX_MACRO_NOTIFICATION_EMAIL",
+        "Description": "The email to send notifications to for this microservice"
+      }
+    },
+    "IAMRoleParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "ProjectDescriptionParam",
+      "Properties": {
+        "Name": "PHX_MACRO_SSM_PROJECT_NAME_ROOT/global/iam-role",
+        "Type": "String",
+        "Value": "PHX_MACRO_IAM_ROLE",
+        "Description": "The IAM role that has access to all of the projects resources."
+      }
+    }
+  }
+}

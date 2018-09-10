@@ -7,12 +7,15 @@ set -e
 #   ./deploy-microservice-init.sh
 
 # Replace any phoenix SSM parameter keys if they exist
-PROJECT_NAME=`jq -r '.Parameters.ProjectName' ssm-microservice-params.json`
+PROJECT_NAME=`jq -r '.Parameters.ProjectName' template-macro-params.json`
 PHOENIX_PREFIX='phoenix'
 python search_and_replace.py . /microservice/$PHOENIX_PREFIX/ /microservice/$PROJECT_NAME/
 
+echo "Deploying the CloudFormation Macro"
+./deploy-macro.sh create
+
 echo "Deploying SSM parameters"
-./deploy-ssm-microservice-params.sh create
+./deploy-ssm-parameters.sh create
 
 echo "Deploying microservice"
 ./deploy-microservice.sh create

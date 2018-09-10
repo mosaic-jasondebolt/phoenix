@@ -302,7 +302,7 @@
         "ExecutionRoleArn": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "ec2",
               {"Ref": "Environment"},
               "TaskExecutionRoleArn"
@@ -319,7 +319,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      "PHX_MACRO_PROJECT_NAME",
                       "database",
                       {"Ref": "DBEnvironment"},
                       "MasterUsername"
@@ -332,7 +332,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      "PHX_MACRO_PROJECT_NAME",
                       "database",
                       {"Ref": "DBEnvironment"},
                       "DatabasePasswordParameterStoreKey"
@@ -345,7 +345,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      "PHX_MACRO_PROJECT_NAME",
                       "database",
                       {"Ref": "DBEnvironment"},
                       "Endpoint"
@@ -358,7 +358,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      "PHX_MACRO_PROJECT_NAME",
                       "database",
                       {"Ref": "DBEnvironment"},
                       "ReadEndpoint"
@@ -371,7 +371,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      {"Ref": "ProjectName"},
+                      "PHX_MACRO_PROJECT_NAME",
                       "database",
                       {"Ref": "DBEnvironment"},
                       "EndpointPort"
@@ -398,7 +398,7 @@
                   ]]},
                   "/",
                   {"Fn::Join": ["-", [
-                    {"Ref": "ProjectName"},
+                    "PHX_MACRO_PROJECT_NAME",
                     {"Ref": "ImageName"},
                   ]]},
                   ":",
@@ -434,9 +434,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": {"Ref": "IAMRole"},
+        "Role": "PHX_MACRO_IAM_ROLE",
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -461,13 +461,13 @@
         "KMSKeyId": "alias/aws/ssm",
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
-          {"Ref": "ProjectName"},
+          "PHX_MACRO_PROJECT_NAME",
           {"Ref": "DBEnvironment"},
           "aurora-admin-password"
         ]]},
         "ParameterDescription": {"Fn::Join": ["", [
           "Password for the ",
-          {"Ref": "ProjectName"},
+          "PHX_MACRO_PROJECT_NAME",
           {"Ref": "DBEnvironment"},
           " Aurora DB from ECS ",
           {"Ref": "Environment"},
@@ -482,7 +482,7 @@
         "Cluster": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "ec2",
               {"Ref": "Environment"},
               "Cluster"
@@ -516,7 +516,7 @@
               {
                 "Fn::ImportValue": {
                   "Fn::Join": ["-", [
-                    {"Ref": "ProjectName"},
+                    "PHX_MACRO_PROJECT_NAME",
                     "ec2",
                     {"Ref": "Environment"},
                     "WebSG"
@@ -573,7 +573,7 @@
     "ApplicationELBLogsS3BucketPolicy": {
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
-         "Bucket": {"Ref": "LoadBalancerLogsBucketName"},
+         "Bucket": "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME",
          "PolicyDocument" : {
            "Version": "2012-10-17",
            "Statement": [
@@ -584,7 +584,7 @@
                "Effect": "Allow",
                "Resource": {"Fn::Join": ["", [
                  "arn:aws:s3:::",
-                 {"Ref": "LoadBalancerLogsBucketName"},
+                 "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME",
                  "/",
                  { "Ref": "AWS::StackName" },
                  "/AWSLogs/",
@@ -627,7 +627,7 @@
               },
               {
                 "Key": "access_logs.s3.bucket",
-                "Value": {"Ref": "LoadBalancerLogsBucketName"}
+                "Value": "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME"
               },
               {
                 "Key": "access_logs.s3.prefix",
@@ -641,7 +641,7 @@
           {
             "Fn::ImportValue": {
               "Fn::Join": ["-", [
-                {"Ref": "ProjectName"},
+                "PHX_MACRO_PROJECT_NAME",
                 "ec2",
                 {"Ref": "Environment"},
                 "ApplicationELBSG"
@@ -669,7 +669,7 @@
             "Value": {
               "Fn::ImportValue": {
                 "Fn::Join": ["-", [
-                  {"Ref": "ProjectName"},
+                  "PHX_MACRO_PROJECT_NAME",
                   "ec2",
                   {"Ref": "Environment"},
                   "Cluster"
@@ -685,7 +685,7 @@
       "Properties": {
         "Certificates": [
           {
-            "CertificateArn": {"Ref": "ECSSSLCertificateARN"}
+            "CertificateArn": "PHX_MACRO_ECS_SSL_CERTIFICATE_ARN"
           }
         ],
         "DefaultActions": [
@@ -738,7 +738,7 @@
             "Value": {
               "Fn::ImportValue": {
                 "Fn::Join": ["-", [
-                  {"Ref": "ProjectName"},
+                  "PHX_MACRO_PROJECT_NAME",
                   "ec2",
                   {"Ref": "Environment"},
                   "Cluster"
@@ -782,7 +782,7 @@
               {
                 "Fn::ImportValue": {
                   "Fn::Join": ["-", [
-                    {"Ref": "ProjectName"},
+                    "PHX_MACRO_PROJECT_NAME",
                     "ec2",
                     {"Ref": "Environment"},
                     "Cluster"
@@ -905,7 +905,7 @@
         "FromPort": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "database",
               {"Ref": "DBEnvironment"},
               "EndpointPort"
@@ -915,7 +915,7 @@
         "GroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "database",
               {"Ref": "DBEnvironment"},
               "RDSDBSecurityGroup"
@@ -926,7 +926,7 @@
         "SourceSecurityGroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "ec2",
               {"Ref": "Environment"},
               "WebSG"
@@ -936,7 +936,7 @@
         "ToPort": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "database",
               {"Ref": "DBEnvironment"},
               "EndpointPort"
@@ -948,7 +948,7 @@
     },
     "DnsRecordSetGroup": {
       "Properties": {
-        "HostedZoneId": {"Ref": "HostedZoneId"},
+        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
         "RecordSets": [
           {
             "AliasTarget": {
@@ -988,7 +988,7 @@
               ]},
               "ecs",
               ".",
-              {"Ref": "Domain"}
+              "PHX_MACRO_DOMAIN"
             ]]},
             "Type": "A"
           }
@@ -1025,7 +1025,7 @@
         ]},
         "ecs",
         ".",
-        {"Ref": "Domain"}
+        "PHX_MACRO_DOMAIN"
       ]]}
     },
     "ServiceHostname" : {
@@ -1033,7 +1033,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "ecs",
             {"Ref": "TaskFamily"},
             {"Ref": "Environment"},
@@ -1065,7 +1065,7 @@
         ]},
         "ecs",
         ".",
-        {"Ref": "Domain"}
+        "PHX_MACRO_DOMAIN"
       ]]}
     }
   }

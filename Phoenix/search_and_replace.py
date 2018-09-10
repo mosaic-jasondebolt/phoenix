@@ -52,6 +52,7 @@ def search_and_replace(directory, find, replace, filePattern=None):
             print('              REPLACING content in filename ' + filename)
         with open(filename, 'w') as f:
             f.write(s_new)
+    return 0
 
 if __name__ == '__main__':
     #TODO(jason.debolt): Clean this up with argparse.

@@ -277,7 +277,7 @@
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "rds",
               {"Ref": "Environment"},
               "sg"
@@ -351,9 +351,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": {"Ref": "IAMRole"},
+        "Role": "PHX_MACRO_IAM_ROLE",
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -379,7 +379,7 @@
         "SnapshotIdentifier": {"Ref": "SnapshotIdentifier"},
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
-          {"Ref": "ProjectName"},
+          "PHX_MACRO_PROJECT_NAME",
           {"Ref": "Environment"},
           "aurora-admin-password"
         ]]},
@@ -387,7 +387,7 @@
           "This parameter was created by stack ",
           {"Ref": "AWS::StackName"},
           " to store passwords for the ",
-          {"Ref": "ProjectName"},
+          "PHX_MACRO_PROJECT_NAME",
           {"Ref": "Environment"},
           " Aurora DB TEST"
         ]]}
@@ -406,7 +406,7 @@
         "SnapshotIdentifier": {"Ref": "SnapshotIdentifier"},
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
-          {"Ref": "ProjectName"},
+          "PHX_MACRO_PROJECT_NAME",
           {"Ref": "Environment"},
           "aurora-admin-password"
         ]]},
@@ -414,7 +414,7 @@
           "This parameter was created by stack ",
           {"Ref": "AWS::StackName"},
           " to store passwords for the ",
-          {"Ref": "ProjectName"},
+          "PHX_MACRO_PROJECT_NAME",
           {"Ref": "Environment"},
           " Aurora DB"
         ]]}
@@ -456,7 +456,7 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucketName"},
+          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
           "NamespaceType": "BUILD_ID",
           "Name": {
             "Ref": "ProjectName"
@@ -467,7 +467,7 @@
         "Cache": {
           "Location": {
             "Fn::Join": ["", [
-              {"Ref": "CodeBuildBucketName"},
+              "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
               "/",
               {
                 "Ref": "ProjectName"
@@ -505,7 +505,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                {"Ref": "Domain"}
+                "PHX_MACRO_DOMAIN"
               ]]}
             },
             {
@@ -517,7 +517,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                {"Ref": "Domain"}
+                "PHX_MACRO_DOMAIN"
               ]]}
             },
             {
@@ -531,19 +531,19 @@
               "Type": "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
-                {"Ref": "ProjectName"},
+                "PHX_MACRO_PROJECT_NAME",
                 {"Ref": "Environment"},
                 "aurora-admin-password"
               ]]}
             }
           ],
-          "Image": {"Ref": "CodeBuildDockerImage"},
+          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "rds-migration",
             {"Ref": "Environment"}
           ]]
@@ -603,7 +603,7 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": {"Ref": "CodeBuildBucketName"},
+          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
           "NamespaceType": "BUILD_ID",
           "Name": {
             "Ref": "ProjectName"
@@ -614,7 +614,7 @@
         "Cache": {
           "Location": {
             "Fn::Join": ["", [
-              {"Ref": "CodeBuildBucketName"},
+              "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
               "/",
               {
                 "Ref": "ProjectName"
@@ -652,7 +652,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                {"Ref": "Domain"}
+                "PHX_MACRO_DOMAIN"
               ]]}
             },
             {
@@ -664,7 +664,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                {"Ref": "Domain"}
+                "PHX_MACRO_DOMAIN"
               ]]}
             },
             {
@@ -678,19 +678,19 @@
               "Type": "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
-                {"Ref": "ProjectName"},
+                "PHX_MACRO_PROJECT_NAME",
                 {"Ref": "Environment"},
                 "aurora-admin-password"
               ]]}
             }
           ],
-          "Image": {"Ref": "CodeBuildDockerImage"},
+          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "integration-test",
             {"Ref": "Environment"}
           ]]
@@ -716,7 +716,7 @@
     },
     "DnsRecordSetGroup": {
       "Properties": {
-        "HostedZoneId": {"Ref": "HostedZoneId"},
+        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
         "RecordSets": [
           {
             "ResourceRecords": [
@@ -732,7 +732,7 @@
               ".",
               {"Ref": "Environment"},
               ".",
-              {"Ref": "Domain"}
+              "PHX_MACRO_DOMAIN"
             ]]},
             "Type": "CNAME"
           },
@@ -752,7 +752,7 @@
               ".",
               {"Ref": "Environment"},
               ".",
-              {"Ref": "Domain"}
+              "PHX_MACRO_DOMAIN"
             ]]},
             "Type": "CNAME"
           }
@@ -766,7 +766,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "database",
             {"Ref": "Environment"},
             "MasterUsername"
@@ -781,7 +781,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "database",
             {"Ref": "Environment"},
             "DatabasePasswordParameterStoreKey"
@@ -790,7 +790,7 @@
       },
       "Value": {"Fn::Join": ["/", [
         "/microservice",
-        {"Ref": "ProjectName"},
+        "PHX_MACRO_PROJECT_NAME",
         {"Ref": "Environment"},
         "aurora-admin-password"
       ]]}
@@ -799,7 +799,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "database",
             {"Ref": "Environment"},
             "EndpointPort"
@@ -814,7 +814,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "database",
             {"Ref": "Environment"},
             "Endpoint"
@@ -826,14 +826,14 @@
         ".",
         {"Ref": "Environment"},
         ".",
-        {"Ref": "Domain"}
+        "PHX_MACRO_DOMAIN"
       ]]}
     },
     "ReadEndpoint": {
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "database",
             {"Ref": "Environment"},
             "ReadEndpoint"
@@ -847,14 +847,14 @@
         ".",
         {"Ref": "Environment"},
         ".",
-        {"Ref": "Domain"}
+        "PHX_MACRO_DOMAIN"
       ]]}
     },
     "RDSDBSecurityGroup": {
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "database",
             {"Ref": "Environment"},
             "RDSDBSecurityGroup"

@@ -36,9 +36,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": {"Ref": "IAMRole"},
+        "Role": "PHX_MACRO_IAM_ROLE",
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -62,7 +62,7 @@
         "Hostname": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "ecs-main",
               {"Ref": "Environment"},
               "ServiceHostname"
@@ -73,7 +73,7 @@
         "RestApiId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "api",
               {"Ref": "Environment"},
               "RestApiId"

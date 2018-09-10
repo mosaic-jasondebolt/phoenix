@@ -11,12 +11,13 @@ set -e
 #   ./deploy-merge-request-pipeline-api.sh update
 
 # Extract JSON properties for a file into a local variable
-CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' ssm-microservice-params.json)
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
 PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-ENVIRONMENT=`jq -r '.Parameters.Environment' template-merge-request-pipeline-api-params.json`
 LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 VERSION_ID=`jq -r '.Parameters.Version' template-merge-request-pipeline-api-params.json`
-STACK_NAME=$PROJECT_NAME-merge-request-pipeline-api-$ENVIRONMENT
+STACK_NAME=$PROJECT_NAME-merge-request-pipeline-api
+ENVIRONMENT='all'
+CHANGE_SET_NAME=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 
 # Check for valid arguments
@@ -25,6 +26,9 @@ if [ $# -ne 1 ]
     echo "Incorrect number of arguments supplied. Pass in either 'create' or 'update'."
     exit 1
 fi
+
+# Convert create/update to uppercase
+OP=$(echo $1 | tr '/a-z/' '/A-Z/')
 
 # Upload the Lambda functions
 listOfLambdaFunctions='mergerequests post_mergerequests gitlab_custom_authorizer'
@@ -49,12 +53,20 @@ sed "s/VERSION_ID/$VERSION_ID/g" temp1.json > temp2.json
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://template-merge-request-pipeline-api.json
 
-# Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $STACK_NAME \
+aws cloudformation create-change-set --stack-name $STACK_NAME \
+    --change-set-name $CHANGE_SET_NAME \
     --template-body file://template-merge-request-pipeline-api.json \
     --parameters file://temp2.json \
+    --change-set-type $OP \
     --capabilities CAPABILITY_IAM \
     --role-arn $CLOUDFORMATION_ROLE
+
+aws cloudformation wait change-set-create-complete \
+    --change-set-name $CHANGE_SET_NAME --stack-name $STACK_NAME
+
+# Let's automatically execute the change-set for now
+aws cloudformation execute-change-set --stack-name $STACK_NAME \
+    --change-set-name $CHANGE_SET_NAME
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 

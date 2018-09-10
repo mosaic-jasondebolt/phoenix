@@ -104,7 +104,7 @@
         "DomainName" : {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "api-custom-domain",
               {"Ref": "Environment"},
               "CustomDomain"
@@ -198,7 +198,7 @@
         "DomainName" : {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "api-custom-domain",
               {"Ref": "Environment"},
               "CustomDomain"

@@ -54,7 +54,7 @@ def get_deployment_resource(api_gateway_deployment_obj):
             "RestApiId": {
                 "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                        {"Ref": "ProjectName"},
+                        "PHX_MACRO_PROJECT_NAME",
                         "api",
                         {"Ref": "Environment"},
                         "RestApiId"

@@ -250,7 +250,7 @@
                   "FunctionName": {
                     "Fn::ImportValue": {
                       "Fn::Join": ["-", [
-                        {"Ref": "ProjectName"},
+                        "PHX_MACRO_PROJECT_NAME",
                         "merge-request-pipeline-api",
                         {"Ref": "Environment"},
                         "LambdaPostMergeRequestFunctionName"
@@ -265,7 +265,7 @@
         ],
         "ArtifactStore": {
           "Type": "S3",
-          "Location" : {"Ref": "CodePipelineBucketName"}
+          "Location" : "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME"
         }
       }
     },
@@ -284,7 +284,7 @@
         },
         "GroupDescription": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "CodeBuild",
             "MR",
             {"Ref": "PipelineName"},

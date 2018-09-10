@@ -35,10 +35,10 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.handler",
-        "Role": {"Ref": "IAMRole"},
+        "Role": "PHX_MACRO_IAM_ROLE",
         "MemorySize": 128,
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "vpc_proxy",
@@ -140,9 +140,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": {"Ref": "IAMRole"},
+        "Role": "PHX_MACRO_IAM_ROLE",
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -159,9 +159,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": {"Ref": "IAMRole"},
+        "Role": "PHX_MACRO_IAM_ROLE",
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "projects",
@@ -188,7 +188,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "lambda",
             {"Ref": "Environment"},
              "LambdaVPCProxyArn"
@@ -203,7 +203,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "lambda",
             {"Ref": "Environment"},
              "LambdaVPCProxySecurityGroup"
@@ -216,7 +216,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "lambda",
             {"Ref": "Environment"},
              "LambdaProjectsArn"

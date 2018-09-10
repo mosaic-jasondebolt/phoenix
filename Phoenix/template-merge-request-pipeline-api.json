@@ -1,22 +1,8 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description" : "Deploys an API Gateway endpoint that GitLab merge request events can invoke to setup/teardown a review pipeline.",
+  "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
-    "ProjectName": {
-      "Description": "The name of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/project-name"
-    },
-    "LambdaBucketName": {
-      "Description": "The bucket name in which versioned lambda functions are stored.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/lambda-bucket-name"
-    },
-    "Environment": {
-      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
-      "Type": "String",
-      "Default": "all"
-    },
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
       "Type": "String"
@@ -41,17 +27,7 @@
             "TestKey": "hello"
           }
         },
-        "StageName": {
-          "Fn::Join": [
-            "_",
-            [
-              {
-                "Ref": "Environment"
-              },
-              {"Ref": "Version"}
-            ]
-          ]
-        }
+        "StageName": {"Ref": "Version"}
       }
     },
     "RestAPI": {
@@ -59,17 +35,16 @@
       "Properties" : {
         "Description" : {"Fn::Join": ["", [
           "The ",
-          { "Ref": "ProjectName" },
+          "PHX_MACRO_PROJECT_NAME",
           " GitLab Merge Request ",
           " REST API (Release Candidate ",
           {"Ref": "Version"},
           ")"
         ]]},
         "Name" : { "Fn::Join": ["-",  [
-          { "Ref": "ProjectName" },
+          "PHX_MACRO_PROJECT_NAME",
           "api",
-          "mergerequests",
-          { "Ref": "Environment" }
+          "mergerequests"
         ]]}
       }
     },
@@ -149,7 +124,7 @@
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "mergerequests",
@@ -236,7 +211,7 @@
           "Version": "2012-10-17"
         },
         "PolicyName": { "Fn::Join": ["-", [
-          { "Ref": "ProjectName"},
+          "PHX_MACRO_PROJECT_NAME",
           "APILambdaRole"
         ]]},
         "Roles": [
@@ -273,7 +248,7 @@
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaPostMergeRequestRole", "Arn"] },
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "post_mergerequests",
@@ -397,7 +372,7 @@
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaGitlabCustomAuthorizerRole", "Arn"] },
         "Code": {
-          "S3Bucket" : {"Ref": "LambdaBucketName"},
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "gitlab_custom_authorizer",
@@ -529,9 +504,8 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "merge-request-pipeline-api",
-            {"Ref": "Environment"},
             "LambdaPostMergeRequestFunctionName"
           ]]
         }
@@ -542,9 +516,8 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "merge-request-pipeline-api",
-            {"Ref": "Environment"},
             "MergeRequestsURL"
           ]]
         }
@@ -560,8 +533,6 @@
           ".",
           "amazonaws.com",
           "/",
-          {"Ref": "Environment"},
-          "_",
           {"Ref": "Version"},
           "/",
           "MergeRequests"

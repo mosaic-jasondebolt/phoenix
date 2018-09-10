@@ -154,7 +154,7 @@ trumps all external conventions or style guides.
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "database",
             {"Ref": "Environment"},
             "EndpointAddress"

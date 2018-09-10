@@ -38,13 +38,13 @@
       "Properties" : {
         "Description" : {"Fn::Join": ["", [
           "The ",
-          { "Ref": "ProjectName" },
+          "PHX_MACRO_PROJECT_NAME",
           " REST API (Release Candidate ",
           {"Ref": "Version"},
           ")"
         ]]},
         "Name" : { "Fn::Join": ["-",  [
-          { "Ref": "ProjectName" },
+          "PHX_MACRO_PROJECT_NAME",
           "api",
           { "Ref": "Environment" }
         ]]},
@@ -60,7 +60,7 @@
                     {"Ref": "AWS::AccountId"},
                     ":root"
                   ]]},
-                  {"Ref": "IAMRole"},
+                  "PHX_MACRO_IAM_ROLE",
                   {"Fn::Join": ["", [
                     "arn:aws:iam::",
                     {"Ref": "AWS::AccountId"},
@@ -148,7 +148,7 @@
             "arn:aws:apigateway:",
             { "Ref": "AWS::Region" },
             ":lambda:path/2015-03-31/functions/",
-            {"Fn::ImportValue": {"Fn::Join": ["-", [{"Ref": "ProjectName"},"lambda",{"Ref": "Environment"},"LambdaProjectsArn"]]} },
+            {"Fn::ImportValue": {"Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME","lambda",{"Ref": "Environment"},"LambdaProjectsArn"]]} },
             "/invocations"
           ]]},
           "RequestTemplates": {
@@ -225,7 +225,7 @@
             "arn:aws:apigateway:",
             { "Ref": "AWS::Region" },
             ":lambda:path/2015-03-31/functions/",
-            { "Fn::ImportValue": { "Fn::Join": ["-", [ {"Ref": "ProjectName"}, "lambda", {"Ref": "Environment"}, "LambdaProjectsArn" ]] } },
+            { "Fn::ImportValue": { "Fn::Join": ["-", [ "PHX_MACRO_PROJECT_NAME", "lambda", {"Ref": "Environment"}, "LambdaProjectsArn" ]] } },
             "/invocations"
           ]]},
           "RequestTemplates": {
@@ -283,7 +283,7 @@
             "arn:aws:apigateway:",
             { "Ref": "AWS::Region" },
             ":lambda:path/2015-03-31/functions/",
-            { "Fn::ImportValue": { "Fn::Join": ["-", [ {"Ref": "ProjectName"}, "lambda", {"Ref": "Environment"}, "LambdaProjectsArn" ]] } },
+            { "Fn::ImportValue": { "Fn::Join": ["-", [ "PHX_MACRO_PROJECT_NAME", "lambda", {"Ref": "Environment"}, "LambdaProjectsArn" ]] } },
             "/invocations"
           ]]},
           "RequestTemplates": {
@@ -361,7 +361,7 @@
             "arn:aws:apigateway:",
             { "Ref": "AWS::Region" },
             ":lambda:path/2015-03-31/functions/",
-            { "Fn::ImportValue": { "Fn::Join": ["-", [ {"Ref": "ProjectName"}, "lambda", {"Ref": "Environment"}, "LambdaVPCProxyArn" ]] } },
+            { "Fn::ImportValue": { "Fn::Join": ["-", [ "PHX_MACRO_PROJECT_NAME", "lambda", {"Ref": "Environment"}, "LambdaVPCProxyArn" ]] } },
             "/invocations"
           ]]},
           "RequestTemplates": {
@@ -595,7 +595,7 @@
         "GroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "ec2",
               {"Ref": "Environment"},
               "ApplicationELBSG"
@@ -606,7 +606,7 @@
         "SourceSecurityGroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "lambda",
               {"Ref": "Environment"},
               "LambdaVPCProxySecurityGroup"
@@ -623,7 +623,7 @@
         "GroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "ec2",
               {"Ref": "Environment"},
               "WebSG"
@@ -634,7 +634,7 @@
         "SourceSecurityGroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "lambda",
               {"Ref": "Environment"},
               "LambdaVPCProxySecurityGroup"
@@ -651,7 +651,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "api",
             {"Ref": "Environment"},
             "RestApiId"
@@ -666,7 +666,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "api",
             {"Ref": "Environment"},
             "APIUserAccessKeyId"
@@ -685,7 +685,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "api",
             {"Ref": "Environment"},
             "APIUserNotSoSecretAccessKey"

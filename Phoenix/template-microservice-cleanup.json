@@ -100,7 +100,7 @@
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              {"Ref": "ProjectName"},
+              "PHX_MACRO_PROJECT_NAME",
               "codebuild",
               "sg"
             ]]}
@@ -163,7 +163,7 @@
         "Name": {
           "Fn::Join": ["-", [
             "destroy",
-            {"Ref": "ProjectName"},
+            "PHX_MACRO_PROJECT_NAME",
             "microservice"
           ]]
         },

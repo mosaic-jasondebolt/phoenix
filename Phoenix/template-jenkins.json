@@ -390,7 +390,7 @@
         }
       },
       "Properties": {
-        "KeyName": {"Ref": "KeyPairName"},
+        "KeyName": "PHX_MACRO_KEY_PAIR_NAME",
         "Tags": [
           {
             "Key": "Name",
@@ -644,7 +644,7 @@
             "LoadBalancerPort": "443",
             "InstancePort": "8080",
             "Protocol": "HTTPS",
-            "SSLCertificateId" : {"Ref": "SSLCertificateARN"}
+            "SSLCertificateId" : "PHX_MACRO_SSL_CERTIFICATE_ARN"
           }
         ],
         "HealthCheck": {
