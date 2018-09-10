@@ -54,11 +54,6 @@
       "Description": "The identifier/version associated with this deployment.",
       "Type": "String",
       "Default": "latest"
-    },
-    "Environment": {
-      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
-      "Type": "String",
-      "Default": "all"
     }
   },
   "Resources": {
@@ -241,7 +236,6 @@
                       "Fn::Join": ["-", [
                         {"Ref": "ProjectName"},
                         "merge-request-pipeline-api",
-                        {"Ref": "Environment"},
                         "LambdaPostMergeRequestFunctionName"
                       ]]
                     }
