@@ -42,14 +42,14 @@ def get_gitlab_access_token():
 
 def get_gitlab_url():
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/global/gitlab-url',
+        Name='/microservice/{0}/global/gitlab-url'.format(os.environ['PROJECT_NAME']),
         WithDecryption=False
     )
     return response['Parameter']['Value']
 
 def get_microservice_bucket_name():
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/global/bucket-name',
+        Name='/microservice/{0}/global/bucket-name'.format(os.environ['PROJECT_NAME']),
         WithDecryption=False
     )
     return response['Parameter']['Value']
@@ -93,6 +93,34 @@ def lambda_handler(event, context):
         get_microservice_bucket_name(), template_name)
 
     parameters=[
+      {
+        'ParameterKey': 'ProjectName',
+        'ParameterValue': os.environ['PROJECT_NAME']
+      },
+      {
+        'ParameterKey': 'ProjectDescription',
+        'ParameterValue': os.environ['PROJECT_DESCRIPTION']
+      },
+      {
+        'ParameterKey': 'CodePipelineBucketName',
+        'ParameterValue': os.environ['CODE_PIPELINE_BUCKET_NAME']
+      },
+      {
+        'ParameterKey': 'CodeBuildDockerImage',
+        'ParameterValue': os.environ['CODE_BUILD_DOCKER_IMAGE']
+      },
+      {
+        'ParameterKey': 'CodeBuildServiceRoleArn',
+        'ParameterValue': os.environ['CODE_BUILD_SERVICE_ROLE_ARN']
+      },
+      {
+        'ParameterKey': 'CodePipelineServiceRoleArn',
+        'ParameterValue': os.environ['CODE_PIPELINE_SERVICE_ROLE_ARN']
+      },
+      {
+        'ParameterKey': 'LambdaBucketName',
+        'ParameterValue': os.environ['LAMBDA_BUCKET_NAME']
+      },
       {
         'ParameterKey': 'PipelineName',
         'ParameterValue': stack_name
