@@ -221,7 +221,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "LastCommit"},
+                      {"Fn::Join": ["", [ "v", {"Ref": "LastCommit"} ]]},
                       "ec2",
                       "deploy"
                     ]]
@@ -254,7 +254,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "LastCommit"},
+                      {"Fn::Join": ["", [ "v", {"Ref": "LastCommit"} ]]},
                       "ecs",
                       "main",
                       "deploy"
