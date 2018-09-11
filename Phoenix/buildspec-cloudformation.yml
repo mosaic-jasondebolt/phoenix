@@ -14,13 +14,14 @@ phases:
       - |-
         if [ ! -z "$PIPELINE_NAME" ]; then     # If this build was triggered by a merge request.
           STACK_PREFIX=$PIPELINE_NAME
-          CHANGE_SET_PREFIX=$VERSION_ID
+          CHANGE_SET_PREFIX=$CODEBUILD_RESOLVED_SOURCE_VERSION
           LIST_OF_ENVIRONMENTS='deploy'
         else                                   # If this is a normal, non merge request pipeline build
           STACK_PREFIX=$NON_MR_STACK_PREFIX
-          CHANGE_SET_PREFIX=$VERSION_ID
+          CHANGE_SET_PREFIX=$CODEBUILD_RESOLVED_SOURCE_VERSION
           LIST_OF_ENVIRONMENTS=$NON_MR_ENVIRONMENTS
         fi
+      - echo $NON_MR_ENVIRONMENTS,$NON_MR_STACK_PREFIX,$STACK_PREFIX,$CHANGE_SET_PREFIX,$LIST_OF_ENVIRONMENTS
   build:
     commands:
       - echo Build started on `date`
@@ -35,11 +36,6 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-e2e.json_temp cloudformation > $CODEBUILD_SRC_DIR/t-database-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp cloudformation > $CODEBUILD_SRC_DIR/t-database-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
-      - echo $NON_MR_ENVIRONMENTS
-      - echo $NON_MR_STACK_PREFIX
-      - echo $STACK_PREFIX
-      - echo $CHANGE_SET_PREFIX
-      - echo $LIST_OF_ENVIRONMENTS
       - # Build the CloudFormation Change Sets
       - # We don't deploy databases for the merge request pipelines, so we use NON_MR_ENVIRONMENTS
       - |-
@@ -49,9 +45,7 @@ phases:
           CHANGE_SET_NAME=$CHANGE_SET_PREFIX-database-$environmentName
           # Try and UPDATE or CREATE change set operation.
           {
-            echo 'HERE'
             echo $environmentName
-            echo 'HERE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
@@ -60,9 +54,7 @@ phases:
                 --capabilities CAPABILITY_NAMED_IAM \
                 --role-arn $IAM_ROLE
           } || {
-            echo 'THERE'
             echo $environmentName
-            echo 'THERE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
