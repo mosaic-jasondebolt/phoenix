@@ -50,6 +50,10 @@
       "Description": "The CodePipeline service role that CodePipeline pipelines use.",
       "Type": "String"
     },
+    "IAMRole": {
+      "Description": "The IAM Role used to manage the pipeline stack.",
+      "Type": "String"
+    },
     "Version": {
       "Description": "The identifier/version associated with this deployment.",
       "Type": "String",
@@ -526,6 +530,11 @@
               "Name" : "GITLAB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/access-token"
+            },
+            {
+              "Name" : "IAM_ROLE",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "IAMRole"}
             },
             {
               "Name" : "GITLAB_URL",

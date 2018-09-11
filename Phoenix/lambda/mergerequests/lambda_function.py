@@ -140,6 +140,10 @@ def lambda_handler(event, context):
       {
         'ParameterKey': 'SourceBranch',
         'ParameterValue': obj.object_attributes.source_branch
+      },
+      {
+        'ParameterKey': 'IAMRole',
+        'ParameterValue': os.environ['IAM_ROLE']
       }
     ]
 

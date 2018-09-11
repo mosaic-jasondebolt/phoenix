@@ -130,6 +130,7 @@
             "CODE_PIPELINE_BUCKET_NAME": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
             "CODE_BUILD_DOCKER_IMAGE": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
             "LAMBDA_BUCKET_NAME": "PHX_MACRO_LAMBDA_BUCKET_NAME",
+            "IAM_ROLE": "PHX_MACRO_IAM_ROLE",
             "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
               "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
