@@ -1,0 +1,224 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay&
+      - timeout 15s sh -c "until docker info; do echo .; sleep 1; done"
+      - pip install requests
+  pre_build:
+    commands:
+      - VERSION_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - |-
+        if [ ! -z "$PIPELINE_NAME" ]; then     # If this build was triggered by a merge request.
+          STACK_PREFIX=$PIPELINE_NAME
+          CHANGE_SET_PREFIX=$VERSION_ID
+          LIST_OF_ENVIRONMENTS='deploy'
+        else                                   # If this is a normal pipeline build
+          STACK_PREFIX=$PROJECT_NAME
+          CHANGE_SET_PREFIX=$VERSION_ID
+          LIST_OF_ENVIRONMENTS='testing e2e prod'
+        fi
+  build:
+    commands:
+      - echo Build started on `date`
+      - # Database (Aurora, DynamoDB)
+      - echo ===== DATABASE BUILD =====
+      - echo replacing VERSION_ID in the database params files.
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-testing.json > $CODEBUILD_SRC_DIR/t-database-params-testing.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-e2e.json > $CODEBUILD_SRC_DIR/t-database-params-e2e.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-prod.json > $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp
+      - echo replacing params in the database params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
+      - # Build the CloudFormation Change Sets
+      - |-
+        for environmentName in $LIST_OF_ENVIRONMENTS
+        do
+          STACK_NAME=$STACK_PREFIX-database-$environmentName
+          CHANGE_SET_NAME=$CHANGE_SET_PREFIX-database-$environmentName
+          # Try and UPDATE or CREATE change set operation.
+          aws cloudformation create-change-set --stack-name $STACK_NAME \
+              --change-set-name $CHANGE_SET_NAME \
+              --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
+              --change-set-type UPDATE \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --role-arn $IAM_ROLE || \
+          aws cloudformation create-change-set --stack-name $STACK_NAME \
+              --change-set-name $CHANGE_SET_NAME \
+              --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
+              --change-set-type CREATE \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --role-arn $IAM_ROLE
+        done
+      - # EC2 resources
+      - echo ===== EC2 BUILD =====
+      - echo replacing params in the task definition params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ec2.json $CODEBUILD_SRC_DIR
+      - # Build the CloudFormation Change Sets
+      - |-
+        for environmentName in $LIST_OF_ENVIRONMENTS
+        do
+          STACK_NAME=$STACK_PREFIX-ec2-$environmentName
+          CHANGE_SET_NAME=$CHANGE_SET_PREFIX-ec2-$environmentName
+          # Try and UPDATE or CREATE change set operation.
+          aws cloudformation create-change-set --stack-name $STACK_NAME \
+              --change-set-name $CHANGE_SET_NAME \
+              --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
+              --change-set-type UPDATE \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --role-arn $IAM_ROLE || \
+          aws cloudformation create-change-set --stack-name $STACK_NAME \
+              --change-set-name $CHANGE_SET_NAME \
+              --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
+              --change-set-type CREATE \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --role-arn $IAM_ROLE
+        done
+      - # ECS Main Service resources
+      - echo ===== DOCKER BUILD =====
+      - echo replacing build number in the task definition param files.
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-testing.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-testing.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-e2e.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-e2e.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-prod.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-prod.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-testing.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-e2e.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-prod.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json_temp
+      - echo replacing params in the task definition params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task.json $CODEBUILD_SRC_DIR
+      - # Build the CloudFormation Change Sets
+      - |-
+        for environmentName in $LIST_OF_ENVIRONMENTS
+        do
+          STACK_NAME=$STACK_PREFIX-ecs-main-$environmentName
+          CHANGE_SET_NAME=$CHANGE_SET_PREFIX-ecs-main-$environmentName
+          # Try and UPDATE or CREATE change set operation.
+          aws cloudformation create-change-set --stack-name $STACK_NAME \
+              --change-set-name $CHANGE_SET_NAME \
+              --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+              --change-set-type UPDATE \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --role-arn $IAM_ROLE || \
+          aws cloudformation create-change-set --stack-name $STACK_NAME \
+              --change-set-name $CHANGE_SET_NAME \
+              --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+              --change-set-type CREATE \
+              --capabilities CAPABILITY_NAMED_IAM \
+              --role-arn $IAM_ROLE
+        done
+      - # Lambda
+      - echo ===== LAMBDA BUILD =====
+      - echo replacing VERSION_ID in the lambda params files.
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-testing.json > $CODEBUILD_SRC_DIR/t-lambda-params-testing.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-e2e.json > $CODEBUILD_SRC_DIR/t-lambda-params-e2e.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-prod.json > $CODEBUILD_SRC_DIR/t-lambda-params-prod.json_temp
+      - echo replacing params in the lambda params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-lambda.json $CODEBUILD_SRC_DIR
+      - # API Gateway Custom Domain
+      - echo ===== API GATEWAY CUSTOM DOMAIN BUILD =====
+      - echo replacing params in the api custom domain params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain.json $CODEBUILD_SRC_DIR/template-api-custom-domain.json
+      - # V0 API Documentation
+      - echo ===== API DOCUMENTATION BUILD =====
+      - echo replacing params in the api documentation params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation.json $CODEBUILD_SRC_DIR/template-api-documentation.json
+      - # API Gateway (Changes current API at HEAD, but does not deploy the API distrubtion to the API Endpoint)
+      - echo ===== API GATEWAY BUILD =====
+      - echo replacing VERSION_ID in the api params files.
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-testing.json > $CODEBUILD_SRC_DIR/t-api-params-testing.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-e2e.json > $CODEBUILD_SRC_DIR/t-api-params-e2e.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-prod.json > $CODEBUILD_SRC_DIR/t-api-params-prod.json_temp
+      - echo replacing params in the api params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api.json $CODEBUILD_SRC_DIR
+      - # API Gateway Internals (Additional configuration for the API Gateway API that isn't easily configured via CloudFormation)
+      - echo ===== API GATEWAY INTERNALS BUILD =====
+      - echo replacing VERSION_ID in the api params files.
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-internals-params-testing.json > $CODEBUILD_SRC_DIR/t-api-internals-params-testing.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-internals-params-e2e.json > $CODEBUILD_SRC_DIR/t-api-internals-params-e2e.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-internals-params-prod.json > $CODEBUILD_SRC_DIR/t-api-internals-params-prod.json_temp
+      - echo replacing params in the api params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-internals-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-internals-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-internals-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-internals-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-internals-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-internals-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-internals.json $CODEBUILD_SRC_DIR
+      - # API Gateway Deployment (Deploys the current API configuration to the API Endpoint)
+      - echo ===== API GATEWAY DEPLOYMENT BUILD =====
+      - echo replacing params in the api deployment params files.
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-e2e.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment.json $CODEBUILD_SRC_DIR/template-api-deployment.json
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - # Notify Gitlab and alter t-ec2-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
+      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py build
+artifacts:
+    files:
+      - # Gitlab config file which will be picked up my Lambda if this is a merge request build.
+      - gitlab.json
+      - # Database (Aurora, DynamoDB)
+      - template-database.json
+      - t-database-params-testing.json
+      - t-database-params-e2e.json
+      - t-database-params-prod.json
+      - # ECS
+      - template-ec2.json
+      - t-ec2-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
+      - t-ec2-params-e2e.json
+      - t-ec2-params-prod.json
+      - # ECS Main Task
+      - template-ecs-task.json
+      - t-ecs-task-main-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
+      - t-ecs-task-main-params-e2e.json
+      - t-ecs-task-main-params-prod.json
+      - # Lambda
+      - template-lambda.json
+      - t-lambda-params-testing.json
+      - t-lambda-params-e2e.json
+      - t-lambda-params-prod.json
+      - # API Gateway Custom Domain
+      - template-api-custom-domain.json
+      - t-api-custom-domain-params-testing.json
+      - t-api-custom-domain-params-e2e.json
+      - t-api-custom-domain-params-prod.json
+      - # V0 API Documentation
+      - template-api-documentation.json
+      - t-api-documentation-v0-params-testing.json
+      - t-api-documentation-v0-params-e2e.json
+      - t-api-documentation-v0-params-prod.json
+      - # API Gateway
+      - template-api.json
+      - t-api-params-testing.json
+      - t-api-params-e2e.json
+      - t-api-params-prod.json
+      - # API Gateway Internals
+      - template-api-internals.json
+      - t-api-internals-params-testing.json
+      - t-api-internals-params-e2e.json
+      - t-api-internals-params-prod.json
+      - # API Gateway Deployment
+      - template-api-deployment.json
+      - t-api-deployment-params-testing.json
+      - t-api-deployment-params-e2e.json
+      - t-api-deployment-params-prod.json

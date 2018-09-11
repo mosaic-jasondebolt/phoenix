@@ -38,7 +38,7 @@ def get_gitlab_merge_request_notes_url(project_id, merge_request_id, body):
 
 def get_gitlab_url():
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/global/gitlab-url',
+        Name='/microservice/{0}/global/gitlab-url'.format(os.environ['PROJECT_NAME']),
         WithDecryption=False
     )
     return response['Parameter']['Value']
@@ -52,14 +52,14 @@ def get_gitlab_access_token():
 
 def get_microservice_bucket_name():
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/global/bucket-name',
+        Name='/microservice/{0}/global/bucket-name'.format(os.environ['PROJECT_NAME']),
         WithDecryption=True
     )
     return response['Parameter']['Value']
 
 def get_microservice_domain():
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/global/domain',
+        Name='/microservice/{0}/global/domain'.format(os.environ['PROJECT_NAME']),
         WithDecryption=True
     )
     return response['Parameter']['Value']
