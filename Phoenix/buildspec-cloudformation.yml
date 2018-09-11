@@ -35,11 +35,11 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
-      - echo NON_MR_ENVIRONMENTS
-      - echo NON_MR_STACK_PREFIX
-      - echo STACK_PREFIX
-      - echo CHANGE_SET_PREFIX
-      - echo LIST_OF_ENVIRONMENTS
+      - echo $NON_MR_ENVIRONMENTS
+      - echo $NON_MR_STACK_PREFIX
+      - echo $STACK_PREFIX
+      - echo $CHANGE_SET_PREFIX
+      - echo $LIST_OF_ENVIRONMENTS
       - # Build the CloudFormation Change Sets
       - # We don't deploy databases for the merge request pipelines, so we use NON_MR_ENVIRONMENTS
       - |-
