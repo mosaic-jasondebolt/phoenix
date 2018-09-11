@@ -43,11 +43,13 @@ phases:
           aws cloudformation create-change-set --stack-name $STACK_NAME \
               --change-set-name $CHANGE_SET_NAME \
               --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
+              --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
               --change-set-type UPDATE \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn $IAM_ROLE || \
           aws cloudformation create-change-set --stack-name $STACK_NAME \
               --change-set-name $CHANGE_SET_NAME \
+              --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
               --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
               --change-set-type CREATE \
               --capabilities CAPABILITY_NAMED_IAM \
@@ -70,12 +72,14 @@ phases:
           aws cloudformation create-change-set --stack-name $STACK_NAME \
               --change-set-name $CHANGE_SET_NAME \
               --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
+              --parameters file://$CODEBUILD_SRC_DIR/t-ec2-params-$environmentName.json \
               --change-set-type UPDATE \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn $IAM_ROLE || \
           aws cloudformation create-change-set --stack-name $STACK_NAME \
               --change-set-name $CHANGE_SET_NAME \
               --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
+              --parameters file://$CODEBUILD_SRC_DIR/t-ec2-params-$environmentName.json \
               --change-set-type CREATE \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn $IAM_ROLE
@@ -104,12 +108,14 @@ phases:
           aws cloudformation create-change-set --stack-name $STACK_NAME \
               --change-set-name $CHANGE_SET_NAME \
               --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+              --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
               --change-set-type UPDATE \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn $IAM_ROLE || \
           aws cloudformation create-change-set --stack-name $STACK_NAME \
               --change-set-name $CHANGE_SET_NAME \
               --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+              --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
               --change-set-type CREATE \
               --capabilities CAPABILITY_NAMED_IAM \
               --role-arn $IAM_ROLE
