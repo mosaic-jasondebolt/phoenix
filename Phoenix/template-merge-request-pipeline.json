@@ -58,6 +58,10 @@
       "Description": "The identifier/version associated with this deployment.",
       "Type": "String",
       "Default": "latest"
+    },
+    "LastCommit": {
+      "Description": "The last git commit sha-1 associated with the change.",
+      "Type": "String"
     }
   },
   "Resources": {
@@ -217,7 +221,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      {"Ref": "PipelineName"},
+                      {"Ref": "LastCommit"},
                       "ec2",
                       "deploy"
                     ]]
@@ -243,6 +247,14 @@
                   "StackName": {
                     "Fn::Join": ["-", [
                       {"Ref": "PipelineName"},
+                      "ecs",
+                      "main",
+                      "deploy"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "LastCommit"},
                       "ecs",
                       "main",
                       "deploy"

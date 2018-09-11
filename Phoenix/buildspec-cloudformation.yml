@@ -11,7 +11,7 @@ phases:
       - VERSION_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - NON_MR_ENVIRONMENTS='testing e2e prod'
       - NON_MR_STACK_PREFIX=$PROJECT_NAME
-      - CHANGE_SET_PREFIX=v$CODEBUILD_RESOLVED_SOURCE_VERSION # Change set names don't allow underscores
+      - CHANGE_SET_PREFIX=$CODEBUILD_RESOLVED_SOURCE_VERSION # Change set names don't allow underscores
       - |-
         if [ ! -z "$PIPELINE_NAME" ]; then     # If this build was triggered by a merge request.
           STACK_PREFIX=$PIPELINE_NAME

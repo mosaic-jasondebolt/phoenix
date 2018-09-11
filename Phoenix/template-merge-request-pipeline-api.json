@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Deploys an API Gateway endpoint that GitLab merge request events can invoke to setup/teardown a review pipeline.",
+  "Description" : "Deploys an API Gateway endpoint that GitLab merge request events can invoke to setup/teardown a review pipeline",
   "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
     "VPCPrefix": {

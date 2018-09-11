@@ -144,6 +144,10 @@ def lambda_handler(event, context):
       {
         'ParameterKey': 'IAMRole',
         'ParameterValue': os.environ['IAM_ROLE']
+      },
+      {
+        'ParameterKey': 'LastCommit',
+        'ParameterValue': obj.object_attributes.last_commit.id
       }
     ]
 
