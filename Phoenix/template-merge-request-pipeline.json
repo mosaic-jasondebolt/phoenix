@@ -200,7 +200,7 @@
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ec2-params-deploy.json",
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
@@ -268,7 +268,7 @@
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-deploy.json",
+                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
                 }
               },
