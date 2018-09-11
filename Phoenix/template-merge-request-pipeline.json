@@ -192,7 +192,7 @@
             ]
           },
           {
-            "Name": "DeployToEC2",
+            "Name": "DeployToECS",
             "Actions": [
               {
                 "Name": "EC2ChangeSet",
@@ -239,7 +239,7 @@
                 "InputArtifacts": [{
                   "Name": "CloudformationOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_EXECUTE",
@@ -271,7 +271,7 @@
                 "InputArtifacts": [{
                   "Name": "CloudformationOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_EXECUTE",
@@ -307,7 +307,7 @@
                 "InputArtifacts": [{
                   "Name": "CloudformationOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -341,7 +341,7 @@
                 "InputArtifacts": [{
                   "Name": "CloudformationOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "FunctionName": {
                     "Fn::ImportValue": {
