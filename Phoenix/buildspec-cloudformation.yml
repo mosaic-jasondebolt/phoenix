@@ -49,7 +49,9 @@ phases:
           CHANGE_SET_NAME=$CHANGE_SET_PREFIX-database-$environmentName
           # Try and UPDATE or CREATE change set operation.
           {
-            echo environmentName
+            echo 'HERE'
+            echo $environmentName
+            echo 'HERE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
@@ -58,7 +60,9 @@ phases:
                 --capabilities CAPABILITY_NAMED_IAM \
                 --role-arn $IAM_ROLE
           } || {
-            echo environmentName
+            echo 'THERE'
+            echo $environmentName
+            echo 'THERE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
