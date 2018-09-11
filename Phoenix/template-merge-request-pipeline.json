@@ -109,30 +109,6 @@
                 }
               },
               {
-                "Name": "Cloudformation",
-                "ActionTypeId": {
-                  "Category": "Build",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CodeBuild"
-                },
-                "InputArtifacts": [{
-                  "Name": "SourceOutput"
-                }],
-                "OutputArtifacts": [{
-                  "Name": "CloudformationOutput"
-                }],
-                "RunOrder": 1,
-                "Configuration": {
-                  "ProjectName": {
-                    "Fn::Join": ["-", [
-                      {"Ref": "PipelineName"},
-                      "cloudformation"
-                    ]]
-                  }
-                }
-              },
-              {
                 "Name": "UnitTest",
                 "ActionTypeId": {
                   "Category": "Test",
@@ -203,7 +179,7 @@
                   "Provider": "CloudFormation"
                 },
                 "InputArtifacts": [{
-                  "Name": "CloudformationOutput"
+                  "Name": "BuildOutput"
                 }],
                 "RunOrder": 1,
                 "Configuration": {
@@ -224,8 +200,8 @@
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "CloudformationOutput::t-ec2-params-mr.json",
-                  "TemplatePath": "CloudformationOutput::template-ec2.json"
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-mr.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
               {
@@ -237,7 +213,7 @@
                   "Provider": "CloudFormation"
                 },
                 "InputArtifacts": [{
-                  "Name": "CloudformationOutput"
+                  "Name": "BuildOutput"
                 }],
                 "RunOrder": 2,
                 "Configuration": {
@@ -269,7 +245,7 @@
                   "Provider": "CloudFormation"
                 },
                 "InputArtifacts": [{
-                  "Name": "CloudformationOutput"
+                  "Name": "BuildOutput"
                 }],
                 "RunOrder": 2,
                 "Configuration": {
@@ -292,8 +268,8 @@
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "CloudformationOutput::t-ecs-task-main-params-mr.json",
-                  "TemplatePath": "CloudformationOutput::template-ecs-task.json"
+                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-mr.json",
+                  "TemplatePath": "BuildOutput::template-ecs-task.json"
                 }
               },
               {
@@ -305,7 +281,7 @@
                   "Provider": "CloudFormation"
                 },
                 "InputArtifacts": [{
-                  "Name": "CloudformationOutput"
+                  "Name": "BuildOutput"
                 }],
                 "RunOrder": 3,
                 "Configuration": {
@@ -339,7 +315,7 @@
                   "Provider": "Lambda"
                 },
                 "InputArtifacts": [{
-                  "Name": "CloudformationOutput"
+                  "Name": "BuildOutput"
                 }],
                 "RunOrder": 4,
                 "Configuration": {
@@ -352,7 +328,7 @@
                       ]]
                     }
                   },
-                  "UserParameters": "{\"artifact\": \"CloudformationOutput\", \"file\": \"gitlab.json\"}"
+                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
                 }
               }
             ]
