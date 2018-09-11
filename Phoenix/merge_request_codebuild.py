@@ -150,10 +150,16 @@ def onBuildJobCompletion():
         sender.send_request(merge_request_approval_url())
     # Notify GitLab of the approval
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
-    # Generate the ECS CloudFormation stack to create an ECS instance
-    generate_ec2_params()
-    generate_ecs_task_main_params()
+    # Save git gitlab.json file
     generate_lambda_gitlab_config()
+
+def onGenerateEC2MergeRequestParams():
+    # Modify testing param files to generate merge request parameters
+    generate_ec2_params()
+
+def onGenerateECTaskMainMergeRequestParams():
+    # Modify testing param files to generate merge request parameters
+    generate_ecs_task_main_params()
 
 def onUnitTestJobCompletion():
     sender = RequestSender(GITLAB_UNIT_TEST_ACCESS_TOKEN)
@@ -200,6 +206,20 @@ if __name__ == '__main__':
         sys.exit(0)
 
     arg = sys.argv[1]
+
+    if arg == 'generate-ec2-merge-requests-params'
+        if not PIPELINE_NAME:
+            print('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
+            sys.exit(0)
+        print('Running generate_merge_request_params')
+        onGenerateEC2MergeRequestParams()
+
+    if arg == 'generate-ecs-task-main-merge-requests-params'
+        if not PIPELINE_NAME:
+            print('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
+            sys.exit(0)
+        print('Running generate_merge_request_params')
+        onGenerateECTaskMainMergeRequestParams()
 
     if arg == 'build':
         if not GITLAB_ACCESS_TOKEN:

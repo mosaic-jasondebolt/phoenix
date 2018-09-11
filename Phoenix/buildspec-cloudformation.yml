@@ -10,14 +10,17 @@ phases:
     commands:
       - VERSION_ID=v_$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - |-
+        NON_MR_ENVIRONMENTS='testing e2e prod'
+        NON_MR_STACK_PREFIX=$PROJECT_NAME
+
         if [ ! -z "$PIPELINE_NAME" ]; then     # If this build was triggered by a merge request.
           STACK_PREFIX=$PIPELINE_NAME
           CHANGE_SET_PREFIX=$VERSION_ID
           LIST_OF_ENVIRONMENTS='deploy'
-        else                                   # If this is a normal pipeline build
-          STACK_PREFIX=$PROJECT_NAME
+        else                                   # If this is a normal, non merge request pipeline build
+          STACK_PREFIX=$NON_MR_STACK_PREFIX
           CHANGE_SET_PREFIX=$VERSION_ID
-          LIST_OF_ENVIRONMENTS='testing e2e prod'
+          LIST_OF_ENVIRONMENTS=$NON_MR_ENVIRONMENTS
         fi
   build:
     commands:
@@ -35,25 +38,28 @@ phases:
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
       - # Build the CloudFormation Change Sets
       - |-
-        for environmentName in $LIST_OF_ENVIRONMENTS
+        for environmentName in $NON_MR_ENVIRONMENTS   # We don't deploy databases for the merge request pipelines
         do
-          STACK_NAME=$STACK_PREFIX-database-$environmentName
+          STACK_NAME=$NON_MR_STACK_PREFIX-database-$environmentName
           CHANGE_SET_NAME=$CHANGE_SET_PREFIX-database-$environmentName
           # Try and UPDATE or CREATE change set operation.
-          aws cloudformation create-change-set --stack-name $STACK_NAME \
-              --change-set-name $CHANGE_SET_NAME \
-              --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
-              --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
-              --change-set-type UPDATE \
-              --capabilities CAPABILITY_NAMED_IAM \
-              --role-arn $IAM_ROLE || true
-          aws cloudformation create-change-set --stack-name $STACK_NAME \
-              --change-set-name $CHANGE_SET_NAME \
-              --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
-              --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
-              --change-set-type CREATE \
-              --capabilities CAPABILITY_NAMED_IAM \
-              --role-arn $IAM_ROLE || true
+          {
+            aws cloudformation create-change-set --stack-name $STACK_NAME \
+                --change-set-name $CHANGE_SET_NAME \
+                --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
+                --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
+                --change-set-type UPDATE \
+                --capabilities CAPABILITY_NAMED_IAM \
+                --role-arn $IAM_ROLE
+          } || {
+            aws cloudformation create-change-set --stack-name $STACK_NAME \
+                --change-set-name $CHANGE_SET_NAME \
+                --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
+                --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
+                --change-set-type CREATE \
+                --capabilities CAPABILITY_NAMED_IAM \
+                --role-arn $IAM_ROLE
+          }
         done
       - # EC2 resources
       - echo ===== EC2 BUILD =====
@@ -62,6 +68,8 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ec2.json $CODEBUILD_SRC_DIR
+      -
+      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py generate-ec2-merge-requests-params
       - # Build the CloudFormation Change Sets
       - |-
         for environmentName in $LIST_OF_ENVIRONMENTS
@@ -69,20 +77,23 @@ phases:
           STACK_NAME=$STACK_PREFIX-ec2-$environmentName
           CHANGE_SET_NAME=$CHANGE_SET_PREFIX-ec2-$environmentName
           # Try and UPDATE or CREATE change set operation.
-          aws cloudformation create-change-set --stack-name $STACK_NAME \
-              --change-set-name $CHANGE_SET_NAME \
-              --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
-              --parameters file://$CODEBUILD_SRC_DIR/t-ec2-params-$environmentName.json \
-              --change-set-type UPDATE \
-              --capabilities CAPABILITY_NAMED_IAM \
-              --role-arn $IAM_ROLE || true
-          aws cloudformation create-change-set --stack-name $STACK_NAME \
-              --change-set-name $CHANGE_SET_NAME \
-              --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
-              --parameters file://$CODEBUILD_SRC_DIR/t-ec2-params-$environmentName.json \
-              --change-set-type CREATE \
-              --capabilities CAPABILITY_NAMED_IAM \
-              --role-arn $IAM_ROLE || true
+          {
+            aws cloudformation create-change-set --stack-name $STACK_NAME \
+                --change-set-name $CHANGE_SET_NAME \
+                --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
+                --parameters file://$CODEBUILD_SRC_DIR/t-ec2-params-$environmentName.json \
+                --change-set-type UPDATE \
+                --capabilities CAPABILITY_NAMED_IAM \
+                --role-arn $IAM_ROLE
+          } || {
+            aws cloudformation create-change-set --stack-name $STACK_NAME \
+                --change-set-name $CHANGE_SET_NAME \
+                --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
+                --parameters file://$CODEBUILD_SRC_DIR/t-ec2-params-$environmentName.json \
+                --change-set-type CREATE \
+                --capabilities CAPABILITY_NAMED_IAM \
+                --role-arn $IAM_ROLE
+          }
         done
       - # ECS Main Service resources
       - echo ===== DOCKER BUILD =====
@@ -105,20 +116,23 @@ phases:
           STACK_NAME=$STACK_PREFIX-ecs-main-$environmentName
           CHANGE_SET_NAME=$CHANGE_SET_PREFIX-ecs-main-$environmentName
           # Try and UPDATE or CREATE change set operation.
-          aws cloudformation create-change-set --stack-name $STACK_NAME \
-              --change-set-name $CHANGE_SET_NAME \
-              --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
-              --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
-              --change-set-type UPDATE \
-              --capabilities CAPABILITY_NAMED_IAM \
-              --role-arn $IAM_ROLE || true
-          aws cloudformation create-change-set --stack-name $STACK_NAME \
-              --change-set-name $CHANGE_SET_NAME \
-              --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
-              --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
-              --change-set-type CREATE \
-              --capabilities CAPABILITY_NAMED_IAM \
-              --role-arn $IAM_ROLE || true
+          {
+            aws cloudformation create-change-set --stack-name $STACK_NAME \
+                --change-set-name $CHANGE_SET_NAME \
+                --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+                --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
+                --change-set-type UPDATE \
+                --capabilities CAPABILITY_NAMED_IAM \
+                --role-arn $IAM_ROLE
+          } || {
+            aws cloudformation create-change-set --stack-name $STACK_NAME \
+                --change-set-name $CHANGE_SET_NAME \
+                --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+                --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
+                --change-set-type CREATE \
+                --capabilities CAPABILITY_NAMED_IAM \
+                --role-arn $IAM_ROLE
+          }
         done
       - # Lambda
       - echo ===== LAMBDA BUILD =====
