@@ -175,7 +175,7 @@ def onGenerateEC2MergeRequestParams():
     # Modify testing param files to generate merge request parameters
     generate_ec2_params()
 
-def onGenerateECTaskMainMergeRequestParams():
+def onGenerateECSTaskMainMergeRequestParams():
     # Modify testing param files to generate merge request parameters
     generate_ecs_task_main_params()
 
@@ -237,7 +237,7 @@ if __name__ == '__main__':
             print('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
             sys.exit(0)
         print('Running generate_merge_request_params')
-        onGenerateECTaskMainMergeRequestParams()
+        onGenerateECSTaskMainMergeRequestParams()
 
     if arg == 'build':
         if not GITLAB_ACCESS_TOKEN:

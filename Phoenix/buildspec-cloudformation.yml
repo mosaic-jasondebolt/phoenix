@@ -131,7 +131,7 @@ phases:
             echo 'CREATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
-                --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+                --template-body file://$CODEBUILD_SRC_DIR/template-ecs-task.json \
                 --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
                 --change-set-type CREATE \
                 --capabilities CAPABILITY_NAMED_IAM \
@@ -141,7 +141,7 @@ phases:
             echo 'UPDATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
-                --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
+                --template-body file://$CODEBUILD_SRC_DIR/template-ecs-task.json \
                 --parameters file://$CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json \
                 --change-set-type UPDATE \
                 --capabilities CAPABILITY_NAMED_IAM \
