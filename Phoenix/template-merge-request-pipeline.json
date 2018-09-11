@@ -184,7 +184,7 @@
                 "RunOrder": 1,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
-                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
@@ -200,7 +200,7 @@
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ec2-params-mr.json",
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-deploy.json",
                   "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
@@ -250,7 +250,7 @@
                 "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
-                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
@@ -268,7 +268,7 @@
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-mr.json",
+                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-deploy.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
                 }
               },

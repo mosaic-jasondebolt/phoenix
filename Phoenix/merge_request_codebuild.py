@@ -105,7 +105,7 @@ def generate_ec2_params():
     ec2_params['Parameters']['Environment'] = PIPELINE_NAME
     ec2_params['Parameters']['DBEnvironment'] = 'dev'
     ec2_params['Parameters']['VPCPrefix'] = 'dev'
-    ec2_params_file = open('t-ec2-params-mr.json', 'w')
+    ec2_params_file = open('t-ec2-params-deploy.json', 'w')
     ec2_params_file.write(json.dumps(ec2_params, indent=2))
 
 def generate_ecs_task_main_params():
@@ -120,7 +120,7 @@ def generate_ecs_task_main_params():
     ecs_params['Parameters']['DBEnvironment'] = 'dev'
     ecs_params['Parameters']['VPCPrefix'] = 'dev'
     ecs_params['Parameters']['URLPrefixOverride'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
-    ecs_params_file = open('t-ecs-task-main-params-mr.json', 'w')
+    ecs_params_file = open('t-ecs-task-main-params-deploy.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 
 def generate_lambda_gitlab_config():
