@@ -116,7 +116,7 @@
                   "Name": "SourceOutput"
                 }],
                 "OutputArtifacts": [{
-                  "Name": "BuildOutput"
+                  "Name": "CloudformationOutput"
                 }],
                 "RunOrder": 1,
                 "Configuration": {
@@ -197,7 +197,7 @@
                   "Provider": "CloudFormation"
                 },
                 "InputArtifacts": [{
-                  "Name": "BuildOutput"
+                  "Name": "CloudformationOutput"
                 }],
                 "RunOrder": 1,
                 "Configuration": {
@@ -229,7 +229,7 @@
                   "Provider": "CloudFormation"
                 },
                 "InputArtifacts": [{
-                  "Name": "BuildOutput"
+                  "Name": "CloudformationOutput"
                 }],
                 "RunOrder": 2,
                 "Configuration": {
@@ -255,7 +255,7 @@
                   "Provider": "Lambda"
                 },
                 "InputArtifacts": [{
-                  "Name": "BuildOutput"
+                  "Name": "CloudformationOutput"
                 }],
                 "RunOrder": 3,
                 "Configuration": {
