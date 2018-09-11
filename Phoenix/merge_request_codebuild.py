@@ -86,12 +86,27 @@ class RequestSender(object):
         response = requests.post(url, headers=headers)
         print(response)
 
+def toggle_cloudformation_params_format(obj):
+    # Toggles between cloudformation parameters file format and code pipeline parameters file format.
+    codepipeline_obj = {'Parameters': {}}
+    cloudformation_obj = []
+    if 'Parameters' in obj: # Convert a code pipeline parameter file to a cloudformation parameter file
+        for param in obj['Parameters']:
+            item = {'ParameterKey': param, 'ParameterValue': obj['Parameters'][param]}
+            cloudformation_obj.append(item)
+        return cloudformation_obj
+    else: # Convert a cloudformation parameter file to a code pipeline parameter file
+        for param in obj:
+            codepipeline_obj['Parameters'][param['ParameterKey']] = param['ParameterValue']
+        return codepipeline_obj
+
 def generate_ec2_params():
     print("Saving updated ECS parameter file...")
     file_path = os.path.join(
-        os.environ.get('CODEBUILD_SRC_DIR'), 't-ec2-params-testing.json'
+        os.environ.get('CODEBUILD_SRC_DIR'), 'template-ec2-params-testing.json'
     )
     ec2_params = _parse_json(file_path)
+    ec2_params = toggle_cloudformation_params_format(ec2_params)
     print(json.dumps(ec2_params, indent=2))
     # We will use the dev environment by default, but the URL will include the git commit sha1.
     # Also, we will use the pipeline name as the environment.
@@ -105,21 +120,24 @@ def generate_ec2_params():
     ec2_params['Parameters']['Environment'] = PIPELINE_NAME
     ec2_params['Parameters']['DBEnvironment'] = 'dev'
     ec2_params['Parameters']['VPCPrefix'] = 'dev'
+    ec2_params = toggle_cloudformation_params_format(ec2_params)
     ec2_params_file = open('t-ec2-params-deploy.json', 'w')
     ec2_params_file.write(json.dumps(ec2_params, indent=2))
 
 def generate_ecs_task_main_params():
     print("Saving updated ECS task main parameter file...")
     file_path = os.path.join(
-        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-task-main-params-testing.json'
+        os.environ.get('CODEBUILD_SRC_DIR'), 'Phoenix', 'template-ecs-task-main-params-testing.json'
     )
     ecs_params = _parse_json(file_path)
+    ecs_params = toggle_cloudformation_params_format(ecs_params)
     print(json.dumps(ecs_params, indent=2))
     # NOTE!: Comments in the 'generate_ec2_params' function above apply to this function as well.
     ecs_params['Parameters']['Environment'] = PIPELINE_NAME
     ecs_params['Parameters']['DBEnvironment'] = 'dev'
     ecs_params['Parameters']['VPCPrefix'] = 'dev'
     ecs_params['Parameters']['URLPrefixOverride'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
+    ecs_params = toggle_cloudformation_params_format(ecs_params)
     ecs_params_file = open('t-ecs-task-main-params-deploy.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
 

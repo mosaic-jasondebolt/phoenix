@@ -111,6 +111,8 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json_temp cloudformation > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json_temp cloudformation > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task.json $CODEBUILD_SRC_DIR
+      -
+      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py generate-ecs-task-main-merge-requests-params
       - # Build the CloudFormation Change Sets
       - |-
         for environmentName in $LIST_OF_ENVIRONMENTS
