@@ -45,6 +45,7 @@ phases:
           # Try and UPDATE or CREATE change set operation.
           {
             echo $environmentName
+            echo 'CREATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --template-body file://$CODEBUILD_SRC_DIR/template-database.json \
@@ -54,6 +55,7 @@ phases:
                 --role-arn $IAM_ROLE
           } || {
             echo $environmentName
+            echo 'UPDATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --parameters file://$CODEBUILD_SRC_DIR/t-database-params-$environmentName.json \
@@ -80,6 +82,8 @@ phases:
           CHANGE_SET_NAME=$CHANGE_SET_PREFIX-ec2-$environmentName
           # Try and UPDATE or CREATE change set operation.
           {
+            echo $environmentName
+            echo 'CREATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
@@ -88,6 +92,8 @@ phases:
                 --capabilities CAPABILITY_NAMED_IAM \
                 --role-arn $IAM_ROLE
           } || {
+            echo $environmentName
+            echo 'UPDATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --template-body file://$CODEBUILD_SRC_DIR/template-ec2.json \
@@ -121,6 +127,8 @@ phases:
           CHANGE_SET_NAME=$CHANGE_SET_PREFIX-ecs-main-$environmentName
           # Try and UPDATE or CREATE change set operation.
           {
+            echo $environmentName
+            echo 'CREATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
@@ -129,6 +137,8 @@ phases:
                 --capabilities CAPABILITY_NAMED_IAM \
                 --role-arn $IAM_ROLE
           } || {
+            echo $environmentName
+            echo 'UPDATE'
             aws cloudformation create-change-set --stack-name $STACK_NAME \
                 --change-set-name $CHANGE_SET_NAME \
                 --template-body file://$CODEBUILD_SRC_DIR/template-ecs-main.json \
