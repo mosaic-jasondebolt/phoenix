@@ -103,7 +103,7 @@ def toggle_cloudformation_params_format(obj):
 def generate_ec2_params():
     print("Saving updated ECS parameter file...")
     file_path = os.path.join(
-        os.environ.get('CODEBUILD_SRC_DIR'), 'Phoenix', 'template-ec2-params-testing.json'
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-ec2-params-testing.json'
     )
     ec2_params = _parse_json(file_path)
     ec2_params = toggle_cloudformation_params_format(ec2_params)
@@ -127,7 +127,7 @@ def generate_ec2_params():
 def generate_ecs_task_main_params():
     print("Saving updated ECS task main parameter file...")
     file_path = os.path.join(
-        os.environ.get('CODEBUILD_SRC_DIR'), 'Phoenix', 'template-ecs-task-main-params-testing.json'
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-ecs-task-main-params-testing.json'
     )
     ecs_params = _parse_json(file_path)
     ecs_params = toggle_cloudformation_params_format(ecs_params)
