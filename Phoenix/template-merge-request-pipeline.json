@@ -268,7 +268,7 @@
                       ]]
                     }
                   },
-                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
+                  "UserParameters": "{\"artifact\": \"CloudformationOutput\", \"file\": \"gitlab.json\"}"
                 }
               }
             ]
