@@ -207,14 +207,14 @@ if __name__ == '__main__':
 
     arg = sys.argv[1]
 
-    if arg == 'generate-ec2-merge-requests-params'
+    if arg == 'generate-ec2-merge-requests-params':
         if not PIPELINE_NAME:
             print('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
             sys.exit(0)
         print('Running generate_merge_request_params')
         onGenerateEC2MergeRequestParams()
 
-    if arg == 'generate-ecs-task-main-merge-requests-params'
+    if arg == 'generate-ecs-task-main-merge-requests-params':
         if not PIPELINE_NAME:
             print('PIPELINE_NAME environment variable not set. This might be a non merge-request build.')
             sys.exit(0)
