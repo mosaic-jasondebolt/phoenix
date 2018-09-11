@@ -1,6 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Generates all database resources required for a microservice.",
+  "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
