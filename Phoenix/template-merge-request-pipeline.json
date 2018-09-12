@@ -50,15 +50,14 @@
       "Description": "The CodePipeline service role that CodePipeline pipelines use.",
       "Type": "String"
     },
+    "IAMRole": {
+      "Description": "The IAM Role used to manage the pipeline stack.",
+      "Type": "String"
+    },
     "Version": {
       "Description": "The identifier/version associated with this deployment.",
       "Type": "String",
       "Default": "latest"
-    },
-    "Environment": {
-      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
-      "Type": "String",
-      "Default": "all"
     }
   },
   "Resources": {
@@ -89,9 +88,10 @@
           },
           {
             "Name": "Build",
-            "Actions": [{
-              "Name": "Build",
-              "ActionTypeId": {
+            "Actions": [
+              {
+                "Name": "Build",
+                "ActionTypeId": {
                   "Category": "Build",
                   "Owner": "AWS",
                   "Version": "1",
@@ -154,22 +154,24 @@
           },
           {
             "Name": "Approval",
-            "Actions": [{
-              "Name": "ManualApproval",
-              "ActionTypeId": {
-                "Category": "Approval",
-                "Owner": "AWS",
-                "Version": "1",
-                "Provider": "Manual"
-              },
-              "RunOrder": 1
-            }]
+            "Actions": [
+              {
+                "Name": "ManualApproval",
+                "ActionTypeId": {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Manual"
+                },
+                "RunOrder": 1
+              }
+            ]
           },
           {
             "Name": "DeployToECS",
             "Actions": [
               {
-                "Name": "EC2",
+                "Name": "EC2ChangeSet",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -182,7 +184,7 @@
                 "RunOrder": 1,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
@@ -191,8 +193,83 @@
                       "deploy"
                     ]]
                   },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ec2",
+                      "deploy"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::t-ec2-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ec2.json"
+                }
+              },
+              {
+                "Name": "EC2",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ec2",
+                      "deploy"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ec2",
+                      "deploy"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "ECSMainServiceChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ecs",
+                      "main",
+                      "deploy"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ecs",
+                      "main",
+                      "deploy"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ecs-task.json"
                 }
               },
               {
@@ -206,9 +283,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "StackName": {
@@ -219,8 +296,14 @@
                       "deploy"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-ecs-task.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ecs",
+                      "main",
+                      "deploy"
+                    ]]
+                  }
                 }
               },
               {
@@ -234,14 +317,13 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "FunctionName": {
                     "Fn::ImportValue": {
                       "Fn::Join": ["-", [
-                        "PHX_MACRO_PROJECT_NAME",
+                        {"Ref": "ProjectName"},
                         "merge-request-pipeline-api",
-                        {"Ref": "Environment"},
                         "LambdaPostMergeRequestFunctionName"
                       ]]
                     }
@@ -254,7 +336,7 @@
         ],
         "ArtifactStore": {
           "Type": "S3",
-          "Location" : "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME"
+          "Location" : {"Ref": "CodePipelineBucketName"}
         }
       }
     },
@@ -272,7 +354,7 @@
         },
         "GroupDescription": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"Ref": "ProjectName"},
             "CodeBuild",
             "MR",
             {"Ref": "PipelineName"},
@@ -373,6 +455,30 @@
               "Name" : "SOURCE_BRANCH",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "SourceBranch"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "ProjectName"}
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "LambdaBucketName"}
+            },
+            {
+              "Name" : "GITLAB_ACCESS_TOKEN",
+              "Type" : "PARAMETER_STORE",
+              "Value" : "/global/gitlab/codebuild/access-token"
+            },
+            {
+              "Name" : "GITLAB_URL",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global/gitlab-url"
+              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
@@ -465,6 +571,30 @@
               "Name" : "SOURCE_BRANCH",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "SourceBranch"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "ProjectName"}
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "LambdaBucketName"}
+            },
+            {
+              "Name" : "GITLAB_UNIT_TEST_ACCESS_TOKEN",
+              "Type" : "PARAMETER_STORE",
+              "Value" : "/global/gitlab/codebuild/unit-test-access-token"
+            },
+            {
+              "Name" : "GITLAB_URL",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global/gitlab-url"
+              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
@@ -558,6 +688,30 @@
               "Name" : "SOURCE_BRANCH",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "SourceBranch"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "ProjectName"}
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "LambdaBucketName"}
+            },
+            {
+              "Name" : "GITLAB_LINT_ACCESS_TOKEN",
+              "Type" : "PARAMETER_STORE",
+              "Value" : "/global/gitlab/codebuild/lint-access-token"
+            },
+            {
+              "Name" : "GITLAB_URL",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global/gitlab-url"
+              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},

@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Deploys an API Gateway endpoint that GitLab merge request events can invoke to setup/teardown a review pipeline.",
+  "Description" : "Deploys an API Gateway endpoint that GitLab merge request events can invoke to setup/teardown a review pipeline",
   "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
     "VPCPrefix": {
@@ -130,6 +130,7 @@
             "CODE_PIPELINE_BUCKET_NAME": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
             "CODE_BUILD_DOCKER_IMAGE": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
             "LAMBDA_BUCKET_NAME": "PHX_MACRO_LAMBDA_BUCKET_NAME",
+            "IAM_ROLE": "PHX_MACRO_IAM_ROLE",
             "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
               "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
@@ -268,6 +269,11 @@
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaPostMergeRequestRole", "Arn"] },
+        "Environment": {
+          "Variables": {
+            "PROJECT_NAME": "PHX_MACRO_PROJECT_NAME"
+          }
+        },
         "Code": {
           "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key" : {"Fn::Join": ["/", [

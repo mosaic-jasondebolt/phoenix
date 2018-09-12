@@ -150,7 +150,7 @@ def onBuildJobCompletion():
         sender.send_request(merge_request_approval_url())
     # Notify GitLab of the approval
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
-    # Generate the ECS CloudFormation stack to create an ECS instance
+    # Save git gitlab.json file
     generate_ec2_params()
     generate_ecs_task_main_params()
     generate_lambda_gitlab_config()

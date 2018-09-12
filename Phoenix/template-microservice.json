@@ -271,6 +271,30 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+            },
+            {
+              "Name" : "GITLAB_ACCESS_TOKEN",
+              "Type" : "PARAMETER_STORE",
+              "Value" : "/global/gitlab/codebuild/access-token"
+            },
+            {
+              "Name" : "GITLAB_URL",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global/gitlab-url"
+              ]]}
             }
           ],
           "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
@@ -355,6 +379,30 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+            },
+            {
+              "Name" : "GITLAB_UNIT_TEST_ACCESS_TOKEN",
+              "Type" : "PARAMETER_STORE",
+              "Value" : "/global/gitlab/codebuild/unit-test-access-token"
+            },
+            {
+              "Name" : "GITLAB_URL",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global/gitlab-url"
+              ]]}
             }
           ],
           "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
@@ -443,6 +491,30 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+            },
+            {
+              "Name" : "GITLAB_LINT_ACCESS_TOKEN",
+              "Type" : "PARAMETER_STORE",
+              "Value" : "/global/gitlab/codebuild/lint-access-token"
+            },
+            {
+              "Name" : "GITLAB_URL",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global/gitlab-url"
+              ]]}
             }
           ],
           "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
