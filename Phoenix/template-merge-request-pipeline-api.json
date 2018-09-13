@@ -18,7 +18,7 @@
     }
   },
   "Resources": {
-    "LatestPHX_MACRO_RANDOM_7": {
+    "Latest": {
       "Type": "AWS::ApiGateway::Deployment",
       "DependsOn": ["MergeRequestsPost"],
       "Properties": {
