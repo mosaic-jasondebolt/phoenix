@@ -63,8 +63,7 @@ def notify_gitlab(project_id, merge_request_id, request_body):
     print(response)
 
 def create_or_update_stack(
-    create, stack_name, template_url, parameters, project_id,
-    merge_request_internal_id, request_body):
+    create, stack_name, template_url, parameters, project_id, merge_request_internal_id):
     if create:
         response = cloudformation_client.create_stack(
           StackName=stack_name,
@@ -213,7 +212,7 @@ def lambda_handler(event, context):
             create_or_update_stack(
                 create=True, stack_name=stack_name, template_url=template_url,
                 parameters=parameters, project_id=project_id,
-                merge_request_internal_id=merge_request_internal_id, request_body=request_body)
+                merge_request_internal_id=merge_request_internal_id)
         except Exception as e:
             print('Stack may have already been created, and that is OK.')
             print('Error: {0}'.format(e))
@@ -222,7 +221,7 @@ def lambda_handler(event, context):
               create_or_update_stack(
                   create=False, stack_name=stack_name, template_url=template_url,
                   parameters=parameters, project_id=project_id,
-                  merge_request_internal_id=merge_request_internal_id, request_body=request_body)
+                  merge_request_internal_id=merge_request_internal_id)
             except Exception as ex:
                 print('Stack may not need to be updated.')
                 print('Error: {0}'.format(ex))
