@@ -22,12 +22,9 @@
         "StageDescription": {
           "Description": "Stage Description",
           "LoggingLevel": "INFO",
-          "MetricsEnabled": "true",
-          "Variables": {
-            "TestKey": "hello"
-          }
+          "MetricsEnabled": "true"
         },
-        "StageName": "v0"
+        "StageName": {"Ref": "Version"}
       }
     },
     "RestAPI": {
