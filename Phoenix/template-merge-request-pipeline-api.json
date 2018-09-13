@@ -10,24 +10,21 @@
     "Version": {
       "Description": "The identifier/version associated with this API.",
       "Type": "String"
+    },
+    "StageName": {
+      "Description": "The API Gateway stage name",
+      "Type": "String",
+      "Default": "v0"
     }
   },
   "Resources": {
-    "Latest": {
+    "LatestPHX_MACRO_RANDOM_7": {
       "Type": "AWS::ApiGateway::Deployment",
       "DependsOn": ["MergeRequestsPost"],
       "Properties": {
         "RestApiId": {"Ref": "RestAPI"},
         "Description": "Description here",
-        "StageDescription": {
-          "Description": "Stage Description",
-          "LoggingLevel": "INFO",
-          "MetricsEnabled": "true",
-          "Variables": {
-            "TestKey": "hello"
-          }
-        },
-        "StageName": "v0"
+        "StageName": {"Ref": "StageName"}
       }
     },
     "RestAPI": {
@@ -560,7 +557,7 @@
           ".",
           "amazonaws.com",
           "/",
-          {"Ref": "Version"},
+          {"Ref": "StageName"},
           "/",
           "MergeRequests"
         ]]
