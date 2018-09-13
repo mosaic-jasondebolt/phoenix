@@ -63,7 +63,7 @@ def notify_gitlab(project_id, merge_request_id, request_body):
     print(response)
 
 def create_or_update_stack(
-    create=True, stack_name, template_url, parameters, project_id,
+    create, stack_name, template_url, parameters, project_id,
     merge_request_internal_id, request_body):
     if create:
         response = cloudformation_client.create_stack(
