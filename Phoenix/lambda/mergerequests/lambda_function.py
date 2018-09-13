@@ -62,6 +62,34 @@ def notify_gitlab(project_id, merge_request_id, request_body):
     response = requests.post(gitlab_url, headers=headers)
     print(response)
 
+def create_or_update_stack(
+    create, stack_name, template_url, parameters, project_id, merge_request_internal_id):
+    if create:
+        response = cloudformation_client.create_stack(
+          StackName=stack_name,
+          TemplateURL=template_url,
+          Parameters=parameters,
+          Capabilities=['CAPABILITY_IAM']
+        )
+    else:
+        response = cloudformation_client.update_stack(
+          StackName=stack_name,
+          TemplateURL=template_url,
+          Parameters=parameters,
+          Capabilities=['CAPABILITY_IAM']
+        )
+    # Notify gitlab
+    region = os.environ['AWS_DEFAULT_REGION']
+
+    request_body = (
+        '<a href="https://console.aws.amazon.com/codepipeline/home?region='
+        '{region}#/view/{pipeline_name}">View Pipeline</a> &nbsp; &nbsp; '
+        ' {emoji} ').format(
+            region=region, pipeline_name=stack_name,
+            emoji=MONTH_EMOJI_MAP.get(datetime.now().month, ':white_check_mark:'))
+    notify_gitlab(project_id, merge_request_internal_id, request_body)
+
+
 def lambda_handler(event, context):
     print(event)
     json_obj = json.dumps(event, indent=4)
@@ -151,56 +179,53 @@ def lambda_handler(event, context):
     print('merge_request_internal_id is {0}'.format(merge_request_internal_id))
 
     if merge_state in ['merged', 'closed']:
-      print('Deleting Pipeline Stack')
-      # Delete the pipeline stack
-      response = cloudformation_client.delete_stack(
-        StackName=stack_name
-      )
-      print(response)
-
-      print('Deleting ECS Main Deploy Stack')
-      # Delete the ECS MAIN Task deploy stack
-      main_deploy_stack_name = '{0}-{1}-{2}-{3}'.format(stack_name, 'ecs', 'main', 'deploy')
-      print(main_deploy_stack_name)
-      response = cloudformation_client.delete_stack(
-        StackName=main_deploy_stack_name
-      )
-      print(response)
-
-      print('Waiting on ECS Main Deploy Stack deletion...')
-      main_deploy_waiter = cloudformation_client.get_waiter('stack_delete_complete')
-      main_deploy_waiter.wait(StackName=main_deploy_stack_name)
-
-      print('Deleting EC2 Deploy Stack')
-      # Delete the EC2 deploy stack
-      response = cloudformation_client.delete_stack(
-        StackName='{0}-{1}-{2}'.format(stack_name, 'ec2', 'deploy')
-      )
-      print(response)
-    else:
-      print('Creating or Updating stack')
-      print('Attempting to create stack')
-      try:
-        response = cloudformation_client.create_stack(
-          StackName=stack_name,
-          TemplateURL=template_url,
-          Parameters=parameters,
-          Capabilities=['CAPABILITY_IAM']
+        print('Deleting Pipeline Stack')
+        # Delete the pipeline stack
+        response = cloudformation_client.delete_stack(
+          StackName=stack_name
         )
-        # Notify gitlab
-        region = os.environ['AWS_DEFAULT_REGION']
+        print(response)
 
-        request_body = (
-            '<a href="https://console.aws.amazon.com/codepipeline/home?region='
-            '{region}#/view/{pipeline_name}">View Pipeline</a> &nbsp; &nbsp; '
-            ' {emoji} ').format(
-                region=region, pipeline_name=stack_name,
-                emoji=MONTH_EMOJI_MAP.get(datetime.now().month, ':white_check_mark:'))
-        notify_gitlab(project_id, merge_request_internal_id, request_body)
-      except Exception as e:
-        print('Stack may have already been created, and that is OK.')
-        print('Error: {0}'.format(e))
-        print('Continuing as normal. There is no need to update the stack once it is deleted')
+        print('Deleting ECS Main Deploy Stack')
+        # Delete the ECS MAIN Task deploy stack
+        main_deploy_stack_name = '{0}-{1}-{2}-{3}'.format(stack_name, 'ecs', 'main', 'deploy')
+        print(main_deploy_stack_name)
+        response = cloudformation_client.delete_stack(
+          StackName=main_deploy_stack_name
+        )
+        print(response)
+
+        print('Waiting on ECS Main Deploy Stack deletion...')
+        main_deploy_waiter = cloudformation_client.get_waiter('stack_delete_complete')
+        main_deploy_waiter.wait(StackName=main_deploy_stack_name)
+
+        print('Deleting EC2 Deploy Stack')
+        # Delete the EC2 deploy stack
+        response = cloudformation_client.delete_stack(
+          StackName='{0}-{1}-{2}'.format(stack_name, 'ec2', 'deploy')
+        )
+        print(response)
+    else:
+        print('Creating or Updating stack')
+        print('Attempting to create stack')
+        try:
+            create_or_update_stack(
+                create=True, stack_name=stack_name, template_url=template_url,
+                parameters=parameters, project_id=project_id,
+                merge_request_internal_id=merge_request_internal_id)
+        except Exception as e:
+            print('Stack may have already been created, and that is OK.')
+            print('Error: {0}'.format(e))
+            print('Attempting to update stack')
+            try:
+              create_or_update_stack(
+                  create=False, stack_name=stack_name, template_url=template_url,
+                  parameters=parameters, project_id=project_id,
+                  merge_request_internal_id=merge_request_internal_id)
+            except Exception as ex:
+                print('Stack may not need to be updated.')
+                print('Error: {0}'.format(ex))
+                print('Continuing as normal. There is no need to update the stack once it is deleted')
 
 
 MONTH_EMOJI_MAP = {
