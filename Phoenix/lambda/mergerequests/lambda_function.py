@@ -144,10 +144,6 @@ def lambda_handler(event, context):
       {
         'ParameterKey': 'IAMRole',
         'ParameterValue': os.environ['IAM_ROLE']
-      },
-      {
-        'ParameterKey': 'TestMe',
-        'ParameterValue': "IAM_HERE"
       }
     ]
 
