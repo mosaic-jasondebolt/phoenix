@@ -128,6 +128,27 @@
                     ]]
                   }
                 }
+              },
+              {
+                "Name": "Lint",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "lint"
+                    ]]
+                  }
+                }
               }
             ]
           },
