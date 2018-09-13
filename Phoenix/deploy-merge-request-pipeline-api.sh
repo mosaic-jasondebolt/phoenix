@@ -17,7 +17,7 @@ PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
 MICROSERVICE_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-microservice
 LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 ENVIRONMENT='all'
-VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
+VERSION_ID=$ENVIRONMENT
 STACK_NAME=$PROJECT_NAME-merge-request-pipeline-api
 CHANGE_SET_NAME=$VERSION_ID
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
