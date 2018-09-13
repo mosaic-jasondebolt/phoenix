@@ -169,6 +169,243 @@
         "Runtime": "python3.6",
         "Timeout": "25"
       }
+    },
+    "MacroVersion": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/macro-stack-version"]]},
+        "Type": "String",
+        "Value": {"Ref": "Version"},
+        "Description": "The version of latest deployed Macro cloudformation stack.",
+      }
+    },
+    "OrganizationNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/organization-name"]]},
+        "Type": "String",
+        "Value": {"Ref": "OrganizationName"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The organization name associated with this account"
+      }
+    },
+    "ProjectNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "OrganizationNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/project-name"]]},
+        "Type": "String",
+        "Value": {"Ref": "ProjectName"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The microservice name associated with this account"
+      }
+    },
+    "GitRepoNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "ProjectNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/git-repo-name"]]},
+        "Type": "String",
+        "Value": {"Ref": "GitRepoName"},
+        "Description": "The name of the git repo used by this project."
+      }
+    },
+    "GitRootProjectBranchParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRepoNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/git-root-project-branch"]]},
+        "Type": "String",
+        "Value": {"Ref": "GitRootProjectBranch"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The main git branch associated with your main pipeline (i.e master, main, etc.)",
+      }
+    },
+    "GitCurrentProjectBranchParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/git-current-project-branch"]]},
+        "Type": "String",
+        "Value": {"Ref": "GitCurrentProjectBranch"},
+        "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
+        "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
+      }
+    },
+    "CodeBuildDockerImageParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/code-build-docker-image"]]},
+        "Type": "String",
+        "Value": {"Ref": "CodeBuildDockerImage"},
+        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with."
+      }
+    },
+    "NodeJSBuildDockerImageParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/code-build-docker-image-nodejs"]]},
+        "Type": "String",
+        "Value": {"Ref": "NodeJSBuildDockerImage"},
+        "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with."
+      }
+    },
+    "CodeBuildBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/code-build-bucket-name"]]},
+        "Type": "String",
+        "Value": {"Fn::Join": ["-", [
+          {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "code-build"]]},
+        "Description": "The bucket name in which CodeBuild artifacts will be stored."
+      }
+    },
+    "CodePipelineBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/code-pipeline-bucket-name"]]},
+        "Type": "String",
+        "Value": {"Fn::Join": ["-", [
+          {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "code-pipeline"]]},
+        "Description": "The bucket name in which CodePipeline artifacts will be stored."
+      }
+    },
+    "MicroserviceBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/bucket-name"]]},
+        "Type": "String",
+        "Value": {"Fn::Join": ["-", [
+          {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "microservice"]]},
+        "Description": "The bucket name in which cloudformation templates and lambda functions will be stored."
+      }
+    },
+    "DomainParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/domain"]]},
+        "Type": "String",
+        "Value": {"Ref": "Domain"},
+        "Description": "The domain name that this service will fall under."
+      }
+    },
+    "SSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "CodeBuildBucketNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn"]]},
+        "Type": "String",
+        "Value": {"Ref": "SSLCertificateARN"},
+        "Description": "The AWS ACM Certificate ARN."
+      }
+    },
+    "ECSSSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn-ecs"]]},
+        "Type": "String",
+        "Value": {"Ref": "ECSSSLCertificateARN"},
+        "Description": "The AWS ACM Certificate ARN used by ECS tasks."
+      }
+    },
+    "APIDocsSSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn-api-docs"]]},
+        "Type": "String",
+        "Value": {"Ref": "APIDocsSSLCertificateARN"},
+        "Description": "The AWS ACM Certificate ARN used by API documentation."
+      }
+    },
+    "HostedZoneIdParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/hosted-zone-id"]]},
+        "Type": "String",
+        "Value": {"Ref": "HostedZoneId"},
+        "Description": "The Route53 hosted zone id that this service will fall under."
+      }
+    },
+    "GitlabURLParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/gitlab-url"]]},
+        "Type": "String",
+        "Value": {"Ref": "GitlabURL"},
+        "Description": "The Gitlab URL of your organization."
+      }
+    },
+    "KeyPairNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/key-pair-name"]]},
+        "Type": "String",
+        "Value": {"Ref": "KeyPairName"},
+        "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
+      }
+    },
+    "LambdaBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/lambda-bucket-name"]]},
+        "Type": "String",
+        "Value": {"Fn::Join": ["-", [
+          {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "lambda"]]},
+        "Description": "The bucket name in which Lambda artifacts will be stored."
+      }
+    },
+    "LoadBalancerLogsBucketNameParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "LambdaBucketNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/load-balancer-logs-bucket-name"]]},
+        "Type": "String",
+        "Value": {"Fn::Join": ["-", [
+          {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "load-balancer-logs"]]},
+        "Description": "The bucket name in which load balancer logs will be stored."
+      }
+    },
+    "ProjectDescriptionParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "LambdaBucketNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/project-description"]]},
+        "Type": "String",
+        "Value": {"Ref": "ProjectDescription"},
+        "Description": "A description of your project."
+      }
+    },
+    "NotificationEmailParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "ProjectDescriptionParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/notification-email"]]},
+        "Type": "String",
+        "Value": {"Ref": "NotificationEmail"},
+        "Description": "The email to send notifications to for this microservice"
+      }
+    },
+    "IAMRoleParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "ProjectDescriptionParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/iam-role"]]},
+        "Type": "String",
+        "Value": {"Ref": "IAMRole"},
+        "Description": "The IAM role that has access to all of the projects resources."
+      }
     }
   },
   "Outputs": {
