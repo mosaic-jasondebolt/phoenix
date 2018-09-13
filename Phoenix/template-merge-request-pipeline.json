@@ -58,6 +58,11 @@
       "Description": "The identifier/version associated with this deployment.",
       "Type": "String",
       "Default": "latest"
+    },
+    "TestMe": {
+      "Description": "A Test",
+      "Type": "String",
+      "Default": "latest"
     }
   },
   "Resources": {
@@ -732,6 +737,11 @@
         "TimeoutInMinutes": 60,
         "Tags": []
       }
+    }
+  },
+  "Outputs": {
+    "TestMe": {
+      "Value": {"Ref": "TestMe"}
     }
   }
 }
