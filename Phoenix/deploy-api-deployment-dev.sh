@@ -23,9 +23,6 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
-# Get the current API Gateway Deployment template from the stack, compare, and generate a new template.
-#python api_gateway_deployment_rotator.py template-api-deployment-params-dev.json > template-api-deployment.json
-
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-api-deployment-params-dev.json cloudformation > temp1.json
 
