@@ -15,9 +15,9 @@ fi
 
 # Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
 STACK_NAME=$PROJECT_NAME-microservice-cleanup
-MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+MICROSERVICE_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-microservice
 
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-microservice-cleanup.json" --delete
 

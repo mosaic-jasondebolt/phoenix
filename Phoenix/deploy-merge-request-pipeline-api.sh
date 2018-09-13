@@ -12,12 +12,14 @@ set -e
 
 # Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
-VERSION_ID=`jq -r '.Parameters.Version' template-merge-request-pipeline-api-params.json`
-STACK_NAME=$PROJECT_NAME-merge-request-pipeline-api
+ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+MICROSERVICE_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-microservice
+LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 ENVIRONMENT='all'
-CHANGE_SET_NAME=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
+VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
+STACK_NAME=$PROJECT_NAME-merge-request-pipeline-api
+CHANGE_SET_NAME=$VERSION_ID
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 
 # Check for valid arguments
@@ -29,6 +31,8 @@ fi
 
 # Convert create/update to uppercase
 OP=$(echo $1 | tr '/a-z/' '/A-Z/')
+
+aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-merge-request-pipeline.json" --delete
 
 # Upload the Lambda functions
 listOfLambdaFunctions='mergerequests post_mergerequests gitlab_custom_authorizer'

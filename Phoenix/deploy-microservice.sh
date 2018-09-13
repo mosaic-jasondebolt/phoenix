@@ -22,9 +22,10 @@ if [ -d "builds" ]; then
 fi
 
 # Extract JSON properties for a file into a local variable
-CLOUDFORMATION_ROLE=$(aws ssm get-parameter --name /microservice/phoenix/global/iam-role | jq '.Parameter.Value' | sed -e s/\"//g)
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-MICROSERVICE_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
+ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+MICROSERVICE_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-microservice
 STACK_NAME=$PROJECT_NAME-microservice
 ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
@@ -56,7 +57,3 @@ aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 if [[ $1 == 'create' ]]; then
   aws cloudformation update-termination-protection --enable-termination-protection --stack-name $STACK_NAME
 fi
-
-# Cleanup
-rm temp1.json
-rm temp2.json

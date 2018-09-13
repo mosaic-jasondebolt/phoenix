@@ -1,33 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Generates all resources required to clean up/tear down microservice components.",
-  "Parameters": {
-    "ProjectName": {
-      "Description": "The name of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/project-name"
-    },
-    "GitRepoName": {
-      "Description": "The name of the git repo for this project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/git-repo-name"
-    },
-    "GitCurrentProjectBranch": {
-      "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/git-current-project-branch"
-    },
-    "CodeBuildDockerImage": {
-      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/code-build-docker-image"
-    },
-    "CodeBuildBucketName": {
-      "Description": "The bucket name in which CodeBuild artifacts will be stored.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/code-build-bucket-name"
-    }
-  },
+  "Transform" : ["ProjectLambdaMacro"],
   "Resources": {
     "CodeBuildServiceRole": {
       "Type": "AWS::IAM::Role",
@@ -46,9 +20,7 @@
           "PolicyName": {
             "Fn::Join": ["-", [
               "code-build",
-              {
-                "Ref": "ProjectName"
-              },
+              "PHX_MACRO_PROJECT_NAME",
               "cleanup",
               "service-policy"
             ]]
@@ -68,9 +40,8 @@
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupName": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
+          "Fn::Join": ["-", [
+            "PHX_MACRO_PROJECT_NAME",
             "CodeBuild",
             "Microservice",
             "Cleanup",
@@ -78,9 +49,8 @@
           ]]
         },
         "GroupDescription": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
+          "Fn::Join": ["-", [
+            "PHX_MACRO_PROJECT_NAME",
             "CodeBuild",
             "Microservice",
             "Cleanup",
@@ -154,9 +124,7 @@
               "Value" : {"Ref": "AWS::AccountId"}
             }
           ],
-          "Image": {
-            "Ref": "CodeBuildDockerImage"
-          },
+          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
@@ -167,9 +135,7 @@
             "microservice"
           ]]
         },
-        "ServiceRole": {
-          "Ref": "CodeBuildServiceRole"
-        },
+        "ServiceRole": {"Ref": "CodeBuildServiceRole"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-destroy-microservice.yml",
           "Type": "CODECOMMIT",
@@ -178,9 +144,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              {
-                "Ref": "GitRepoName"
-              }
+              "PHX_MACRO_GIT_REPO_NAME"
             ]]
           }
         },

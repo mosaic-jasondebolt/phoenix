@@ -29,7 +29,7 @@ listOfPythonLambdaFunctions='macro'
 for functionName in $listOfPythonLambdaFunctions
 do
   mkdir -p builds/$functionName
-cp -rf lambda/$functionName/* builds/$functionName/
+  cp -rf lambda/$functionName/* builds/$functionName/
   cd builds/$functionName/
   pip install -r requirements.txt -t .
   zip -r lambda_function.zip ./*

@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "Version": "microservice",
+    "Version": "VERSION_ID",
     "VPCPrefix": "dev"
   }
 }

@@ -27,7 +27,7 @@
             "TestKey": "hello"
           }
         },
-        "StageName": {"Ref": "Version"}
+        "StageName": "v0"
       }
     },
     "RestAPI": {
