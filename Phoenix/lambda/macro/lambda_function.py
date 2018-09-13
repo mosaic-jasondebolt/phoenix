@@ -39,7 +39,7 @@ def macro_value_replace(obj, old=None, new=None, replace_map=None):
 def macro_key_replace(obj, old=None, new=None):
     # This function only replaces keys in a JSON CloudFormation template, not values.
     # Updates only the part of they key that matches.
-    # {"old_123": ...} --> {"new_123": ...}
+    # {"old123": ...} --> {"new123": ...}
     if isinstance(obj, dict):
         for key, value in obj.items():
             if old is not None and new is not None:
