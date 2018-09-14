@@ -91,9 +91,6 @@ For each environment (dev, testing, prod), and additional developer environments
 * Update all of the params....json files with your project info
 * The ProjectName should match the name of this Git repo. Use all lower case, optionally with dashes, keep it short.
 ```
-cd Phoenix
-$ python search_and_replace.py . 714284646049 {your AWS AccountId}
-$ python search_and_replace.py . phoenix {name of your project}
 
 Make sure there are no dashes in the DatabaseNamePrefix or MasterUsername parameters in the
 template-database-params JSON files.

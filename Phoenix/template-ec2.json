@@ -503,6 +503,16 @@
               "Name" : "ENVIRONMENT",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "Environment"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
+            },
+            {
+              "Name" : "DOMAIN",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_DOMAIN"
             }
           ],
           "Image": "PHX_MACRO_NODEJS_BUILD_DOCKER_IMAGE",

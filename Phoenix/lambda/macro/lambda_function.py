@@ -52,7 +52,7 @@ def macro_key_replace(obj, old=None, new=None):
         for index, item in enumerate(obj):
             macro_key_replace(item, old, new)
 
-def get_phoenix_macro_environment_variable_map():
+def get_macro_environment_variable_map():
     replace_map = {}
     for env_variable in os.environ:
         if env_variable.startswith('PHX_MACRO_'):
@@ -65,11 +65,11 @@ def lambda_handler(event, context):
     print(json.dumps(event, indent=2, default=str))
 
     fragment = event['fragment']
-    phoenix_macro_value_replace_map = get_phoenix_macro_environment_variable_map()
-    print(phoenix_macro_value_replace_map)
+    macro_value_replace_map = get_macro_environment_variable_map()
+    print(macro_value_replace_map)
 
     # Replace all values in the PHX_MACRO_* lambda map
-    macro_value_replace(fragment, replace_map=phoenix_macro_value_replace_map)
+    macro_value_replace(fragment, replace_map=macro_value_replace_map)
 
     # Replace API Deployment logical CloudFormation ID's with random values (or anything else with the PHX_MACRO_RANDOM constant)
     macro_key_replace(fragment, old='PHX_MACRO_RANDOM_7', new=random_uppercase_string(7))

@@ -440,6 +440,16 @@
               "Value" : {"Ref": "Environment"}
             },
             {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+            },
+            {
               "Name": "RDS_MASTER_USERNAME",
               "Type" : "PLAINTEXT",
               "Value": {"Ref": "MasterUsername"}
@@ -582,6 +592,16 @@
               "Name" : "ENVIRONMENT",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "Environment"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
+            },
+            {
+              "Name" : "LAMBDA_BUCKET_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
             },
             {
               "Name": "RDS_MASTER_USERNAME",

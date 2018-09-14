@@ -1,11 +1,5 @@
 version: 0.2
 
-env:
-  parameter-store:
-    ORGANIZATION_NAME: /microservice/phoenix/global/organization-name
-    PROJECT_NAME: /microservice/phoenix/global/project-name
-    DOMAIN: /microservice/phoenix/global/domain
-
 phases:
   install:
     commands:

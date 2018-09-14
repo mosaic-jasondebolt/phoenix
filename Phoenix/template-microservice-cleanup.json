@@ -122,6 +122,21 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "ORGANIZATION_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_ORGANIZATION_NAME"
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
+            },
+            {
+              "Name" : "DOMAIN",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_DOMAIN"
             }
           ],
           "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",

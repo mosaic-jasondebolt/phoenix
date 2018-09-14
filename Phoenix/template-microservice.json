@@ -613,6 +613,11 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
+            },
+            {
+              "Name" : "PROJECT_NAME",
+              "Type" : "PLAINTEXT",
+              "Value" : "PHX_MACRO_PROJECT_NAME"
             }
           ],
           "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
