@@ -7,8 +7,8 @@ set -e
 #   ./deploy-ecs-all-dev.sh create
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-DOMAIN_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/domain | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+DOMAIN_NAME=$(jq -r '.Parameters.Domain' template-macro-params.json)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-deployment-params-dev.json`
 
 if [ $1 == "create" ]

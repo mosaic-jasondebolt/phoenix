@@ -3,25 +3,10 @@
   "Description": "Generates all database resources required for a microservice.",
   "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
-    "ProjectName": {
-      "Description": "The name of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/project-name"
-    },
     "SnapshotIdentifier": {
       "Description": "The RDS Cluster Snapshot ID if you plan on restoring the DB cluster.",
       "Type": "String",
       "Default": ""
-    },
-    "Domain": {
-      "Description": "The domain name that this service will fall under.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/domain"
-    },
-    "HostedZoneId": {
-      "Description": "The Route53 hosted zone id that this service will fall under.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/hosted-zone-id"
     },
     "DatabaseNamePrefix": {
       "Description": "The name of your datbase.",
@@ -67,34 +52,9 @@
       ],
       "Type": "String"
     },
-    "LambdaBucketName": {
-      "Description": "The bucket name in which Lambda artifacts will be stored.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/lambda-bucket-name"
-    },
-    "CodeBuildBucketName": {
-      "Description": "The bucket name in which CodeBuild artifacts will be stored.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/code-build-bucket-name"
-    },
-    "CodeBuildDockerImage": {
-      "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/code-build-docker-image"
-    },
-    "CodeBuildServiceRoleArn": {
-      "Description": "The ARN of the CodeBuild service role.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/code-build-service-role-arn"
-    },
     "Version": {
       "Description": "The Lambda function version",
       "Type": "String"
-    },
-    "IAMRole": {
-      "Description": "The role of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/iam-role"
     }
   },
   "Conditions": {
@@ -208,12 +168,9 @@
       "Properties": {
         "DBSubnetGroupDescription": "Microservice DB subnet group",
         "DBSubnetGroupName": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
-            {
-              "Ref": "Environment"
-            },
+          "Fn::Join": ["-", [
+            "PHX_MACRO_PROJECT_NAME",
+            {"Ref": "Environment"},
             "db", "subnet", "group"
           ]]
         },
@@ -244,23 +201,17 @@
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupName": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
-            {
-              "Ref": "Environment"
-            },
+          "Fn::Join": ["-", [
+            "PHX_MACRO_PROJECT_NAME",
+            {"Ref": "Environment"},
             "DB",
             "SG"
           ]]
         },
         "GroupDescription": {
-          "Fn::Join": ["-", [{
-              "Ref": "ProjectName"
-            },
-            {
-              "Ref": "Environment"
-            },
+          "Fn::Join": ["-", [
+            "PHX_MACRO_PROJECT_NAME",
+            {"Ref": "Environment"},
             "DB",
             "SG"
           ]]
@@ -459,9 +410,7 @@
           "Type": "S3",
           "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
           "NamespaceType": "BUILD_ID",
-          "Name": {
-            "Ref": "ProjectName"
-          },
+          "Name": "PHX_MACRO_PROJECT_NAME",
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
@@ -470,17 +419,13 @@
             "Fn::Join": ["", [
               "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
               "/",
-              {
-                "Ref": "ProjectName"
-              },
+              "PHX_MACRO_PROJECT_NAME",
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": {
-          "Ref": "ProjectName"
-        },
+        "Description": "PHX_MACRO_PROJECT_NAME",
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -549,7 +494,12 @@
             {"Ref": "Environment"}
           ]]
         },
-        "ServiceRole": {"Ref": "CodeBuildServiceRoleArn"},
+        "ServiceRole": {"Fn::Join": ["", [
+          "{{resolve:ssm:",
+          "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
+          "/global/code-build-service-role-arn",
+          ":1}}"
+        ]]},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-rds-migration.yml",
           "Type": "CODECOMMIT",
@@ -558,9 +508,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              {
-                "Ref": "ProjectName"
-              }
+              "PHX_MACRO_PROJECT_NAME"
             ]]
           }
         },
@@ -606,9 +554,7 @@
           "Type": "S3",
           "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
           "NamespaceType": "BUILD_ID",
-          "Name": {
-            "Ref": "ProjectName"
-          },
+          "Name": "PHX_MACRO_PROJECT_NAME",
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
@@ -617,17 +563,13 @@
             "Fn::Join": ["", [
               "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
               "/",
-              {
-                "Ref": "ProjectName"
-              },
+              "PHX_MACRO_PROJECT_NAME",
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": {
-          "Ref": "ProjectName"
-        },
+        "Description": "PHX_MACRO_PROJECT_NAME",
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -696,7 +638,12 @@
             {"Ref": "Environment"}
           ]]
         },
-        "ServiceRole": {"Ref": "CodeBuildServiceRoleArn"},
+        "ServiceRole": {"Fn::Join": ["", [
+          "{{resolve:ssm:",
+          "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
+          "/global/code-build-service-role-arn",
+          ":1}}"
+        ]]},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-integration-test.yml",
           "Type": "CODECOMMIT",
@@ -705,9 +652,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              {
-                "Ref": "ProjectName"
-              }
+              "PHX_MACRO_PROJECT_NAME"
             ]]
           }
         },

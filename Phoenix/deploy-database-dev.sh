@@ -24,14 +24,12 @@ fi
 # Convert create/update to uppercase
 OP=$(echo $1 | tr '/a-z/' '/A-Z/')
 
-# Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-database-params-dev.json`
-LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-database-$ENVIRONMENT
-
-# Allow developers to name the environment whatever they want, supporting multiple dev environments.
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID
 

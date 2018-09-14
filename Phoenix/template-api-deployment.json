@@ -1,12 +1,8 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Deploys an API (RESTful or not)",
+  "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
-    "ProjectName": {
-      "Description": "The name of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/project-name"
-    },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
@@ -23,13 +19,9 @@
             "Fn::Join": [
               "-",
               [
-                {
-                  "Ref": "ProjectName"
-                },
+                "PHX_MACRO_PROJECT_NAME",
                 "api",
-                {
-                  "Ref": "Environment"
-                },
+                {"Ref": "Environment"},
                 "RestApiId"
               ]
             ]
@@ -53,13 +45,9 @@
                 "Fn::Join": [
                   "-",
                   [
-                    {
-                      "Ref": "ProjectName"
-                    },
+                    "PHX_MACRO_PROJECT_NAME",
                     "api",
-                    {
-                      "Ref": "Environment"
-                    },
+                    {"Ref": "Environment"},
                     "RestApiId"
                   ]
                 ]
@@ -79,13 +67,9 @@
             "Fn::Join": [
               "-",
               [
-                {
-                  "Ref": "ProjectName"
-                },
+                "PHX_MACRO_PROJECT_NAME",
                 "api",
-                {
-                  "Ref": "Environment"
-                },
+                {"Ref": "Environment"},
                 "RestApiId"
               ]
             ]
@@ -116,13 +100,9 @@
             "Fn::Join": [
               "-",
               [
-                {
-                  "Ref": "ProjectName"
-                },
+                "PHX_MACRO_PROJECT_NAME",
                 "api",
-                {
-                  "Ref": "Environment"
-                },
+                {"Ref": "Environment"},
                 "RestApiId"
               ]
             ]
@@ -147,13 +127,9 @@
                 "Fn::Join": [
                   "-",
                   [
-                    {
-                      "Ref": "ProjectName"
-                    },
+                    "PHX_MACRO_PROJECT_NAME",
                     "api",
-                    {
-                      "Ref": "Environment"
-                    },
+                    {"Ref": "Environment"},
                     "RestApiId"
                   ]
                 ]
@@ -173,13 +149,9 @@
             "Fn::Join": [
               "-",
               [
-                {
-                  "Ref": "ProjectName"
-                },
+                "PHX_MACRO_PROJECT_NAME",
                 "api",
-                {
-                  "Ref": "Environment"
-                },
+                {"Ref": "Environment"},
                 "RestApiId"
               ]
             ]
@@ -210,13 +182,9 @@
             "Fn::Join": [
               "-",
               [
-                {
-                  "Ref": "ProjectName"
-                },
+                "PHX_MACRO_PROJECT_NAME",
                 "api",
-                {
-                  "Ref": "Environment"
-                },
+                {"Ref": "Environment"},
                 "RestApiId"
               ]
             ]

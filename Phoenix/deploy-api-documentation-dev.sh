@@ -10,9 +10,6 @@ set -e
 #   ./deploy-api-documentations-dev.sh create
 #   ./deploy-api-documentations-dev.sh update
 
-# Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-
 # Check for valid arguments
 if [ $# -ne 1 ]
   then
@@ -20,11 +17,20 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
+# Convert create/update to uppercase
+OP=$(echo $1 | tr '/a-z/' '/A-Z/')
+
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+
 listOfVersions='v0'
 for docVersion in $listOfVersions
 do
   ENVIRONMENT=$(jq -r '.Parameters.Environment' template-api-documentation-$docVersion-params-dev.json)
   STACK_NAME=$PROJECT_NAME-api-documentation-$docVersion-$ENVIRONMENT
+  ENVIRONMENT='all'
+  VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
+  CHANGE_SET_NAME=$VERSION_ID
 
   # Regenerate the dev params file into a format the the CloudFormation CLI expects.
   python parameters_generator.py template-api-documentation-$docVersion-params-dev.json cloudformation > temp1.json
@@ -32,11 +38,20 @@ do
   # Validate the CloudFormation template before template execution.
   aws cloudformation validate-template --template-body file://template-api-documentation.json
 
-  # Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-  aws cloudformation $1-stack --stack-name $STACK_NAME \
+  aws cloudformation create-change-set --stack-name $STACK_NAME \
+      --change-set-name $CHANGE_SET_NAME \
       --template-body file://template-api-documentation.json \
       --parameters file://temp1.json \
-      --capabilities CAPABILITY_IAM
+      --change-set-type $OP \
+      --capabilities CAPABILITY_IAM \
+      --role-arn $CLOUDFORMATION_ROLE
+
+  aws cloudformation wait change-set-create-complete \
+      --change-set-name $CHANGE_SET_NAME --stack-name $STACK_NAME
+
+  # Let's automatically execute the change-set for now
+  aws cloudformation execute-change-set --stack-name $STACK_NAME \
+      --change-set-name $CHANGE_SET_NAME
 
   aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 done

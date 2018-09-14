@@ -19,8 +19,8 @@ set -e
 #   ./deploy-api-dev-all.sh update swagger-postman l1l5pcj1xc v0
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
-DOMAIN_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/domain | jq '.Parameter.Value' | sed -e s/\"//g)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+DOMAIN_NAME=$(jq -r '.Parameters.Domain' template-macro-params.json)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-deployment-params-dev.json`
 API_DEPLOYMENT_STACK_NAME=$PROJECT_NAME-api-deployment-$ENVIRONMENT
 

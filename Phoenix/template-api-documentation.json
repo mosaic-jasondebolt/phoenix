@@ -1,32 +1,8 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Deploys AWS resources required to support versioned API documentation. Resources include a static S3 website/bucket, Bucket policy, CloudFront distribution, Web Application Firewall ACL, WAF rules, and WAF predicates for managing API documentation access.",
+  "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
-    "ProjectName": {
-      "Description": "The name of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/project-name"
-    },
-    "IAMRole": {
-      "Description": "The role of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/iam-role"
-    },
-    "HostedZoneId": {
-      "Description": "The Route53 hosted zone id that this service will fall under.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/hosted-zone-id"
-    },
-    "Domain": {
-      "Description": "The domain name for the static S3 bucket website.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/domain"
-    },
-    "APIDocsSSLCertificateARN": {
-      "Description": "The API Docs AWS ACM Certificate ARN.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/ssl-certificate-arn-api-docs"
-    },
     "APIDocsUserAgent": {
       "Description": "The user agent used for API Documentation access",
       "Type": "AWS::SSM::Parameter::Value<String>",
@@ -49,9 +25,7 @@
           "Fn::Join": [".", [{
               "Ref": "DomainPrefix"
             },
-            {
-              "Ref": "Domain"
-            }
+            "PHX_MACRO_DOMAIN"
           ]]
         },
         "AccessControl": "PublicRead",
@@ -96,7 +70,7 @@
           "Comment": {
             "Fn::Join": ["-", [
               { "Ref": "DomainPrefix" },
-              { "Ref": "Domain" }
+              "PHX_MACRO_DOMAIN"
             ]]
           }
         }
@@ -114,7 +88,7 @@
           "Aliases": [{
             "Fn::Join": [".", [
               { "Ref": "DomainPrefix" },
-              { "Ref": "Domain" }
+              "PHX_MACRO_DOMAIN"
             ]]
           }],
           "DefaultRootObject": "index.html",
@@ -123,14 +97,14 @@
               "Id": {
                 "Fn::Join": [".", [
                   { "Ref": "DomainPrefix" },
-                  { "Ref": "Domain" },
+                  "PHX_MACRO_DOMAIN",
                   "s3.amazonaws.com"
                 ]]
               },
               "DomainName": {
                 "Fn::Join": [".", [
                   { "Ref": "DomainPrefix" },
-                  { "Ref": "Domain" },
+                  "PHX_MACRO_DOMAIN",
                   "s3.amazonaws.com"
                 ]]
               },
@@ -151,7 +125,7 @@
             "TargetOriginId": {
               "Fn::Join": [".", [
                 { "Ref": "DomainPrefix" },
-                { "Ref": "Domain" },
+                "PHX_MACRO_DOMAIN",
                 "s3.amazonaws.com"
               ]]
             },
@@ -188,7 +162,7 @@
           "Value": {
             "Fn::Join": [".", [
               { "Ref": "DomainPrefix" },
-              { "Ref": "Domain" }
+              "PHX_MACRO_DOMAIN"
             ]]
           }
         }]
@@ -261,7 +235,7 @@
         "Name": {
           "Fn::Join": ["-", [
             { "Ref": "DomainPrefix" },
-            { "Ref": "Domain" },
+            "PHX_MACRO_DOMAIN",
             "user-agent"
           ]]
         }
@@ -319,7 +293,7 @@
         "Name": {
           "Fn::Join": ["-", [
             { "Ref": "DomainPrefix" },
-            { "Ref": "Domain" },
+            "PHX_MACRO_DOMAIN",
             "ip-whitelist"
           ]]
         }

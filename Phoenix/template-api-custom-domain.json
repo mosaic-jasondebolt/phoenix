@@ -1,30 +1,11 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Deploys an API (RESTful or not)",
+  "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
-    "ProjectName": {
-      "Description": "The name of your project.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/project-name"
-    },
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
-    },
-    "HostedZoneId": {
-      "Description": "The Route53 hosted zone id that this service will fall under.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/hosted-zone-id"
-    },
-    "Domain": {
-      "Description": "The domain name that this service will fall under.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/domain"
-    },
-    "SSLCertificateARN": {
-      "Description": "The AWS ACM Certificate ARN.",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-      "Default": "/microservice/phoenix/global/ssl-certificate-arn"
     },
     "URLPrefixOverride": {
       "Description": "The URL prefix to override the environment prefix with. Works only for non-production environments.",

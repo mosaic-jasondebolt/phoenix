@@ -14,15 +14,34 @@ set -e
 #   ./deploy-ecs-task-main-def.sh update .   --> Dockerfile in project root dir.
 #   ./deploy-ecs-task-main-def.sh update ecs   --> Dockerfile in ecs dir.
 
+# Check for valid arguments
+if [ $# -ne 2 ]
+  then
+    echo "Incorrect number of arguments supplied. Pass in either 'create' or 'update' and the location of the docker file"
+    exit 1
+fi
+
+# Convert create/update to uppercase
+OP=$(echo $1 | tr '/a-z/' '/A-Z/')
+
+if [ -d "builds" ]; then
+  echo deleting builds dir
+  rm -rf builds
+fi
+
 ECS_PARAM_FILE='template-ecs-task-main-params-dev.json'
 ECS_FILE='template-ecs-task.json'
 TASK_FAMILY='main'
 
 AWS_ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 AWS_REGION=`aws configure get region`
-PROJECT_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/project-name | jq '.Parameter.Value' | sed -e s/\"//g)
+
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
+ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
+
 ENVIRONMENT=`jq -r '.Parameters.Environment' $ECS_PARAM_FILE`
-LAMBDA_BUCKET_NAME=$(aws ssm get-parameter --name /microservice/phoenix/global/lambda-bucket-name | jq '.Parameter.Value' | sed -e s/\"//g)
 STACK_NAME=$PROJECT_NAME-ecs-$TASK_FAMILY-$ENVIRONMENT
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 IMAGE_TAG=$TASK_FAMILY-$ENVIRONMENT-`date +"%Y-%m-%d-%H%M%S"`
@@ -30,6 +49,7 @@ IMAGE_NAME=$PROJECT_NAME-$TASK_FAMILY
 ECR_REPO=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$IMAGE_TAG
 
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
+CHANGE_SET_NAME=$VERSION_ID
 
 # Upload the Python Lambda functions
 listOfPythonLambdaFunctions='password_generator'
@@ -47,14 +67,6 @@ done
 
 # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
 sed "s/VERSION_ID/$VERSION_ID/g" $ECS_PARAM_FILE > temp1.json
-
-
-# Check for valid arguments
-if [ $# -ne 2 ]
-  then
-    echo "Incorrect number of arguments supplied. Pass in either 'create' or 'update' and the location of the docker file"
-    exit 1
-fi
 
 if [ $2 == "sbt" ]
   then
@@ -85,11 +97,20 @@ python parameters_generator.py temp2.json cloudformation > temp3.json
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://$ECS_FILE
 
-# Create or update the CloudFormation stack with deploys your docker service to the Dev cluster.
-aws cloudformation $1-stack --stack-name $STACK_NAME \
+aws cloudformation create-change-set --stack-name $STACK_NAME \
+    --change-set-name $CHANGE_SET_NAME \
     --template-body file://$ECS_FILE \
     --parameters file://temp3.json \
-    --capabilities CAPABILITY_NAMED_IAM
+    --change-set-type $OP \
+    --capabilities CAPABILITY_NAMED_IAM \
+    --role-arn $CLOUDFORMATION_ROLE
+
+aws cloudformation wait change-set-create-complete \
+    --change-set-name $CHANGE_SET_NAME --stack-name $STACK_NAME
+
+# Let's automatically execute the change-set for now
+aws cloudformation execute-change-set --stack-name $STACK_NAME \
+    --change-set-name $CHANGE_SET_NAME
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 

@@ -160,7 +160,12 @@
     "CodeBuildServiceRoleArnParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "/microservice/phoenix/global/code-build-service-role-arn",
+        "Name": {"Fn::Join": ["/", [
+          "/microservice",
+          "PHX_MACRO_PROJECT_NAME",
+          "global",
+          "code-build-service-role-arn"
+        ]]},
         "Type": "String",
         "Value": "PHX_MACRO_IAM_ROLE",
         "Description": "The Code Build Service Role ARN"
@@ -205,7 +210,12 @@
     "CodeBuildSecurityGroupParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "/microservice/phoenix/global/code-build-security-group",
+        "Name": {"Fn::Join": ["/", [
+          "/microservice",
+          "PHX_MACRO_PROJECT_NAME",
+          "global",
+          "code-build-security-group"
+        ]]},
         "Type": "String",
         "Value": {"Ref": "CodeBuildSecurityGroup"},
         "Description": "The Code Build security group ID"
@@ -634,7 +644,12 @@
     "CodePipelineServiceRoleArnParam": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
-        "Name": "/microservice/phoenix/global/code-pipeline-service-role-arn",
+        "Name": {"Fn::Join": ["/", [
+          "/microservice",
+          "PHX_MACRO_PROJECT_NAME",
+          "global",
+          "code-pipeline-service-role-arn"
+        ]]},
         "Type": "String",
         "Value": "PHX_MACRO_IAM_ROLE",
         "Description": "The Code Pipeline Service Role ARN"
@@ -1710,7 +1725,8 @@
                 "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
                       "api-documentation",
                       "prod"
                     ]]
@@ -1742,7 +1758,7 @@
         ],
         "ArtifactStore": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME",
+          "Location": "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME"
         }
       }
     },
@@ -1757,9 +1773,10 @@
           "resources": [{"Ref": "CodePipeline"}]
         },
         "State" : "ENABLED",
-        "Targets" : [ {"Arn": {"Ref": "CodePipelineFailedSNSTopic"},
-          "Id": {"Fn::Join": ["-", ["event-pipeline-failed-for", "PHX_MACRO_PROJECT_NAME"] ]
-          } } ]
+        "Targets" : [{
+          "Arn": {"Ref": "CodePipelineFailedSNSTopic"},
+          "Id": {"Fn::Join": ["-", ["event-pipeline-failed-for", "PHX_MACRO_PROJECT_NAME"] ]}
+        }]
       }
     }
   }
