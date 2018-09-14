@@ -819,6 +819,33 @@
                 }
               },
               {
+                "Name": "EC2ChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
+                }
+              },
+              {
                 "Name": "EC2",
                 "ActionTypeId": {
                   "Category": "Deploy",
@@ -831,7 +858,7 @@
                 }],
                 "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -840,9 +867,34 @@
                       "ec2",
                       "testing"
                     ]]
+                  }
+                }
+              },
+              {
+                "Name": "LambdaChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "testing"
+                    ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ec2-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-ec2.json"
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               },
               {
@@ -858,7 +910,7 @@
                 }],
                 "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -867,9 +919,34 @@
                       "lambda",
                       "testing"
                     ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDomainChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "testing"
+                    ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-lambda.json"
+                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
                 }
               },
               {
@@ -885,7 +962,7 @@
                 }],
                 "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -894,9 +971,34 @@
                       "api-custom-domain",
                       "testing"
                     ]]
+                  }
+                }
+              },
+              {
+                "Name": "V0_APIDocumentationChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "testing"
+                    ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                  "TemplateConfiguration": "BuildOutput::t-api-documentation-v0-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api-documentation.json"
                 }
               },
               {
@@ -912,7 +1014,7 @@
                 }],
                 "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -921,9 +1023,7 @@
                       "api-documentation-v0",
                       "testing"
                     ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-documentation-v0-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api-documentation.json"
+                  }
                 }
               },
               {
