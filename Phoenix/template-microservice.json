@@ -1193,6 +1193,14 @@
                       "testing"
                     ]]
                   },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "testing"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
                 }
@@ -1214,6 +1222,14 @@
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "ecs",
@@ -1246,6 +1262,13 @@
                       "testing"
                     ]]
                   },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "testing"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::t-api-deployment-params-testing.json",
                   "TemplatePath": "BuildOutput::template-api-deployment.json"
                 }
@@ -1267,6 +1290,13 @@
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "api-deployment",
