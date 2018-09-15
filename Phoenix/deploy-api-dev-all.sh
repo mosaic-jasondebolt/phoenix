@@ -29,7 +29,6 @@ if [ $1 == "create" ]
     ./deploy-lambda-dev.sh $1
     ./deploy-api-custom-domain-dev.sh $1
     ./deploy-api-dev.sh $1
-    ./deploy-api-internals-dev.sh $1
     ./deploy-api-deployment-dev.sh $1
 fi
 
@@ -41,7 +40,6 @@ if [ $1 == "create_all" ]
     ./deploy-lambda-dev.sh create
     ./deploy-api-custom-domain-dev.sh create
     ./deploy-api-dev.sh create
-    ./deploy-api-internals-dev.sh create
     ./deploy-api-deployment-dev.sh create
 fi
 
@@ -49,7 +47,6 @@ if [ $1 == "create_without_domain" ]
   then
     ./deploy-lambda-dev.sh create
     ./deploy-api-dev.sh create
-    ./deploy-api-internals-dev.sh create
     ./deploy-api-deployment-dev.sh create
 fi
 
@@ -80,7 +77,7 @@ fi
 if [ $1 == "update" ] && [ $2 == "api-deploy" ]
   then
     ./deploy-api-dev.sh update
-    ./deploy-api-internals-dev.sh update
+    ./deploy-api-deployment-dev.sh update # Calls the 'API internals' Lambda function which adds body template mappings.
 
     aws apigateway delete-base-path-mapping --domain-name $ENVIRONMENT.$DOMAIN_NAME --base-path $VERSION
     aws apigateway delete-stage --rest-api-id $API_ID --stage-name $VERSION

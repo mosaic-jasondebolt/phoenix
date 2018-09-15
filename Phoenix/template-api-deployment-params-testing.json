@@ -1,5 +1,6 @@
 {
   "Parameters": {
-    "Environment": "testing"
+    "Environment": "testing",
+    "Version": "VERSION_ID"
   }
 }

@@ -6,11 +6,71 @@
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
       "Type": "String"
+    },
+    "Port": {
+      "Description": "The TCP Port that the VPC Proxy will send requests to. Use 443 for HTTPS.",
+      "Type": "String",
+      "Default": "80"
+    },
+    "Version": {
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
+      "Type": "String"
     }
   },
   "Resources": {
+    "LambdaAPIInternals": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": "PHX_MACRO_IAM_ROLE",
+        "Code": {
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Key": {
+            "Fn::Join": ["/", [
+              {"Ref": "Version"},
+              "api_internals",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+    "CustomResourceAPIInternals": {
+      "Type": "Custom::APIInternals",
+      "DependsOn": "LambdaAPIInternals",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": ["LambdaAPIInternals", "Arn"]
+        },
+        "LambdaVersion": {"Ref": "Version"},
+        "Hostname": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              "PHX_MACRO_PROJECT_NAME",
+              "ecs-main",
+              {"Ref": "Environment"},
+              "ServiceHostname"
+            ]]
+          }
+        },
+        "Port": {"Ref": "Port"},
+        "RestApiId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              "PHX_MACRO_PROJECT_NAME",
+              "api",
+              {"Ref": "Environment"},
+              "RestApiId"
+            ]]
+          }
+        }
+      }
+    },
     "v0DocumentationVersion": {
       "Type": "AWS::ApiGateway::DocumentationVersion",
+      "DependsOn": ["CustomResourceAPIInternals"],
       "Properties": {
         "Description": "v0 API",
         "DocumentationVersion": "v0",
@@ -31,7 +91,7 @@
     },
     "v0DeploymentStage": {
         "Type": "AWS::ApiGateway::Stage",
-        "DependsOn": ["v0Deployment", "v0DocumentationVersion"],
+        "DependsOn": ["CustomResourceAPIInternals", "v0Deployment", "v0DocumentationVersion"],
         "Properties": {
             "StageName": "v0",
             "Description": {
@@ -61,6 +121,7 @@
     },
     "v0Deployment": {
       "Type": "AWS::ApiGateway::Deployment",
+      "DependsOn": ["CustomResourceAPIInternals"],
       "Properties": {
         "RestApiId": {
           "Fn::ImportValue": {
@@ -83,6 +144,7 @@
     },
     "v0BasePathMapping": {
       "Type" : "AWS::ApiGateway::BasePathMapping",
+      "DependsOn": ["CustomResourceAPIInternals"],
       "Properties" : {
         "BasePath" : "v0",
         "DomainName" : {
@@ -113,7 +175,7 @@
     },
     "v1DeploymentStage": {
         "Type": "AWS::ApiGateway::Stage",
-        "DependsOn": ["v1Deployment"],
+        "DependsOn": ["CustomResourceAPIInternals", "v1Deployment"],
         "Properties": {
             "StageName": "v1",
             "Description": {
@@ -142,7 +204,7 @@
     },
     "v1Deployment": {
       "Type": "AWS::ApiGateway::Deployment",
-      "DependsOn": "v0Deployment",
+      "DependsOn": ["CustomResourceAPIInternals", "v0Deployment"],
       "Properties": {
         "RestApiId": {
           "Fn::ImportValue": {
@@ -165,6 +227,7 @@
     },
     "v1BasePathMapping": {
       "Type" : "AWS::ApiGateway::BasePathMapping",
+      "DependsOn": ["CustomResourceAPIInternals"],
       "Properties" : {
         "BasePath" : "v1",
         "DomainName" : {

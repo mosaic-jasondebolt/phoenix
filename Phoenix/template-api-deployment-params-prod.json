@@ -1,5 +1,6 @@
 {
   "Parameters": {
-    "Environment": "prod"
+    "Environment": "prod",
+    "Version": "VERSION_ID"
   }
 }

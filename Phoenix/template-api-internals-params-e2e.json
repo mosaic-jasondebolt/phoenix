@@ -1,6 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "e2e",
-    "Version": "VERSION_ID"
-  }
-}

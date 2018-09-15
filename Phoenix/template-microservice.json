@@ -841,6 +841,13 @@
                       "testing"
                     ]]
                   },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "testing"
+                    ]]
+                  },
                   "TemplateConfiguration": "BuildOutput::t-ec2-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ec2.json"
                 }
@@ -867,6 +874,13 @@
                       "ec2",
                       "testing"
                     ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "testing"
+                    ]]
                   }
                 }
               },
@@ -887,6 +901,13 @@
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "lambda",
@@ -919,6 +940,13 @@
                       "lambda",
                       "testing"
                     ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "testing"
+                    ]]
                   }
                 }
               },
@@ -939,6 +967,13 @@
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "api-custom-domain",
@@ -971,6 +1006,13 @@
                       "api-custom-domain",
                       "testing"
                     ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "testing"
+                    ]]
                   }
                 }
               },
@@ -991,6 +1033,13 @@
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "api-documentation-v0",
@@ -1023,7 +1072,48 @@
                       "api-documentation-v0",
                       "testing"
                     ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "testing"
+                    ]]
                   }
+                }
+              },
+              {
+                "Name": "APIGatewayChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
                 }
               },
               {
@@ -1039,7 +1129,7 @@
                 }],
                 "RunOrder": 3,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1049,8 +1139,13 @@
                       "testing"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "testing"
+                    ]]
+                  }
                 }
               },
               {
@@ -1075,7 +1170,7 @@
                 }
               },
               {
-                "Name": "ECSMainService",
+                "Name": "ECSMainServiceChangeSet",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1085,9 +1180,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 1,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1103,7 +1198,7 @@
                 }
               },
               {
-                "Name": "APIGatewayInternals",
+                "Name": "ECSMainService",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1113,20 +1208,46 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 3,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
-                      "api-internals",
+                      "ecs",
+                      "main",
+                      "testing"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDeployChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
                       "testing"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-internals-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api-internals.json"
+                  "TemplateConfiguration": "BuildOutput::t-api-deployment-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-api-deployment.json"
                 }
               },
               {
@@ -1142,7 +1263,7 @@
                 }],
                 "RunOrder": 5,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1151,9 +1272,7 @@
                       "api-deployment",
                       "testing"
                     ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-deployment-params-testing.json",
-                  "TemplatePath": "BuildOutput::template-api-deployment.json"
+                  }
                 }
               },
               {
@@ -1191,7 +1310,8 @@
                 "RunOrder": 7,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
                       "integration-test",
                       "testing"
                     ]]
@@ -1430,33 +1550,6 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-e2e.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
-                }
-              },
-              {
-                "Name": "APIGatewayInternals",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
-                      "api-internals",
-                      "e2e"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-internals-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-api-internals.json"
                 }
               },
               {
@@ -1760,33 +1853,6 @@
                   },
                   "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-prod.json",
                   "TemplatePath": "BuildOutput::template-ecs-task.json"
-                }
-              },
-              {
-                "Name": "APIGatewayInternals",
-                "ActionTypeId": {
-                  "Category": "Deploy",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "CloudFormation"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
-                  "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
-                  "StackName": {
-                    "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
-                      "api-internals",
-                      "prod"
-                    ]]
-                  },
-                  "TemplateConfiguration": "BuildOutput::t-api-internals-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api-internals.json"
                 }
               },
               {
