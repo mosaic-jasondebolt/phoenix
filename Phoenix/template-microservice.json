@@ -1284,7 +1284,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1316,7 +1316,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
@@ -1337,7 +1337,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 7,
+                "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
@@ -1372,7 +1372,7 @@
             "Name": "DeployToEndToEnd",
             "Actions": [
               {
-                "Name": "Database",
+                "Name": "DatabaseChangeSet",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1384,7 +1384,41 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-database-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-database.json"
+                }
+              },
+              {
+                "Name": "Database",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1394,8 +1428,47 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-database-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-database.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "EC2ChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
               {
@@ -1409,9 +1482,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1421,8 +1494,47 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ec2-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-ec2.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "LambdaChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               },
               {
@@ -1436,9 +1548,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1448,8 +1560,47 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-lambda.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDomainChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
                 }
               },
               {
@@ -1463,9 +1614,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1475,8 +1626,47 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "V0_APIDocumentationChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-documentation-v0-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-api-documentation.json"
                 }
               },
               {
@@ -1490,9 +1680,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1502,8 +1692,47 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-documentation-v0-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-api-documentation.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
                 }
               },
               {
@@ -1517,9 +1746,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1529,8 +1758,13 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-api.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "e2e"
+                    ]]
+                  }
                 }
               },
               {
@@ -1544,7 +1778,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
@@ -1552,6 +1786,42 @@
                       "e2e"
                     ]]
                   }
+                }
+              },
+              {
+                "Name": "ECSMainServiceChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-ecs-task.json"
                 }
               },
               {
@@ -1565,9 +1835,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1578,8 +1848,48 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-ecs-task.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDeployChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-deployment-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-api-deployment.json"
                 }
               },
               {
@@ -1595,7 +1905,7 @@
                 }],
                 "RunOrder": 4,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1605,8 +1915,13 @@
                       "e2e"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-deployment-params-e2e.json",
-                  "TemplatePath": "BuildOutput::template-api-deployment.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "e2e"
+                    ]]
+                  }
                 }
               },
               {
@@ -1644,7 +1959,8 @@
                 "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
                       "integration-test",
                       "e2e"
                     ]]
@@ -1654,28 +1970,28 @@
             ]
           },
           {
-          "Name": "ProdApprovalStage",
-          "Actions": [
-          {
-            "Name": "ProdManualApprovalStep",
-            "ActionTypeId": {
-              "Category": "Approval",
-              "Owner": "AWS",
-              "Version": "1",
-              "Provider": "Manual"
-            },
-            "RunOrder": 1,
-            "Configuration": {
-              "NotificationArn": {"Ref": "CodePipelineApprovalSNSTopic"}
-            }
-          }
-        ]
-      },
-          {
-            "Name": "DeployToProduction",
+            "Name": "ProdApprovalStage",
             "Actions": [
               {
-                "Name": "Database",
+                "Name": "ProdManualApprovalStep",
+                "ActionTypeId": {
+                  "Category": "Approval",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Manual"
+                },
+                "RunOrder": 1,
+                "Configuration": {
+                  "NotificationArn": {"Ref": "CodePipelineApprovalSNSTopic"}
+                }
+              }
+            ]
+          },
+          {
+            "Name": "DeployToProd",
+            "Actions": [
+              {
+                "Name": "DatabaseChangeSet",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1687,7 +2003,41 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-database-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-database.json"
+                }
+              },
+              {
+                "Name": "Database",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1697,8 +2047,47 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-database-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-database.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "EC2ChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ec2-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-ec2.json"
                 }
               },
               {
@@ -1712,9 +2101,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1724,8 +2113,47 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ec2-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-ec2.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "LambdaChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
                 }
               },
               {
@@ -1739,9 +2167,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1751,8 +2179,47 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-lambda-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-lambda.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDomainChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
                 }
               },
               {
@@ -1766,9 +2233,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1778,8 +2245,47 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-custom-domain-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "V0_APIDocumentationChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-documentation-v0-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api-documentation.json"
                 }
               },
               {
@@ -1793,9 +2299,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1805,8 +2311,47 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-documentation-v0-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api-documentation.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api.json"
                 }
               },
               {
@@ -1820,9 +2365,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1832,8 +2377,13 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      "prod"
+                    ]]
+                  }
                 }
               },
               {
@@ -1847,7 +2397,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
@@ -1855,6 +2405,42 @@
                       "prod"
                     ]]
                   }
+                }
+              },
+              {
+                "Name": "ECSMainServiceChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-ecs-task.json"
                 }
               },
               {
@@ -1868,9 +2454,9 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1881,8 +2467,48 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-ecs-task-main-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-ecs-task.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDeployChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-api-deployment-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-api-deployment.json"
                 }
               },
               {
@@ -1898,7 +2524,7 @@
                 }],
                 "RunOrder": 4,
                 "Configuration": {
-                  "ActionMode": "CREATE_UPDATE",
+                  "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "RoleArn": "PHX_MACRO_IAM_ROLE",
                   "StackName": {
@@ -1908,8 +2534,13 @@
                       "prod"
                     ]]
                   },
-                  "TemplateConfiguration": "BuildOutput::t-api-deployment-params-prod.json",
-                  "TemplatePath": "BuildOutput::template-api-deployment.json"
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      "prod"
+                    ]]
+                  }
                 }
               },
               {
@@ -1926,8 +2557,7 @@
                 "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
                       "api-documentation",
                       "prod"
                     ]]
