@@ -95,6 +95,147 @@
         "RestApiId" : {"Ref": "RestAPI"}
       }
     },
+    "ExamplesResource": {
+      "Type" : "AWS::ApiGateway::Resource",
+      "Properties" : {
+        "ParentId" : { "Fn::GetAtt": ["RestAPI", "RootResourceId"] },
+        "PathPart" : "examples",
+        "RestApiId" : { "Ref": "RestAPI" }
+      }
+    },
+    "ExamplesGet": {
+      "Type" : "AWS::ApiGateway::Method",
+      "Properties" : {
+        "RestApiId" : { "Ref": "RestAPI" },
+        "AuthorizationType" : "AWS_IAM",
+        "HttpMethod": "GET",
+        "ResourceId" : {"Ref": "ExamplesResource"},
+        "RequestParameters": {
+          "method.request.querystring.error": false
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false,
+              "method.response.header.content-length": false,
+              "method.response.header.date": false,
+              "method.response.header.etag": false,
+              "method.response.header.x-powered-by": false
+            }
+          },
+          {"StatusCode": "400"},
+          {"StatusCode": "401"},
+          {"StatusCode": "403"},
+          {"StatusCode": "404"},
+          {"StatusCode": "500"}
+        ],
+        "Integration": {
+          "Type": "AWS",
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "StatusCode" : "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.content-length": "integration.response.body.headers.content-length",
+                "method.response.header.date": "integration.response.body.headers.date",
+                "method.response.header.etag": "integration.response.body.headers.etag",
+                "method.response.header.x-powered-by": "integration.response.body.headers.x-powered-by"
+              },
+              "ResponseTemplates" : {
+                "application/json": ""
+              }
+            }
+          ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "Uri": {"Fn::Join": ["", [
+            "arn:aws:apigateway:",
+            { "Ref": "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/",
+            { "Fn::ImportValue": { "Fn::Join": ["-", [ "PHX_MACRO_PROJECT_NAME", "lambda", {"Ref": "Environment"}, "LambdaVPCProxyArn" ]] } },
+            "/invocations"
+          ]]},
+          "RequestTemplates": {
+            "application/json": ""
+          }
+        }
+      }
+    },
+    "ExampleResource": {
+      "Type" : "AWS::ApiGateway::Resource",
+      "DependsOn": ["ExamplesResource"],
+      "Properties" : {
+        "ParentId" : {"Ref": "ExamplesResource"},
+        "PathPart" : "{id}",
+        "RestApiId" : { "Ref": "RestAPI" }
+      }
+    },
+    "ExampleGet": {
+      "Type" : "AWS::ApiGateway::Method",
+      "Properties" : {
+        "RestApiId" : { "Ref": "RestAPI" },
+        "AuthorizationType" : "AWS_IAM",
+        "HttpMethod": "GET",
+        "ResourceId" : { "Ref": "ExampleResource" },
+        "RequestParameters": {
+          "method.request.querystring.name": true,
+          "method.request.path.id": true
+        },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false,
+              "method.response.header.content-length": false,
+              "method.response.header.date": false,
+              "method.response.header.etag": false,
+              "method.response.header.x-powered-by": false
+            }
+          },
+          {"StatusCode": "400"},
+          {"StatusCode": "401"},
+          {"StatusCode": "403"},
+          {"StatusCode": "404"},
+          {"StatusCode": "500"}
+        ],
+        "Integration": {
+          "Type": "AWS",
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "StatusCode" : "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.content-length": "integration.response.body.headers.content-length",
+                "method.response.header.date": "integration.response.body.headers.date",
+                "method.response.header.etag": "integration.response.body.headers.etag",
+                "method.response.header.x-powered-by": "integration.response.body.headers.x-powered-by"
+              },
+              "ResponseTemplates" : {
+                "application/json": ""
+              }
+            }
+          ],
+          "RequestParameters": {
+            "integration.request.querystring.name": "method.request.querystring.name"
+          },
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "Uri": {"Fn::Join": ["", [
+            "arn:aws:apigateway:",
+            { "Ref": "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/",
+            { "Fn::ImportValue": { "Fn::Join": ["-", [ "PHX_MACRO_PROJECT_NAME", "lambda", {"Ref": "Environment"}, "LambdaVPCProxyArn" ]] } },
+            "/invocations"
+          ]]},
+          "RequestTemplates": {
+            "application/json": ""
+          }
+        }
+      }
+    },
     "ProjectsResource": {
       "Type" : "AWS::ApiGateway::Resource",
       "Properties" : {

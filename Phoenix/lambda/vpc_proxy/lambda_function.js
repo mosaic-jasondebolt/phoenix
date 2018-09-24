@@ -2,8 +2,18 @@ var http = require('http');
 
 let containerId;
 
+String.prototype.supplant = function (o) {
+    return this.replace(/{([^{}]*)}/g,
+        function (a, b) {
+            var r = o[b];
+            return typeof r === 'string' || typeof r === 'number' ? r : a;
+        }
+    );
+};
+
 exports.handler = function(event, context, callback) {
     // setup request options and parameters
+    console.log("EVENT:");
     console.log(event);
 
     if (!containerId) {
@@ -26,7 +36,7 @@ exports.handler = function(event, context, callback) {
     var options = {
       host: event.requestParams.hostname,
       port: event.requestParams.port,
-      path: event.requestParams.path,
+      path: event.requestParams.path.supplant(event.params.path),
       method: event.requestParams.method
     };
 
@@ -75,6 +85,8 @@ exports.handler = function(event, context, callback) {
                 bodyJson: jsonResponse,
                 headers: response.headers
             };
+            console.log("OUTPUT");
+            console.log(output);
 
             // if the response was a 200 we can just pass the entire JSON back to
             // API Gateway for parsing.
@@ -90,9 +102,13 @@ exports.handler = function(event, context, callback) {
         });
     }
 
+    console.log("OPTIONS:");
+    console.log(options);
     var req = http.request(options, callback);
 
     if (event.bodyJson && event.bodyJson !== "") {
+        console.log("BODY_JSON:");
+        console.log(event.bodyJson);
         req.write(JSON.stringify(event.bodyJson));
     }
 
