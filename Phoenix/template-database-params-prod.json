@@ -5,7 +5,7 @@
     "Version": "VERSION_ID",
     "VPCPrefix": "prod",
     "DBEngine": "aurora-mysql",
-    "DBInstanceClass": "db.t2.small",
+    "DBInstanceClass": "db.t2.medium",
     "MasterUsername": "PROJECT_NAME_NO_DASHES_admin",
     "SnapshotIdentifier": ""
   }
