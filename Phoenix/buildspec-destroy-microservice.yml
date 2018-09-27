@@ -33,7 +33,15 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-prod
-      - # Delete ECS Main Task
+      - # # Delete Cognito Internals
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-internals-prod
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-internals-testing
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-internals-e2e
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-internals-prod
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-internals-testing
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-internals-e2e
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-internals-prod
+      - # # Delete ECS Main Task
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ecs-main-prod
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ecs-main-testing
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ecs-main-e2e
@@ -49,7 +57,15 @@ phases:
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-testing
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-e2e
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-prod
-      - # Delete Lambda
+      - # # Delete Cognito
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-prod
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-testing
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-e2e
+      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-prod
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-testing
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-e2e
+      - # aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-prod
+      - # # Delete Lambda
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-lambda-prod
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-testing
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-e2e
