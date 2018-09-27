@@ -1,0 +1,104 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Adds additional Cognito configuration that requires custom Lambda CloudFormation resources",
+  "Transform" : ["ProjectLambdaMacro"],
+  "Parameters": {
+    "Environment": {
+      "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
+      "Type": "String"
+    },
+    "ResourceServerName": {
+      "Description": "The name of the Cognito resource server",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "[a-z]*",
+      "Type": "String"
+    },
+    "ResourceServerIdentifier": {
+      "Description": "The identifier of the Cognito resource server",
+      "MinLength": "1",
+      "MaxLength": "20",
+      "AllowedPattern": "[a-z]*",
+      "Type": "String"
+    },
+    "CustomDomainPrefix": {
+      "Description": "The prefix for your custom auth domain.",
+      "Type": "String",
+      "Default": "auth"
+    },
+    "Version": {
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "LambdaCognitoInternals": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": "PHX_MACRO_IAM_ROLE",
+        "Code": {
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Key": {
+            "Fn::Join": ["/", [
+              {"Ref": "Version"},
+              "cognito_internals",
+              "lambda_function.zip"
+            ]]
+          }
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+    "CustomResourceCognitoInternals": {
+      "Type": "Custom::CognitoInternals",
+      "DependsOn": "LambdaCognitoInternals",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": ["LambdaCognitoInternals", "Arn"]
+        },
+        "LambdaVersion": {"Ref": "Version"},
+        "UserPoolId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              "PHX_MACRO_PROJECT_NAME",
+              "cognito",
+              {"Ref": "Environment"},
+              "UserPoolId"
+            ]]
+          }
+        },
+        "ClientId": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              "PHX_MACRO_PROJECT_NAME",
+              "cognito",
+              {"Ref": "Environment"},
+              "AppClientId"
+            ]]
+          }
+        },
+        "CognitoDomain": {"Fn::Join": ["-", [
+          "PHX_MACRO_PROJECT_NAME",
+          {"Ref": "Environment"}
+        ]]},
+        "APIDomain": "PHX_MACRO_DOMAIN",
+        "AuthDomain": {"Fn::Join": [".", [
+          {"Ref": "CustomDomainPrefix"},
+          "PHX_MACRO_DOMAIN"
+        ]]},
+        "CustomDomain": {"Fn::Join": [".", [
+          {"Ref": "Environment"},
+          {"Ref": "CustomDomainPrefix"},
+          "PHX_MACRO_DOMAIN"
+        ]]},
+        "AuthSSLCertificateARN": "PHX_MACRO_AUTH_SSL_CERTIFICATE_ARN",
+        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
+        "ResourceServerName": {"Ref": "ResourceServerName"},
+        "ResourceServerIdentifier": {"Ref": "ResourceServerIdentifier"},
+        "ResourceServerScope": "external"
+      }
+    }
+  }
+}

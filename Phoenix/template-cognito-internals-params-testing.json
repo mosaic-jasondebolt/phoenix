@@ -1,0 +1,8 @@
+{
+  "Parameters": {
+    "Environment": "testing",
+    "ResourceServerName": "userpool",
+    "ResourceServerIdentifier": "userpool",
+    "Version": "VERSION_ID"
+  }
+}

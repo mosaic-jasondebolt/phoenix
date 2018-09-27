@@ -53,15 +53,19 @@
       "Type": "String"
     },
     "SSLCertificateARN": {
-      "Description": "The AWS ACM Certificate ARN.",
+      "Description": "The AWS ACM Certificate ARN associated with the 'top level' domain of this project.",
       "Type": "String"
     },
     "ECSSSLCertificateARN": {
-      "Description": "The AWS ACM Certificate ARN used by ECS tasks.",
+      "Description": "The AWS ACM Certificate ARN used by ECS services.",
       "Type": "String"
     },
     "APIDocsSSLCertificateARN": {
       "Description": "The AWS ACM Certificate ARN used by API documentation.",
+      "Type": "String"
+    },
+    "AuthSSLCertificateARN": {
+      "Description": "The AWS ACM Certificate ARN used by auth endpoints such as Cognito User Pools.",
       "Type": "String"
     },
     "HostedZoneId": {
@@ -132,6 +136,7 @@
             "PHX_MACRO_SSL_CERTIFICATE_ARN": {"Ref": "SSLCertificateARN"},
             "PHX_MACRO_ECS_SSL_CERTIFICATE_ARN": {"Ref": "ECSSSLCertificateARN"},
             "PHX_MACRO_API_DOCS_SSL_CERTIFICATE_ARN": {"Ref": "APIDocsSSLCertificateARN"},
+            "PHX_MACRO_AUTH_SSL_CERTIFICATE_ARN": {"Ref": "AuthSSLCertificateARN"},
             "PHX_MACRO_KEY_PAIR_NAME": {"Ref": "KeyPairName"},
             "PHX_MACRO_PROJECT_DESCRIPTION": {"Ref": "ProjectDescription"},
             "PHX_MACRO_NOTIFICATION_EMAIL": {"Ref": "NotificationEmail"},
@@ -323,6 +328,16 @@
         "Type": "String",
         "Value": {"Ref": "APIDocsSSLCertificateARN"},
         "Description": "The AWS ACM Certificate ARN used by API documentation."
+      }
+    },
+    "AuthSSLCertificateARNParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "SSLCertificateARNParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn-auth"]]},
+        "Type": "String",
+        "Value": {"Ref": "AuthSSLCertificateARN"},
+        "Description": "The AWS ACM Certificate ARN used by auth endpoints such as Cognito User Pools.",
       }
     },
     "HostedZoneIdParam": {

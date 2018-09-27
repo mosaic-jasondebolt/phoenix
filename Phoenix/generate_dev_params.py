@@ -56,6 +56,13 @@ def write_dev_param_files(environment_name):
     dev_ec2_file_obj = open('template-ec2-params-dev.json', 'w')
     dev_ec2_file_obj.write(json.dumps(dev_ec2_template, indent=2))
 
+    # Cognito template
+    testing_cognito_template = _parse_json('template-cognito-params-testing.json')
+    dev_cognito_template = copy.deepcopy(testing_cognito_template)
+    dev_cognito_template['Parameters']['Environment'] = environment_name
+    dev_cognito_file_obj = open('template-cognito-params-dev.json', 'w')
+    dev_cognito_file_obj.write(json.dumps(dev_cognito_template, indent=2))
+
     # ECS Task Main template
     testing_ecs_task_main_template = _parse_json('template-ecs-task-main-params-testing.json')
     dev_ecs_task_main_template = copy.deepcopy(testing_ecs_task_main_template)
@@ -80,6 +87,13 @@ def write_dev_param_files(environment_name):
     dev_api_custom_domain_template['Parameters']['Environment'] = environment_name
     dev_api_custom_domain_file_obj = open('template-api-custom-domain-params-dev.json', 'w')
     dev_api_custom_domain_file_obj.write(json.dumps(dev_api_custom_domain_template, indent=2))
+
+    # Cognito Internals template
+    testing_cognito_internals_template = _parse_json('template-cognito-internals-params-testing.json')
+    dev_cognito_internals_template = copy.deepcopy(testing_cognito_internals_template)
+    dev_cognito_internals_template['Parameters']['Environment'] = environment_name
+    dev_cognito_file_obj = open('template-cognito-internals-params-dev.json', 'w')
+    dev_cognito_file_obj.write(json.dumps(dev_cognito_internals_template, indent=2))
 
     # API template
     testing_api_template = _parse_json('template-api-params-testing.json')
