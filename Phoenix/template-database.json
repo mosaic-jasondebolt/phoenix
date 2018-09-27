@@ -285,7 +285,7 @@
         "Description": "Aurora Cluster Parameter Group",
         "Family": "aurora-mysql5.7",
         "Parameters": {
-          "time_zone": "US/Pacific",
+          "time_zone": "UTC",
           "binlog_format": "ROW"
         }
       }
