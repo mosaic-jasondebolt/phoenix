@@ -31,7 +31,6 @@
       "Type" : "AWS::Cognito::UserPoolClient",
       "Properties" : {
         "ClientName" : {"Ref": "UserPoolClientName"},
-        "ExplicitAuthFlows" : [ "ADMIN_NO_SRP_AUTH" ],
         "GenerateSecret" : true,
         "RefreshTokenValidity" : 1,
         "UserPoolId" : {"Ref": "UserPool"}

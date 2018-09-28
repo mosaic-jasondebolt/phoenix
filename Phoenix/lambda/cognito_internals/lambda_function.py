@@ -59,7 +59,21 @@ def change_resource_record_set(hosted_zone_id, alias_target_hosted_zone_id, reco
         print(e)
         print('Auth record set {0} operation failed. Record set may already have been created or deleted by a previous stack. This is expected.'.format(action))
 
-def create_user_pool_domain(custom_domain, user_pool_id, auth_ssl_certificate_arn):
+
+def create_user_pool_domain(domain, user_pool_id):
+    try:
+        response = cognito_client.create_user_pool_domain(
+            Domain=domain,
+            UserPoolId=user_pool_id
+        )
+        print(response)
+    except Exception as e:
+        # If the user pool domain was previously created, let's return the cloudfront alias associated with the current domain.
+        print(e)
+        print('Unable to create non-custom user pool domain. This may have been already previously created.')
+
+
+def create_user_pool_custom_domain(custom_domain, user_pool_id, auth_ssl_certificate_arn):
     try:
         response = cognito_client.create_user_pool_domain(
             Domain=custom_domain,
@@ -73,8 +87,8 @@ def create_user_pool_domain(custom_domain, user_pool_id, auth_ssl_certificate_ar
     except Exception as e:
         # If the user pool domain was previously created, let's return the cloudfront alias associated with the current domain.
         print(e)
-        print('create user pool domain failed')
-        print('attempting to get existing user pool domain')
+        print('create user pool custom domain failed')
+        print('attempting to get existing user pool custom domain')
         try:
             response = cognito_client.describe_user_pool_domain(Domain=custom_domain)
             print(response)
@@ -88,6 +102,7 @@ def update_user_pool_client(user_pool_id, client_id, resource_server_scope):
     response = cognito_client.update_user_pool_client(
         UserPoolId=user_pool_id,
         ClientId=client_id,
+        ExplicitAuthFlows=['ADMIN_NO_SRP_AUTH'],
         AllowedOAuthFlows=['client_credentials'],
         AllowedOAuthScopes=[resource_server_scope]
     )
@@ -159,6 +174,8 @@ def lambda_handler(event, context):
         api_domain = event['ResourceProperties']['APIDomain']  # api.mosaic-credit.com
         auth_domain = event['ResourceProperties']['AuthDomain']  # auth.api.mosaic-credit.com
         custom_domain = event['ResourceProperties']['CustomDomain'] # {environment}.auth.api.mosaic-credit.com
+        domain_prefix = event['ResourceProperties']['DomainPrefix'] # {prefix}-{environment}
+        use_custom_domain = event['ResourceProperties']['UseCustomDomain'] == "true" # AWS accounts have a hard limit of 4 custom domains.
         hosted_zone_id = event['ResourceProperties']['HostedZoneId']
         cloudfront_hosted_zone_id = 'Z2FDTNDATAQYW2' # htps://docs.aws.amazon.com/general/latest/gr/rande.html
         user_pool_id = event['ResourceProperties']['UserPoolId']
@@ -175,12 +192,14 @@ def lambda_handler(event, context):
             change_resource_record_set( # Creates the auth route53 record set (auth.api.mosaic-credit.com)
                 hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=hosted_zone_id,
                 record_set_dns_name=api_domain, record_set_name=auth_domain, action='CREATE')
-            cloudfront_domain = create_user_pool_domain(
-                custom_domain=custom_domain, user_pool_id=user_pool_id,
-                auth_ssl_certificate_arn=auth_ssl_certificate_arn)
-            change_resource_record_set( # Creates the auth route53 record set ({environment}.auth.api-mosaic-credit.com)
-                hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_hosted_zone_id,
-                record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='CREATE')
+            create_user_pool_domain(domain=domain_prefix, user_pool_id=user_pool_id)
+            if use_custom_domain:
+                cloudfront_domain = create_user_pool_custom_domain(
+                    custom_domain=custom_domain, user_pool_id=user_pool_id,
+                    auth_ssl_certificate_arn=auth_ssl_certificate_arn)
+                change_resource_record_set( # Creates the auth route53 record set ({environment}.auth.api-mosaic-credit.com)
+                    hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_hosted_zone_id,
+                    record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='CREATE')
             create_resource_server(
                 user_pool_id=user_pool_id, client_id=client_id,
                 resource_server_identifier=resource_server_identifier,
@@ -191,27 +210,26 @@ def lambda_handler(event, context):
                 client_id=client_id,
                 resource_server_scope='{0}/{1}'.format(resource_server_identifier, resource_server_scope))
         elif event['RequestType'] == 'Update':
-            cloudfront_domain = create_user_pool_domain(
-                custom_domain=custom_domain, user_pool_id=user_pool_id,
-                auth_ssl_certificate_arn=auth_ssl_certificate_arn)
-            change_resource_record_set( # Creates the auth route53 record set ({environment}.auth.api-mosaic-credit.com)
-                hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_hosted_zone_id,
-                record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='UPSERT')
-            update_user_pool_client( # This resource is already created in CloudFormation.
-                user_pool_id=user_pool_id,
-                client_id=client_id,
-                resource_server_scope='{0}/{1}'.format(resource_server_identifier, resource_server_scope))
+            create_user_pool_domain(domain=domain_prefix, user_pool_id=user_pool_id)
+            if use_custom_domain:
+                cloudfront_domain = create_user_pool_custom_domain(
+                    custom_domain=custom_domain, user_pool_id=user_pool_id,
+                    auth_ssl_certificate_arn=auth_ssl_certificate_arn)
+                change_resource_record_set( # Creates the auth route53 record set ({environment}.auth.api-mosaic-credit.com)
+                    hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_hosted_zone_id,
+                    record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='UPSERT')
             update_resource_server(
                 user_pool_id=user_pool_id, client_id=client_id,
                 resource_server_identifier=resource_server_identifier,
                 resource_server_name=resource_server_name,
                 resource_server_scope=resource_server_scope)
         elif event['RequestType'] == 'Delete':
-            domain_obj = cognito_client.describe_user_pool_domain(Domain=custom_domain)
-            cloudfront_domain = domain_obj['DomainDescription']['CloudFrontDistribution']
-            change_resource_record_set(
-                hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_domain,
-                record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='DELETE')
+            if use_custom_domain:
+                domain_obj = cognito_client.describe_user_pool_domain(Domain=custom_domain)
+                cloudfront_domain = domain_obj['DomainDescription']['CloudFrontDistribution']
+                change_resource_record_set(
+                    hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_domain,
+                    record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='DELETE')
             delete_resource_server(user_pool_id, resource_server_identifier)
             #delete_user_pool_domain( # Keep this around as it is expensive to create and delete.
             #    custom_domain=custom_domain, user_pool_id=user_pool_id)

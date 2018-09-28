@@ -92,6 +92,7 @@ def write_dev_param_files(environment_name):
     testing_cognito_internals_template = _parse_json('template-cognito-internals-params-testing.json')
     dev_cognito_internals_template = copy.deepcopy(testing_cognito_internals_template)
     dev_cognito_internals_template['Parameters']['Environment'] = environment_name
+    dev_cognito_internals_template['Parameters']['UseCustomDomain'] = 'false' # we do not want to use custom domains for dev environments.
     dev_cognito_file_obj = open('template-cognito-internals-params-dev.json', 'w')
     dev_cognito_file_obj.write(json.dumps(dev_cognito_internals_template, indent=2))
 

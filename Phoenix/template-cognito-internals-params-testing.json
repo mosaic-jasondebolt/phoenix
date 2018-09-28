@@ -3,6 +3,8 @@
     "Environment": "testing",
     "ResourceServerName": "userpool",
     "ResourceServerIdentifier": "userpool",
+    "DomainPrefix": "userpool",
+    "UseCustomDomain": "true",
     "Version": "VERSION_ID"
   }
 }
