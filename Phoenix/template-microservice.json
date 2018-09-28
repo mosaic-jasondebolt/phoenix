@@ -1372,6 +1372,72 @@
                 }
               },
               {
+                "Name": "CognitoInternalsChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-cognito-internals-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-cognito-internals.json"
+                }
+              },
+              {
+                "Name": "CognitoInternals",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "testing"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "testing"
+                    ]]
+                  }
+                }
+              },
+              {
                 "Name": "PublishAPIDocumentation",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -1630,6 +1696,72 @@
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "lambda",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "CognitoChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-cognito-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-cognito.json"
+                }
+              },
+              {
+                "Name": "Cognito",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
                       "e2e"
                     ]]
                   }
@@ -1991,6 +2123,72 @@
                 }
               },
               {
+                "Name": "CognitoInternalsChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-cognito-internals-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-cognito-internals.json"
+                }
+              },
+              {
+                "Name": "CognitoInternals",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "e2e"
+                    ]]
+                  }
+                }
+              },
+              {
                 "Name": "PublishAPIDocumentation",
                 "ActionTypeId": {
                   "Category": "Build",
@@ -2249,6 +2447,72 @@
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "lambda",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "CognitoChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-cognito-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-cognito.json"
+                }
+              },
+              {
+                "Name": "Cognito",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
                       "prod"
                     ]]
                   }
@@ -2604,6 +2868,72 @@
                     "Fn::Join": ["-", [
                       "PHX_MACRO_PROJECT_NAME",
                       "api-deployment",
+                      "prod"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "CognitoInternalsChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-cognito-internals-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-cognito-internals.json"
+                }
+              },
+              {
+                "Name": "CognitoInternals",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
                       "prod"
                     ]]
                   }
