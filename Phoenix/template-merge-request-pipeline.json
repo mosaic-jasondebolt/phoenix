@@ -323,7 +323,7 @@
                     "Fn::ImportValue": {
                       "Fn::Join": ["-", [
                         {"Ref": "ProjectName"},
-                        "merge-request-pipeline-api",
+                        "merge-request-webhook",
                         "LambdaPostMergeRequestFunctionName"
                       ]]
                     }

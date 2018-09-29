@@ -41,7 +41,7 @@
         "Name" : { "Fn::Join": ["-",  [
           "PHX_MACRO_PROJECT_NAME",
           "api",
-          "mergerequests"
+          "merge-request-webhook"
         ]]}
       }
     },
@@ -146,7 +146,7 @@
           "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
-            "mergerequests",
+            "merge_request_webhook",
             "lambda_function.zip"
           ]]}
         },
@@ -529,7 +529,7 @@
         "Name": {
           "Fn::Join": ["-", [
             "PHX_MACRO_PROJECT_NAME",
-            "merge-request-pipeline-api",
+            "merge-request-webhook",
             "LambdaPostMergeRequestFunctionName"
           ]]
         }
@@ -541,7 +541,7 @@
         "Name": {
           "Fn::Join": ["-", [
             "PHX_MACRO_PROJECT_NAME",
-            "merge-request-pipeline-api",
+            "merge-request-webhook",
             "MergeRequestsURL"
           ]]
         }

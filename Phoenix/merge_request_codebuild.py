@@ -24,6 +24,7 @@ __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
 
 import os
 import urllib
+from urllib.parse import quote
 import sys
 import json
 import requests
@@ -65,7 +66,7 @@ def merge_request_note(emoji):
         '@ commit {source_version}').format(
             code_build_url=get_code_build_url(), build_name=BUILD_NAME,
             emoji=emoji, source_version=CODEBUILD_RESOLVED_SOURCE_VERSION)
-    return urllib.quote(body)
+    return quote(body)
 
 def merge_request_note_url(body):
     return os.path.join(

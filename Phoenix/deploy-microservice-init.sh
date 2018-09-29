@@ -13,7 +13,7 @@ echo "Deploying microservice"
 ./deploy-pipeline.sh create
 
 echo "Deploying merge request pipeline"
-./deploy-merge-request-pipeline-api.sh create
+./deploy-merge-request-webhook.sh create
 
 echo "Deploying microservice cleanup"
 ./deploy-microservice-cleanup.sh create
