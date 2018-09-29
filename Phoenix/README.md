@@ -7,7 +7,7 @@ A full CI/CD solution for continuously building and deploying RDS, ECS, Lambda, 
 ![Pipeline](/Phoenix/images/pipeline_1b.png)
 
 #### What ships with Phoenix?
-##### Phoenix Microservice (template-microservice.json)
+##### Phoenix Microservice (template-pipeline.json)
 * Creates a local CodeCommit repo which stores all of your source code, buildspecs, templates, etc.
 * Creates an ECR repo for your project's Docker images.
 * Creates an AWS CodePipeline which will CI/CD any changes pushed to master.
@@ -99,7 +99,7 @@ template-database-params JSON files.
 ```
 cd Phoenix
 ./deploy-vpc.sh create
-./deploy-microservice.sh create
+./deploy-pipeline.sh create
 ./deploy-database-dev.sh create
 ./deploy-ec2-dev.sh create ecs
 ./deploy-lambda-dev.sh create
@@ -116,11 +116,11 @@ git push origin master
 * After you've pushed your changes, open the CodePipeline and watch it go.
 
 ### Creating and updating a microservice project
-* Update the template-microservice file with your project details.
+* Update the template-pipeline file with your project details.
 ```
 cd Phoenix
-./deploy-microservice.sh create
-./deploy-microservice.sh update
+./deploy-pipeline.sh create
+./deploy-pipeline.sh update
 ```
 
 ### Deploying a local Docker container to the Dev ECS cluster (skips the pipeline)

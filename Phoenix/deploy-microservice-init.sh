@@ -10,7 +10,7 @@ echo "Deploying the CloudFormation Macro"
 ./deploy-macro.sh create
 
 echo "Deploying microservice"
-./deploy-microservice.sh create
+./deploy-pipeline.sh create
 
 echo "Deploying merge request pipeline"
 ./deploy-merge-request-pipeline-api.sh create
