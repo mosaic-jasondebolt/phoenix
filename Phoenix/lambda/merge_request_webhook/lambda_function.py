@@ -96,7 +96,7 @@ def lambda_handler(event, context):
     print(json_obj)
     obj = json.loads(json_obj, object_hook=JSONObject)
     if obj.object_kind != 'merge_request':
-      raise Exception('Object is not a merge request! object is of type' + obj.kind)
+      raise Exception('Object is not a merge request! object is of type' + obj.object_kind)
 
     path_with_namespace = obj.project.path_with_namespace               # namespace/reponame
     path_with_namespace_dashes = path_with_namespace.replace('/', '-')  # namespace-reponame

@@ -1,0 +1,567 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description" : "Deploys an API Gateway endpoint that GitLab push events can invoke to setup/teardown a set of release pipelines",
+  "Transform" : ["ProjectLambdaMacro"],
+  "Parameters": {
+    "VPCPrefix": {
+      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The identifier/version associated with this API.",
+      "Type": "String"
+    },
+    "StageName": {
+      "Description": "The API Gateway stage name",
+      "Type": "String",
+      "Default": "v0"
+    }
+  },
+  "Resources": {
+    "Latest": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "DependsOn": ["ReleasesPost"],
+      "Properties": {
+        "RestApiId": {"Ref": "RestAPI"},
+        "Description": "Description here",
+        "StageName": {"Ref": "StageName"}
+      }
+    },
+    "RestAPI": {
+      "Type" : "AWS::ApiGateway::RestApi",
+      "Properties" : {
+        "Description" : {"Fn::Join": ["", [
+          "The ",
+          "PHX_MACRO_PROJECT_NAME",
+          " GitLab Release ",
+          " REST API (Release Candidate ",
+          {"Ref": "Version"},
+          ")"
+        ]]},
+        "Name" : { "Fn::Join": ["-",  [
+          "PHX_MACRO_PROJECT_NAME",
+          "api",
+          "release-webhook"
+        ]]}
+      }
+    },
+    "ReleasesResource": {
+      "Type" : "AWS::ApiGateway::Resource",
+      "Properties" : {
+        "ParentId" : { "Fn::GetAtt": ["RestAPI", "RootResourceId"] },
+        "PathPart" : "Releases",
+        "RestApiId" : { "Ref": "RestAPI" }
+      }
+    },
+    "ReleasesPost": {
+      "Type" : "AWS::ApiGateway::Method",
+      "DependsOn": ["LambdaReleases"],
+      "Properties" : {
+        "RestApiId" : { "Ref": "RestAPI" },
+        "AuthorizationType" : "CUSTOM",
+        "AuthorizerId": {"Ref": "ApiGatewayCustomLambdaAuth"},
+        "HttpMethod": "POST",
+        "ResourceId" : { "Ref": "ReleasesResource" },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false
+            }
+          }
+        ],
+        "Integration": {
+          "Type" : "AWS",
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "ResponseTemplates" : { "application/json": "" },
+              "StatusCode" : "200"
+            }
+          ],
+          "Uri": {"Fn::Join": ["", [
+            "arn:aws:apigateway:",
+            { "Ref": "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/",
+            { "Fn::GetAtt": [
+              "LambdaReleases",
+              "Arn"
+            ]},
+            "/invocations"
+          ]]}
+        }
+      }
+    },
+    "LambdaSG": {
+      "Properties": {
+        "GroupDescription": "Release Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaReleases": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy", "LambdaSG"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
+        "Environment": {
+          "Variables": {
+            "PROJECT_NAME": "PHX_MACRO_PROJECT_NAME",
+            "PROJECT_DESCRIPTION": "PHX_MACRO_PROJECT_DESCRIPTION",
+            "CODE_PIPELINE_BUCKET_NAME": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+            "CODE_BUILD_DOCKER_IMAGE": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+            "LAMBDA_BUCKET_NAME": "PHX_MACRO_LAMBDA_BUCKET_NAME",
+            "IAM_ROLE": "PHX_MACRO_IAM_ROLE",
+            "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
+              "{{resolve:ssm:",
+              "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
+              "/global/code-build-service-role-arn",
+              ":1}}"
+            ]]},
+            "CODE_PIPELINE_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
+              "{{resolve:ssm:",
+              "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
+              "/global/code-pipeline-service-role-arn",
+              ":1}}"
+            ]]}
+          }
+        },
+        "Code": {
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "release_webhook",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
+        "Timeout": "300"
+      }
+    },
+    "LambdaReleasesInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaReleases", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com"
+      }
+    },
+    "LambdaRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "dynamodb:*",
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "s3:*",
+                "ec2:*",
+                "ssm:*",
+                "kms:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateRole",
+                "iam:PassRole",
+                "iam:GetRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          "PHX_MACRO_PROJECT_NAME",
+          "APILambdaRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "LambdaPostReleaseSG": {
+      "Properties": {
+        "GroupDescription": "Post Release Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-post-rel-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaPostRelease": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaPostReleaseRole", "LambdaPostReleaseRolePolicy", "LambdaPostReleaseSG"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaPostReleaseRole", "Arn"] },
+        "Environment": {
+          "Variables": {
+            "PROJECT_NAME": "PHX_MACRO_PROJECT_NAME"
+          }
+        },
+        "Code": {
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "post_release",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaPostReleaseSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
+        "Timeout": "25"
+      }
+    },
+    "LambdaPostReleaseInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaPostRelease", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "codepipeline.amazonaws.com"
+      }
+    },
+    "LambdaPostReleaseRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaPostReleaseRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "dynamodb:*",
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "s3:*",
+                "ec2:*",
+                "ssm:*",
+                "kms:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateRole",
+                "iam:PassRole",
+                "iam:GetRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          { "Ref": "AWS::StackName"},
+          "LambdaPostReleaseRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaPostReleaseRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "LambdaGitlabCustomAuthorizerSG": {
+      "Properties": {
+        "GroupDescription": "Gitlab custom authorizer Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-post-rel-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaGitlabCustomAuthorizer": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaGitlabCustomAuthorizerRole", "LambdaGitlabCustomAuthorizerRolePolicy", "LambdaGitlabCustomAuthorizerSG"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaGitlabCustomAuthorizerRole", "Arn"] },
+        "Code": {
+          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "gitlab_custom_authorizer",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python2.7",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaGitlabCustomAuthorizerSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
+        "Timeout": "25"
+      }
+    },
+    "LambdaGitlabCustomAuthorizerInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaGitlabCustomAuthorizer", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com"
+      }
+    },
+    "LambdaGitlabCustomAuthorizerRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaGitlabCustomAuthorizerRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "apigateway:*",
+                "dynamodb:*",
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "s3:*",
+                "ec2:*",
+                "ssm:*",
+                "kms:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateRole",
+                "iam:PassRole",
+                "iam:GetRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          { "Ref": "AWS::StackName"},
+          "LambdaGitlabCustomAuthorizerRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaGitlabCustomAuthorizerRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "ApiGatewayCustomLambdaAuth": {
+      "Type": "AWS::ApiGateway::Authorizer",
+      "Properties": {
+        "AuthType": "custom",
+        "AuthorizerCredentials": {
+          "Fn::GetAtt": [
+            "LambdaGitlabCustomAuthorizerRole", "Arn"
+          ]
+        },
+        "AuthorizerResultTtlInSeconds": 3600,
+        "AuthorizerUri": {"Fn::Join": ["", [
+          "arn:aws:apigateway:",
+          { "Ref": "AWS::Region" },
+          ":lambda:path/2015-03-31/functions/",
+          { "Fn::GetAtt": [
+            "LambdaGitlabCustomAuthorizer",
+            "Arn"
+            ]},
+            "/invocations"
+          ]]
+        },
+        "IdentitySource" : "method.request.header.X-Gitlab-Token",
+        "Name" : "gitlab-webhook-auth",
+        "RestApiId" : {"Ref": "RestAPI"},
+        "Type" : "TOKEN"
+      }
+    }
+  },
+  "Outputs": {
+    "LambdaPostReleaseFunctionName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            "PHX_MACRO_PROJECT_NAME",
+            "release-webhook",
+            "LambdaPostReleaseFunctionName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "LambdaPostRelease"}
+    },
+    "ReleasesURL": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            "PHX_MACRO_PROJECT_NAME",
+            "release-webhook",
+            "ReleasesURL"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::Join": ["", [
+          "https://",
+          {"Ref": "RestAPI"},
+          ".",
+          "execute-api",
+          ".",
+          {"Ref": "AWS::Region"},
+          ".",
+          "amazonaws.com",
+          "/",
+          {"Ref": "StageName"},
+          "/",
+          "Releases"
+        ]]
+      }
+    }
+  }
+}
