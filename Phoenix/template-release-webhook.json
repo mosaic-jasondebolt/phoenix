@@ -130,13 +130,15 @@
             "IAM_ROLE": "PHX_MACRO_IAM_ROLE",
             "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
-              "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
+              "/microservice/",
+              "PHX_MACRO_PROJECT_NAME",
               "/global/code-build-service-role-arn",
               ":1}}"
             ]]},
             "CODE_PIPELINE_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
-              "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
+              "/microservice/",
+              "PHX_MACRO_PROJECT_NAME",
               "/global/code-pipeline-service-role-arn",
               ":1}}"
             ]]}

@@ -111,7 +111,7 @@
           "PHX_MACRO_DOMAIN"
         ]]},
         "UseCustomDomain": {"Ref": "UseCustomDomain"},
-        "AuthSSLCertificateARN": "PHX_MACRO_AUTH_SSL_CERTIFICATE_ARN",
+        "AuthSSLCertificateARN": "PHX_MACRO_SSL_CERTIFICATE_ARN_AUTH",
         "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
         "ResourceServerName": {"Ref": "ResourceServerName"},
         "ResourceServerIdentifier": {"Ref": "ResourceServerIdentifier"},

@@ -149,7 +149,7 @@
           "PriceClass": "PriceClass_All",
           "Enabled": true,
           "ViewerCertificate": {
-            "AcmCertificateArn": "PHX_MACRO_API_DOCS_SSL_CERTIFICATE_ARN",
+            "AcmCertificateArn": "PHX_MACRO_SSL_CERTIFICATE_ARN_API_DOCS",
             "SslSupportMethod": "sni-only",
             "MinimumProtocolVersion": "TLSv1.1_2016"
           },

@@ -130,38 +130,7 @@
         "Role": {"Ref": "IAMRole"},
         "Environment": {
           "Variables": {
-            "PHX_MACRO_ORGANIZATION_NAME": {"Ref": "OrganizationName"},
-            "PHX_MACRO_PROJECT_NAME": {"Ref": "ProjectName"},
-            "PHX_MACRO_GIT_REPO_NAME": {"Ref": "GitRepoName"},
-            "PHX_MACRO_GIT_ROOT_PROJECT_BRANCH": {"Ref": "GitRootProjectBranch"},
-            "PHX_MACRO_GIT_CURRENT_PROJECT_BRANCH": {"Ref": "GitCurrentProjectBranch"},
-            "PHX_MACRO_DOMAIN": {"Ref": "Domain"},
-            "PHX_MACRO_HOSTED_ZONE_ID": {"Ref": "HostedZoneId"},
-            "PHX_MACRO_SSL_CERTIFICATE_ARN": {"Ref": "SSLCertificateARN"},
-            "PHX_MACRO_ECS_SSL_CERTIFICATE_ARN": {"Ref": "ECSSSLCertificateARN"},
-            "PHX_MACRO_API_DOCS_SSL_CERTIFICATE_ARN": {"Ref": "APIDocsSSLCertificateARN"},
-            "PHX_MACRO_AUTH_SSL_CERTIFICATE_ARN": {"Ref": "AuthSSLCertificateARN"},
-            "PHX_MACRO_KEY_PAIR_NAME": {"Ref": "KeyPairName"},
-            "PHX_MACRO_PROJECT_DESCRIPTION": {"Ref": "ProjectDescription"},
-            "PHX_MACRO_NOTIFICATION_EMAIL": {"Ref": "NotificationEmail"},
-            "PHX_MACRO_IAM_ROLE": {"Ref": "IAMRole"},
-            "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE": {"Ref": "CodeBuildDockerImage"},
-            "PHX_MACRO_NODEJS_BUILD_DOCKER_IMAGE": {"Ref": "NodeJSBuildDockerImage"},
-            "PHX_MACRO_GITLAB_URL": {"Ref": "GitlabURL"},
-            "PHX_RELEASE_ENVIRONMENTS": {"Fn::Join": [",", {"Ref": "ReleaseEnvironments"}]},
-            "PHX_MACRO_CODE_BUILD_BUCKET_NAME": {"Fn::Join": ["-", [
-              {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "code-build"]]},
-            "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME": {"Fn::Join": ["-", [
-              {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "code-pipeline"]]},
-            "PHX_MACRO_LAMBDA_BUCKET_NAME": {"Fn::Join": ["-", [
-              {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "lambda"]]},
-            "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME": {"Fn::Join": ["-", [
-              {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "load-balancer-logs"]]},
-            "PHX_MACRO_MICROSERVICE_BUCKET_NAME": {"Fn::Join": ["-", [
-              {"Ref": "OrganizationName"}, {"Ref": "ProjectName"}, "microservice"]]},
-            "PHX_MACRO_SSM_PROJECT_NAME_ROOT": {"Fn::Join": ["/", [
-              "/microservice", {"Ref": "ProjectName"}]]
-            }
+            "PHX_MACRO_PROJECT_NAME": {"Ref": "ProjectName"}
           }
         },
         "Code": {
@@ -186,7 +155,7 @@
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/macro-stack-version"]]},
         "Type": "String",
         "Value": {"Ref": "Version"},
-        "Description": "The version of latest deployed Macro cloudformation stack.",
+        "Description": "The version of latest deployed Macro cloudformation stack."
       }
     },
     "OrganizationNameParam": {
@@ -228,7 +197,7 @@
         "Type": "String",
         "Value": {"Ref": "GitRootProjectBranch"},
         "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
-        "Description": "The main git branch associated with your main pipeline (i.e master, main, etc.)",
+        "Description": "The main git branch associated with your main pipeline (i.e master, main, etc.)"
       }
     },
     "GitCurrentProjectBranchParam": {
@@ -239,7 +208,7 @@
         "Type": "String",
         "Value": {"Ref": "GitCurrentProjectBranch"},
         "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
-        "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch.",
+        "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch."
       }
     },
     "CodeBuildDockerImageParam": {
@@ -342,7 +311,7 @@
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn-auth"]]},
         "Type": "String",
         "Value": {"Ref": "AuthSSLCertificateARN"},
-        "Description": "The AWS ACM Certificate ARN used by auth endpoints such as Cognito User Pools.",
+        "Description": "The AWS ACM Certificate ARN used by auth endpoints such as Cognito User Pools."
       }
     },
     "HostedZoneIdParam": {
@@ -372,7 +341,7 @@
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/release-environments"]]},
         "Type": "String",
         "Value": {"Fn::Join": [",", {"Ref": "ReleaseEnvironments"}]},
-        "Description": "The list of isolated release environments with associated pipelines that are not part of the main pipeline and can be created in parallel.",
+        "Description": "The list of isolated release environments with associated pipelines that are not part of the main pipeline and can be created in parallel."
       }
     },
     "KeyPairNameParam": {
