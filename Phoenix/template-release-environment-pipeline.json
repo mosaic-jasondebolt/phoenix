@@ -172,7 +172,7 @@
                       ]]
                     }
                   },
-                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
+                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab-release.json\"}"
                 }
               }
             ]

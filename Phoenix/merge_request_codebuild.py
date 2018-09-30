@@ -1,10 +1,7 @@
 """ Handles CodeBuild jobs executing in the context of a GitLab Merge Request
 
 USAGE:
-  python2.7 merge_request_codebuild.py [build | unit-test | lint]
-
-  This script must be run using Python2.7 as that is the version of Python
-  that is being used in our AWS CodeBuild environment.
+  python merge_request_codebuild.py [build | unit-test | lint]
 
   As long as you have the environment variables set as specified in the
   initializer, you can run this script either locally or on AWS CodeBuild.
@@ -15,8 +12,9 @@ USAGE:
   for merge request events.
 
   This script does the following:
-    1) Notifies GitLab of the status of AWS CodeBuild jobs.
-    2) Generates an ECS parameter template specifically for spinning up
+    1) Persists a gitlab.json file that is passed by CodePipeline to a Lambda function.
+    2) Notifies GitLab of the status of AWS CodeBuild jobs.
+    3) Generates an ECS parameter template specifically for spinning up
        a dev ECS instance used during code review.
 """
 

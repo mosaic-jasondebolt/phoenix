@@ -60,6 +60,7 @@ def get_user_params(job_data):
         Exception: The JSON can't be decoded or a property is missing.
 
     """
+    print('Getting user params')
     try:
         # Get the user parameters which contain the stack, artifact and file settings
         user_parameters = job_data['actionConfiguration']['configuration']['UserParameters']
@@ -160,25 +161,33 @@ def lambda_handler(event, context):
         json_obj = json.dumps(event, indent=4)
         print(json_obj)
         job_id = event['CodePipeline.job']['id']
+        print('job_id: ', job_id)
         job_data = event['CodePipeline.job']['data']
+        print('job_data: ', job_data)
         params = get_user_params(job_data)
+        print('params: ', params)
         artifacts = job_data['inputArtifacts']
+        print('artifacts: ', artifacts)
         artifact = params['artifact'] # The actual name of the CodePipeline artifact, such as 'MyApp' or 'SourceOutput'
+        print('artifact: ', artifact)
         file_name = params['file'] # The name of the file you want to access
+        print('file_name: ', file_name)
         artifact_data = find_artifact(artifacts, artifact)
+        print('artifact_data: ', artifact_data)
         s3 = setup_s3_client(job_data)
         file_str = get_file_as_string(s3, artifact_data, file_name)
-        data_obj = json.loads(file_str.decode('utf-8'))
-        print("data_obj: ")
-        print(data_obj)
-
+        print('file_str: ', file_str)
+        decoded_file_str = file_str.decode('utf-8')
+        print('decoded_file_str: ', decoded_file_str)
+        data_obj = json.loads(decoded_file_str)
+        print('data_obj: ', data_obj)
         put_job_success(job_id, 'Function complete')
     except Exception as e:
         print('Function failed due to exception.')
+        print(e)
 
         # We must notify CodePipeline of the job status or it will block the pipeline for ages
         put_job_failure(job_id, 'Function failed')
-        print(e)
 
     print('Function complete.')
     return "Complete."
