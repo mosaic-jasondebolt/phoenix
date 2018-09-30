@@ -163,8 +163,9 @@ phases:
       - docker push $MAIN_REPOSITORY_URI:$IMAGE_TAG
 artifacts:
     files:
-      - # Gitlab config file which will be picked up my Lambda if this is a merge request build.
+      - # Gitlab config files which will be picked up my Lambda if this is a merge request build.
       - gitlab.json
+      - gitlab-release.json
       - # Database (Aurora, DynamoDB)
       - template-database.json
       - t-database-params-testing.json
