@@ -18,6 +18,7 @@
     "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.1",
     "NodeJSBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/nodejs:10.1.0",
     "GitlabURL": "https://gitlab.intranet.solarmosaic.com",
+    "ReleaseEnvironments": "staging, qa",
     "Version": "VERSION_ID"
   }
 }

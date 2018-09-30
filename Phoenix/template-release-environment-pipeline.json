@@ -50,6 +50,10 @@
       "Description": "The IAM Role used to manage the pipeline stack.",
       "Type": "String"
     },
+    "ReleaseEnvironment": {
+      "Description": "The environment (staging, qa, etc.) to deploy to.",
+      "Type": "String"
+    },
     "Version": {
       "Description": "The identifier/version associated with this deployment.",
       "Type": "String",
@@ -277,6 +281,11 @@
               "Value" : {"Ref": "GitlabProjectId"}
             },
             {
+              "Name" : "RELEASE_ENVIRONMENT",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "ReleaseEnvironment"}
+            },
+            {
               "Name" : "PIPELINE_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "PipelineName"}
@@ -386,6 +395,11 @@
               "Name" : "GITLAB_PROJECT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "GitlabProjectId"}
+            },
+            {
+              "Name" : "RELEASE_ENVIRONMENT",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "ReleaseEnvironment"}
             },
             {
               "Name" : "PIPELINE_NAME",
@@ -498,6 +512,11 @@
               "Name" : "GITLAB_PROJECT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "GitlabProjectId"}
+            },
+            {
+              "Name" : "RELEASE_ENVIRONMENT",
+              "Type" : "PLAINTEXT",
+              "Value" : {"Ref": "ReleaseEnvironment"}
             },
             {
               "Name" : "PIPELINE_NAME",
