@@ -153,8 +153,10 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      - # Notify Gitlab and alter t-ec2-params-template.json for merge request ecs deploy if certain environment variables are present (see the code for details)
+      - # Manipulate CodeBuild artifacts if this is a merge request build
       - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py build
+      - # Manipulate CodeBuild artifacts if this is a release build
+      - python $CODEBUILD_SRC_DIR/Phoenix/release_codebuild.py build
       - # Push docker files
       - echo Pushing the Docker images...
       - docker push $MAIN_REPOSITORY_URI:latest
