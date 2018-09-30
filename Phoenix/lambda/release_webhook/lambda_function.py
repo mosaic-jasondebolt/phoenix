@@ -63,6 +63,7 @@ def lambda_handler(event, context):
     source_branch = obj.ref.split('/')[-1]
 
     is_release_branch = bool(re.match('release-\d{8}$', source_branch))
+    print('is_release_branch: ', is_release_branch)
     if not is_release_branch:
         return  # We only care about release branches.
 
