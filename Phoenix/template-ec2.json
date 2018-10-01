@@ -160,7 +160,7 @@
     },
     "ApplicationELBSG": {
       "Properties": {
-        "GroupDescription": "Application ELB security group.",
+        "GroupDescription": "Application ELB security group. PHX_MACRO",
         "Tags": [
           {
             "Key": "Name",

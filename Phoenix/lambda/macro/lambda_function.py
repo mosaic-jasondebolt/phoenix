@@ -55,7 +55,9 @@ def macro_value_replace(obj, old=None, new=None, replace_map=None):
                     if old in value:
                         obj[key] = obj[key].replace(old, new)
                 elif replace_map is not None:
-                    for replace_key, replace_val in replace_map.items():
+                    # Reverse sorting by dict key length forces matches on the larger string before any overlapping smaller strings.
+                    for replace_key in sorted(replace_map, key=len, reverse=True):
+                        replace_val = replace_map[replace_key]
                         if replace_key in value:
                             obj[key] = obj[key].replace(replace_key, replace_val)
             else:
@@ -67,7 +69,9 @@ def macro_value_replace(obj, old=None, new=None, replace_map=None):
                     if old in item:
                         obj[index] = obj[index].replace(old, new)
                 elif replace_map is not None:
-                    for replace_key, replace_val in replace_map.items():
+                    # Reverse sorting by dict key length forces matches on the larger string before any overlapping smaller strings.
+                    for replace_key in sorted(replace_map, key=len, reverse=True):
+                        replace_val = replace_map[replace_key]
                         if replace_key in item:
                             obj[index] = obj[index].replace(replace_key, replace_val)
             else:
@@ -77,6 +81,7 @@ def macro_key_replace(obj, old=None, new=None):
     # This function only replaces keys in a JSON CloudFormation template, not values.
     # Updates only the part of they key that matches.
     # {"old123": ...} --> {"new123": ...}
+    # TODO (jasondebolt): Sort dict by reverse key length like above to avoid matching on overlapping substrings.
     if isinstance(obj, dict):
         for key, value in obj.items():
             if old is not None and new is not None:
@@ -99,6 +104,12 @@ def get_macro_environment_variable_map():
         phx_key = 'PHX_MACRO_' + param_key.split('/')[-1].replace('-', '_').upper()
         replace_map[phx_key] = param_value
     return replace_map
+
+def check_for_phx_macro_orphans(fragment):
+    str_fragment = str(fragment)
+    if 'PHX_MACRO' in str_fragment:
+        print('PHX_MACRO was found in the template! There should be no PHX_MACRO')
+        return # Will notify CloudFormation as a failure.
 
 def lambda_handler(event, context):
     print(event)
