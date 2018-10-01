@@ -133,11 +133,9 @@ def lambda_handler(event, context):
     print(fragment)
     has_orphan = check_for_phx_macro_orphans(fragment)
     if has_orphan:
-        return {
-            "requestId": event['requestId'],
-            "status": "PHX_MACRO was found in the template! See /lambda/macro/lambda_function.py for details.", # Anything but 'success' will notify cloudformation of a failure.
-            "fragment": fragment
-        }
+        # TODO (jasondebolt): Follow up with AWS support to see if there's a way to send this error message back to CloudFormation so our developers don't have to dig into the Lambda logs.
+        print("The string 'PHX_MACRO' was found somewhere in your template after the template was processed! Please check your template for 'PHX_MACRO' references that were possibly mistyped as a typos.")
+        return # Anything but 'success' will notify cloudformation of a failure.
 
     return {
         "requestId": event['requestId'],
