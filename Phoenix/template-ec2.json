@@ -225,8 +225,7 @@
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
               { "Ref": "Cluster"},
-              "ECSInstance",
-              "PHX_MACRO"
+              "ECSInstance"
             ]]},
             "PropagateAtLaunch": "true"
           }
