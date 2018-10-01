@@ -106,6 +106,7 @@ def get_macro_environment_variable_map():
     return replace_map
 
 def check_for_phx_macro_orphans(fragment):
+    # Checks if there are any remaining PHX_MACRO strings in the tempalte that may not have been replaced due to typos.
     str_fragment = str(fragment)
     if 'PHX_MACRO' in str_fragment:
         print('PHX_MACRO was found in the template! There should be no PHX_MACRO')
@@ -128,6 +129,7 @@ def lambda_handler(event, context):
     macro_key_replace(fragment, old='PHX_MACRO_RANDOM_7', new=random_uppercase_string(7))
     print('New Fragment')
     print(fragment)
+    check_for_phx_macro_orphans(fragment)
 
     return {
         "requestId": event['requestId'],
