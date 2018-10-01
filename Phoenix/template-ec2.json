@@ -160,7 +160,7 @@
     },
     "ApplicationELBSG": {
       "Properties": {
-        "GroupDescription": "Application ELB security group. PHX_MACRO",
+        "GroupDescription": "Application ELB security group.",
         "Tags": [
           {
             "Key": "Name",
@@ -225,7 +225,8 @@
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
               { "Ref": "Cluster"},
-              "ECSInstance"
+              "ECSInstance",
+              "PHX_MACRO"
             ]]},
             "PropagateAtLaunch": "true"
           }
