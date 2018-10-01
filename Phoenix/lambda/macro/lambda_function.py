@@ -133,7 +133,11 @@ def lambda_handler(event, context):
     print(fragment)
     has_orphan = check_for_phx_macro_orphans(fragment)
     if has_orphan:
-        return # Will notify CloudFormation as a failure.
+        return {
+            "requestId": event['requestId'],
+            "status": "PHX_MACRO was found in the template! See /lambda/macro/lambda_function.py for details.", # Anything but 'success' will notify cloudformation of a failure.
+            "fragment": fragment
+        }
 
     return {
         "requestId": event['requestId'],
