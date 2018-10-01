@@ -27,9 +27,9 @@ if [ -d "builds" ]; then
 fi
 
 # Extract JSON properties for a file into a local variable
-CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
-ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-macro-params.json)
-PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
+ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-ssm-globals-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
 LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-params-dev.json`
 STACK_NAME=$PROJECT_NAME-api-deployment-$ENVIRONMENT

@@ -29,7 +29,7 @@ def convert_parameters_file(obj, conversion_format='cloudformation'):
     codepipeline_obj = {'Parameters': {}}
 
     project_name = _parse_json(
-        'template-macro-params.json')['Parameters']['ProjectName']
+        'template-ssm-globals-macro-params.json')['Parameters']['ProjectName']
 
     for param_key in params:
         value = params[param_key]

@@ -110,10 +110,10 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-microservice
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-microservice
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-microservice
-      - # Delete SSM Params
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-microservice-params
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-microservice-params
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-microservice-params
+      - # Delete global SSM Params
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-globals-macro
+      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-globals-macro
+      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-globals-macro
   post_build:
     commands:
       - echo Build completed on `date`

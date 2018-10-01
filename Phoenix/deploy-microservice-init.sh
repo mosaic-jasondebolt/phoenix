@@ -6,8 +6,11 @@ set -e
 # USAGE
 #   ./deploy-microservice-init.sh
 
-echo "Deploying the CloudFormation Macro"
-./deploy-macro.sh create
+echo "Deploying global SSM parameters and CloudFormation Macro"
+./deploy-ssm-globals-macro.sh create
+
+echo "Deploying environment specific SSM parameters"
+./deploy-ssm-environments.sh create
 
 echo "Deploying microservice"
 ./deploy-pipeline.sh create

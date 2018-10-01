@@ -37,6 +37,14 @@ def write_dev_param_files(environment_name):
     what is happening here is rather simple.
     """
 
+    # SSM environments template
+    testing_ssm_environments_template = _parse_json('template-ssm-environments-params-testing.json')
+    dev_ssm_environments_template = copy.deepcopy(testing_ssm_environments_template)
+    dev_ssm_environments_template['Parameters']['Environment'] = 'dev'
+    dev_ssm_environments_template['Parameters']['EnvironmentDescription'] = 'The dev environment is used by individual developers who full control over resources in this environment.'
+    dev_ssm_environments_file_obj = open('template-ssm-environments-params-dev.json', 'w')
+    dev_ssm_environments_file_obj.write(json.dumps(dev_ssm_environments_template, indent=2))
+
     # Database template
     testing_database_template = _parse_json('template-database-params-testing.json')
     dev_database_template = copy.deepcopy(testing_database_template)

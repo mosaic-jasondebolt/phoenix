@@ -19,8 +19,8 @@ set -e
 #   ./deploy-api-dev-all.sh update swagger-postman l1l5pcj1xc v0
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
-DOMAIN_NAME=$(jq -r '.Parameters.Domain' template-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
+DOMAIN_NAME=$(jq -r '.Parameters.Domain' template-ssm-globals-macro-params.json)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-deployment-params-dev.json`
 API_DEPLOYMENT_STACK_NAME=$PROJECT_NAME-api-deployment-$ENVIRONMENT
 

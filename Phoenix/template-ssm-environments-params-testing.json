@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "testing",
+    "EnvironmentDescription": "The testing environment is used by the developers to merge and test their changes before deploying into other environments.",
+    "Version": "VERSION_ID"
+  }
+}

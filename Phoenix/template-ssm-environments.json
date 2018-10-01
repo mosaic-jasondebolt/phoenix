@@ -1,0 +1,39 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description" : "Deploys environment specific SSM parameters.",
+  "Transform" : ["ProjectLambdaMacro"],
+  "Parameters": {
+    "Environment": {
+      "Description": "The environment associated with these SSM parameters.",
+      "Type": "String"
+    },
+    "EnvironmentDescription": {
+      "Description": "A description of this environment and how it is used.",
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The version of this stack.",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "DescriptionParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", "PHX_MACRO_PROJECT_NAME", {"Ref": "Environment"}, "description"]]},
+        "Type": "String",
+        "Value": {"Ref": "EnvironmentDescription"},
+        "Description": "A description of this environment and how it is used.",
+      }
+    },
+    "VersionParam": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", "PHX_MACRO_PROJECT_NAME", {"Ref": "Environment"}, "version"]]},
+        "Type": "String",
+        "Value": {"Ref": "Version"},
+        "Description": "The timestamp version of when this SSM parameters for this environment were last updates from CloudFormation. This param also forces stack updates when no other values have changed.",
+      }
+    }
+  }
+}

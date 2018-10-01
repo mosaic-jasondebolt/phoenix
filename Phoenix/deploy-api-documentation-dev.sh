@@ -20,8 +20,8 @@ fi
 # Convert create/update to uppercase
 OP=$(echo $1 | tr '/a-z/' '/A-Z/')
 
-CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
-PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
 
 listOfVersions='v0'
 for docVersion in $listOfVersions

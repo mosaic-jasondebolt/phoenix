@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "staging",
+    "EnvironmentDescription": "The staging environment is a pre-prod environment that exactly resembles the prod environment.",
+    "Version": "VERSION_ID"
+  }
+}

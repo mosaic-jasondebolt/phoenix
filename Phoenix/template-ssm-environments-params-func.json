@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "func",
+    "EnvironmentDescription": "The func (or 'functional') environment is used for running functional tests.",
+    "Version": "VERSION_ID"
+  }
+}

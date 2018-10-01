@@ -19,7 +19,7 @@ package_name=jq
 t=`which $package_name`
 [ -z "$t" ] && echo "the $package_name isn't installed! Install with 'brew install jq'" && exit 1
 
-IMAGE_ID=$(jq -r '.Parameters.CodeBuildDockerImage' template-macro-params.json)
+IMAGE_ID=$(jq -r '.Parameters.CodeBuildDockerImage' template-ssm-globals-macro-params.json)
 
 #$(aws ecr get-login --no-include-email --region us-east-1) && docker pull $IMAGE_ID && exit 1
 

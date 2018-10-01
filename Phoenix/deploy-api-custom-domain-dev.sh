@@ -20,9 +20,9 @@ fi
 # Convert create/update to uppercase
 OP=$(echo $1 | tr '/a-z/' '/A-Z/')
 
-CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
-ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-macro-params.json)
-PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
+ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-ssm-globals-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
 ENVIRONMENT=`jq -r '.Parameters.Environment' template-api-custom-domain-params-dev.json`
 STACK_NAME=$PROJECT_NAME-api-custom-domain-$ENVIRONMENT
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`

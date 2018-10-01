@@ -32,7 +32,7 @@ if [ $# -ne 0 ];
 fi
 
 # Extract JSON properties for a file into a local variable
-PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
 DNS_PREFIX=$(jq -r '.Parameters.DnsPrefix' template-jenkins-params.json)
 STACK_NAME=$PROJECT_NAME-jenkins-$DNS_PREFIX
 ENVIRONMENT='all'

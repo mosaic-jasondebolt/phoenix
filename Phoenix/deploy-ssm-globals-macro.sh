@@ -4,7 +4,7 @@ set -e
 # Creates a Lambda CloudFormation Macro to post-process CloudFormation templates.
 #
 # USAGE
-#   ./deploy-macro.sh [create | update]
+#   ./deploy-ssm-globals-macro.sh [create | update]
 
 # Check for valid arguments
 if [ $# -ne 1 ]
@@ -14,11 +14,11 @@ if [ $# -ne 1 ]
 fi
 
 # Extract JSON properties for a file into a local variable
-CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-macro-params.json)
-ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-macro-params.json)
-PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-macro-params.json)
+CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
+ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-ssm-globals-macro-params.json)
+PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
 LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
-STACK_NAME=$PROJECT_NAME-macro
+STACK_NAME=$PROJECT_NAME-ssm-globals-macro
 ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 
@@ -39,20 +39,20 @@ do
 done
 
 # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
-sed "s/VERSION_ID/$VERSION_ID/g" template-macro-params.json > temp1.json
+sed "s/VERSION_ID/$VERSION_ID/g" template-ssm-globals-macro-params.json > temp1.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py temp1.json cloudformation > temp2.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py template-macro-params.json cloudformation > temp1.json
+python parameters_generator.py template-ssm-globals-macro-params.json cloudformation > temp1.json
 
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-body file://template-macro.json
+aws cloudformation validate-template --template-body file://template-ssm-globals-macro.json
 
 aws cloudformation $1-stack \
     --stack-name $STACK_NAME \
-    --template-body file://template-macro.json \
+    --template-body file://template-ssm-globals-macro.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_NAMED_IAM \
     --role-arn $CLOUDFORMATION_ROLE

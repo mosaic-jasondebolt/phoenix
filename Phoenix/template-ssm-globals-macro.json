@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Deploys a CloudFormation Macro Lambda for template post-processing",
+  "Description" : "Deploys global project specific SSM parameters and a CloudFormation Macro Lambda for template post-processing",
   "Parameters": {
     "OrganizationName": {
       "Description": "The name of your organization.",
@@ -408,7 +408,7 @@
     }
   },
   "Outputs": {
-    "MacroLambdaArn": {
+    "LambdaMacroArn": {
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
