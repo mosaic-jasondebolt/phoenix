@@ -3,8 +3,45 @@ import json
 import string
 import random
 import os
+import boto3
+import botocore
 
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
+
+ssm_client = boto3.client('ssm')
+
+def get_ssm_params_by_path(path):
+    """ Returns a list of SSM parameter object.
+    [
+        {
+          "Name": "...",
+          "Type": "String",
+          "Value": "...",
+          "Version": 1,
+          "LastModifiedDate": "2018-09-13 14:11:39.928000-07:00",
+          "ARN": "..."
+        },
+        ...
+    ]
+    """
+    result = []
+    next_token = ''
+    while True:
+        args = {
+            'Path': path,
+            'Recursive': True,
+            'WithDecryption': False,
+            'MaxResults': 10,
+        }
+        if next_token:
+            args['NextToken'] = next_token
+        response = ssm_client.get_parameters_by_path(**args)
+        result.extend(response['Parameters'])
+        if not response.get('NextToken'):
+            break
+        next_token = response['NextToken']
+    print(json.dumps(result, indent=2, default=str))
+    return result
 
 def random_uppercase_string(str_len):
     return ''.join([random.choice(string.ascii_uppercase) for _ in range(str_len)])
@@ -54,9 +91,13 @@ def macro_key_replace(obj, old=None, new=None):
 
 def get_macro_environment_variable_map():
     replace_map = {}
-    for env_variable in os.environ:
-        if env_variable.startswith('PHX_MACRO_'):
-            replace_map[env_variable] = os.environ[env_variable]
+    global_ssm_path = '/microservice/{0}/global/'.format(os.environ['PHX_MACRO_PROJECT_NAME'])
+    ssm_params = get_ssm_params_by_path(global_ssm_path)
+    for param in ssm_params:
+        param_key, param_value = param['Name'], param['Value']
+        # '/microservice/{project_name}/global/some-param-key' --> 'PHX_MACRO_SOME_PARAM_KEY'
+        phx_key = 'PHX_MACRO_' + param_key.split('/')[-1].replace('-', '_').upper()
+        replace_map[phx_key] = param_value
     return replace_map
 
 def lambda_handler(event, context):
@@ -66,7 +107,8 @@ def lambda_handler(event, context):
 
     fragment = event['fragment']
     macro_value_replace_map = get_macro_environment_variable_map()
-    print(macro_value_replace_map)
+    print('MACRO VALUES: ')
+    print(json.dumps(macro_value_replace_map, indent=2, default=str))
 
     # Replace all values in the PHX_MACRO_* lambda map
     macro_value_replace(fragment, replace_map=macro_value_replace_map)

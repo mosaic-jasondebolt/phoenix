@@ -651,7 +651,7 @@
       "Properties": {
         "Certificates": [
           {
-            "CertificateArn": "PHX_MACRO_ECS_SSL_CERTIFICATE_ARN"
+            "CertificateArn": "PHX_MACRO_SSL_CERTIFICATE_ARN_ECS"
           }
         ],
         "DefaultActions": [

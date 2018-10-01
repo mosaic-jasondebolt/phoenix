@@ -515,7 +515,7 @@
               "Value" : "PHX_MACRO_DOMAIN"
             }
           ],
-          "Image": "PHX_MACRO_NODEJS_BUILD_DOCKER_IMAGE",
+          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE_NODEJS",
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
@@ -528,7 +528,8 @@
         },
         "ServiceRole": {"Fn::Join": ["", [
           "{{resolve:ssm:",
-          "PHX_MACRO_SSM_PROJECT_NAME_ROOT",
+          "/microservice/",
+          "PHX_MACRO_PROJECT_NAME",
           "/global/code-build-service-role-arn",
           ":1}}"
         ]]},
