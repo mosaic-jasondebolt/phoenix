@@ -19,8 +19,9 @@ phases:
   build:
     commands:
       - echo Build started on `date`
+      - listOfEnvironments='testing e2e prod func rc rcf'
       - |-
-        for environmentName in 'testing e2e prod func rc rcf'
+        for environmentName in $listOfEnvironments
         do
           echo ==== ENVIRONMENT: $environmentName ====
 
