@@ -86,16 +86,16 @@ phases:
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-$environmentName
         done
 
-        # Delete Cognito
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-prod
-        for environmentName in $listOfEnvironments
-        do
-          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-$environmentName
-        done
-        for environmentName in $listOfEnvironments
-        do
-          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-$environmentName
-        done
+        #### # Delete Cognito
+        #### python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-prod
+        #### for environmentName in $listOfEnvironments
+        #### do
+        ####   python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-$environmentName
+        #### done
+        #### for environmentName in $listOfEnvironments
+        #### do
+        ####   aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-$environmentName
+        #### done
 
         # Delete Lambda
         python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-lambda-prod
