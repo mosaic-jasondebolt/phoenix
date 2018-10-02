@@ -168,19 +168,19 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "database",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "database",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -208,17 +208,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "database",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "database",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -240,17 +240,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ec2",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ec2",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -278,17 +278,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ec2",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ec2",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -310,17 +310,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "lambda",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "lambda",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -348,17 +348,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "lambda",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "lambda",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -380,17 +380,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -418,17 +418,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -450,17 +450,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-custom-domain",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-custom-domain",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -488,17 +488,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-custom-domain",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-custom-domain",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -520,17 +520,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-documentation-v0",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-documentation-v0",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -558,17 +558,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-documentation-v0",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-documentation-v0",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -590,17 +590,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -628,17 +628,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -659,7 +659,7 @@
                 "RunOrder": 3,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"Ref": "ProjectName"},
                       "rds-migration",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -681,10 +681,10 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ecs",
                       "main",
                       {"Ref": "ReleaseEnvironment"}
@@ -692,7 +692,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ecs",
                       "main",
                       {"Ref": "ReleaseEnvironment"}
@@ -721,10 +721,10 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ecs",
                       "main",
                       {"Ref": "ReleaseEnvironment"}
@@ -732,7 +732,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "ecs",
                       "main",
                       {"Ref": "ReleaseEnvironment"}
@@ -755,17 +755,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-deployment",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-deployment",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -793,17 +793,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-deployment",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "api-deployment",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -825,17 +825,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito-internals",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito-internals",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -863,17 +863,17 @@
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"Ref": "IAMRole"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito-internals",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "cognito-internals",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -894,7 +894,7 @@
                 "RunOrder": 5,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"Ref": "ProjectName"},
                       "api-documentation",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
@@ -916,7 +916,7 @@
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"Ref": "ProjectName"},
                       "integration-test",
                       {"Ref": "ReleaseEnvironment"}
                     ]]
