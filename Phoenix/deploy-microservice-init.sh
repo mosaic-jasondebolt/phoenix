@@ -12,7 +12,7 @@ echo "Deploying global SSM parameters and CloudFormation Macro"
 echo "Deploying environment specific SSM parameters"
 ./deploy-ssm-environments.sh create
 
-echo "Deploying microservice"
+echo "Deploying pipeline"
 ./deploy-pipeline.sh create
 
 echo "Deploying merge request pipeline"

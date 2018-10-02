@@ -152,16 +152,16 @@ phases:
       - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-rcf
       - # # Delete the Project ECR repositories.
       - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
-      - # Delete Microservice
+      - # Delete Pipeline
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-pipeline
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-pipeline
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-pipeline
-      - # Delete global SSM Params
+      - # Delete all environment specific SSM Params
+      - (cd $CODEBUILD_SRC_DIR/Phoenix && deploy-ssm-environments.sh delete)
+      - # Delete global SSM Params and Macro
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-globals-macro
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-globals-macro
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-globals-macro
-      - # Delete all environment specific SSM Params
-      - (cd $CODEBUILD_SRC_DIR/Phoenix && deploy-ssm-environments.sh delete)
   post_build:
     commands:
       - echo Build completed on `date`
