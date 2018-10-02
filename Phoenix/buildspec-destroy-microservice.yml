@@ -156,8 +156,18 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-pipeline
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-pipeline
       - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-pipeline
-      - # Delete all environment specific SSM Params
-      - (cd $CODEBUILD_SRC_DIR/Phoenix && sh deploy-ssm-environments.sh delete)
+      # Delete all environment specific SSM Params
+      - |-
+        # Delete all environment specific SSM Params
+        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-environments-prod
+        for environmentName in $listOfEnvironments
+        do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-environments-$environmentName
+        done
+        for environmentName in $listOfEnvironments
+        do
+          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-environments-$environmentName
+        done
       - # Delete global SSM Params and Macro
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-globals-macro
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-globals-macro
