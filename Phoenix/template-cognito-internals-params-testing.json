@@ -4,7 +4,7 @@
     "ResourceServerName": "userpool",
     "ResourceServerIdentifier": "userpool",
     "DomainPrefix": "userpool",
-    "UseCustomDomain": "true",
+    "UseCustomDomain": "false",
     "Version": "VERSION_ID"
   }
 }
