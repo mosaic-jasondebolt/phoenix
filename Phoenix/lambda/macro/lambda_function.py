@@ -94,7 +94,7 @@ def macro_key_replace(obj, old=None, new=None):
         for index, item in enumerate(obj):
             macro_key_replace(item, old, new)
 
-def get_macro_environment_variable_map():
+def get_globals_map():
     replace_map = {}
     global_ssm_path = '/microservice/{0}/global/'.format(os.environ['PHX_MACRO_PROJECT_NAME'])
     ssm_params = get_ssm_params_by_path(global_ssm_path)
@@ -102,6 +102,18 @@ def get_macro_environment_variable_map():
         param_key, param_value = param['Name'], param['Value']
         # '/microservice/{project_name}/global/some-param-key' --> 'PHX_MACRO_SOME_PARAM_KEY'
         phx_key = 'PHX_MACRO_' + param_key.split('/')[-1].replace('-', '_').upper()
+        replace_map[phx_key] = param_value
+    return replace_map
+
+def get_environment_map(environment):
+    # Environment can be devjason, testing, e2e, prod, func, etc.
+    replace_map = {}
+    env_ssm_path = '/microservice/{0}/{1}/'.format(os.environ['PHX_MACRO_PROJECT_NAME'], environment)
+    ssm_params = get_ssm_params_by_path(env_ssm_path)
+    for param in ssm_params:
+        param_key, param_value = param['Name'], param['Value']
+        # '/microservice/{project_name}/global/some-param-key' --> 'PHX_MACRO_SOME_PARAM_KEY'
+        phx_key = 'PHX_MACRO_ENV_' + param_key.split('/')[-1].replace('-', '_').upper()
         replace_map[phx_key] = param_value
     return replace_map
 
@@ -120,9 +132,18 @@ def lambda_handler(event, context):
     print(json.dumps(event, indent=2, default=str))
 
     fragment = event['fragment']
-    macro_value_replace_map = get_macro_environment_variable_map()
-    print('MACRO VALUES: ')
+    macro_value_replace_map = get_globals_map()
+    print('MACRO GLOBAL VALUES: ')
     print(json.dumps(macro_value_replace_map, indent=2, default=str))
+
+    # If this stack has an 'Environment' parameter, let's return the value so we can query SSM for them and populate a replacement dict.
+    environment = event['params']
+    environment = event['templateParameterValues'].get('Environment')
+    print('Environment: ', environment)
+    if environment: # Only update the dict if this is an environment specific stack.
+        macro_value_replace_map.update(get_environment_map(environment))
+        print('ALL VALUES: ')
+        print(json.dumps(macro_value_replace_map, indent=2, default=str))
 
     # Replace all values in the PHX_MACRO_* lambda map
     macro_value_replace(fragment, replace_map=macro_value_replace_map)

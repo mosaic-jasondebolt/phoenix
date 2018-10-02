@@ -24,13 +24,13 @@ LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID
-RELEASE_ENVIRONMENTS=$(jq -r '.Parameters.ReleaseEnvironments' template-ssm-globals-macro-params.json)
-RELEASE_ENVIRONMENTS_LIST=$(echo $RELEASE_ENVIRONMENTS | sed "s/,//g")
+ENVIRONMENT_PARAM_FILES=$(ls template-ssm-environments-params-*)
 
 if [ $1 = "delete" ]; then
-  for release_environment in $RELEASE_ENVIRONMENTS_LIST
+  for filename in $ENVIRONMENT_PARAM_FILES
   do
-    STACK_NAME=$PROJECT_NAME-ssm-environments-$release_environment
+    ENVIRONMENT=$(jq -r '.Parameters.Environment' $filename)
+    STACK_NAME=$PROJECT_NAME-ssm-environments-$ENVIRONMENT
     echo 'Deleting stack ' $STACK_NAME
     aws cloudformation delete-stack --stack-name $STACK_NAME
     aws cloudformation wait stack-delete-complete --stack-name $STACK_NAME
@@ -38,13 +38,14 @@ if [ $1 = "delete" ]; then
   exit 0
 fi
 
-for release_environment in $RELEASE_ENVIRONMENTS_LIST
+for filename in $ENVIRONMENT_PARAM_FILES
 do
   # call your procedure/other scripts here below
-  STACK_NAME=$PROJECT_NAME-ssm-environments-$release_environment
+  ENVIRONMENT=$(jq -r '.Parameters.Environment' $filename)
+  STACK_NAME=$PROJECT_NAME-ssm-environments-$ENVIRONMENT
   echo $OP 'stack' $STACK_NAME
   # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
-  sed "s/VERSION_ID/$VERSION_ID/g" template-ssm-environments-params-$release_environment.json > temp1.json
+  sed "s/VERSION_ID/$VERSION_ID/g" $filename > temp1.json
 
   # Regenerate the dev params file into a format the the CloudFormation CLI expects.
   python parameters_generator.py temp1.json cloudformation > temp2.json

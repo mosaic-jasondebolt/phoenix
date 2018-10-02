@@ -7,7 +7,7 @@
       "Description": "The environment associated with these SSM parameters.",
       "Type": "String"
     },
-    "EnvironmentDescription": {
+    "Description": {
       "Description": "A description of this environment and how it is used.",
       "Type": "String"
     },
@@ -22,7 +22,7 @@
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", "PHX_MACRO_PROJECT_NAME", {"Ref": "Environment"}, "description"]]},
         "Type": "String",
-        "Value": {"Ref": "EnvironmentDescription"},
+        "Value": {"Ref": "Description"},
         "Description": "A description of this environment and how it is used.",
       }
     },

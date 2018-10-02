@@ -170,6 +170,9 @@
     }
   },
   "Outputs": {
+    "Description": {
+      "Value": "PHX_MACRO_ENV_DESCRIPTION"
+    },
     "VPCProxyLambdaArn": {
       "Export": {
         "Name": {
