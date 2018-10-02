@@ -34,7 +34,7 @@ def write_dev_param_files(environment_name):
 
     I could have used loops here and made the code look less repetitive,
     but there's simply no need to optimize this or tweak any further because
-    what is happening here is rather simple.
+    what is happening here is rather simple. Keep it simple.
     """
 
     # SSM environments template

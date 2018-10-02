@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "rc",
+    "Description": "The rc environment",
+    "Version": "VERSION_ID"
+  }
+}

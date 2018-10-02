@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "Environment": "rcf",
+    "DomainPrefix": "v0-rcf.docs"
+  }
+}

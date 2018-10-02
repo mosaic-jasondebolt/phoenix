@@ -149,7 +149,785 @@
                     ]]
                   }
                 }
+              }
+            ]
+          },
+          {
+            "Name": "Deploy",
+            "Actions": [
+              {
+                "Name": "DatabaseChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-database-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-database.json"
+                }
               },
+              {
+                "Name": "Database",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "database",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "EC2ChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-ec2-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-ec2.json"
+                }
+              },
+              {
+                "Name": "EC2",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ec2",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "LambdaChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-lambda-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "lambda",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "CognitoChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-cognito-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-cognito.json"
+                }
+              },
+              {
+                "Name": "Cognito",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDomainChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-api-custom-domain-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-api-custom-domain.json"
+                }
+              },
+              {
+                "Name": "APIGatewayDomain",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-custom-domain",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "V0_APIDocumentationChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-api-documentation-v0-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-api-documentation.json"
+                }
+              },
+              {
+                "Name": "V0_APIDocumentation",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-documentation-v0",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-api-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-api.json"
+                }
+              },
+              {
+                "Name": "APIGateway",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "DatabaseMigration",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                      "rds-migration",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "ECSMainServiceChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-ecs-task-main-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-ecs-task.json"
+                }
+              },
+              {
+                "Name": "ECSMainService",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "ecs",
+                      "main",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "APIGatewayDeployChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-api-deployment-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-api-deployment.json"
+                }
+              },
+              {
+                "Name": "APIGatewayDeploy",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 4,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "api-deployment",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "CognitoInternalsChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "TemplateConfiguration": {"Fn::Join": ["", [
+                    "BuildOutput::t-cognito-internals-params-",
+                    {"Ref": "ReleaseEnvironment"},
+                    ".json",
+                  ]]},
+                  "TemplatePath": "BuildOutput::template-cognito-internals.json"
+                }
+              },
+              {
+                "Name": "CognitoInternals",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "cognito-internals",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "PublishAPIDocumentation",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 5,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                      "api-documentation",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "IntegrationTest",
+                "ActionTypeId": {
+                  "Category": "Test",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "InputArtifacts": [{
+                  "Name": "SourceOutput"
+                }],
+                "RunOrder": 5,
+                "Configuration": {
+                  "ProjectName": {
+                    "Fn::Join": ["-", [
+                      "PHX_MACRO_PROJECT_NAME",
+                      "integration-test",
+                      {"Ref": "ReleaseEnvironment"}
+                    ]]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "Name": "PostRelease",
+            "Actions": [
               {
                 "Name": "PostRelease",
                 "ActionTypeId": {

@@ -1,0 +1,10 @@
+{
+  "Parameters": {
+    "Environment": "rcf",
+    "ResourceServerName": "userpool",
+    "ResourceServerIdentifier": "userpool",
+    "DomainPrefix": "userpool",
+    "UseCustomDomain": "false",
+    "Version": "VERSION_ID"
+  }
+}

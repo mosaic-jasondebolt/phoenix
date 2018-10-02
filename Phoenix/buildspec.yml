@@ -25,10 +25,16 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-testing.json > $CODEBUILD_SRC_DIR/t-database-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-e2e.json > $CODEBUILD_SRC_DIR/t-database-params-e2e.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-prod.json > $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-func.json > $CODEBUILD_SRC_DIR/t-database-params-func.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-rc.json > $CODEBUILD_SRC_DIR/t-database-params-rc.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-database-params-rcf.json > $CODEBUILD_SRC_DIR/t-database-params-rcf.json_temp
       - echo replacing params in the database params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-func.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-rc.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-database-params-rcf.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-database-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
       - # EC2 resources
       - echo ===== EC2 BUILD =====
@@ -36,6 +42,9 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-func.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-rc.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ec2-params-rcf.json codepipeline > $CODEBUILD_SRC_DIR/t-ec2-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ec2.json $CODEBUILD_SRC_DIR
       - # AWS Cognito
       - echo ===== COGNITO BUILD =====
@@ -43,10 +52,16 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-params-testing.json > $CODEBUILD_SRC_DIR/t-cognito-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-params-e2e.json > $CODEBUILD_SRC_DIR/t-cognito-params-e2e.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-params-prod.json > $CODEBUILD_SRC_DIR/t-cognito-params-prod.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-params-func.json > $CODEBUILD_SRC_DIR/t-cognito-params-func.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-params-rc.json > $CODEBUILD_SRC_DIR/t-cognito-params-rc.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-params-rcf.json > $CODEBUILD_SRC_DIR/t-cognito-params-rcf.json_temp
       - echo replacing params in the api params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-params-func.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-params-rc.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-params-rcf.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-cognito.json $CODEBUILD_SRC_DIR
       - # ECS Main Service resources
       - echo ===== DOCKER BUILD =====
@@ -54,13 +69,22 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-testing.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-e2e.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-e2e.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-prod.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-prod.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-func.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-func.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-rc.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-rc.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task-main-params-rcf.json > $CODEBUILD_SRC_DIR/Phoenix/t-ecs-rcf.json_temp
       - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-testing.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json_temp
       - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-e2e.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json_temp
       - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-prod.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-func.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-func.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-rc.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-rc.json_temp
+      - sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-rcf.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-rcf.json_temp
       - echo replacing params in the task definition params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-func.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-rc.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-rcf.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task.json $CODEBUILD_SRC_DIR
       - echo Building the Docker image from the Dockerfile.
       - docker build -t $MAIN_REPOSITORY_URI:latest $CODEBUILD_SRC_DIR/Phoenix/ecs
@@ -71,10 +95,16 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-testing.json > $CODEBUILD_SRC_DIR/t-lambda-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-e2e.json > $CODEBUILD_SRC_DIR/t-lambda-params-e2e.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-prod.json > $CODEBUILD_SRC_DIR/t-lambda-params-prod.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-func.json > $CODEBUILD_SRC_DIR/t-lambda-params-func.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-rc.json > $CODEBUILD_SRC_DIR/t-lambda-params-rc.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-rcf.json > $CODEBUILD_SRC_DIR/t-lambda-params-rcf.json_temp
       - echo replacing params in the lambda params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-func.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-rc.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-rcf.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-lambda.json $CODEBUILD_SRC_DIR
       - # Upload the Python Lambda functions
       - listOfPythonLambdaFunctions='projects api_internals password_generator delete_network_interface cognito_internals'
@@ -109,6 +139,9 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-func.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-rc.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain-params-rcf.json codepipeline > $CODEBUILD_SRC_DIR/t-api-custom-domain-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain.json $CODEBUILD_SRC_DIR/template-api-custom-domain.json
       - # V0 API Documentation
       - echo ===== API DOCUMENTATION BUILD =====
@@ -116,6 +149,9 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-testing.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-e2e.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-prod.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-func.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-rc.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation-v0-params-rcf.json codepipeline > $CODEBUILD_SRC_DIR/t-api-documentation-v0-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation.json $CODEBUILD_SRC_DIR/template-api-documentation.json
       - # API Gateway (Changes current API at HEAD, but does not deploy the API distrubtion to the API Endpoint)
       - echo ===== API GATEWAY BUILD =====
@@ -123,10 +159,16 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-testing.json > $CODEBUILD_SRC_DIR/t-api-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-e2e.json > $CODEBUILD_SRC_DIR/t-api-params-e2e.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-prod.json > $CODEBUILD_SRC_DIR/t-api-params-prod.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-func.json > $CODEBUILD_SRC_DIR/t-api-params-func.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-rc.json > $CODEBUILD_SRC_DIR/t-api-params-rc.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-params-rcf.json > $CODEBUILD_SRC_DIR/t-api-params-rcf.json_temp
       - echo replacing params in the api params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-func.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-rc.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-params-rcf.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api.json $CODEBUILD_SRC_DIR
       - # API Gateway Deployment
       - echo ===== API GATEWAY DEPLOYMENT BUILD =====
@@ -134,10 +176,16 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-testing.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-e2e.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-e2e.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-prod.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-func.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-func.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-rc.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-rc.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment-params-rcf.json > $CODEBUILD_SRC_DIR/t-api-deployment-params-rcf.json_temp
       - echo replacing params in the api params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-func.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-rc.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-api-deployment-params-rcf.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-api-deployment-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment.json $CODEBUILD_SRC_DIR
       - # Cognito Internals (Additional configuration for the Cognito API that isn't easily configured via CloudFormation)
       - echo ===== COGNITO INTERNALS BUILD =====
@@ -145,10 +193,16 @@ phases:
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals-params-testing.json > $CODEBUILD_SRC_DIR/t-cognito-internals-params-testing.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals-params-e2e.json > $CODEBUILD_SRC_DIR/t-cognito-internals-params-e2e.json_temp
       - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals-params-prod.json > $CODEBUILD_SRC_DIR/t-cognito-internals-params-prod.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals-params-func.json > $CODEBUILD_SRC_DIR/t-cognito-internals-params-func.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals-params-rc.json > $CODEBUILD_SRC_DIR/t-cognito-internals-params-rc.json_temp
+      - sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals-params-rcf.json > $CODEBUILD_SRC_DIR/t-cognito-internals-params-rcf.json_temp
       - echo replacing params in the cognito params files.
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-testing.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-testing.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-e2e.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-e2e.json
       - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-prod.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-prod.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-func.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-func.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-rc.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-rc.json
+      - python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-rcf.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-rcf.json
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals.json $CODEBUILD_SRC_DIR
   post_build:
     commands:
@@ -171,48 +225,78 @@ artifacts:
       - t-database-params-testing.json
       - t-database-params-e2e.json
       - t-database-params-prod.json
+      - t-database-params-func.json
+      - t-database-params-rc.json
+      - t-database-params-rcf.json
       - # ECS
       - template-ec2.json
       - t-ec2-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
       - t-ec2-params-e2e.json
       - t-ec2-params-prod.json
+      - t-ec2-params-func.json
+      - t-ec2-params-rc.json
+      - t-ec2-params-rcf.json
       - # ECS Main Task
       - template-ecs-task.json
       - t-ecs-task-main-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
       - t-ecs-task-main-params-e2e.json
       - t-ecs-task-main-params-prod.json
+      - t-ecs-task-main-params-func.json
+      - t-ecs-task-main-params-rc.json
+      - t-ecs-task-main-params-rcf.json
       - # Lambda
       - template-lambda.json
       - t-lambda-params-testing.json
       - t-lambda-params-e2e.json
       - t-lambda-params-prod.json
+      - t-lambda-params-func.json
+      - t-lambda-params-rc.json
+      - t-lambda-params-rcf.json
       - # Cognito
       - template-cognito.json
       - t-cognito-params-testing.json
       - t-cognito-params-e2e.json
       - t-cognito-params-prod.json
+      - t-cognito-params-func.json
+      - t-cognito-params-rc.json
+      - t-cognito-params-rcf.json
       - # API Gateway Custom Domain
       - template-api-custom-domain.json
       - t-api-custom-domain-params-testing.json
       - t-api-custom-domain-params-e2e.json
       - t-api-custom-domain-params-prod.json
+      - t-api-custom-domain-params-func.json
+      - t-api-custom-domain-params-rc.json
+      - t-api-custom-domain-params-rcf.json
       - # V0 API Documentation
       - template-api-documentation.json
       - t-api-documentation-v0-params-testing.json
       - t-api-documentation-v0-params-e2e.json
       - t-api-documentation-v0-params-prod.json
+      - t-api-documentation-v0-params-func.json
+      - t-api-documentation-v0-params-rc.json
+      - t-api-documentation-v0-params-rcf.json
       - # API Gateway
       - template-api.json
       - t-api-params-testing.json
       - t-api-params-e2e.json
       - t-api-params-prod.json
+      - t-api-params-func.json
+      - t-api-params-rc.json
+      - t-api-params-rcf.json
       - # API Gateway Deployment
       - template-api-deployment.json
       - t-api-deployment-params-testing.json
       - t-api-deployment-params-e2e.json
       - t-api-deployment-params-prod.json
+      - t-api-deployment-params-func.json
+      - t-api-deployment-params-rc.json
+      - t-api-deployment-params-rcf.json
       - # Cognito Internals
       - template-cognito-internals.json
       - t-cognito-internals-params-testing.json
       - t-cognito-internals-params-e2e.json
       - t-cognito-internals-params-prod.json
+      - t-cognito-internals-params-func.json
+      - t-cognito-internals-params-rc.json
+      - t-cognito-internals-params-rcf.json

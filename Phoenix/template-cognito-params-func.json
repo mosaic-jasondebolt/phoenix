@@ -1,7 +1,8 @@
 {
   "Parameters": {
     "Environment": "func",
-    "Description": "The func environment",
+    "UserPoolName": "userpool",
+    "UserPoolClientName": "userpool",
     "Version": "VERSION_ID"
   }
 }

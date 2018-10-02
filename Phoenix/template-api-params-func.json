@@ -1,7 +1,7 @@
 {
   "Parameters": {
     "Environment": "func",
-    "Description": "The func environment",
+    "VPCPrefix": "testing",
     "Version": "VERSION_ID"
   }
 }

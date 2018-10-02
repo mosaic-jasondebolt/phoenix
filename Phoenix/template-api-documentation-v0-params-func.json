@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "Environment": "func",
+    "DomainPrefix": "v0-func.docs"
+  }
+}
