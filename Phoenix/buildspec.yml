@@ -222,81 +222,31 @@ artifacts:
       - gitlab-release.json
       - # Database (Aurora, DynamoDB)
       - template-database.json
-      - t-database-params-testing.json
-      - t-database-params-e2e.json
-      - t-database-params-prod.json
-      - t-database-params-func.json
-      - t-database-params-rc.json
-      - t-database-params-rcf.json
+      - t-database-params-*.json
       - # ECS
       - template-ec2.json
-      - t-ec2-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
-      - t-ec2-params-e2e.json
-      - t-ec2-params-prod.json
-      - t-ec2-params-func.json
-      - t-ec2-params-rc.json
-      - t-ec2-params-rcf.json
+      - t-ec2-params-*.json
       - # ECS Main Task
       - template-ecs-task.json
-      - t-ecs-task-main-params-testing.json # Note: this file may have been altered by merge_request_codebuild.py if this is a merge request build.
-      - t-ecs-task-main-params-e2e.json
-      - t-ecs-task-main-params-prod.json
-      - t-ecs-task-main-params-func.json
-      - t-ecs-task-main-params-rc.json
-      - t-ecs-task-main-params-rcf.json
+      - t-ecs-task-main-params-*.json
       - # Lambda
       - template-lambda.json
-      - t-lambda-params-testing.json
-      - t-lambda-params-e2e.json
-      - t-lambda-params-prod.json
-      - t-lambda-params-func.json
-      - t-lambda-params-rc.json
-      - t-lambda-params-rcf.json
+      - t-lambda-params-*.json
       - # Cognito
       - template-cognito.json
-      - t-cognito-params-testing.json
-      - t-cognito-params-e2e.json
-      - t-cognito-params-prod.json
-      - t-cognito-params-func.json
-      - t-cognito-params-rc.json
-      - t-cognito-params-rcf.json
+      - t-cognito-params-*.json
       - # API Gateway Custom Domain
       - template-api-custom-domain.json
-      - t-api-custom-domain-params-testing.json
-      - t-api-custom-domain-params-e2e.json
-      - t-api-custom-domain-params-prod.json
-      - t-api-custom-domain-params-func.json
-      - t-api-custom-domain-params-rc.json
-      - t-api-custom-domain-params-rcf.json
+      - t-api-custom-domain-params-*.json
       - # V0 API Documentation
       - template-api-documentation.json
-      - t-api-documentation-v0-params-testing.json
-      - t-api-documentation-v0-params-e2e.json
-      - t-api-documentation-v0-params-prod.json
-      - t-api-documentation-v0-params-func.json
-      - t-api-documentation-v0-params-rc.json
-      - t-api-documentation-v0-params-rcf.json
+      - t-api-documentation-v0-params-*.json
       - # API Gateway
       - template-api.json
-      - t-api-params-testing.json
-      - t-api-params-e2e.json
-      - t-api-params-prod.json
-      - t-api-params-func.json
-      - t-api-params-rc.json
-      - t-api-params-rcf.json
+      - t-api-params-*.json
       - # API Gateway Deployment
       - template-api-deployment.json
-      - t-api-deployment-params-testing.json
-      - t-api-deployment-params-e2e.json
-      - t-api-deployment-params-prod.json
-      - t-api-deployment-params-func.json
-      - t-api-deployment-params-rc.json
-      - t-api-deployment-params-rcf.json
+      - t-api-deployment-params-*.json
       - # Cognito Internals
       - template-cognito-internals.json
-      - t-cognito-internals-params-testing.json
-      - t-cognito-internals-params-e2e.json
-      - t-cognito-internals-params-prod.json
-      - t-cognito-internals-params-func.json
-      - t-cognito-internals-params-rc.json
-      - t-cognito-internals-params-rcf.json
+      - t-cognito-internals-params-*.json
