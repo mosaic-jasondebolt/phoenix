@@ -175,74 +175,7 @@
         "Principal": "apigateway.amazonaws.com"
       }
     },
-    "LambdaRole": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com",
-                  "codepipeline.amazonaws.com",
-                  "codebuild.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "dynamodb:*",
-                "cloudformation:*",
-                "codepipeline:*",
-                "codebuild:*",
-                "s3:*",
-                "ec2:*",
-                "ssm:*",
-                "kms:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole",
-                "iam:DeleteRole",
-                "iam:DeleteRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:CreateRole",
-                "iam:PassRole",
-                "iam:GetRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          "PHX_MACRO_PROJECT_NAME",
-          "APILambdaRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaRole"
-          }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
-    },
+    "LambdaRole": "PHX_MACRO_IAM_ROLE",
     "LambdaPostReleaseSG": {
       "Properties": {
         "GroupDescription": "Post Release Lambda Security Group",
