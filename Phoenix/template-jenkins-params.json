@@ -6,6 +6,6 @@
     "Scheme": "internal",
     "WebSubnets": "Private",
     "DnsPrefix": "jenkins",
-    "SnapshotId": ""
+    "SnapshotId": "snap-0fa8c2b34ab724471"
   }
 }

@@ -49,7 +49,7 @@ aws cloudformation create-change-set --stack-name $STACK_NAME \
     --change-set-name $CHANGE_SET_NAME \
     --template-body file://template-jenkins.json \
     --parameters file://temp1.json \
-    --change-set-type $OP \
+    --change-set-type CREATE \
     --capabilities CAPABILITY_IAM
 
 aws cloudformation wait change-set-create-complete \
