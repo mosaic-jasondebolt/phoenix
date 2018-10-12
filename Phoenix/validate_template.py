@@ -1,20 +1,14 @@
 import glob
 import subprocess
-
 import time
 import os
-import json
 
-def parse_output(output):
-    """
-    Formats the output to be printed
-    :param output:
-    :return:
-    """
-    #TODO: need to search for ERROR and return exit(1) if output looks to have error in it
-    #TODO: need to make output look much better
-    print(str(output))
 
+def infra_status(cmd, status):
+    if status != 0:
+        text = 'Error: Running \n{0}\n '.format(cmd)
+        print(text)
+        exit(0)
 
 def main():
     """
@@ -55,7 +49,9 @@ def main():
                     s3_path = 'mosaic-phoenix-code-pipeline/{0}'.format(s3_file_name)
 
                     # upload the file
-                    subprocess.call(['aws', 's3', 'cp', os.path.abspath(file_path), 's3://{0}'.format(s3_path)])
+                    ret = subprocess.call(['aws', 's3', 'cp', os.path.abspath(file_path), 's3://{0}'.format(s3_path)])
+                    cmd = 'aws s3 cp {0} s3://{1}'.format(os.path.abspath(file_path), s3_path )
+                    infra_status(cmd, ret)
 
                     # validate the file
                     result = subprocess.call([
@@ -65,7 +61,9 @@ def main():
                     ])
 
                     # delete the file
-                    subprocess.call(['aws', 's3', 'rm', 's3://{0}'.format(s3_path)])
+                    ret = subprocess.call(['aws', 's3', 'rm', 's3://{0}'.format(s3_path)])
+                    cmd =  'aws s3 rm s3://{0}'.format( s3_path )
+                    infra_status( cmd, ret)
 
                     if result != 0:
                         text = 'Validation failed! aws cloudformation validate-template --template-url https://s3.amazonaws.com/{0}'.format(s3_path)
@@ -81,8 +79,7 @@ def main():
                 print(text)
                 exit(1)
 
-        else:
-            print('Not validating parameters file: {0}'.format(file_path))
+    print('\n\nAll cloudformation have valid syntax. Nice job you ROCK!!\n\n')
 
 
 if __name__ == "__main__":
