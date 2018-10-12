@@ -1,8 +1,19 @@
 import glob
 import subprocess
-import boto3
+
 import time
 import os
+import json
+
+def parse_output(output):
+    """
+    Formats the output to be printed
+    :param output:
+    :return:
+    """
+    #TODO: need to search for ERROR and return exit(1) if output looks to have error in it
+    #TODO: need to make output look much better
+    print(str(output))
 
 
 def main():
@@ -15,11 +26,13 @@ def main():
             print('Validating file: {0}'.format(file_path))
 
             try:
-                subprocess.check_output([
+               result = subprocess.check_output([
                     'aws',
                     'cloudformation', 'validate-template', '--template-body',
                     'file://{0}'.format(file_path)
-                ], stderr=subprocess.STDOUT)
+                    ], stderr=subprocess.STDOUT)
+
+               parse_output(result)
 
             except subprocess.CalledProcessError as e:
                 output = str(e.output)
@@ -38,7 +51,7 @@ def main():
                     subprocess.call(['aws', 's3', 'cp', os.path.abspath(file_path), 's3://{0}'.format(s3_path)])
 
                     # validate the file
-                    subprocess.call([
+                    result = subprocess.call([
                         'aws',
                         'cloudformation', 'validate-template', '--template-url',
                         'https://s3.amazonaws.com/{0}'.format(s3_path)
@@ -46,6 +59,17 @@ def main():
 
                     # delete the file
                     subprocess.call(['aws', 's3', 'rm', 's3://{0}'.format(s3_path)])
+
+                    if result != 0:
+                        text = 'Validation failed! aws cloudformation validate-template --template-body file://{0}'.format(file_path)
+                        print(text)
+                        exit(1)
+
+            except : #need to catch other exceptions
+                text = 'Exception: Validation failed! aws cloudformation validate-template --template-body file://{0}'.format(file_path)
+                print(text)
+                exit(1)
+
         else:
             print('Not validating parameters file: {0}'.format(file_path))
 
