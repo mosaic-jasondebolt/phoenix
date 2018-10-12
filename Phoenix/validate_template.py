@@ -26,13 +26,17 @@ def main():
             print('Validating file: {0}'.format(file_path))
 
             try:
-               result = subprocess.check_output([
+               result = subprocess.call([
+                   'aws',
+                   'cloudformation', 'validate-template', '--template-body',
+                   'file://{0}'.format(file_path)
+               ])
+               if result != 0:
+                 subprocess.check_output([
                     'aws',
                     'cloudformation', 'validate-template', '--template-body',
                     'file://{0}'.format(file_path)
                     ], stderr=subprocess.STDOUT)
-
-               parse_output(result)
 
             except subprocess.CalledProcessError as e:
                 output = str(e.output)
@@ -61,11 +65,15 @@ def main():
                     subprocess.call(['aws', 's3', 'rm', 's3://{0}'.format(s3_path)])
 
                     if result != 0:
-                        text = 'Validation failed! aws cloudformation validate-template --template-body file://{0}'.format(file_path)
+                        text = 'Validation failed! aws cloudformation validate-template --template-url https://s3.amazonaws.com/{0}'.format(s3_path)
                         print(text)
                         exit(1)
 
             except : #need to catch other exceptions
+                text = 'Exception: Validation failed! aws cloudformation validate-template --template-body file://{0}'.format(file_path)
+                print(text)
+                exit(1)
+            if result != 0:
                 text = 'Exception: Validation failed! aws cloudformation validate-template --template-body file://{0}'.format(file_path)
                 print(text)
                 exit(1)
