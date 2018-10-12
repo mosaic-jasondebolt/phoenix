@@ -32,6 +32,9 @@ def main():
                    'file://{0}'.format(file_path)
                ])
                if result != 0:
+                 # If this valdate throughs as expection it is caught but if it just puts and error
+                 # in the output then we have false positives. That is why I have the one about.
+                 # I feel my logic is flawed.
                  subprocess.check_output([
                     'aws',
                     'cloudformation', 'validate-template', '--template-body',
