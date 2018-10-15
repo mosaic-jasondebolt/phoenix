@@ -10,6 +10,13 @@ def infra_status(cmd, status):
         print(text)
         exit(0)
 
+def make_bucket(bucket):
+    """Check if the bucket already exists, if not then create it"""
+    ret = subprocess.call(['aws', 's3', 'ls', 's3://{0}'.format(bucket)])
+
+    if ret != 0:
+      subprocess.call(['aws', 's3', 'mb', 's3://{0}'.format(bucket)])
+
 def main():
     """
     Iterate over all cloud formation templates running validate command against them
@@ -45,10 +52,13 @@ def main():
 
                     timestamp = str(time.time())
                     abs_path = os.path.abspath(file_path)
-                    s3_file_name = timestamp + '-' + os.path.basename(abs_path)
-                    s3_path = 'mosaic-phoenix-code-pipeline/{0}'.format(s3_file_name)
+                    s3_file_name = timestamp.split('.')[0] + '-' + os.path.basename(abs_path)
+                    bucket = 'infratemp'
 
-                    # upload the file
+                    make_bucket(bucket)
+                    s3_path = '{0}/{1}'.format(bucket, s3_file_name)
+
+                # upload the file
                     ret = subprocess.call(['aws', 's3', 'cp', os.path.abspath(file_path), 's3://{0}'.format(s3_path)])
                     cmd = 'aws s3 cp {0} s3://{1}'.format(os.path.abspath(file_path), s3_path )
                     infra_status(cmd, ret)
