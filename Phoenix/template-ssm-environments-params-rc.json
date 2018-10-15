@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "ProjectName": "PROJECT_NAME",
     "Environment": "rc",
     "Description": "The rc environment",
     "Version": "VERSION_ID"

@@ -13,9 +13,6 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
-# Convert create/update to uppercase
-OP=$(echo $1 | tr '/a-z/' '/A-Z/')
-
 # Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
 ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-ssm-globals-macro-params.json)
@@ -23,7 +20,6 @@ PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params
 LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
-CHANGE_SET_NAME=$VERSION_ID
 ENVIRONMENT_PARAM_FILES=$(ls template-ssm-environments-params-*)
 
 if [ $1 = "delete" ]; then
@@ -43,7 +39,6 @@ do
   # call your procedure/other scripts here below
   ENVIRONMENT=$(jq -r '.Parameters.Environment' $filename)
   STACK_NAME=$PROJECT_NAME-ssm-environments-$ENVIRONMENT
-  echo $OP 'stack' $STACK_NAME
   # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
   sed "s/VERSION_ID/$VERSION_ID/g" $filename > temp1.json
 
@@ -53,19 +48,14 @@ do
   # Validate the CloudFormation template before template execution.
   aws cloudformation validate-template --template-body file://template-ssm-environments.json
 
-  aws cloudformation create-change-set --stack-name $STACK_NAME \
-      --change-set-name $CHANGE_SET_NAME \
+  aws cloudformation $1-stack \
+      --stack-name $STACK_NAME \
       --template-body file://template-ssm-environments.json \
       --parameters file://temp2.json \
-      --change-set-type $OP \
       --capabilities CAPABILITY_IAM \
       --role-arn $CLOUDFORMATION_ROLE
 
-  aws cloudformation wait change-set-create-complete \
-      --change-set-name $CHANGE_SET_NAME --stack-name $STACK_NAME
-
-  aws cloudformation execute-change-set --stack-name $STACK_NAME \
-      --change-set-name $CHANGE_SET_NAME
+  aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 
   # Cleanup
   rm temp1.json

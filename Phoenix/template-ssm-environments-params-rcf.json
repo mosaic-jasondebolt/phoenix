@@ -1,5 +1,6 @@
 {
   "Parameters": {
+    "ProjectName": "PROJECT_NAME",
     "Environment": "rcf",
     "Description": "The rcf environment",
     "Version": "VERSION_ID"

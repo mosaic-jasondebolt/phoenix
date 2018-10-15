@@ -10,6 +10,8 @@ __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
 
 ssm_client = boto3.client('ssm')
 
+PROJECT_NAME = os.environ['PHX_MACRO_PROJECT_NAME']
+
 def get_ssm_params_by_path(path):
     """ Returns a list of SSM parameter object.
     [
@@ -94,28 +96,37 @@ def macro_key_replace(obj, old=None, new=None):
         for index, item in enumerate(obj):
             macro_key_replace(item, old, new)
 
-def get_globals_map():
+def get_ssm_map():
     replace_map = {}
-    global_ssm_path = '/microservice/{0}/global/'.format(os.environ['PHX_MACRO_PROJECT_NAME'])
-    ssm_params = get_ssm_params_by_path(global_ssm_path)
+    ssm_path = '/microservice/{0}/'.format(PROJECT_NAME)
+    ssm_params = get_ssm_params_by_path(ssm_path)
     for param in ssm_params:
         param_key, param_value = param['Name'], param['Value']
         # '/microservice/{project_name}/global/some-param-key' --> 'PHX_MACRO_SOME_PARAM_KEY'
-        phx_key = 'PHX_MACRO_' + param_key.split('/')[-1].replace('-', '_').upper()
-        replace_map[phx_key] = param_value
+        replace_map[param_key] = param_value
     return replace_map
 
-def get_environment_map(environment):
-    # Environment can be devjason, testing, e2e, prod, func, etc.
-    replace_map = {}
-    env_ssm_path = '/microservice/{0}/{1}/'.format(os.environ['PHX_MACRO_PROJECT_NAME'], environment)
-    ssm_params = get_ssm_params_by_path(env_ssm_path)
-    for param in ssm_params:
-        param_key, param_value = param['Name'], param['Value']
-        # '/microservice/{project_name}/global/some-param-key' --> 'PHX_MACRO_SOME_PARAM_KEY'
-        phx_key = 'PHX_MACRO_ENV_' + param_key.split('/')[-1].replace('-', '_').upper()
-        replace_map[phx_key] = param_value
-    return replace_map
+def macro_phoenix_ssm_replace(obj, replace_map, params_map):
+    # Replaces dicts of {"PhoenixSSM": /microservice/{ProjectName}/../{Environment}/...}  with SSM values.
+    if isinstance(obj, dict):
+        for key in obj:
+            if isinstance(obj[key], dict):
+              if "PhoenixSSM" in obj[key]:
+                  PhoenixVal = obj[key]["PhoenixSSM"].format(**params_map)
+                  replace_val = replace_map.get(PhoenixVal)
+                  if replace_val is not None:
+                      obj[key] = replace_val
+        for key, value in obj.items():
+            macro_phoenix_ssm_replace(value, replace_map, params_map)
+    elif isinstance(obj, list):
+        for index, item in enumerate(obj):
+            if isinstance(item, dict):
+                if "PhoenixSSM" in item:
+                    PhoenixVal = item["PhoenixSSM"].format(**params_map)
+                    replace_val = replace_map.get(PhoenixVal)
+                    if replace_val is not None:
+                        obj[index] = replace_val
+            macro_phoenix_ssm_replace(item, replace_map, params_map)
 
 def check_for_phx_macro_orphans(fragment):
     # Checks if there are any remaining PHX_MACRO strings in the tempalte that may not have been replaced due to typos.
@@ -132,21 +143,13 @@ def lambda_handler(event, context):
     print(json.dumps(event, indent=2, default=str))
 
     fragment = event['fragment']
-    macro_value_replace_map = get_globals_map()
-    print('MACRO GLOBAL VALUES: ')
-    print(json.dumps(macro_value_replace_map, indent=2, default=str))
+    replace_map = get_ssm_map()
+    params_map = event['templateParameterValues']
+    params_map.update({'ProjectName': PROJECT_NAME}) # Add the ProjectName to the params map
+    print('REPLACE_MAP:', json.dumps(replace_map, indent=2, default=str))
 
-    # If this stack has an 'Environment' parameter, let's return the value so we can query SSM for them and populate a replacement dict.
-    environment = event['params']
-    environment = event['templateParameterValues'].get('Environment')
-    print('Environment: ', environment)
-    if environment: # Only update the dict if this is an environment specific stack.
-        macro_value_replace_map.update(get_environment_map(environment))
-        print('ALL VALUES: ')
-        print(json.dumps(macro_value_replace_map, indent=2, default=str))
-
-    # Replace all values in the PHX_MACRO_* lambda map
-    macro_value_replace(fragment, replace_map=macro_value_replace_map)
+    macro_phoenix_ssm_replace(fragment, replace_map, params_map)
+    print(json.dumps(fragment, indent=2, default=str))
 
     # Replace API Deployment logical CloudFormation ID's with random values (or anything else with the PHX_MACRO_RANDOM constant)
     macro_key_replace(fragment, old='PHX_MACRO_RANDOM_7', new=random_uppercase_string(7))
