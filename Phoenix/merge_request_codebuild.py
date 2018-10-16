@@ -15,7 +15,7 @@ USAGE:
     1) Persists a gitlab.json file that is passed by CodePipeline to a Lambda function.
     2) Notifies GitLab of the status of AWS CodeBuild jobs.
     3) Generates an ECS parameter template specifically for spinning up
-       a dev ECS instance used during code review.
+       a testing ECS instance used during code review.
 """
 
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
@@ -92,18 +92,18 @@ def generate_ec2_params():
     )
     ec2_params = _parse_json(file_path)
     print(json.dumps(ec2_params, indent=2))
-    # We will use the dev environment by default, but the URL will include the git commit sha1.
+    # We will use the testing environment by default, but the URL will include the git commit sha1.
     # Also, we will use the pipeline name as the environment.
-    # If we left the 'Environment' parameter value as the default of 'testing' or 'dev', the underlying EC2
-    # instance would fail to launch as 'testing' and 'dev' instances may already exists.
+    # If we left the 'Environment' parameter value as the default of 'testing', the underlying EC2
+    # instance would fail to launch as 'testing' instances may already exists.
     # If we used the git sha1 as the environment, a new EC2 instance would be created for every merge request update,
     # which is super slow an inefficient.
     # Ideally, we would spin up an EC2 instance when the MR is created, and tear it down when MR is merged or closed.
     # The pipeline name a a good environment choice since that name persists throughout the MR.
     # NOTE!: If you change the below URL, you must also change this value in the post_mergerequests lambda function.
     ec2_params['Parameters']['Environment'] = PIPELINE_NAME
-    ec2_params['Parameters']['DBEnvironment'] = 'dev'
-    ec2_params['Parameters']['VPCPrefix'] = 'dev'
+    ec2_params['Parameters']['DBEnvironment'] = 'testing' # previously set to 'dev'
+    ec2_params['Parameters']['VPCPrefix'] = 'testing' # previously set to 'dev'
     ec2_params_file = open('t-ec2-params-testing.json', 'w')
     ec2_params_file.write(json.dumps(ec2_params, indent=2))
 
@@ -116,8 +116,8 @@ def generate_ecs_task_main_params():
     print(json.dumps(ecs_params, indent=2))
     # NOTE!: Comments in the 'generate_ec2_params' function above apply to this function as well.
     ecs_params['Parameters']['Environment'] = PIPELINE_NAME
-    ecs_params['Parameters']['DBEnvironment'] = 'dev'
-    ecs_params['Parameters']['VPCPrefix'] = 'dev'
+    ecs_params['Parameters']['DBEnvironment'] = 'testing' # previously set to 'dev'
+    ecs_params['Parameters']['VPCPrefix'] = 'testing' # previously set to 'dev'
     ecs_params['Parameters']['URLPrefixOverride'] = 'mr-{0}'.format(CODEBUILD_RESOLVED_SOURCE_VERSION)
     ecs_params_file = open('t-ecs-task-main-params-testing.json', 'w')
     ecs_params_file.write(json.dumps(ecs_params, indent=2))
