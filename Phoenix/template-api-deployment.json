@@ -22,9 +22,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": "PHX_MACRO_IAM_ROLE",
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Code": {
-          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -48,7 +48,7 @@
         "Hostname": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "ecs-main",
               {"Ref": "Environment"},
               "ServiceHostname"
@@ -59,7 +59,7 @@
         "RestApiId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "api",
               {"Ref": "Environment"},
               "RestApiId"
@@ -79,7 +79,7 @@
             "Fn::Join": [
               "-",
               [
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 "api",
                 {"Ref": "Environment"},
                 "RestApiId"
@@ -105,7 +105,7 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "PHX_MACRO_PROJECT_NAME",
+                    {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                     "api",
                     {"Ref": "Environment"},
                     "RestApiId"
@@ -128,7 +128,7 @@
             "Fn::Join": [
               "-",
               [
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 "api",
                 {"Ref": "Environment"},
                 "RestApiId"
@@ -150,7 +150,7 @@
         "DomainName" : {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "api-custom-domain",
               {"Ref": "Environment"},
               "CustomDomain"
@@ -162,7 +162,7 @@
             "Fn::Join": [
               "-",
               [
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 "api",
                 {"Ref": "Environment"},
                 "RestApiId"
@@ -189,7 +189,7 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "PHX_MACRO_PROJECT_NAME",
+                    {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                     "api",
                     {"Ref": "Environment"},
                     "RestApiId"
@@ -211,7 +211,7 @@
             "Fn::Join": [
               "-",
               [
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 "api",
                 {"Ref": "Environment"},
                 "RestApiId"
@@ -233,7 +233,7 @@
         "DomainName" : {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "api-custom-domain",
               {"Ref": "Environment"},
               "CustomDomain"
@@ -245,7 +245,7 @@
             "Fn::Join": [
               "-",
               [
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 "api",
                 {"Ref": "Environment"},
                 "RestApiId"
