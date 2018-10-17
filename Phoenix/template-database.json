@@ -685,7 +685,7 @@
     },
     "DnsRecordSetGroup": {
       "Properties": {
-        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"},
+        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/private-hosted-zone-id"},
         "RecordSets": [
           {
             "ResourceRecords": [
