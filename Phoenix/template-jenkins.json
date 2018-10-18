@@ -366,12 +366,12 @@
         }
       },
       "Properties": {
-        "KeyName": "PHX_MACRO_KEY_PAIR_NAME",
+        "KeyName": {"PhoenixSSM": "/microservice/{ProjectName}/global/key-pair-name"},
         "Tags": [
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "JenkinsInstance",
               {"Ref": "DnsPrefix"}
             ]]}
@@ -620,7 +620,7 @@
             "LoadBalancerPort": "443",
             "InstancePort": "8080",
             "Protocol": "HTTPS",
-            "SSLCertificateId" : "PHX_MACRO_SSL_CERTIFICATE_ARN"
+            "SSLCertificateId" : {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn"}
           }
         ],
         "HealthCheck": {
@@ -657,7 +657,7 @@
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "JenkinsInstance",
               {"Ref": "DnsPrefix"}
             ]]}
@@ -687,7 +687,7 @@
           "Fn::Join": [
             "",
             [
-              "PHX_MACRO_DOMAIN",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
               "."
             ]
           ]
@@ -700,7 +700,7 @@
                 "Ref": "DnsPrefix"
               },
               ".",
-              "PHX_MACRO_DOMAIN",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
               "."
             ]
           ]

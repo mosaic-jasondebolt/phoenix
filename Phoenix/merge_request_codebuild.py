@@ -94,8 +94,6 @@ def generate_ec2_params():
     print(json.dumps(ec2_params, indent=2))
     # We will use the dev environment by default, but the URL will include the git commit sha1.
     # Also, we will use the pipeline name as the environment.
-    # If we left the 'Environment' parameter value as the default of 'testing' or 'dev', the underlying EC2
-    # instance would fail to launch as 'testing' and 'dev' instances may already exists.
     # If we used the git sha1 as the environment, a new EC2 instance would be created for every merge request update,
     # which is super slow an inefficient.
     # Ideally, we would spin up an EC2 instance when the MR is created, and tear it down when MR is merged or closed.

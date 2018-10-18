@@ -34,7 +34,7 @@ fi
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
 DNS_PREFIX=$(jq -r '.Parameters.DnsPrefix' template-jenkins-params.json)
-STACK_NAME=$PROJECT_NAME-jenkins-$DNS_PREFIX
+STACK_NAME=$PROJECT_NAME-$DNS_PREFIX
 ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID

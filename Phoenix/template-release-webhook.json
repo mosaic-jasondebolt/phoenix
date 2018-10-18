@@ -32,14 +32,14 @@
       "Properties" : {
         "Description" : {"Fn::Join": ["", [
           "The ",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           " GitLab Release ",
           " REST API (Release Candidate ",
           {"Ref": "Version"},
           ")"
         ]]},
         "Name" : { "Fn::Join": ["-",  [
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "api",
           "release-webhook"
         ]]}
@@ -122,30 +122,30 @@
         "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
         "Environment": {
           "Variables": {
-            "PROJECT_NAME": "PHX_MACRO_PROJECT_NAME",
-            "PROJECT_DESCRIPTION": "PHX_MACRO_PROJECT_DESCRIPTION",
-            "CODE_PIPELINE_BUCKET_NAME": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
-            "CODE_BUILD_DOCKER_IMAGE": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
-            "LAMBDA_BUCKET_NAME": "PHX_MACRO_LAMBDA_BUCKET_NAME",
-            "IAM_ROLE": "PHX_MACRO_IAM_ROLE",
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "PROJECT_DESCRIPTION": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-description"},
+            "CODE_PIPELINE_BUCKET_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
+            "CODE_BUILD_DOCKER_IMAGE": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
+            "LAMBDA_BUCKET_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
+            "IAM_ROLE": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
             "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
               "/microservice/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "/global/code-build-service-role-arn",
               ":1}}"
             ]]},
             "CODE_PIPELINE_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
               "/microservice/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "/global/code-pipeline-service-role-arn",
               ":1}}"
             ]]}
           }
         },
         "Code": {
-          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "release_webhook",
@@ -232,7 +232,7 @@
           "Version": "2012-10-17"
         },
         "PolicyName": { "Fn::Join": ["-", [
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "APILambdaRole"
         ]]},
         "Roles": [
@@ -270,11 +270,11 @@
         "Role": { "Fn::GetAtt" : ["LambdaPostReleaseRole", "Arn"] },
         "Environment": {
           "Variables": {
-            "PROJECT_NAME": "PHX_MACRO_PROJECT_NAME"
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
           }
         },
         "Code": {
-          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "post_release",
@@ -398,7 +398,7 @@
         "Handler": "lambda_function.lambda_handler",
         "Role": { "Fn::GetAtt" : ["LambdaGitlabCustomAuthorizerRole", "Arn"] },
         "Code": {
-          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
           "S3Key" : {"Fn::Join": ["/", [
             {"Ref": "Version"},
             "gitlab_custom_authorizer",
@@ -530,7 +530,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "release-webhook",
             "LambdaPostReleaseFunctionName"
           ]]
@@ -542,7 +542,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "release-webhook",
             "ReleasesURL"
           ]]

@@ -169,7 +169,7 @@
         "DBSubnetGroupDescription": "Microservice DB subnet group",
         "DBSubnetGroupName": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             {"Ref": "Environment"},
             "db", "subnet", "group"
           ]]
@@ -202,7 +202,7 @@
       "Properties": {
         "GroupName": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             {"Ref": "Environment"},
             "DB",
             "SG"
@@ -210,7 +210,7 @@
         },
         "GroupDescription": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             {"Ref": "Environment"},
             "DB",
             "SG"
@@ -229,7 +229,7 @@
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "rds",
               {"Ref": "Environment"},
               "sg"
@@ -304,9 +304,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": "PHX_MACRO_IAM_ROLE",
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Code": {
-          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -332,7 +332,7 @@
         "SnapshotIdentifier": {"Ref": "SnapshotIdentifier"},
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "Environment"},
           "aurora-admin-password"
         ]]},
@@ -340,7 +340,7 @@
           "This parameter was created by stack ",
           {"Ref": "AWS::StackName"},
           " to store passwords for the ",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "Environment"},
           " Aurora DB TEST"
         ]]}
@@ -359,7 +359,7 @@
         "SnapshotIdentifier": {"Ref": "SnapshotIdentifier"},
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "Environment"},
           "aurora-admin-password"
         ]]},
@@ -367,7 +367,7 @@
           "This parameter was created by stack ",
           {"Ref": "AWS::StackName"},
           " to store passwords for the ",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "Environment"},
           " Aurora DB"
         ]]}
@@ -409,24 +409,24 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
           "NamespaceType": "BUILD_ID",
-          "Name": "PHX_MACRO_PROJECT_NAME",
+          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [
-              "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
               "/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": "PHX_MACRO_PROJECT_NAME",
+        "Description": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -443,12 +443,12 @@
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             },
             {
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
               "Name": "RDS_MASTER_USERNAME",
@@ -462,7 +462,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                "PHX_MACRO_DOMAIN"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
               ]]}
             },
             {
@@ -474,7 +474,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                "PHX_MACRO_DOMAIN"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
               ]]}
             },
             {
@@ -488,19 +488,19 @@
               "Type": "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 {"Ref": "Environment"},
                 "aurora-admin-password"
               ]]}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "rds-migration",
             {"Ref": "Environment"}
           ]]
@@ -508,7 +508,7 @@
         "ServiceRole": {"Fn::Join": ["", [
           "{{resolve:ssm:",
           "/microservice/",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "/global/code-build-service-role-arn",
           ":1}}"
         ]]},
@@ -520,7 +520,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_PROJECT_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             ]]
           }
         },
@@ -564,24 +564,24 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
           "NamespaceType": "BUILD_ID",
-          "Name": "PHX_MACRO_PROJECT_NAME",
+          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [
-              "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
               "/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": "PHX_MACRO_PROJECT_NAME",
+        "Description": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -598,12 +598,12 @@
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             },
             {
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
               "Name": "RDS_MASTER_USERNAME",
@@ -617,7 +617,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                "PHX_MACRO_DOMAIN"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
               ]]}
             },
             {
@@ -629,7 +629,7 @@
                 ".",
                 {"Ref": "Environment"},
                 ".",
-                "PHX_MACRO_DOMAIN"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
               ]]}
             },
             {
@@ -643,19 +643,19 @@
               "Type": "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 {"Ref": "Environment"},
                 "aurora-admin-password"
               ]]}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "integration-test",
             {"Ref": "Environment"}
           ]]
@@ -663,7 +663,7 @@
         "ServiceRole": {"Fn::Join": ["", [
           "{{resolve:ssm:",
           "/microservice/",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "/global/code-build-service-role-arn",
           ":1}}"
         ]]},
@@ -675,7 +675,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_PROJECT_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             ]]
           }
         },
@@ -685,7 +685,7 @@
     },
     "DnsRecordSetGroup": {
       "Properties": {
-        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
+        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"},
         "RecordSets": [
           {
             "ResourceRecords": [
@@ -701,7 +701,7 @@
               ".",
               {"Ref": "Environment"},
               ".",
-              "PHX_MACRO_DOMAIN"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             ]]},
             "Type": "CNAME"
           },
@@ -721,7 +721,7 @@
               ".",
               {"Ref": "Environment"},
               ".",
-              "PHX_MACRO_DOMAIN"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             ]]},
             "Type": "CNAME"
           }
@@ -735,7 +735,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "MasterUsername"
@@ -750,7 +750,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "DatabasePasswordParameterStoreKey"
@@ -759,7 +759,7 @@
       },
       "Value": {"Fn::Join": ["/", [
         "/microservice",
-        "PHX_MACRO_PROJECT_NAME",
+        {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
         {"Ref": "Environment"},
         "aurora-admin-password"
       ]]}
@@ -768,7 +768,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "EndpointPort"
@@ -783,7 +783,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "Endpoint"
@@ -795,14 +795,14 @@
         ".",
         {"Ref": "Environment"},
         ".",
-        "PHX_MACRO_DOMAIN"
+        {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
       ]]}
     },
     "ReadEndpoint": {
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "ReadEndpoint"
@@ -816,14 +816,14 @@
         ".",
         {"Ref": "Environment"},
         ".",
-        "PHX_MACRO_DOMAIN"
+        {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
       ]]}
     },
     "RDSDBSecurityGroup": {
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "RDSDBSecurityGroup"

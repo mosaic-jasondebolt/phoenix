@@ -23,6 +23,17 @@ import itertools
 import os
 import sys
 
+BAD_SEARCH_DIRS = [
+    './.',
+    './node_modules',
+    './build',
+]
+
+def is_bad_dir(dir_path):
+    for bad_dir in BAD_SEARCH_DIRS:
+        if dir_path.startswith(bad_dir):
+            return True
+    return False
 
 def find_files(dir_path=None, patterns=None):
     """Returns a generator yielding files matching the given pattern."""
@@ -33,7 +44,7 @@ def find_files(dir_path=None, patterns=None):
         filter_partial = functools.partial(fnmatch.filter, file_names)
 
         for file_name in itertools.chain(*map(filter_partial, path_patterns)):
-            if not root_dir.startswith('./.') and '.git/' not in root_dir:
+            if not is_bad_dir(root_dir) and '.git/' not in root_dir:
                 yield os.path.join(root_dir, file_name)
 
 
@@ -43,6 +54,8 @@ def search_and_replace(directory, find, replace, filePattern=None):
         if (filename.endswith('.png') or
             filename.endswith('.jpg') or
             filename.endswith('.jpeg') or
+            filename.endswith('.swf') or
+            filename.endswith('.ico') or
             filename.endswith('.svg')):
             continue
         with open(filename) as f:

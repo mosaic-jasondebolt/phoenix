@@ -150,7 +150,7 @@ trumps all external conventions or style guides.
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "EndpointAddress"

@@ -247,7 +247,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 1,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_REPLACE",

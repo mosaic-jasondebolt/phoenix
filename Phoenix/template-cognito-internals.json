@@ -49,9 +49,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": "PHX_MACRO_IAM_ROLE",
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Code": {
-          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -75,7 +75,7 @@
         "UserPoolId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "cognito",
               {"Ref": "Environment"},
               "UserPoolId"
@@ -85,7 +85,7 @@
         "ClientId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "cognito",
               {"Ref": "Environment"},
               "AppClientId"
@@ -93,13 +93,13 @@
           }
         },
         "CognitoDomain": {"Fn::Join": ["-", [
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "Environment"}
         ]]},
-        "APIDomain": "PHX_MACRO_DOMAIN",
+        "APIDomain": {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
         "AuthDomain": {"Fn::Join": [".", [
           {"Ref": "CustomDomainPrefix"},
-          "PHX_MACRO_DOMAIN"
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
         ]]},
         "DomainPrefix": {"Fn::Join": ["-", [
           {"Ref": "DomainPrefix"},
@@ -108,11 +108,11 @@
         "CustomDomain": {"Fn::Join": [".", [
           {"Ref": "Environment"},
           {"Ref": "CustomDomainPrefix"},
-          "PHX_MACRO_DOMAIN"
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
         ]]},
         "UseCustomDomain": {"Ref": "UseCustomDomain"},
-        "AuthSSLCertificateARN": "PHX_MACRO_SSL_CERTIFICATE_ARN_AUTH",
-        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
+        "AuthSSLCertificateARN": {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn-auth"},
+        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"},
         "ResourceServerName": {"Ref": "ResourceServerName"},
         "ResourceServerIdentifier": {"Ref": "ResourceServerIdentifier"},
         "ResourceServerScope": "external"

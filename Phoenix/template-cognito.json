@@ -85,7 +85,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "cognito",
             {"Ref": "Environment"},
             "AppClientId"
@@ -98,7 +98,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "cognito",
             {"Ref": "Environment"},
             "UserPoolId"
@@ -111,7 +111,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "cognito",
             {"Ref": "Environment"},
             "UserPoolProviderName"
@@ -126,7 +126,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "cognito",
             {"Ref": "Environment"},
             "UserPoolProviderURL"
@@ -141,7 +141,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "cognito",
             {"Ref": "Environment"},
             "UserPoolArn"
