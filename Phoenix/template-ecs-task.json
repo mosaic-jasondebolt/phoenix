@@ -914,11 +914,7 @@
     },
     "DnsRecordSetGroup": {
       "Properties": {
-        "HostedZoneId": {"Fn::If": [
-          "IsInternalELB",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/private-hosted-zone-id"},
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"}
-        ]},
+        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"},
         "RecordSets": [
           {
             "AliasTarget": {

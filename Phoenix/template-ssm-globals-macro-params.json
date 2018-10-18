@@ -7,7 +7,6 @@
     "GitCurrentProjectBranch": "master",
     "Domain": "phoenix.joinmosaic.com",
     "HostedZoneId": "Z3BZWA5KLQHQ6O",
-    "PrivateHostedZoneId": "Z6BTE7ABDGWW4",
     "KeyPairName": "us-east-1-714284646049",
     "ProjectDescription": "The Mosaic Phoenix project.",
     "NotificationEmail": "ops@joinmosaic.com",

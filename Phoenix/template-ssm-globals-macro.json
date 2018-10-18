@@ -56,10 +56,6 @@
       "Description": "The Route53 hosted zone id that this service will fall under.",
       "Type": "String"
     },
-    "PrivateHostedZoneId": {
-      "Description": "The Route53 private hosted zone id that this service will fall under.",
-      "Type": "String"
-    },
     "KeyPairName":{
       "Type":"AWS::EC2::KeyPair::KeyName",
       "Description":"Name of an existing EC2 KeyPair to enable SSH access to the ECS instances."
@@ -356,16 +352,6 @@
         "Type": "String",
         "Value": {"Ref": "HostedZoneId"},
         "Description": "The Route53 hosted zone id that this service will fall under."
-      }
-    },
-    "PrivateHostedZoneIdParam": {
-      "Type": "AWS::SSM::Parameter",
-      "DependsOn": "SSLCertificateARNParam",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/private-hosted-zone-id"]]},
-        "Type": "String",
-        "Value": {"Ref": "PrivateHostedZoneId"},
-        "Description": "The Route53 private hosted zone id that this service will fall under."
       }
     },
     "GitlabURLParam": {
