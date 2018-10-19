@@ -32,7 +32,7 @@ VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID
 
 # Generate the MICROSERVICE bucket if it doesn't already exist
-aws s3 mb s3://$MICROSERVICE_BUCKET_NAME
+aws s3 mb s3://$MICROSERVICE_BUCKET_NAME || true
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
 
 # Validate the CloudFormation template before template execution.

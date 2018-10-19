@@ -25,6 +25,11 @@ phases:
         do
           echo ==== ENVIRONMENT: $environmentName ====
 
+          # SSM resources
+          echo ===== SSM BUILD =====
+          echo replacing params in the task definition params files.
+          python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/Phoenix/template-ssm-environments-params-$environmentName.json codepipeline > $CODEBUILD_SRC_DIR/t-ssm-environments-params-$environmentName.json
+
           # Database (Aurora, DynamoDB)
           echo ===== DATABASE BUILD =====
           echo replacing VERSION_ID in the database params files.
@@ -91,6 +96,7 @@ phases:
           python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-$environmentName.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-$environmentName.json
         done
       - # Copy all templates to codebuild source directory
+      - cp $CODEBUILD_SRC_DIR/Phoenix/template-ssm-environments.json $CODEBUILD_SRC_DIR
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-database.json $CODEBUILD_SRC_DIR
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ec2.json $CODEBUILD_SRC_DIR
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-cognito.json $CODEBUILD_SRC_DIR
@@ -150,6 +156,9 @@ artifacts:
       - # Gitlab config files which will be picked up my Lambda if this is a merge request build.
       - gitlab.json
       - gitlab-release.json
+      - # Database (Aurora, DynamoDB)
+      - template-ssm-environments.json
+      - t-ssm-environments-params-*.json
       - # Database (Aurora, DynamoDB)
       - template-database.json
       - t-database-params-*.json
