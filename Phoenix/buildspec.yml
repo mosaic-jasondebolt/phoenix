@@ -28,7 +28,7 @@ phases:
           # SSM resources
           echo ===== SSM BUILD =====
           echo replacing params in the task definition params files.
-          sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ssm-environments-params-$environmentName.json > $CODEBUILD_SRC_DIR/Phoenix/t-ssm-environments-params-$environmentName.json_temp
+          sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-ssm-environments-params-$environmentName.json > $CODEBUILD_SRC_DIR/t-ssm-environments-params-$environmentName.json_temp
           echo replacing params in the task definition params files.
           python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ssm-environments-params-$environmentName.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ssm-environments-params-$environmentName.json
 
