@@ -208,7 +208,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_REPLACE",
@@ -242,7 +242,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_EXECUTE",
@@ -274,7 +274,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_REPLACE",
@@ -310,7 +310,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -344,7 +344,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "FunctionName": {
                     "Fn::ImportValue": {
