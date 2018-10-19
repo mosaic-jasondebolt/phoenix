@@ -85,6 +85,18 @@ class RequestSender(object):
         response = requests.post(url, headers=headers)
         print(response)
 
+def generate_ssm_params():
+    print("Saving updated SSM parameter file...")
+    file_path = os.path.join(
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-ssm-environments-params-testing.json'
+    )
+    ssm_params = _parse_json(file_path)
+    print(json.dumps(ssm_params, indent=2))
+    ssm_params['Parameters']['Environment'] = PIPELINE_NAME
+    ssm_params['Parameters']['Description'] = 'A merge request environment is used for merge requests.'
+    ssm_params_file = open('t-ssm-environments-params-testing.json', 'w')
+    ssm_params_file.write(json.dumps(ssm_params, indent=2))
+
 def generate_ec2_params():
     print("Saving updated ECS parameter file...")
     file_path = os.path.join(
@@ -92,7 +104,7 @@ def generate_ec2_params():
     )
     ec2_params = _parse_json(file_path)
     print(json.dumps(ec2_params, indent=2))
-    # We will use the dev environment by default, but the URL will include the git commit sha1.
+    # We will use the testing environment by default, but the URL will include the git commit sha1.
     # Also, we will use the pipeline name as the environment.
     # If we used the git sha1 as the environment, a new EC2 instance would be created for every merge request update,
     # which is super slow an inefficient.
@@ -148,6 +160,7 @@ def onBuildJobCompletion():
     # Notify GitLab of the approval
     sender.send_request(merge_request_note_url(merge_request_note(BUILD_EMOJI)))
     # Save git gitlab.json file
+    generate_ssm_params()
     generate_ec2_params()
     generate_ecs_task_main_params()
     generate_lambda_gitlab_config()

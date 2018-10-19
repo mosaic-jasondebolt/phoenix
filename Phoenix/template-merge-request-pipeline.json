@@ -171,6 +171,33 @@
             "Name": "DeployToECS",
             "Actions": [
               {
+                "Name": "SSMParameters",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ssm-environments",
+                      "deploy"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ssm-environments.json"
+                }
+              },
+              {
                 "Name": "EC2ChangeSet",
                 "ActionTypeId": {
                   "Category": "Deploy",

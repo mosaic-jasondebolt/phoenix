@@ -775,13 +775,6 @@
                       "testing"
                     ]]
                   },
-                  "ChangeSetName": {
-                    "Fn::Join": ["-", [
-                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-                      "ssm-environments",
-                      "testing"
-                    ]]
-                  },
                   "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-testing.json",
                   "TemplatePath": "BuildOutput::template-ssm-environments.json"
                 }
@@ -1560,13 +1553,6 @@
                       "e2e"
                     ]]
                   },
-                  "ChangeSetName": {
-                    "Fn::Join": ["-", [
-                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-                      "ssm-environments",
-                      "e2e"
-                    ]]
-                  },
                   "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-e2e.json",
                   "TemplatePath": "BuildOutput::template-ssm-environments.json"
                 }
@@ -2339,13 +2325,6 @@
                   "ActionMode": "CREATE_UPDATE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
-                    "Fn::Join": ["-", [
-                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-                      "ssm-environments",
-                      "prod"
-                    ]]
-                  },
-                  "ChangeSetName": {
                     "Fn::Join": ["-", [
                       {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ssm-environments",
