@@ -1538,7 +1538,7 @@
             "Name": "DeployToEndToEnd",
             "Actions": [
               {
-                "Name": "DatabaseChangeSet",
+                "Name": "SSMParameters",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1549,6 +1549,40 @@
                   "Name": "BuildOutput"
                 }],
                 "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                      "ssm-environments",
+                      "e2e"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                      "ssm-environments",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-ssm-environments.json"
+                }
+              },
+              {
+                "Name": "DatabaseChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "ActionMode": "CHANGE_SET_REPLACE",
@@ -1582,7 +1616,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1614,7 +1648,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1648,7 +1682,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1680,7 +1714,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1714,7 +1748,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1746,7 +1780,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1780,7 +1814,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1812,7 +1846,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1846,7 +1880,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1878,7 +1912,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1912,7 +1946,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1944,7 +1978,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -1978,7 +2012,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2010,7 +2044,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
@@ -2031,7 +2065,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2067,7 +2101,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2101,7 +2135,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2135,7 +2169,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2167,7 +2201,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2201,7 +2235,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2233,7 +2267,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
@@ -2254,7 +2288,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
@@ -2289,7 +2323,7 @@
             "Name": "DeployToProd",
             "Actions": [
               {
-                "Name": "DatabaseChangeSet",
+                "Name": "SSMParameters",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -2300,6 +2334,40 @@
                   "Name": "BuildOutput"
                 }],
                 "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                      "ssm-environments",
+                      "prod"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                      "ssm-environments",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-ssm-environments.json"
+                }
+              },
+              {
+                "Name": "DatabaseChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "ActionMode": "CHANGE_SET_REPLACE",
@@ -2333,7 +2401,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2365,7 +2433,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2399,7 +2467,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2431,7 +2499,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2465,7 +2533,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2497,7 +2565,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2531,7 +2599,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2563,7 +2631,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2597,7 +2665,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2629,7 +2697,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2663,7 +2731,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2695,7 +2763,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2729,7 +2797,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2761,7 +2829,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
@@ -2782,7 +2850,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2818,7 +2886,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2852,7 +2920,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2886,7 +2954,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2918,7 +2986,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2952,7 +3020,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -2984,7 +3052,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
@@ -3005,7 +3073,7 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 7,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
