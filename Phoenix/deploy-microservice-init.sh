@@ -9,9 +9,6 @@ set -e
 echo "Deploying global SSM parameters and CloudFormation Macro"
 ./deploy-ssm-globals-macro.sh create
 
-echo "Deploying environment specific SSM parameters"
-./deploy-ssm-environments.sh create
-
 echo "Deploying pipeline"
 ./deploy-pipeline.sh create
 
