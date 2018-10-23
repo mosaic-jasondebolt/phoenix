@@ -688,6 +688,39 @@
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     },
+    "RedirectHTTPToHTTPS": {
+      "Type": "Custom::AlbListenerRule",
+      "Properties" : {
+        "ServiceToken": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "lambda",
+              {"Ref": "Environment"},
+              "LambdaALBListenerRuleArn"
+            ]]
+          }
+        },
+        "Actions": [
+          {
+            "Type": "redirect",
+            "RedirectConfig": {
+              "Protocol": "HTTPS",
+              "Port": 443,
+              "StatusCode": "HTTP_301"
+            }
+          }
+        ],
+        "Conditions" : [
+          {
+            "Field" : "host-header",
+            "Values" : [ "*.*" ]
+          }
+        ],
+        "ListenerArn" : {"Ref": "Listener80"},
+        "Priority" : 10
+      }
+    },
     "TargetGroup": {
       "DependsOn": "ApplicationELB",
       "Properties": {

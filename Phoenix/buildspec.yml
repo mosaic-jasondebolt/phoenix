@@ -52,6 +52,13 @@ phases:
           echo replacing params in the api params files.
           python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-params-$environmentName.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-params-$environmentName.json
 
+          # Lambda
+          echo ===== LAMBDA BUILD =====
+          echo replacing VERSION_ID in the lambda params files.
+          sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-$environmentName.json > $CODEBUILD_SRC_DIR/t-lambda-params-$environmentName.json_temp
+          echo replacing params in the lambda params files.
+          python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-$environmentName.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-$environmentName.json
+
           # ECS Main Service resources
           echo ===== DOCKER BUILD =====
           echo replacing build number in the task definition param files.
@@ -59,13 +66,6 @@ phases:
           sed "s/IMAGE_TAG/$IMAGE_TAG/g" $CODEBUILD_SRC_DIR/Phoenix/t-ecs-$environmentName.json_temp > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json_temp
           echo replacing params in the task definition params files.
           python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-ecs-task-main-params-$environmentName.json
-
-          # Lambda
-          echo ===== LAMBDA BUILD =====
-          echo replacing VERSION_ID in the lambda params files.
-          sed "s/VERSION_ID/$VERSION_ID/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda-params-$environmentName.json > $CODEBUILD_SRC_DIR/t-lambda-params-$environmentName.json_temp
-          echo replacing params in the lambda params files.
-          python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-lambda-params-$environmentName.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-lambda-params-$environmentName.json
 
           # API Gateway Custom Domain
           echo ===== API GATEWAY CUSTOM DOMAIN BUILD =====
@@ -117,7 +117,7 @@ phases:
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals.json $CODEBUILD_SRC_DIR
 
       - # Upload the Python Lambda functions
-      - listOfPythonLambdaFunctions='projects api_internals password_generator delete_network_interface cognito_internals'
+      - listOfPythonLambdaFunctions='projects api_internals password_generator delete_network_interface cognito_internals alb_listener_rule'
       - |-
         for functionName in $listOfPythonLambdaFunctions
         do
@@ -168,12 +168,12 @@ artifacts:
       - # ECS
       - template-ec2.json
       - t-ec2-params-*.json
-      - # ECS Main Task
-      - template-ecs-task.json
-      - t-ecs-task-main-params-*.json
       - # Lambda
       - template-lambda.json
       - t-lambda-params-*.json
+      - # ECS Main Task
+      - template-ecs-task.json
+      - t-ecs-task-main-params-*.json
       - # Cognito
       - template-cognito.json
       - t-cognito-params-*.json

@@ -117,6 +117,18 @@ def generate_ec2_params():
     ec2_params_file = open('t-ec2-params-testing.json', 'w')
     ec2_params_file.write(json.dumps(ec2_params, indent=2))
 
+def generate_lambda_params():
+    print("Saving updated Lambda parameter file...")
+    file_path = os.path.join(
+        os.environ.get('CODEBUILD_SRC_DIR'), 't-lambda-params-testing.json'
+    )
+    lambda_params = _parse_json(file_path)
+    print(json.dumps(lambda_params, indent=2))
+    lambda_params['Parameters']['Environment'] = PIPELINE_NAME
+    lambda_params['Parameters']['VPCPrefix'] = 'dev'
+    lambda_params_file = open('t-lambda-params-testing.json', 'w')
+    lambda_params_file.write(json.dumps(lambda_params, indent=2))
+
 def generate_ecs_task_main_params():
     print("Saving updated ECS task main parameter file...")
     file_path = os.path.join(
@@ -162,6 +174,7 @@ def onBuildJobCompletion():
     # Save git gitlab.json file
     generate_ssm_params()
     generate_ec2_params()
+    generate_lambda_params()
     generate_ecs_task_main_params()
     generate_lambda_gitlab_config()
 
