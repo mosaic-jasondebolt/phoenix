@@ -76,6 +76,10 @@
       "Description": "The Gitlab URL of your organization (i.e https://gitlab.yourcompany.com)",
       "Type": "String"
     },
+    "PipelineEnvironments": {
+      "Description": "The list of pipeline environments in the main project pipeline.",
+      "Type": "CommaDelimitedList"
+    },
     "ReleaseEnvironments": {
       "Description": "The list of isolated release environments with associated pipelines that are not part of the main pipeline and can be created in parallel.",
       "Type": "CommaDelimitedList"
@@ -362,6 +366,16 @@
         "Type": "String",
         "Value": {"Ref": "GitlabURL"},
         "Description": "The Gitlab URL of your organization."
+      }
+    },
+    "PipelineEnvironmentsParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "LambdaBucketNameParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/pipeline-environments"]]},
+        "Type": "String",
+        "Value": {"Fn::Join": [",", {"Ref": "PipelineEnvironments"}]},
+        "Description": "The list of pipeline environments in the main project pipeline."
       }
     },
     "ReleaseEnvironmentsParam": {

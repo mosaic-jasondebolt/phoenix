@@ -1,7 +1,8 @@
 """ Generates CloudFormation JSON environment specific parameter files.
 
 This script just copies all of the *params-testing.json files and generates
-namespaced *params-{environment}.json files.
+namespaced *-params-{environment}.json files. If the '--delete' flag is passed
+in, all files matching *-params-{environment}.json will be deleted.
 
 Typically you'll only need to run this script once per new environment. It is
 a utility script to make is easier to generate all of the cloudformation
@@ -14,9 +15,11 @@ URL's, ECS clusters, Lambda functions, etc.
 
 USAGE:
   python generate_environment_params.py {environment}
+  python generate_environment_params.py {environment} --delete
 
  EXAMPLES:
   python generate_environment_params.py staging
+  python generate_environment_params.py staging --delete
 """
 
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
@@ -31,6 +34,10 @@ def _parse_json(path):
     except json.decoder.JSONDecodeError as e:
         print('\nYour JSON is not valid! Did you check trailing commas??\n')
         raise(e)
+
+def delete_environment_param_files(environment):
+    for filename in glob('*-params-{0}.json'.format(environment)):
+        os.remove(filename)
 
 def write_environment_param_files(environment):
     """ Writes the environment param files.
@@ -126,10 +133,16 @@ def write_environment_param_files(environment):
         env_api_docs_bucket_file_obj.write(json.dumps(env_api_docs_bucket_template, indent=2))
 
 def main(args):
-    if len(args) != 1:
+    if len(args) == 2 and args[1] == '--delete':
+        environment = args[0]
+        print("Deleting files")
+        delete_environment_param_files(environment)
+    elif len(args) != 1:
         raise SystemExit('Invalid arguments!')
-    environment = args[0]
-    write_environment_param_files(environment)
+    else:
+        environment = args[0]
+        print("Writing files")
+        write_environment_param_files(environment)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
