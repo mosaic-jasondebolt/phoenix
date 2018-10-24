@@ -1,0 +1,8 @@
+{
+  "Parameters": {
+    "Environment": "rcf",
+    "UserPoolName": "userpool",
+    "UserPoolClientName": "userpool",
+    "Version": "VERSION_ID"
+  }
+}

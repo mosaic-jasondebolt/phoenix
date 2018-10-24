@@ -1,0 +1,22 @@
+{
+  "Parameters": {
+    "AssignPublicIp": "ENABLED",
+    "ContainerPort": "5000",
+    "DesiredTaskCount": "1",
+    "ELBSubnets": "Private",
+    "Scheme": "internal",
+    "Environment": "func",
+    "DBEnvironment": "func",
+    "TaskFamily": "main",
+    "ContainerName": "main",
+    "ImageName": "main",
+    "HealthCheckGracePeriodSeconds": "60",
+    "ImageVersion": "IMAGE_TAG",
+    "LaunchType": "EC2",
+    "MaxTasksToScaleOutInResponseTo500Errors": "2",
+    "MinTasksToScaleInInResponseToScaleInEvent": "1",
+    "VPCPrefix": "testing",
+    "WebSubnets": "Private",
+    "Version": "VERSION_ID"
+  }
+}

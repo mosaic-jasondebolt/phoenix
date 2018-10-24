@@ -1,0 +1,7 @@
+{
+  "Parameters": {
+    "Environment": "rcf",
+    "VPCPrefix": "testing",
+    "Version": "VERSION_ID"
+  }
+}

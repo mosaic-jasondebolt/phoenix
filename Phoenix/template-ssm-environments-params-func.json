@@ -1,0 +1,8 @@
+{
+  "Parameters": {
+    "ProjectName": "PROJECT_NAME",
+    "Environment": "func",
+    "Description": "The func environment",
+    "Version": "VERSION_ID"
+  }
+}
