@@ -1,8 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "rc",
-    "UserPoolName": "userpool",
-    "UserPoolClientName": "userpool",
-    "Version": "VERSION_ID"
-  }
-}

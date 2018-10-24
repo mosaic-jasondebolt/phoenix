@@ -166,6 +166,20 @@ def lambda_handler(event, context):
           StackName='{0}-{1}-{2}'.format(stack_name, 'ec2', 'deploy')
         )
         print(response)
+
+        print('Deleting Lambda Stack')
+        # Delete the EC2 deploy stack
+        response = cloudformation_client.delete_stack(
+          StackName='{0}-{1}-{2}'.format(stack_name, 'lambda', 'deploy')
+        )
+        print(response)
+
+        print('Deleting SSM Environments Parameter Stack')
+        # Delete the EC2 deploy stack
+        response = cloudformation_client.delete_stack(
+          StackName='{0}-{1}-{2}'.format(stack_name, 'ssm-environments', 'deploy')
+        )
+        print(response)
     else:
         print('Creating or Updating stack')
         print('Attempting to create stack')

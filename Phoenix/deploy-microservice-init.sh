@@ -6,14 +6,20 @@ set -e
 # USAGE
 #   ./deploy-microservice-init.sh
 
+echo "Deploying ACM SSL Certificates"
+./deploy-acm-certificates.sh create
+
 echo "Deploying global SSM parameters and CloudFormation Macro"
 ./deploy-ssm-globals-macro.sh create
 
 echo "Deploying pipeline"
 ./deploy-pipeline.sh create
 
-echo "Deploying merge request pipeline"
+echo "Deploying merge request webhook"
 ./deploy-merge-request-webhook.sh create
+
+echo "Deploying release webhook"
+./deploy-release-webhook.sh create
 
 echo "Deploying microservice cleanup"
 ./deploy-microservice-cleanup.sh create
