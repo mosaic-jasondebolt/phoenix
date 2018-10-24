@@ -152,7 +152,7 @@ phases:
           # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-$environmentName
         done
       - # # Delete the Project ECR repositories.
-      - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
+      - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force || true
       - # Delete Pipeline
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-pipeline
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-pipeline
