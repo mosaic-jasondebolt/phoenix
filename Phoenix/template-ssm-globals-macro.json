@@ -89,6 +89,14 @@
       "Type": "String"
     }
   },
+  "Conditions": {
+    "EmptyReleaseEnvironments": {
+      "Fn::Equals": [ {"Ref": "ReleaseEnvironments"}, "" ]
+    },
+    "EmptyPipelineEnvironments": {
+      "Fn::Equals": [ {"Ref": "PipelineEnvironments"}, "" ]
+    }
+  },
   "Resources": {
     "ProjectLambdaMacro": {
       "Type" : "AWS::CloudFormation::Macro",
@@ -135,52 +143,6 @@
         },
         "Runtime": "python3.6",
         "Timeout": "25"
-      }
-    },
-    "SSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Ref": "Domain"},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
-      }
-    },
-    "ECSSSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Fn::Join": [".", [
-          "ecs", {"Ref": "Domain"}
-        ]]},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", "ecs", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
-      }
-    },
-    "APIDocsSSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Fn::Join": [".", [
-          "docs", {"Ref": "Domain"}
-        ]]},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", "docs", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
-      }
-    },
-    "AuthSSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Fn::Join": [".", [
-          "auth", {"Ref": "Domain"}
-        ]]},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", "auth", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
       }
     },
     "MacroVersion": {
@@ -334,7 +296,11 @@
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/pipeline-environments"]]},
         "Type": "String",
-        "Value": {"Fn::Join": [",", {"Ref": "PipelineEnvironments"}]},
+        "Value": {"Fn::If": [
+          "EmptyPipelineEnvironments",
+          " ",
+          {"Ref": "PipelineEnvironments"}
+        ]},
         "Description": "The list of pipeline environments in the main project pipeline."
       }
     },
@@ -344,7 +310,11 @@
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/release-environments"]]},
         "Type": "String",
-        "Value": {"Fn::Join": [",", {"Ref": "ReleaseEnvironments"}]},
+        "Value": {"Fn::If": [
+          "EmptyReleaseEnvironments",
+          " ",
+          {"Ref": "ReleaseEnvironments"}
+        ]},
         "Description": "The list of isolated release environments with associated pipelines that are not part of the main pipeline and can be created in parallel."
       }
     },
