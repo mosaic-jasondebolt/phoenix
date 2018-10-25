@@ -15,7 +15,7 @@
     "NodeJSBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/nodejs:10.1.0",
     "GitlabURL": "https://gitlab.intranet.solarmosaic.com",
     "PipelineEnvironments": "testing, e2e, prod",
-    "ReleaseEnvironments": "",
+    "ReleaseEnvironments": "loadtesting, qa",
     "Version": "VERSION_ID"
   }
 }
