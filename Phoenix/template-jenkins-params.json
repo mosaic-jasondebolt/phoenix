@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "InstanceType": "m5.large",
+    "InstanceType": "m5.xlarge",
     "IPWhitelist": "10.0.0.0/8",
     "VPCPrefix": "dev",
     "Scheme": "internal",
