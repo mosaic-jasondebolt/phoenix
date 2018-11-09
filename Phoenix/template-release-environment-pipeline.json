@@ -1125,12 +1125,12 @@
               "Value" : "/global/gitlab/codebuild/access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],
@@ -1241,12 +1241,12 @@
               "Value" : "/global/gitlab/codebuild/unit-test-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],
@@ -1358,12 +1358,12 @@
               "Value" : "/global/gitlab/codebuild/lint-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],

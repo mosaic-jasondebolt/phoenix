@@ -35,7 +35,7 @@ SOURCE_BRANCH = os.environ.get('SOURCE_BRANCH')
 GITLAB_ACCESS_TOKEN = os.environ.get('GITLAB_ACCESS_TOKEN')
 GITLAB_UNIT_TEST_ACCESS_TOKEN = os.environ.get('GITLAB_UNIT_TEST_ACCESS_TOKEN')
 GITLAB_LINT_ACCESS_TOKEN = os.environ.get('GITLAB_LINT_ACCESS_TOKEN')
-GITLAB_URL = os.environ.get('GITLAB_URL', '')
+GIT_URL = os.environ.get('GIT_URL', '')
 
 # These env variables are always avaialable in AWS CodeBuild
 CODE_BUILD_ARN = os.environ.get('CODEBUILD_BUILD_ARN')
@@ -44,7 +44,7 @@ CODEBUILD_BUILD_SUCCEEDING = int(os.environ.get('CODEBUILD_BUILD_SUCCEEDING', 0)
 CODEBUILD_RESOLVED_SOURCE_VERSION = os.environ.get('CODEBUILD_RESOLVED_SOURCE_VERSION')
 
 # Gitlab vars
-GITLAB_API_URL = os.path.join(GITLAB_URL, 'api/v4/projects')
+GITLAB_API_URL = os.path.join(GIT_URL, 'api/v4/projects')
 
 class RequestSender(object):
     def __init__(self, token):
@@ -110,8 +110,8 @@ if __name__ == '__main__':
     if not SOURCE_BRANCH:
         print('SOURCE_BRANCH environment variable not set. This might be a non release build.')
         sys.exit(0)
-    if not GITLAB_URL:
-        print('GITLAB_URL environment variable not set. This might be a non release build.')
+    if not GIT_URL:
+        print('GIT_URL environment variable not set. This might be a non release build.')
         sys.exit(0)
 
     arg = sys.argv[1]

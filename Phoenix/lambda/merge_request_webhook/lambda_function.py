@@ -42,7 +42,7 @@ def get_gitlab_access_token():
 
 def get_gitlab_url():
     response = ssm_client.get_parameter(
-        Name='/microservice/{0}/global/gitlab-url'.format(os.environ['PROJECT_NAME']),
+        Name='/microservice/{0}/global/git-url'.format(os.environ['PROJECT_NAME']),
         WithDecryption=False
     )
     return response['Parameter']['Value']

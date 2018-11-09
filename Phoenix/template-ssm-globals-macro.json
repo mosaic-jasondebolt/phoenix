@@ -38,6 +38,10 @@
       "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
       "Type": "String"
     },
+    "GitHubOrganization": {
+      "Description": "If using GitHub, this is the name of your organization",
+      "Type": "String"
+    },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Default": "aws/codebuild/ubuntu-base:14.04",
@@ -72,8 +76,8 @@
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "String"
     },
-    "GitlabURL": {
-      "Description": "The Gitlab URL of your organization (i.e https://gitlab.yourcompany.com)",
+    "GitURL": {
+      "Description": "The Git URL of your organization (i.e https://gitlab.yourcompany.com, https://github.com, etc.)",
       "Type": "String"
     },
     "PipelineEnvironments": {
@@ -207,6 +211,16 @@
         "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch."
       }
     },
+    "GitHubOrganizationParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/github/organization"]]},
+        "Type": "String",
+        "Value": {"Ref": "GitHubOrganization"},
+        "Description": "If using GitHub, this is the name of your GitHub organization."
+      }
+    },
     "CodeBuildDockerImageParam": {
       "Type": "AWS::SSM::Parameter",
       "DependsOn": "GitRootProjectBranchParam",
@@ -280,14 +294,14 @@
         "Description": "The Route53 hosted zone id that this service will fall under."
       }
     },
-    "GitlabURLParam": {
+    "GitURLParam": {
       "Type": "AWS::SSM::Parameter",
       "DependsOn": "DomainParam",
       "Properties": {
-        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/gitlab-url"]]},
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/git-url"]]},
         "Type": "String",
-        "Value": {"Ref": "GitlabURL"},
-        "Description": "The Gitlab URL of your organization."
+        "Value": {"Ref": "GitURL"},
+        "Description": "The Git URL."
       }
     },
     "PipelineEnvironmentsParam": {

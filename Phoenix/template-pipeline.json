@@ -85,22 +85,6 @@
         }
       }
     },
-    "MasterTriggerSNSTopic": {
-      "Type": "AWS::SNS::Topic",
-      "Properties": {
-        "DisplayName": "GitMaster",
-        "Subscription": [{
-          "Endpoint": {"PhoenixSSM": "/microservice/{ProjectName}/global/notification-email"},
-          "Protocol": "email"
-        }],
-        "TopicName": {
-          "Fn::Join": ["-", [
-            "master-branch-event-triggered-for",
-            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-          ]]
-        }
-      }
-    },
     "CodePipelineFailedSNSTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
@@ -133,28 +117,32 @@
         }
       }
     },
-    "CodeCommitRepository": {
-      "Type": "AWS::CodeCommit::Repository",
-      "Condition": "ProjectUsesRootGitBranch",
+    "GitHubWebhook": {
+      "Type": "AWS::CodePipeline::Webhook",
       "Properties": {
-        "RepositoryName": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-repo-name"},
-        "RepositoryDescription": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-description"},
-        "Triggers": [
+        "AuthenticationConfiguration": {
+          "SecretToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/tokens/pipeline"}
+        },
+        "Filters": [
           {
-            "Name": "MasterTrigger",
-            "CustomData": {
-              "Fn::Join": [" ", [
-                "Project",
-                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-              ]]
-            },
-            "DestinationArn": {"Ref": "MasterTriggerSNSTopic"},
-            "Branches": [
+            "JsonPath": "$.ref",
+            "MatchEquals": {"Fn::Join": ["", [
+              "refs/heads/",
               {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"}
-            ],
-            "Events": ["all"]
+            ]]}
           }
-        ]
+        ],
+        "Authentication": "GITHUB_HMAC",
+        "TargetPipeline": { "Ref" : "CodePipeline" },
+        "TargetAction": "Source",
+        "Name": {"Fn::Join": ["-", [
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+          "CodePipelineWebhook",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"},
+          "Branch"
+        ]]},
+        "TargetPipelineVersion": { "Fn::GetAtt" : [ "CodePipeline", "Version" ] },
+        "RegisterWithThirdParty": "true"
       }
     },
     "CodeBuildServiceRoleArnParam": {
@@ -298,12 +286,12 @@
               "Value" : "/global/gitlab/codebuild/access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],
@@ -406,12 +394,12 @@
               "Value" : "/global/gitlab/codebuild/unit-test-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],
@@ -518,12 +506,12 @@
               "Value" : "/global/gitlab/codebuild/lint-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],
@@ -666,22 +654,26 @@
       "Properties": {
         "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-        "Stages": [{
+        "Stages": [
+          {
             "Name": "Source",
             "Actions": [{
-              "Name": "SourceAction",
+              "Name": "Source",
               "ActionTypeId": {
                 "Category": "Source",
-                "Owner": "AWS",
+                "Owner": "ThirdParty",
                 "Version": "1",
-                "Provider": "CodeCommit"
+                "Provider": "GitHub"
               },
               "OutputArtifacts": [{
                 "Name": "SourceOutput"
               }],
               "Configuration": {
-                "RepositoryName": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-repo-name"},
-                "BranchName": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"}
+                "Owner": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"},
+                "Repo": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-repo-name"},
+                "PollForSourceChanges": "false",
+                "Branch": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"},
+                "OAuthToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/tokens/pipeline"}
               },
               "RunOrder": 1
             }]
