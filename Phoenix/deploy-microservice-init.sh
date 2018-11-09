@@ -15,14 +15,14 @@ if [ $# -ne 1 ]
     exit 1
 fi
 
+echo "Deploying GitHub token to SSM Parameter Store"
+./deploy-ssm-github-token.sh $1
+
 echo "Deploying ACM SSL Certificates"
 ./deploy-acm-certificates.sh create
 
 echo "Deploying global SSM parameters and CloudFormation Macro"
 ./deploy-ssm-globals-macro.sh create
-
-echo "Deploying SSM GitHub token"
-./deploy-ssm-github-token.sh $1
 
 echo "Deploying pipeline"
 ./deploy-pipeline.sh create
