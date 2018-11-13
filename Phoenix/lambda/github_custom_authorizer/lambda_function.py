@@ -12,6 +12,7 @@ import hashlib
 
 ssm_client = boto3.client('ssm')
 
+<<<<<<< HEAD
 def get_github_webhook_secret_token():
     expected = hashlib.sha1(b'HAZ4f5BL2BKpptAr6DTkcxpzSGrQCNBFTPj8C06hdgbDIu7WKUXV4mLeBJkeTO3D')
     return expected.hexdigest()
@@ -22,6 +23,8 @@ def get_github_webhook_secret_token():
     #)
     #return response['Parameter']['Value']
 
+=======
+>>>>>>> test123
 def lambda_handler(event, context):
     print(event)
     print("Client token: " + event['authorizationToken'])
