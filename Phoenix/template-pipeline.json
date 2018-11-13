@@ -121,7 +121,7 @@
       "Type": "AWS::CodePipeline::Webhook",
       "Properties": {
         "AuthenticationConfiguration": {
-          "SecretToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/tokens/pipeline"}
+          "SecretToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/access-token"}
         },
         "Filters": [
           {
@@ -673,7 +673,7 @@
                 "Repo": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-repo-name"},
                 "PollForSourceChanges": "false",
                 "Branch": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"},
-                "OAuthToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/tokens/pipeline"}
+                "OAuthToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/access-token"}
               },
               "RunOrder": 1
             }]

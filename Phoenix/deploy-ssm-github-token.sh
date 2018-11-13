@@ -1,10 +1,15 @@
 #!/bin/bash
 set -e
 
-# Saves a GitHub access token to SSM parameter store for the pipeline webhook.
+# Saves a GitHub access token to SSM parameter store for your project.
 # You must generate an access token within GitHub and pass it to this script.
 #
-# When creating the webhook in GitHub, give it a name like "{YourProjectName}PipelineWebhook"
+# This token is used in the following ways:
+#  - To create the webhook associated with the main pipeline of your project.
+#  - To create any other webhooks (pull requests, releases, etc.)
+#  - Making GitHub API calls through Lambda Custom Resources within CloudFormation templates.
+#
+# When creating the webhook in GitHub, give it a name like "{YourProjectName}lineWebhook"
 # and give in the "repo" and "admin:repo_hook" scopes. Also be sure to select "Enable SSO"
 # and then "Authorize" else the token will not work.
 #
@@ -22,8 +27,8 @@ fi
 PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
 
 aws ssm put-parameter \
-  --name /microservice/$PROJECT_NAME/global/github/tokens/pipeline \
-  --description 'GitHub token used by the main pipeline for this project' \
+  --name /microservice/$PROJECT_NAME/global/github/access-token \
+  --description 'GitHub access token used by this project' \
   --type 'String' \
   --overwrite \
   --value $1
