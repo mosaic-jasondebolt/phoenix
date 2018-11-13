@@ -58,8 +58,10 @@
       "DependsOn": ["LambdaPullRequests"],
       "Properties" : {
         "RestApiId" : { "Ref": "RestAPI" },
-        "AuthorizationType" : "CUSTOM",
-        "AuthorizerId": {"Ref": "ApiGatewayCustomLambdaAuth"},
+        "AuthorizationType" : "NONE",
+        "RequestParameters": {
+          "method.request.header.X-Hub-Signature": true
+        },
         "HttpMethod": "POST",
         "ResourceId" : { "Ref": "PullRequestsResource" },
         "MethodResponses": [
@@ -77,6 +79,9 @@
         "Integration": {
           "Type" : "AWS",
           "IntegrationHttpMethod": "POST",
+          "RequestParameters": {
+            "integration.request.header.X-Hub-Signature": "method.request.header.X-Hub-Signature"
+          },
           "IntegrationResponses": [
             {
               "ResponseParameters": {
@@ -93,6 +98,7 @@
               "StatusCode" : "401"
             }
           ],
+          "PassthroughBehavior": "WHEN_NO_TEMPLATES",
           "Uri": {"Fn::Join": ["", [
             "arn:aws:apigateway:",
             { "Ref": "AWS::Region" },
@@ -102,7 +108,21 @@
               "Arn"
             ]},
             "/invocations"
-          ]]}
+          ]]},
+          "RequestTemplates": {
+            "application/json": {"Fn::Join": ["\n", [
+              "{",
+              "\t\"method\": \"$context.httpMethod\",",
+              "\t\"body\" : $input.json('$'), ",
+              "\t\"headers\": { ",
+              "\t\t#foreach($param in $input.params().header.keySet()) ",
+              "\t\t\t\"$param\": \"$util.escapeJavaScript($input.params().header.get($param))\" ",
+              "\t\t#if($foreach.hasNext),#end ",
+              "\t\t#end",
+              "\t}",
+              "}"
+            ]]}
+          }
         }
       }
     },
