@@ -10,6 +10,7 @@ EXAMPLE:
   for all text files in the current directory and all subdirectories.
 
   $ python search_and_replace.py . FOO BAR    ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR file.txt  ==> Matches a single file.
   $ python search_and_replace.py . FOO BAR "*"  ==> Matches ALL files, like *
   $ python search_and_replace.py . FOO BAR "*.txt"  ==> Matches
 """
@@ -48,28 +49,37 @@ def find_files(dir_path=None, patterns=None):
                 yield os.path.join(root_dir, file_name)
 
 
-def search_and_replace(directory, find, replace, filePattern=None):
-    for filename in find_files(directory, filePattern):
-        print('Attempting to replace content in filename ' + filename)
-        if (filename.endswith('.png') or
-            filename.endswith('.jpg') or
-            filename.endswith('.jpeg') or
-            filename.endswith('.swf') or
-            filename.endswith('.ico') or
-            filename.endswith('.svg')):
-            continue
-        with open(filename) as f:
-            s_old = f.read()
-        s_new = s_old.replace(find, replace)
-        if s_new != s_old:
-            print('              REPLACING content in filename ' + filename)
-        with open(filename, 'w') as f:
-            f.write(s_new)
+def replace_in_file(filename, find, replace):
+    print('Attempting to replace content in filename ' + filename)
+    with open(filename) as f:
+        s_old = f.read()
+    s_new = s_old.replace(find, replace)
+    if s_new != s_old:
+        print('              REPLACING content in filename ' + filename)
+    with open(filename, 'w') as f:
+        f.write(s_new)
+
+
+def search_and_replace(directory_or_file, find, replace, filePattern=None):
+    if os.path.isdir(directory_or_file): # Must be a directory
+        for filename in find_files(directory_or_file, filePattern):
+            if (filename.endswith('.png') or
+                filename.endswith('.jpg') or
+                filename.endswith('.jpeg') or
+                filename.endswith('.swf') or
+                filename.endswith('.ico') or
+                filename.endswith('.DS_Store') or
+                filename.endswith('.svg')):
+                continue
+            replace_in_file(filename, find, replace)
+    else: # Must be a single file
+            replace_in_file(directory_or_file, find, replace)
     return 0
+
 
 if __name__ == '__main__':
     #TODO(jason.debolt): Clean this up with argparse.
-    print('directory is ' + sys.argv[1])
+    print('directory or file is ' + sys.argv[1])
     print('find ' + sys.argv[2])
     print('replace with ' + sys.argv[3])
     if len(sys.argv) == 5:

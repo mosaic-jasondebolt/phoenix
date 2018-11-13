@@ -1,0 +1,569 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description" : "Deploys an API Gateway endpoint that GitHub pull request events can invoke to setup/teardown a review pipeline",
+  "Transform" : ["ProjectLambdaMacro"],
+  "Parameters": {
+    "VPCPrefix": {
+      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The identifier/version associated with this API.",
+      "Type": "String"
+    },
+    "StageName": {
+      "Description": "The API Gateway stage name",
+      "Type": "String",
+      "Default": "v0"
+    }
+  },
+  "Resources": {
+    "Latest": {
+      "Type": "AWS::ApiGateway::Deployment",
+      "DependsOn": ["PullRequestsPost"],
+      "Properties": {
+        "RestApiId": {"Ref": "RestAPI"},
+        "Description": "Description here",
+        "StageName": {"Ref": "StageName"}
+      }
+    },
+    "RestAPI": {
+      "Type" : "AWS::ApiGateway::RestApi",
+      "Properties" : {
+        "Description" : {"Fn::Join": ["", [
+          "The ",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+          " GitHub Pull Request ",
+          " REST API (Release Candidate ",
+          {"Ref": "Version"},
+          ")"
+        ]]},
+        "Name" : { "Fn::Join": ["-",  [
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+          "api",
+          "pull-request-webhook"
+        ]]}
+      }
+    },
+    "PullRequestsResource": {
+      "Type" : "AWS::ApiGateway::Resource",
+      "Properties" : {
+        "ParentId" : { "Fn::GetAtt": ["RestAPI", "RootResourceId"] },
+        "PathPart" : "PullRequests",
+        "RestApiId" : { "Ref": "RestAPI" }
+      }
+    },
+    "PullRequestsPost": {
+      "Type" : "AWS::ApiGateway::Method",
+      "DependsOn": ["LambdaPullRequests"],
+      "Properties" : {
+        "RestApiId" : { "Ref": "RestAPI" },
+        "AuthorizationType" : "CUSTOM",
+        "AuthorizerId": {"Ref": "ApiGatewayCustomLambdaAuth"},
+        "HttpMethod": "POST",
+        "ResourceId" : { "Ref": "PullRequestsResource" },
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false
+            }
+          }
+        ],
+        "Integration": {
+          "Type" : "AWS",
+          "IntegrationHttpMethod": "POST",
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "ResponseTemplates" : { "application/json": "" },
+              "StatusCode" : "200"
+            }
+          ],
+          "Uri": {"Fn::Join": ["", [
+            "arn:aws:apigateway:",
+            { "Ref": "AWS::Region" },
+            ":lambda:path/2015-03-31/functions/",
+            { "Fn::GetAtt": [
+              "LambdaPullRequests",
+              "Arn"
+            ]},
+            "/invocations"
+          ]]}
+        }
+      }
+    },
+    "LambdaSG": {
+      "Properties": {
+        "GroupDescription": "Pull Request Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaPullRequests": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaRole", "LambdaRolePolicy", "LambdaSG"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
+        "Environment": {
+          "Variables": {
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "PROJECT_DESCRIPTION": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-description"},
+            "CODE_PIPELINE_BUCKET_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
+            "CODE_BUILD_DOCKER_IMAGE": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
+            "LAMBDA_BUCKET_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
+            "IAM_ROLE": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+            "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
+              "{{resolve:ssm:",
+              "/microservice/",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "/global/code-build-service-role-arn",
+              ":1}}"
+            ]]},
+            "CODE_PIPELINE_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
+              "{{resolve:ssm:",
+              "/microservice/",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "/global/code-pipeline-service-role-arn",
+              ":1}}"
+            ]]}
+          }
+        },
+        "Code": {
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "pull_request_webhook",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
+        "Timeout": "300"
+      }
+    },
+    "LambdaPullRequestsInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaPullRequests", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com"
+      }
+    },
+    "LambdaRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "dynamodb:*",
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "s3:*",
+                "ec2:*",
+                "ssm:*",
+                "kms:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateRole",
+                "iam:PassRole",
+                "iam:GetRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+          "APILambdaRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "LambdaPostPullRequestSG": {
+      "Properties": {
+        "GroupDescription": "Post Pull Request Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-post-mr-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaPostPullRequest": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaPostPullRequestRole", "LambdaPostPullRequestRolePolicy", "LambdaPostPullRequestSG"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaPostPullRequestRole", "Arn"] },
+        "Environment": {
+          "Variables": {
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
+          }
+        },
+        "Code": {
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "post_pullrequests",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaPostPullRequestSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
+        "Timeout": "25"
+      }
+    },
+    "LambdaPostPullRequestInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaPostPullRequest", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "codepipeline.amazonaws.com"
+      }
+    },
+    "LambdaPostPullRequestRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaPostPullRequestRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "dynamodb:*",
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "s3:*",
+                "ec2:*",
+                "ssm:*",
+                "kms:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateRole",
+                "iam:PassRole",
+                "iam:GetRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          { "Ref": "AWS::StackName"},
+          "LambdaPostPullRequestRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaPostPullRequestRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "LambdaGitHubCustomAuthorizerSG": {
+      "Properties": {
+        "GroupDescription": "GitHub custom authorizer Lambda Security Group",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Fn::Sub": [
+              "${StackName}-post-mr-lambda-sg", {
+                "StackName": {"Ref": "AWS::StackName"}
+              }
+            ]}
+          }
+        ],
+        "VpcId": {
+          "Fn::ImportValue": "dev-vpc-VPC"
+        }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
+    },
+    "LambdaGitHubCustomAuthorizer": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": ["LambdaGitHubCustomAuthorizerRole", "LambdaGitHubCustomAuthorizerRolePolicy", "LambdaGitHubCustomAuthorizerSG"],
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": { "Fn::GetAtt" : ["LambdaGitHubCustomAuthorizerRole", "Arn"] },
+        "Code": {
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "github_custom_authorizer",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python2.7",
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {"Ref": "LambdaGitHubCustomAuthorizerSG"}
+          ],
+          "SubnetIds" : [
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
+            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
+          ]
+        },
+        "Timeout": "25"
+      }
+    },
+    "LambdaGitHubCustomAuthorizerInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [ "LambdaGitHubCustomAuthorizer", "Arn" ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com"
+      }
+    },
+    "LambdaGitHubCustomAuthorizerRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole"
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                  "s3.amazonaws.com",
+                  "apigateway.amazonaws.com",
+                  "codepipeline.amazonaws.com",
+                  "codebuild.amazonaws.com"
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Type": "AWS::IAM::Role"
+    },
+    "LambdaGitHubCustomAuthorizerRolePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "lambda:*",
+                "apigateway:*",
+                "dynamodb:*",
+                "cloudformation:*",
+                "codepipeline:*",
+                "codebuild:*",
+                "s3:*",
+                "ec2:*",
+                "ssm:*",
+                "kms:*",
+                "logs:*",
+                "xray:*",
+                "sts:AssumeRole",
+                "iam:DeleteRole",
+                "iam:DeleteRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:CreateRole",
+                "iam:PassRole",
+                "iam:GetRole"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": { "Fn::Join": ["-", [
+          { "Ref": "AWS::StackName"},
+          "LambdaGitHubCustomAuthorizerRole"
+        ]]},
+        "Roles": [
+          {
+            "Ref": "LambdaGitHubCustomAuthorizerRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy"
+    },
+    "ApiGatewayCustomLambdaAuth": {
+      "Type": "AWS::ApiGateway::Authorizer",
+      "Properties": {
+        "AuthType": "custom",
+        "AuthorizerCredentials": {
+          "Fn::GetAtt": [
+            "LambdaGitHubCustomAuthorizerRole", "Arn"
+          ]
+        },
+        "AuthorizerResultTtlInSeconds": 3600,
+        "AuthorizerUri": {"Fn::Join": ["", [
+          "arn:aws:apigateway:",
+          { "Ref": "AWS::Region" },
+          ":lambda:path/2015-03-31/functions/",
+          { "Fn::GetAtt": [
+            "LambdaGitHubCustomAuthorizer",
+            "Arn"
+            ]},
+            "/invocations"
+          ]]
+        },
+        "IdentitySource" : "method.request.header.X-Hub-Signature",
+        "Name" : "github-webhook-auth",
+        "RestApiId" : {"Ref": "RestAPI"},
+        "Type" : "TOKEN"
+      }
+    }
+  },
+  "Outputs": {
+    "LambdaPostPullRequestFunctionName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "pull-request-webhook",
+            "LambdaPostPullRequestFunctionName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "LambdaPostPullRequest"}
+    },
+    "PullRequestsURL": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "pull-request-webhook",
+            "PullRequestsURL"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::Join": ["", [
+          "https://",
+          {"Ref": "RestAPI"},
+          ".",
+          "execute-api",
+          ".",
+          {"Ref": "AWS::Region"},
+          ".",
+          "amazonaws.com",
+          "/",
+          {"Ref": "StageName"},
+          "/",
+          "PullRequests"
+        ]]
+      }
+    }
+  }
+}
