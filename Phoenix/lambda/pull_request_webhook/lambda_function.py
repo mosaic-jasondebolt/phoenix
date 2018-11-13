@@ -5,6 +5,7 @@ import botocore
 import requests
 from datetime import datetime
 import urllib.parse
+import hmac
 
 # Handles GitHub merge request events
 
@@ -14,17 +15,17 @@ import urllib.parse
 cloudformation_client = boto3.client('cloudformation')
 ssm_client = boto3.client('ssm')
 
-class JSONObject:
-  def __init__(self, dict):
-      vars(self).update(dict)
-
-# Assign python values to values return from github JSON reqeuest object
-false = False
-true = True
-null = None
-
 def lambda_handler(event, context):
     print(event)
-    json_obj = json.dumps(event, indent=4)
-    print(json_obj)
-    obj = json.loads(json_obj, object_hook=JSONObject)
+
+    github_signature = event['headers']['X-Hub-Signature']
+    signature = hmac.new('test123'.encode(), json.dumps(event['body']).encode(), "sha1")
+    expected_signature = 'sha1=' + signature.hexdigest()
+
+    print(github_signature)
+    print(expected_signature)
+
+    if not hmac.compare_digest(github_signature, expected_signature):
+        return {"status": "401"}
+    else:
+        return {"status": "200"}

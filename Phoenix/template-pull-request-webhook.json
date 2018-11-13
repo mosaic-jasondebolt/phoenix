@@ -67,6 +67,10 @@
             "StatusCode": "200",
             "ResponseParameters": {
               "method.response.header.Access-Control-Allow-Origin": false
+            },
+            "StatusCode": "401",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false
             }
           }
         ],
@@ -80,6 +84,13 @@
               },
               "ResponseTemplates" : { "application/json": "" },
               "StatusCode" : "200"
+            },
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "ResponseTemplates" : { "application/json": "" },
+              "StatusCode" : "401"
             }
           ],
           "Uri": {"Fn::Join": ["", [
