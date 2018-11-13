@@ -13,7 +13,7 @@ import hashlib
 ssm_client = boto3.client('ssm')
 
 def get_github_webhook_secret_token():
-    expected = hashlib.sha1(b'gqWxklZ1IxoWc0Z4LZKZcTxlo7cS2xpj')
+    expected = hashlib.sha1(b'HAZ4f5BL2BKpptAr6DTkcxpzSGrQCNBFTPj8C06hdgbDIu7WKUXV4mLeBJkeTO3D')
     return expected.hexdigest()
     #return 'gqWxklZ1IxoWc0Z4LZKZcTxlo7cS2xpj'
     #response = ssm_client.get_parameter(
