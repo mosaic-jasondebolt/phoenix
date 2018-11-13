@@ -17,7 +17,6 @@ ssm_client = boto3.client('ssm')
 
 def lambda_handler(event, context):
     print(event)
-
     github_signature = event['headers']['X-Hub-Signature']
     signature = hmac.new('test123'.encode(), json.dumps(event['body']).encode(), "sha1")
     expected_signature = 'sha1=' + signature.hexdigest()
