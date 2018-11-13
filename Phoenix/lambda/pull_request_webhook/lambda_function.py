@@ -5,6 +5,7 @@ import botocore
 import requests
 from datetime import datetime
 import urllib.parse
+import hmac
 
 # Handles GitHub merge request events
 
@@ -22,6 +23,17 @@ class JSONObject:
 false = False
 true = True
 null = None
+
+
+# def handle_github_hook(request):
+#     # Unfortunately we cannot send the request body to a Lambda custom
+#     # authorizer, we we inspect here.
+#     github_signature = request.META['HTTP_X_HUB_SIGNATURE']
+#     signature = hmac.new('test123', request.body, hashlib.sha1)
+#     expected_signature = 'sha1=' + signature.hexdigest()
+#     if not hmac.compare_digest(github_signature, expected_signature):
+#         return HttpResponseForbidden('Invalid signature header')
+
 
 def lambda_handler(event, context):
     print(event)
