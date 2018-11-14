@@ -14,14 +14,22 @@ import base64
 # https://developer.github.com/v3/activity/events/types/#pullrequestevent
 
 cloudformation_client = boto3.client('cloudformation')
-ssm_client = boto3.client('ssm')
+secretsmanager_client = boto3.client('secretsmanager')
+
+def get_github_secret():
+    response = secretsmanager_client.get_secret_value(
+        SecretId='GitHubPullRequestSecret'
+    )
+    return response['SecretString']
+
 
 def lambda_handler(event, context):
     print(event)
 
     # I used Lambda proxy integration here.
     github_signature = event['headers']['X-Hub-Signature']
-    signature = hmac.new('test123'.encode(), event['body'].encode(), "sha1")
+    secret = get_github_secret()
+    signature = hmac.new(secret.encode(), event['body'].encode(), "sha1")
     expected_signature = 'sha1=' + signature.hexdigest()
 
     print(github_signature)

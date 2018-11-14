@@ -140,10 +140,10 @@
     },
     "LambdaPullRequests": {
       "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy", "LambdaSG", "GitHubPullRequestSecret"],
+      "DependsOn": ["LambdaSG", "GitHubPullRequestSecret"],
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Environment": {
           "Variables": {
             "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
@@ -199,74 +199,6 @@
         "Principal": "apigateway.amazonaws.com"
       }
     },
-    "LambdaRole": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com",
-                  "codepipeline.amazonaws.com",
-                  "codebuild.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "dynamodb:*",
-                "cloudformation:*",
-                "codepipeline:*",
-                "codebuild:*",
-                "s3:*",
-                "ec2:*",
-                "ssm:*",
-                "kms:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole",
-                "iam:DeleteRole",
-                "iam:DeleteRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:CreateRole",
-                "iam:PassRole",
-                "iam:GetRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "APILambdaRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaRole"
-          }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
-    },
     "LambdaPostPullRequestSG": {
       "Properties": {
         "GroupDescription": "Post Pull Request Lambda Security Group",
@@ -288,10 +220,10 @@
     },
     "LambdaPostPullRequest": {
       "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaPostPullRequestRole", "LambdaPostPullRequestRolePolicy", "LambdaPostPullRequestSG"],
+      "DependsOn": [ "LambdaPostPullRequestSG"],
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaPostPullRequestRole", "Arn"] },
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Environment": {
           "Variables": {
             "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
@@ -327,74 +259,6 @@
         "Action": "lambda:InvokeFunction",
         "Principal": "codepipeline.amazonaws.com"
       }
-    },
-    "LambdaPostPullRequestRole": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com",
-                  "codepipeline.amazonaws.com",
-                  "codebuild.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaPostPullRequestRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "dynamodb:*",
-                "cloudformation:*",
-                "codepipeline:*",
-                "codebuild:*",
-                "s3:*",
-                "ec2:*",
-                "ssm:*",
-                "kms:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole",
-                "iam:DeleteRole",
-                "iam:DeleteRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:CreateRole",
-                "iam:PassRole",
-                "iam:GetRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          { "Ref": "AWS::StackName"},
-          "LambdaPostPullRequestRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaPostPullRequestRole"
-          }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
     }
   },
   "Outputs": {
