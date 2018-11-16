@@ -7,6 +7,8 @@ from datetime import datetime
 import urllib.parse
 import hmac
 import base64
+import random
+import string
 
 # Handles GitHub merge request events
 
@@ -14,21 +16,41 @@ import base64
 # https://developer.github.com/v3/activity/events/types/#pullrequestevent
 
 cloudformation_client = boto3.client('cloudformation')
-secretsmanager_client = boto3.client('secretsmanager')
+ssm_client = boto3.client('ssm')
 
-def get_github_secret():
-    response = secretsmanager_client.get_secret_value(
-        SecretId='GitHubPullRequestSecret'
+def get_random_secret(password_length=20):
+    password = ''
+    char_set = string.ascii_uppercase + string.ascii_lowercase + string.digits + '$'
+    while '$' not in password:
+        password = ''.join(random.sample(char_set * 6, int(password_length)))
+    return password
+
+def put_github_pull_request_secret_secret():
+    print('putting github pull request secret')
+    response = ssm_client.put_parameter(
+        Name='/microservice/phoenix/global/github/pull-request-secret',
+        Description='GitHub pull request secret.',
+        Value=get_random_secret(64),
+        Type='SecureString',
+        Overwrite=True
     )
-    return response['SecretString']
+    print(response)
 
+def get_github_pull_request_secret_secret():
+    print('getting github pull request secret')
+    response = ssm_client.get_parameter(
+        Name='/microservice/phoenix/global/github/pull-request-secret',
+        WithDecryption=True
+    )
+    print(response)
+    return response['Parameter']['Value']
 
 def lambda_handler(event, context):
     print(event)
 
     # I used Lambda proxy integration here.
     github_signature = event['headers']['X-Hub-Signature']
-    secret = get_github_secret()
+    secret = get_github_pull_request_secret_secret()
     signature = hmac.new(secret.encode(), event['body'].encode(), "sha1")
     expected_signature = 'sha1=' + signature.hexdigest()
 

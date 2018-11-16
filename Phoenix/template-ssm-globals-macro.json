@@ -149,6 +149,32 @@
         "Timeout": "25"
       }
     },
+    "LambdaSSMSecret": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Environment": {
+          "Variables": {
+            "PHX_MACRO_PROJECT_NAME": {"Ref": "ProjectName"}
+          }
+        },
+        "Code": {
+          "S3Bucket" : {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "lambda"
+          ]]},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "ssm_secret",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
     "MacroVersion": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
@@ -401,13 +427,27 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "lambda",
-             "LambdaMacroArn"
+            "ssm-globals-macro",
+            "LambdaMacroArn"
           ]]
         }
       },
       "Value": {
         "Fn::GetAtt": ["LambdaMacro", "Arn"]
+      }
+    },
+    "LambdaSSMSecretArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "ssm-globals-macro",
+            "LambdaSSMSecretArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["LambdaSSMSecret", "Arn"]
       }
     }
   }

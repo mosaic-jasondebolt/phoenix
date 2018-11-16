@@ -29,6 +29,7 @@ PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params
 aws ssm put-parameter \
   --name /microservice/$PROJECT_NAME/global/github/access-token \
   --description 'GitHub access token used by this project' \
-  --type 'String' \
+  --key-id 'alias/aws/ssm' \
+  --type 'SecureString' \
   --overwrite \
   --value $1
