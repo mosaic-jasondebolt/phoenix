@@ -34,10 +34,11 @@ fi
 
 if [ $1 == "create_all" ]
   then
+    ./deploy-ssm-environments-dev.sh create
     ./deploy-database-dev.sh create
     ./deploy-ec2-dev.sh create
-    ./deploy-ecs-main-task-dev.sh create ecs
     ./deploy-lambda-dev.sh create
+    ./deploy-ecs-main-task-dev.sh create ecs
     ./deploy-api-custom-domain-dev.sh create
     ./deploy-api-dev.sh create
     ./deploy-api-deployment-dev.sh create

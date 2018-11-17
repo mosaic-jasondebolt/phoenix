@@ -2,6 +2,7 @@
 A full CI/CD solution for continuously building and deploying RDS, ECS, Lambda, and API Gateway resources.
 <img src="/Phoenix/images/logo.png" height="70px"/>
 
+
 ![Pipeline](/Phoenix/images/pipeline_1a.png)
 ![Pipeline](/Phoenix/images/pipeline_1b.png)
 
@@ -150,7 +151,7 @@ trumps all external conventions or style guides.
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "database",
             {"Ref": "Environment"},
             "EndpointAddress"

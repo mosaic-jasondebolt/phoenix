@@ -133,7 +133,7 @@
       "Type": "AWS::ECS::Cluster",
       "Properties" : {
         "ClusterName" : {"Fn::Join": ["-", [
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "Environment"}
         ]]}
       }
@@ -263,7 +263,7 @@
         }],
         "InstanceType": { "Ref": "InstanceType" },
         "IamInstanceProfile": { "Ref": "EC2InstanceProfile" },
-        "KeyName": "PHX_MACRO_KEY_PAIR_NAME",
+        "KeyName": {"PhoenixSSM": "/microservice/{ProjectName}/global/key-pair-name"},
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [
@@ -473,24 +473,24 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
           "NamespaceType": "BUILD_ID",
-          "Name": "PHX_MACRO_PROJECT_NAME",
+          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [
-              "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
               "/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": "PHX_MACRO_PROJECT_NAME",
+        "Description": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -507,21 +507,21 @@
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             },
             {
               "Name" : "DOMAIN",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_DOMAIN"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE_NODEJS",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image-nodejs"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "api-documentation",
             {"Ref": "Environment"}
           ]]
@@ -529,7 +529,7 @@
         "ServiceRole": {"Fn::Join": ["", [
           "{{resolve:ssm:",
           "/microservice/",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "/global/code-build-service-role-arn",
           ":1}}"
         ]]},
@@ -541,7 +541,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_PROJECT_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             ]]
           }
         },
@@ -555,7 +555,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "ec2",
             {"Ref": "Environment"},
             "Cluster"
@@ -568,7 +568,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "ec2",
             {"Ref": "Environment"},
             "TaskExecutionRoleArn"
@@ -581,7 +581,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "ec2",
             {"Ref": "Environment"},
             "ApplicationELBSG"
@@ -594,7 +594,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "ec2",
             {"Ref": "Environment"},
             "WebSG"

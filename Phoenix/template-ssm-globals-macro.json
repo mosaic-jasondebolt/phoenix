@@ -38,6 +38,10 @@
       "ConstraintDescription": "User all lowercase, dashes, or numbers (demo-project) between 1 and 20 characters in length. Must not start with a number, and must not start or end with a dash.",
       "Type": "String"
     },
+    "GitHubOrganization": {
+      "Description": "If using GitHub, this is the name of your organization",
+      "Type": "String"
+    },
     "CodeBuildDockerImage": {
       "Description": "The ECR name (i.e '{account_id}.dkr.ecr.us-east-1.amazonaws.com/{image_name}:0.1.0') to build the image with.",
       "Default": "aws/codebuild/ubuntu-base:14.04",
@@ -72,17 +76,29 @@
       "Description": "The IAM role that has access to all of the projects resources.",
       "Type": "String"
     },
-    "GitlabURL": {
-      "Description": "The Gitlab URL of your organization (i.e https://gitlab.yourcompany.com)",
+    "GitURL": {
+      "Description": "The Git URL of your organization (i.e https://gitlab.yourcompany.com, https://github.com, etc.)",
+      "Type": "String"
+    },
+    "PipelineEnvironments": {
+      "Description": "The list of pipeline environments in the main project pipeline.",
       "Type": "String"
     },
     "ReleaseEnvironments": {
       "Description": "The list of isolated release environments with associated pipelines that are not part of the main pipeline and can be created in parallel.",
-      "Type": "CommaDelimitedList"
+      "Type": "String"
     },
     "Version": {
       "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
       "Type": "String"
+    }
+  },
+  "Conditions": {
+    "EmptyReleaseEnvironments": {
+      "Fn::Equals": [ {"Ref": "ReleaseEnvironments"}, "" ]
+    },
+    "EmptyPipelineEnvironments": {
+      "Fn::Equals": [ {"Ref": "PipelineEnvironments"}, "" ]
     }
   },
   "Resources": {
@@ -133,50 +149,56 @@
         "Timeout": "25"
       }
     },
-    "SSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Ref": "Domain"},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
+    "LambdaSSMSecret": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Environment": {
+          "Variables": {
+            "PHX_MACRO_PROJECT_NAME": {"Ref": "ProjectName"}
+          }
+        },
+        "Code": {
+          "S3Bucket" : {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "lambda"
+          ]]},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "ssm_secret",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
       }
     },
-    "ECSSSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Fn::Join": [".", [
-          "ecs", {"Ref": "Domain"}
-        ]]},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", "ecs", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
-      }
-    },
-    "APIDocsSSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Fn::Join": [".", [
-          "docs", {"Ref": "Domain"}
-        ]]},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", "docs", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
-      }
-    },
-    "AuthSSLCertificateARN": {
-      "Type" : "AWS::CertificateManager::Certificate",
-      "Properties" : {
-        "DomainName" : {"Fn::Join": [".", [
-          "auth", {"Ref": "Domain"}
-        ]]},
-        "SubjectAlternativeNames" : [
-          {"Fn::Join": [".", [ "*", "auth", {"Ref": "Domain"} ]]}
-        ],
-        "ValidationMethod" : "DNS"
+    "LambdaDeleteNetworkInterface": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Environment": {
+          "Variables": {
+            "PHX_MACRO_PROJECT_NAME": {"Ref": "ProjectName"}
+          }
+        },
+        "Code": {
+          "S3Bucket" : {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "lambda"
+          ]]},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "delete_network_interface",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
       }
     },
     "MacroVersion": {
@@ -239,6 +261,16 @@
         "Value": {"Ref": "GitCurrentProjectBranch"},
         "AllowedPattern": "^[a-z]+[\\-a-z0-9]*[a-z0-9]+",
         "Description": "The actual git branch associated with your current pipeline for this project (i.e demo, green, etc.). May be same branch as your GitRootProjectBranch."
+      }
+    },
+    "GitHubOrganizationParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "GitRootProjectBranchParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/github/organization"]]},
+        "Type": "String",
+        "Value": {"Ref": "GitHubOrganization"},
+        "Description": "If using GitHub, this is the name of your GitHub organization."
       }
     },
     "CodeBuildDockerImageParam": {
@@ -304,49 +336,9 @@
         "Description": "The domain name that this service will fall under."
       }
     },
-    "SSLCertificateARNParam": {
-      "Type": "AWS::SSM::Parameter",
-      "DependsOn": "CodeBuildBucketNameParam",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn"]]},
-        "Type": "String",
-        "Value": {"Ref": "SSLCertificateARN"},
-        "Description": "The AWS ACM Certificate ARN."
-      }
-    },
-    "ECSSSLCertificateARNParam": {
-      "Type": "AWS::SSM::Parameter",
-      "DependsOn": "SSLCertificateARNParam",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn-ecs"]]},
-        "Type": "String",
-        "Value": {"Ref": "ECSSSLCertificateARN"},
-        "Description": "The AWS ACM Certificate ARN used by ECS tasks."
-      }
-    },
-    "APIDocsSSLCertificateARNParam": {
-      "Type": "AWS::SSM::Parameter",
-      "DependsOn": "SSLCertificateARNParam",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn-api-docs"]]},
-        "Type": "String",
-        "Value": {"Ref": "APIDocsSSLCertificateARN"},
-        "Description": "The AWS ACM Certificate ARN used by API documentation."
-      }
-    },
-    "AuthSSLCertificateARNParam": {
-      "Type": "AWS::SSM::Parameter",
-      "DependsOn": "SSLCertificateARNParam",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/ssl-certificate-arn-auth"]]},
-        "Type": "String",
-        "Value": {"Ref": "AuthSSLCertificateARN"},
-        "Description": "The AWS ACM Certificate ARN used by auth endpoints such as Cognito User Pools."
-      }
-    },
     "HostedZoneIdParam": {
       "Type": "AWS::SSM::Parameter",
-      "DependsOn": "SSLCertificateARNParam",
+      "DependsOn": "CodeBuildBucketNameParam",
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/hosted-zone-id"]]},
         "Type": "String",
@@ -354,29 +346,47 @@
         "Description": "The Route53 hosted zone id that this service will fall under."
       }
     },
-    "GitlabURLParam": {
+    "GitURLParam": {
       "Type": "AWS::SSM::Parameter",
-      "DependsOn": "SSLCertificateARNParam",
+      "DependsOn": "DomainParam",
       "Properties": {
-        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/gitlab-url"]]},
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/git-url"]]},
         "Type": "String",
-        "Value": {"Ref": "GitlabURL"},
-        "Description": "The Gitlab URL of your organization."
+        "Value": {"Ref": "GitURL"},
+        "Description": "The Git URL."
+      }
+    },
+    "PipelineEnvironmentsParam": {
+      "Type": "AWS::SSM::Parameter",
+      "DependsOn": "DomainParam",
+      "Properties": {
+        "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/pipeline-environments"]]},
+        "Type": "String",
+        "Value": {"Fn::If": [
+          "EmptyPipelineEnvironments",
+          " ",
+          {"Ref": "PipelineEnvironments"}
+        ]},
+        "Description": "The list of pipeline environments in the main project pipeline."
       }
     },
     "ReleaseEnvironmentsParam": {
       "Type": "AWS::SSM::Parameter",
-      "DependsOn": "LambdaBucketNameParam",
+      "DependsOn": "DomainParam",
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/release-environments"]]},
         "Type": "String",
-        "Value": {"Fn::Join": [",", {"Ref": "ReleaseEnvironments"}]},
+        "Value": {"Fn::If": [
+          "EmptyReleaseEnvironments",
+          " ",
+          {"Ref": "ReleaseEnvironments"}
+        ]},
         "Description": "The list of isolated release environments with associated pipelines that are not part of the main pipeline and can be created in parallel."
       }
     },
     "KeyPairNameParam": {
       "Type": "AWS::SSM::Parameter",
-      "DependsOn": "LambdaBucketNameParam",
+      "DependsOn": "DomainParam",
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/key-pair-name"]]},
         "Type": "String",
@@ -386,7 +396,7 @@
     },
     "LambdaBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
-      "DependsOn": "SSLCertificateARNParam",
+      "DependsOn": "KeyPairNameParam",
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/lambda-bucket-name"]]},
         "Type": "String",
@@ -397,7 +407,7 @@
     },
     "LoadBalancerLogsBucketNameParam": {
       "Type": "AWS::SSM::Parameter",
-      "DependsOn": "LambdaBucketNameParam",
+      "DependsOn": "KeyPairNameParam",
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/load-balancer-logs-bucket-name"]]},
         "Type": "String",
@@ -408,7 +418,7 @@
     },
     "ProjectDescriptionParam": {
       "Type": "AWS::SSM::Parameter",
-      "DependsOn": "LambdaBucketNameParam",
+      "DependsOn": "KeyPairNameParam",
       "Properties": {
         "Name": {"Fn::Join": ["/", ["/microservice", {"Ref": "ProjectName"}, "global/project-description"]]},
         "Type": "String",
@@ -443,13 +453,41 @@
         "Name": {
           "Fn::Join": ["-", [
             {"Ref": "ProjectName"},
-            "lambda",
-             "LambdaMacroArn"
+            "ssm-globals-macro",
+            "LambdaMacroArn"
           ]]
         }
       },
       "Value": {
         "Fn::GetAtt": ["LambdaMacro", "Arn"]
+      }
+    },
+    "LambdaSSMSecretArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "ssm-globals-macro",
+            "LambdaSSMSecretArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["LambdaSSMSecret", "Arn"]
+      }
+    },
+    "LambdaDeleteNetworkInterfaceArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "ssm-globals-macro",
+            "LambdaDeleteNetworkInterfaceArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["LambdaDeleteNetworkInterface", "Arn"]
       }
     }
   }

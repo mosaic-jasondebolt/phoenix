@@ -28,7 +28,7 @@
     "CustomDomain": {
       "Type": "AWS::ApiGateway::DomainName",
       "Properties": {
-        "CertificateArn": "PHX_MACRO_SSL_CERTIFICATE_ARN",
+        "CertificateArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn"},
         "DomainName": {"Fn::Join": ["", [
           { "Fn::If": [
             "IsProd",
@@ -41,7 +41,7 @@
               ]
             }
           ]},
-          "PHX_MACRO_DOMAIN"
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
         ]]}
       }
     },
@@ -49,7 +49,7 @@
       "Type": "AWS::Route53::RecordSetGroup",
       "DependsOn": ["CustomDomain"],
       "Properties": {
-        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
+        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"},
         "RecordSets": [
           {
             "Name": {"Fn::Join": ["", [
@@ -64,7 +64,7 @@
                   ]
                 }
               ]},
-              "PHX_MACRO_DOMAIN"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             ]]},
             "AliasTarget" : {
                 "HostedZoneId" : "Z2FDTNDATAQYW2",
@@ -81,7 +81,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "api-custom-domain",
             {"Ref": "Environment"},
             "CustomDomain"

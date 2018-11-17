@@ -4,7 +4,7 @@
   "Transform" : ["ProjectLambdaMacro"],
   "Conditions": {
     "ProjectUsesRootGitBranch" : {"Fn::Equals" : [
-      "PHX_MACRO_GIT_ROOT_PROJECT_BRANCH","PHX_MACRO_GIT_CURRENT_PROJECT_BRANCH"
+      {"PhoenixSSM": "/microservice/{ProjectName}/global/git-root-project-branch"},{"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"}
     ]}
   },
   "Resources": {
@@ -13,7 +13,7 @@
       "Properties": {
         "RepositoryName": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "main"
           ]]
         },
@@ -23,7 +23,7 @@
               "Sid": "AllowPushPull",
               "Effect": "Allow",
               "Principal": {
-                "AWS": ["PHX_MACRO_IAM_ROLE"]
+                "AWS": [{"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"}]
               },
               "Action": [
                 "ecr:GetDownloadUrlForLayer",
@@ -52,7 +52,7 @@
     "CodeBuildBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
         "LifecycleConfiguration": {
           "Rules": [{
             "ExpirationInDays": 180,
@@ -64,7 +64,7 @@
     "CodePipelineBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME",
+        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-pipeline-bucket-name"},
         "LifecycleConfiguration": {
           "Rules": [{
             "ExpirationInDays": 180,
@@ -76,7 +76,7 @@
     "LoadBalancerLogsBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME",
+        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/load-balancer-logs-bucket-name"},
         "LifecycleConfiguration": {
           "Rules": [{
             "ExpirationInDays": 180,
@@ -85,34 +85,18 @@
         }
       }
     },
-    "MasterTriggerSNSTopic": {
-      "Type": "AWS::SNS::Topic",
-      "Properties": {
-        "DisplayName": "GitMaster",
-        "Subscription": [{
-          "Endpoint": "PHX_MACRO_NOTIFICATION_EMAIL",
-          "Protocol": "email"
-        }],
-        "TopicName": {
-          "Fn::Join": ["-", [
-            "master-branch-event-triggered-for",
-            "PHX_MACRO_PROJECT_NAME"
-          ]]
-        }
-      }
-    },
     "CodePipelineFailedSNSTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
         "DisplayName": "PipelineFailed",
         "Subscription": [{
-          "Endpoint": "PHX_MACRO_NOTIFICATION_EMAIL",
+          "Endpoint": {"PhoenixSSM": "/microservice/{ProjectName}/global/notification-email"},
           "Protocol": "email"
         }],
         "TopicName": {
           "Fn::Join": ["-", [
             "pipeline-failed-for",
-            "PHX_MACRO_PROJECT_NAME"
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
           ]]
         }
       }
@@ -122,39 +106,43 @@
       "Properties": {
         "DisplayName": "CodePipeLn",
         "Subscription": [{
-          "Endpoint": "PHX_MACRO_NOTIFICATION_EMAIL",
+          "Endpoint": {"PhoenixSSM": "/microservice/{ProjectName}/global/notification-email"},
           "Protocol": "email"
         }],
         "TopicName": {
           "Fn::Join": ["-", [
             "code-pipeline-approval-required-for",
-            "PHX_MACRO_PROJECT_NAME"
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
           ]]
         }
       }
     },
-    "CodeCommitRepository": {
-      "Type": "AWS::CodeCommit::Repository",
-      "Condition": "ProjectUsesRootGitBranch",
+    "GitHubWebhook": {
+      "Type": "AWS::CodePipeline::Webhook",
       "Properties": {
-        "RepositoryName": "PHX_MACRO_GIT_REPO_NAME",
-        "RepositoryDescription": "PHX_MACRO_PROJECT_DESCRIPTION",
-        "Triggers": [
+        "AuthenticationConfiguration": {
+          "SecretToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/access-token"}
+        },
+        "Filters": [
           {
-            "Name": "MasterTrigger",
-            "CustomData": {
-              "Fn::Join": [" ", [
-                "Project",
-                "PHX_MACRO_PROJECT_NAME"
-              ]]
-            },
-            "DestinationArn": {"Ref": "MasterTriggerSNSTopic"},
-            "Branches": [
-              "PHX_MACRO_GIT_CURRENT_PROJECT_BRANCH"
-            ],
-            "Events": ["all"]
+            "JsonPath": "$.ref",
+            "MatchEquals": {"Fn::Join": ["", [
+              "refs/heads/",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"}
+            ]]}
           }
-        ]
+        ],
+        "Authentication": "GITHUB_HMAC",
+        "TargetPipeline": { "Ref" : "CodePipeline" },
+        "TargetAction": "Source",
+        "Name": {"Fn::Join": ["-", [
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+          "CodePipelineWebhook",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"},
+          "Branch"
+        ]]},
+        "TargetPipelineVersion": { "Fn::GetAtt" : [ "CodePipeline", "Version" ] },
+        "RegisterWithThirdParty": "true"
       }
     },
     "CodeBuildServiceRoleArnParam": {
@@ -162,12 +150,12 @@
       "Properties": {
         "Name": {"Fn::Join": ["/", [
           "/microservice",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "global",
           "code-build-service-role-arn"
         ]]},
         "Type": "String",
-        "Value": "PHX_MACRO_IAM_ROLE",
+        "Value": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Description": "The Code Build Service Role ARN"
       }
     },
@@ -175,13 +163,13 @@
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupName": {
-          "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+          "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "CodeBuild",
             "SG"
           ]]
         },
         "GroupDescription": {
-          "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+          "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "CodeBuild",
             "SG"
           ]]
@@ -199,7 +187,7 @@
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "codebuild",
               "sg"
             ]]}
@@ -212,7 +200,7 @@
       "Properties": {
         "Name": {"Fn::Join": ["/", [
           "/microservice",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "global",
           "code-build-security-group"
         ]]},
@@ -257,23 +245,23 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
           "NamespaceType": "BUILD_ID",
-          "Name": "PHX_MACRO_PROJECT_NAME",
+          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
           "Location": {
-            "Fn::Join": ["", ["PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+            "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
               "/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": "PHX_MACRO_PROJECT_DESCRIPTION",
+        "Description": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-description"},
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -285,34 +273,34 @@
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             },
             {
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
-              "Name" : "GITLAB_ACCESS_TOKEN",
+              "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
-                "PHX_MACRO_PROJECT_NAME",
-                "global/gitlab-url"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                "global/git-url"
               ]]}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
-        "Name": "PHX_MACRO_PROJECT_NAME",
-        "ServiceRole": "PHX_MACRO_IAM_ROLE",
+        "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec.yml",
           "Type": "CODECOMMIT",
@@ -321,7 +309,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_PROJECT_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             ]]
           }
         },
@@ -365,23 +353,23 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
           "NamespaceType": "BUILD_ID",
-          "Name": "PHX_MACRO_PROJECT_NAME",
+          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
           "Location": {
-            "Fn::Join": ["", ["PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+            "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
               "/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": "PHX_MACRO_PROJECT_DESCRIPTION",
+        "Description": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-description"},
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -393,38 +381,38 @@
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             },
             {
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
-              "Name" : "GITLAB_UNIT_TEST_ACCESS_TOKEN",
+              "Name" : "GITHUB_UNIT_TEST_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/unit-test-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
-                "PHX_MACRO_PROJECT_NAME",
-                "global/gitlab-url"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                "global/git-url"
               ]]}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
-          "Fn::Join": ["", ["PHX_MACRO_PROJECT_NAME",
+          "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "-unit-test"
           ]]
         },
-        "ServiceRole": "PHX_MACRO_IAM_ROLE",
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-unit-test.yml",
           "Type": "CODECOMMIT",
@@ -433,7 +421,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_PROJECT_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             ]]
           }
         },
@@ -477,23 +465,23 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
           "NamespaceType": "BUILD_ID",
-          "Name": "PHX_MACRO_PROJECT_NAME",
+          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
           "Location": {
-            "Fn::Join": ["", ["PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+            "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
               "/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": "PHX_MACRO_PROJECT_DESCRIPTION",
+        "Description": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-description"},
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -505,38 +493,38 @@
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             },
             {
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_LAMBDA_BUCKET_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
-              "Name" : "GITLAB_LINT_ACCESS_TOKEN",
+              "Name" : "GITHUB_LINT_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/lint-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
-                "PHX_MACRO_PROJECT_NAME",
-                "global/gitlab-url"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                "global/git-url"
               ]]}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
-          "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+          "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "lint"
           ]]
         },
-        "ServiceRole": "PHX_MACRO_IAM_ROLE",
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-lint.yml",
           "Type": "CODECOMMIT",
@@ -545,7 +533,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_PROJECT_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             ]]
           }
         },
@@ -589,23 +577,23 @@
         },
         "Artifacts": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
           "NamespaceType": "BUILD_ID",
-          "Name": "PHX_MACRO_PROJECT_NAME",
+          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "Packaging": "NONE"
         },
         "BadgeEnabled": "true",
         "Cache": {
           "Location": {
-            "Fn::Join": ["", ["PHX_MACRO_CODE_BUILD_BUCKET_NAME",
+            "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
               "/",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "-cache"
             ]]
           },
           "Type": "S3"
         },
-        "Description": "PHX_MACRO_PROJECT_DESCRIPTION",
+        "Description": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-description"},
         "Environment": {
           "ComputeType": "BUILD_GENERAL1_LARGE",
           "EnvironmentVariables": [
@@ -617,19 +605,19 @@
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
-          "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+          "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "post-prod-deploy"
           ]]
         },
-        "ServiceRole": "PHX_MACRO_IAM_ROLE",
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-post-prod-deploy.yml",
           "Type": "CODECOMMIT",
@@ -638,7 +626,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_PROJECT_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             ]]
           }
         },
@@ -651,12 +639,12 @@
       "Properties": {
         "Name": {"Fn::Join": ["/", [
           "/microservice",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           "global",
           "code-pipeline-service-role-arn"
         ]]},
         "Type": "String",
-        "Value": "PHX_MACRO_IAM_ROLE",
+        "Value": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Description": "The Code Pipeline Service Role ARN"
       }
     },
@@ -664,24 +652,28 @@
       "Type": "AWS::CodePipeline::Pipeline",
       "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
-        "RoleArn": "PHX_MACRO_IAM_ROLE",
-        "Name": "PHX_MACRO_PROJECT_NAME",
-        "Stages": [{
+        "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+        "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+        "Stages": [
+          {
             "Name": "Source",
             "Actions": [{
-              "Name": "SourceAction",
+              "Name": "Source",
               "ActionTypeId": {
                 "Category": "Source",
-                "Owner": "AWS",
+                "Owner": "ThirdParty",
                 "Version": "1",
-                "Provider": "CodeCommit"
+                "Provider": "GitHub"
               },
               "OutputArtifacts": [{
                 "Name": "SourceOutput"
               }],
               "Configuration": {
-                "RepositoryName": "PHX_MACRO_GIT_REPO_NAME",
-                "BranchName": "PHX_MACRO_GIT_CURRENT_PROJECT_BRANCH"
+                "Owner": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"},
+                "Repo": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-repo-name"},
+                "PollForSourceChanges": "false",
+                "Branch": {"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"},
+                "OAuthToken": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/access-token"}
               },
               "RunOrder": 1
             }]
@@ -704,7 +696,7 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "ProjectName": "PHX_MACRO_PROJECT_NAME"
+                  "ProjectName": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
                 }
               },
               {
@@ -721,7 +713,7 @@
                 "RunOrder": 1,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "unit-test"
                     ]]
                   }
@@ -741,7 +733,7 @@
                 "RunOrder": 1,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lint"
                     ]]
                   }
@@ -753,7 +745,7 @@
             "Name": "DeployToTesting",
             "Actions": [
               {
-                "Name": "DatabaseChangeSet",
+                "Name": "SSMParameters",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -765,19 +757,46 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                      "ssm-environments",
+                      "testing"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ssm-environments.json"
+                }
+              },
+              {
+                "Name": "DatabaseChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "testing"
                     ]]
@@ -797,21 +816,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "testing"
                     ]]
@@ -829,21 +848,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "testing"
                     ]]
@@ -863,21 +882,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "testing"
                     ]]
@@ -895,21 +914,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "testing"
                     ]]
@@ -929,21 +948,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "testing"
                     ]]
@@ -961,21 +980,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "testing"
                     ]]
@@ -995,21 +1014,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "testing"
                     ]]
@@ -1027,21 +1046,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "testing"
                     ]]
@@ -1061,21 +1080,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "testing"
                     ]]
@@ -1093,21 +1112,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "testing"
                     ]]
@@ -1127,21 +1146,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "testing"
                     ]]
@@ -1159,21 +1178,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "testing"
                     ]]
@@ -1193,21 +1212,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "testing"
                     ]]
@@ -1225,10 +1244,10 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "rds-migration",
                       "testing"
                     ]]
@@ -1246,14 +1265,14 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "testing"
@@ -1261,7 +1280,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "testing"
@@ -1282,14 +1301,14 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "testing"
@@ -1297,7 +1316,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "testing"
@@ -1316,21 +1335,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "testing"
                     ]]
@@ -1350,21 +1369,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "testing"
                     ]]
@@ -1382,21 +1401,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "testing"
                     ]]
@@ -1416,21 +1435,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "testing"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "testing"
                     ]]
@@ -1448,10 +1467,10 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation",
                       "testing"
                     ]]
@@ -1469,11 +1488,11 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "integration-test",
                       "testing"
                     ]]
@@ -1504,7 +1523,7 @@
             "Name": "DeployToEndToEnd",
             "Actions": [
               {
-                "Name": "DatabaseChangeSet",
+                "Name": "SSMParameters",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -1516,19 +1535,46 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                      "ssm-environments",
+                      "e2e"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-e2e.json",
+                  "TemplatePath": "BuildOutput::template-ssm-environments.json"
+                }
+              },
+              {
+                "Name": "DatabaseChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "e2e"
                     ]]
@@ -1548,21 +1594,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "e2e"
                     ]]
@@ -1580,21 +1626,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "e2e"
                     ]]
@@ -1614,21 +1660,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "e2e"
                     ]]
@@ -1646,21 +1692,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "e2e"
                     ]]
@@ -1680,21 +1726,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "e2e"
                     ]]
@@ -1712,21 +1758,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "e2e"
                     ]]
@@ -1746,21 +1792,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "e2e"
                     ]]
@@ -1778,21 +1824,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "e2e"
                     ]]
@@ -1812,21 +1858,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "e2e"
                     ]]
@@ -1844,21 +1890,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "e2e"
                     ]]
@@ -1878,21 +1924,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "e2e"
                     ]]
@@ -1910,21 +1956,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "e2e"
                     ]]
@@ -1944,21 +1990,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "e2e"
                     ]]
@@ -1976,10 +2022,10 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "rds-migration",
                       "e2e"
                     ]]
@@ -1997,14 +2043,14 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "e2e"
@@ -2012,7 +2058,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "e2e"
@@ -2033,14 +2079,14 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "e2e"
@@ -2048,7 +2094,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "e2e"
@@ -2067,21 +2113,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "e2e"
                     ]]
@@ -2101,21 +2147,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "e2e"
                     ]]
@@ -2133,21 +2179,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "e2e"
                     ]]
@@ -2167,21 +2213,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "e2e"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "e2e"
                     ]]
@@ -2199,10 +2245,10 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation",
                       "e2e"
                     ]]
@@ -2220,11 +2266,11 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "integration-test",
                       "e2e"
                     ]]
@@ -2255,7 +2301,7 @@
             "Name": "DeployToProd",
             "Actions": [
               {
-                "Name": "DatabaseChangeSet",
+                "Name": "SSMParameters",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -2267,19 +2313,46 @@
                 }],
                 "RunOrder": 1,
                 "Configuration": {
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                      "ssm-environments",
+                      "prod"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-prod.json",
+                  "TemplatePath": "BuildOutput::template-ssm-environments.json"
+                }
+              },
+              {
+                "Name": "DatabaseChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "prod"
                     ]]
@@ -2299,21 +2372,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       "prod"
                     ]]
@@ -2331,21 +2404,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "prod"
                     ]]
@@ -2365,21 +2438,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ec2",
                       "prod"
                     ]]
@@ -2397,21 +2470,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "prod"
                     ]]
@@ -2431,21 +2504,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "lambda",
                       "prod"
                     ]]
@@ -2463,21 +2536,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "prod"
                     ]]
@@ -2497,21 +2570,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito",
                       "prod"
                     ]]
@@ -2529,21 +2602,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "prod"
                     ]]
@@ -2563,21 +2636,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-custom-domain",
                       "prod"
                     ]]
@@ -2595,21 +2668,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "prod"
                     ]]
@@ -2629,21 +2702,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation-v0",
                       "prod"
                     ]]
@@ -2661,21 +2734,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "prod"
                     ]]
@@ -2695,21 +2768,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api",
                       "prod"
                     ]]
@@ -2727,10 +2800,10 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "rds-migration",
                       "prod"
                     ]]
@@ -2748,14 +2821,14 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "prod"
@@ -2763,7 +2836,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "prod"
@@ -2784,14 +2857,14 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "prod"
@@ -2799,7 +2872,7 @@
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "ecs",
                       "main",
                       "prod"
@@ -2818,21 +2891,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "prod"
                     ]]
@@ -2852,21 +2925,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-deployment",
                       "prod"
                     ]]
@@ -2884,21 +2957,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 1,
+                "RunOrder": 2,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_REPLACE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "prod"
                     ]]
@@ -2918,21 +2991,21 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
-                  "RoleArn": "PHX_MACRO_IAM_ROLE",
+                  "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
                   "StackName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "prod"
                     ]]
                   },
                   "ChangeSetName": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "cognito-internals",
                       "prod"
                     ]]
@@ -2950,10 +3023,10 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 5,
+                "RunOrder": 6,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "api-documentation",
                       "prod"
                     ]]
@@ -2971,10 +3044,10 @@
                 "InputArtifacts": [{
                   "Name": "SourceOutput"
                 }],
-                "RunOrder": 6,
+                "RunOrder": 7,
                 "Configuration": {
                   "ProjectName": {
-                    "Fn::Join": ["-", ["PHX_MACRO_PROJECT_NAME",
+                    "Fn::Join": ["-", [{"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "post-prod-deploy"
                     ]]
                   }
@@ -2985,7 +3058,7 @@
         ],
         "ArtifactStore": {
           "Type": "S3",
-          "Location": "PHX_MACRO_CODE_PIPELINE_BUCKET_NAME"
+          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-pipeline-bucket-name"}
         }
       }
     },
@@ -3002,7 +3075,7 @@
         "State" : "ENABLED",
         "Targets" : [{
           "Arn": {"Ref": "CodePipelineFailedSNSTopic"},
-          "Id": {"Fn::Join": ["-", ["event-pipeline-failed-for", "PHX_MACRO_PROJECT_NAME"] ]}
+          "Id": {"Fn::Join": ["-", ["event-pipeline-failed-for", {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}] ]}
         }]
       }
     }

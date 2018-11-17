@@ -5,16 +5,18 @@
     "GitRepoName": "phoenix",
     "GitRootProjectBranch": "master",
     "GitCurrentProjectBranch": "master",
-    "Domain": "phoenix.solarmosaic.com",
-    "HostedZoneId": "ZV2LG1I1SQ0YI",
+    "GitHubOrganization": "solmosaic",
+    "Domain": "phoenix.joinmosaic.com",
+    "HostedZoneId": "Z3BZWA5KLQHQ6O",
     "KeyPairName": "us-east-1-714284646049",
     "ProjectDescription": "The Mosaic Phoenix project.",
     "NotificationEmail": "ops@joinmosaic.com",
     "IAMRole": "arn:aws:iam::714284646049:role/PhoenixAdmins",
     "CodeBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.1",
     "NodeJSBuildDockerImage": "714284646049.dkr.ecr.us-east-1.amazonaws.com/nodejs:10.1.0",
-    "GitlabURL": "https://gitlab.intranet.solarmosaic.com",
-    "ReleaseEnvironments": "func, rc, rcf",
+    "GitURL": "https://github.com",
+    "PipelineEnvironments": "testing, e2e, prod",
+    "ReleaseEnvironments": "",
     "Version": "VERSION_ID"
   }
 }

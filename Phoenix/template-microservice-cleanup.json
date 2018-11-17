@@ -20,7 +20,7 @@
           "PolicyName": {
             "Fn::Join": ["-", [
               "code-build",
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "cleanup",
               "service-policy"
             ]]
@@ -41,7 +41,7 @@
       "Properties": {
         "GroupName": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "CodeBuild",
             "Microservice",
             "Cleanup",
@@ -50,7 +50,7 @@
         },
         "GroupDescription": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "CodeBuild",
             "Microservice",
             "Cleanup",
@@ -70,7 +70,7 @@
           {
             "Key": "Name",
             "Value": {"Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "codebuild",
               "sg"
             ]]}
@@ -126,27 +126,27 @@
             {
               "Name" : "ORGANIZATION_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_ORGANIZATION_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/organization-name"}
             },
             {
               "Name" : "PROJECT_NAME",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_PROJECT_NAME"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
             },
             {
               "Name" : "DOMAIN",
               "Type" : "PLAINTEXT",
-              "Value" : "PHX_MACRO_DOMAIN"
+              "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             }
           ],
-          "Image": "PHX_MACRO_CODE_BUILD_DOCKER_IMAGE",
+          "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
           "PrivilegedMode": "true",
           "Type": "LINUX_CONTAINER"
         },
         "Name": {
           "Fn::Join": ["-", [
             "destroy",
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "microservice"
           ]]
         },
@@ -159,7 +159,7 @@
               "https://git-codecommit.",
               {"Ref": "AWS::Region"},
               ".amazonaws.com/v1/repos/",
-              "PHX_MACRO_GIT_REPO_NAME"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/git-repo-name"}
             ]]
           }
         },

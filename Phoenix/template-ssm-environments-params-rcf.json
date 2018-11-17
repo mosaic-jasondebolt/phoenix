@@ -1,7 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "rcf",
-    "Description": "The rcf environment",
-    "Version": "VERSION_ID"
-  }
-}

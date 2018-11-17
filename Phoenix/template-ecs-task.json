@@ -268,7 +268,7 @@
         "ExecutionRoleArn": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "ec2",
               {"Ref": "Environment"},
               "TaskExecutionRoleArn"
@@ -285,7 +285,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       {"Ref": "DBEnvironment"},
                       "MasterUsername"
@@ -298,7 +298,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       {"Ref": "DBEnvironment"},
                       "DatabasePasswordParameterStoreKey"
@@ -311,7 +311,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       {"Ref": "DBEnvironment"},
                       "Endpoint"
@@ -324,7 +324,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       {"Ref": "DBEnvironment"},
                       "ReadEndpoint"
@@ -337,7 +337,7 @@
                 "Value": {
                   "Fn::ImportValue": {
                     "Fn::Join": ["-", [
-                      "PHX_MACRO_PROJECT_NAME",
+                      {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                       "database",
                       {"Ref": "DBEnvironment"},
                       "EndpointPort"
@@ -364,7 +364,7 @@
                   ]]},
                   "/",
                   {"Fn::Join": ["-", [
-                    "PHX_MACRO_PROJECT_NAME",
+                    {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                     {"Ref": "ImageName"},
                   ]]},
                   ":",
@@ -400,9 +400,9 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": "PHX_MACRO_IAM_ROLE",
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Code": {
-          "S3Bucket" : "PHX_MACRO_LAMBDA_BUCKET_NAME",
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
           "S3Key": {
             "Fn::Join": ["/", [
               {"Ref": "Version"},
@@ -427,13 +427,13 @@
         "KMSKeyId": "alias/aws/ssm",
         "ParameterName": {"Fn::Join": ["/", [
           "/microservice",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "DBEnvironment"},
           "aurora-admin-password"
         ]]},
         "ParameterDescription": {"Fn::Join": ["", [
           "Password for the ",
-          "PHX_MACRO_PROJECT_NAME",
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
           {"Ref": "DBEnvironment"},
           " Aurora DB from ECS ",
           {"Ref": "Environment"},
@@ -448,7 +448,7 @@
         "Cluster": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "ec2",
               {"Ref": "Environment"},
               "Cluster"
@@ -482,7 +482,7 @@
               {
                 "Fn::ImportValue": {
                   "Fn::Join": ["-", [
-                    "PHX_MACRO_PROJECT_NAME",
+                    {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                     "ec2",
                     {"Ref": "Environment"},
                     "WebSG"
@@ -539,7 +539,7 @@
     "ApplicationELBLogsS3BucketPolicy": {
       "Type" : "AWS::S3::BucketPolicy",
       "Properties" : {
-         "Bucket": "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME",
+         "Bucket": {"PhoenixSSM": "/microservice/{ProjectName}/global/load-balancer-logs-bucket-name"},
          "PolicyDocument" : {
            "Version": "2012-10-17",
            "Statement": [
@@ -550,7 +550,7 @@
                "Effect": "Allow",
                "Resource": {"Fn::Join": ["", [
                  "arn:aws:s3:::",
-                 "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME",
+                 {"PhoenixSSM": "/microservice/{ProjectName}/global/load-balancer-logs-bucket-name"},
                  "/",
                  { "Ref": "AWS::StackName" },
                  "/AWSLogs/",
@@ -593,7 +593,7 @@
               },
               {
                 "Key": "access_logs.s3.bucket",
-                "Value": "PHX_MACRO_LOAD_BALANCER_LOGS_BUCKET_NAME"
+                "Value": {"PhoenixSSM": "/microservice/{ProjectName}/global/load-balancer-logs-bucket-name"}
               },
               {
                 "Key": "access_logs.s3.prefix",
@@ -607,7 +607,7 @@
           {
             "Fn::ImportValue": {
               "Fn::Join": ["-", [
-                "PHX_MACRO_PROJECT_NAME",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                 "ec2",
                 {"Ref": "Environment"},
                 "ApplicationELBSG"
@@ -635,7 +635,7 @@
             "Value": {
               "Fn::ImportValue": {
                 "Fn::Join": ["-", [
-                  "PHX_MACRO_PROJECT_NAME",
+                  {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                   "ec2",
                   {"Ref": "Environment"},
                   "Cluster"
@@ -651,7 +651,7 @@
       "Properties": {
         "Certificates": [
           {
-            "CertificateArn": "PHX_MACRO_SSL_CERTIFICATE_ARN_ECS"
+            "CertificateArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn-ecs"}
           }
         ],
         "DefaultActions": [
@@ -666,6 +666,7 @@
           "Ref": "ApplicationELB"
         },
         "Port": 443,
+        "SslPolicy": "ELBSecurityPolicy-TLS-1-1-2017-01",
         "Protocol": "HTTPS"
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
@@ -688,6 +689,39 @@
       },
       "Type": "AWS::ElasticLoadBalancingV2::Listener"
     },
+    "RedirectHTTPToHTTPS": {
+      "Type": "Custom::AlbListenerRule",
+      "Properties" : {
+        "ServiceToken": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "lambda",
+              {"Ref": "Environment"},
+              "LambdaALBListenerRuleArn"
+            ]]
+          }
+        },
+        "Actions": [
+          {
+            "Type": "redirect",
+            "RedirectConfig": {
+              "Protocol": "HTTPS",
+              "Port": 443,
+              "StatusCode": "HTTP_301"
+            }
+          }
+        ],
+        "Conditions" : [
+          {
+            "Field" : "host-header",
+            "Values" : [ "*.*" ]
+          }
+        ],
+        "ListenerArn" : {"Ref": "Listener80"},
+        "Priority" : 10
+      }
+    },
     "TargetGroup": {
       "DependsOn": "ApplicationELB",
       "Properties": {
@@ -704,7 +738,7 @@
             "Value": {
               "Fn::ImportValue": {
                 "Fn::Join": ["-", [
-                  "PHX_MACRO_PROJECT_NAME",
+                  {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                   "ec2",
                   {"Ref": "Environment"},
                   "Cluster"
@@ -748,7 +782,7 @@
               {
                 "Fn::ImportValue": {
                   "Fn::Join": ["-", [
-                    "PHX_MACRO_PROJECT_NAME",
+                    {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
                     "ec2",
                     {"Ref": "Environment"},
                     "Cluster"
@@ -871,7 +905,7 @@
         "FromPort": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "database",
               {"Ref": "DBEnvironment"},
               "EndpointPort"
@@ -881,7 +915,7 @@
         "GroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "database",
               {"Ref": "DBEnvironment"},
               "RDSDBSecurityGroup"
@@ -892,7 +926,7 @@
         "SourceSecurityGroupId": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "ec2",
               {"Ref": "Environment"},
               "WebSG"
@@ -902,7 +936,7 @@
         "ToPort": {
           "Fn::ImportValue": {
             "Fn::Join": ["-", [
-              "PHX_MACRO_PROJECT_NAME",
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
               "database",
               {"Ref": "DBEnvironment"},
               "EndpointPort"
@@ -914,7 +948,7 @@
     },
     "DnsRecordSetGroup": {
       "Properties": {
-        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
+        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"},
         "RecordSets": [
           {
             "AliasTarget": {
@@ -954,7 +988,7 @@
               ]},
               "ecs",
               ".",
-              "PHX_MACRO_DOMAIN"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             ]]},
             "Type": "A"
           }
@@ -991,7 +1025,7 @@
         ]},
         "ecs",
         ".",
-        "PHX_MACRO_DOMAIN"
+        {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
       ]]}
     },
     "ServiceHostname" : {
@@ -999,7 +1033,7 @@
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
-            "PHX_MACRO_PROJECT_NAME",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "ecs",
             {"Ref": "TaskFamily"},
             {"Ref": "Environment"},
@@ -1031,7 +1065,7 @@
         ]},
         "ecs",
         ".",
-        "PHX_MACRO_DOMAIN"
+        {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
       ]]}
     }
   }

@@ -194,7 +194,7 @@
             "Name": "DeployToECS",
             "Actions": [
               {
-                "Name": "EC2ChangeSet",
+                "Name": "SSMParameters",
                 "ActionTypeId": {
                   "Category": "Deploy",
                   "Owner": "AWS",
@@ -205,6 +205,33 @@
                   "Name": "BuildOutput"
                 }],
                 "RunOrder": 1,
+                "Configuration": {
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "ActionMode": "CREATE_UPDATE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "ssm-environments",
+                      "deploy"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-ssm-environments-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-ssm-environments.json"
+                }
+              },
+              {
+                "Name": "EC2ChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_REPLACE",
@@ -238,7 +265,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 2,
+                "RunOrder": 3,
                 "Configuration": {
                   "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
                   "ActionMode": "CHANGE_SET_EXECUTE",
@@ -254,6 +281,72 @@
                     "Fn::Join": ["-", [
                       {"Ref": "PipelineName"},
                       "ec2",
+                      "deploy"
+                    ]]
+                  }
+                }
+              },
+              {
+                "Name": "LambdaChangeSet",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 2,
+                "Configuration": {
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "ActionMode": "CHANGE_SET_REPLACE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "lambda",
+                      "deploy"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "lambda",
+                      "deploy"
+                    ]]
+                  },
+                  "TemplateConfiguration": "BuildOutput::t-lambda-params-testing.json",
+                  "TemplatePath": "BuildOutput::template-lambda.json"
+                }
+              },
+              {
+                "Name": "Lambda",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CloudFormation"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "RoleArn": {"Ref": "CodePipelineServiceRoleArn"},
+                  "ActionMode": "CHANGE_SET_EXECUTE",
+                  "Capabilities": "CAPABILITY_NAMED_IAM",
+                  "StackName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "lambda",
+                      "deploy"
+                    ]]
+                  },
+                  "ChangeSetName": {
+                    "Fn::Join": ["-", [
+                      {"Ref": "PipelineName"},
+                      "lambda",
                       "deploy"
                     ]]
                   }
@@ -306,7 +399,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 3,
+                "RunOrder": 4,
                 "Configuration": {
                   "ActionMode": "CHANGE_SET_EXECUTE",
                   "Capabilities": "CAPABILITY_NAMED_IAM",
@@ -340,7 +433,7 @@
                 "InputArtifacts": [{
                   "Name": "BuildOutput"
                 }],
-                "RunOrder": 4,
+                "RunOrder": 5,
                 "Configuration": {
                   "FunctionName": {
                     "Fn::ImportValue": {
@@ -351,7 +444,7 @@
                       ]]
                     }
                   },
-                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab.json\"}"
+                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"github.json\"}"
                 }
               }
             ]
@@ -460,7 +553,7 @@
               "Value" : {"Ref": "GitlabProjectId"}
             },
             {
-              "Name" : "MERGE_REQUEST_INTERNAL_ID",
+              "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "MergeRequestInternalId"}
             },
@@ -490,17 +583,17 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITLAB_ACCESS_TOKEN",
+              "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],
@@ -692,7 +785,7 @@
               "Value" : {"Ref": "GitlabProjectId"}
             },
             {
-              "Name" : "MERGE_REQUEST_INTERNAL_ID",
+              "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "MergeRequestInternalId"}
             },
@@ -722,17 +815,17 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITLAB_UNIT_TEST_ACCESS_TOKEN",
+              "Name" : "GITHUB_UNIT_TEST_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/unit-test-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],
@@ -809,7 +902,7 @@
               "Value" : {"Ref": "GitlabProjectId"}
             },
             {
-              "Name" : "MERGE_REQUEST_INTERNAL_ID",
+              "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "MergeRequestInternalId"}
             },
@@ -839,17 +932,17 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITLAB_LINT_ACCESS_TOKEN",
+              "Name" : "GITHUB_LINT_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/lint-access-token"
             },
             {
-              "Name" : "GITLAB_URL",
+              "Name" : "GIT_URL",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/gitlab-url"
+                "global/git-url"
               ]]}
             }
           ],

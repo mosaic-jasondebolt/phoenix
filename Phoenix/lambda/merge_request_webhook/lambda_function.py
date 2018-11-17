@@ -42,7 +42,7 @@ def get_gitlab_access_token():
 
 def get_gitlab_url():
     response = ssm_client.get_parameter(
-        Name='/microservice/{0}/global/gitlab-url'.format(os.environ['PROJECT_NAME']),
+        Name='/microservice/{0}/global/git-url'.format(os.environ['PROJECT_NAME']),
         WithDecryption=False
     )
     return response['Parameter']['Value']
@@ -164,6 +164,20 @@ def lambda_handler(event, context):
         # Delete the EC2 deploy stack
         response = cloudformation_client.delete_stack(
           StackName='{0}-{1}-{2}'.format(stack_name, 'ec2', 'deploy')
+        )
+        print(response)
+
+        print('Deleting Lambda Stack')
+        # Delete the EC2 deploy stack
+        response = cloudformation_client.delete_stack(
+          StackName='{0}-{1}-{2}'.format(stack_name, 'lambda', 'deploy')
+        )
+        print(response)
+
+        print('Deleting SSM Environments Parameter Stack')
+        # Delete the EC2 deploy stack
+        response = cloudformation_client.delete_stack(
+          StackName='{0}-{1}-{2}'.format(stack_name, 'ssm-environments', 'deploy')
         )
         print(response)
     else:

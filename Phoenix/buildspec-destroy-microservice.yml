@@ -18,7 +18,7 @@ phases:
       - echo Build started on `date`
       - echo Destroying $PROJECT_NAME microservice
       - # Delete API Gateway deployments first
-      - listOfEnvironments='testing e2e prod func rc rcf'
+      - listOfEnvironments=$(jq -r '.Parameters.PipelineEnvironments + "," + .Parameters.ReleaseEnvironments | gsub(" "; "") | split(",") | .[]' $CODEBUILD_SRC_DIR/Phoenix/template-ssm-globals-macro-params.json)
       - |-
         # Delete API Gateway
         python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-deployment-prod
@@ -136,22 +136,23 @@ phases:
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-microservice --recursive || true
       - aws s3 rm s3://$ORGANIZATION_NAME-$PROJECT_NAME-load-balancer-logs --recursive || true
       - # Empty V0 API Documentation buckets
-      - aws s3 rm s3://v0-testing.docs.$DOMAIN --recursive || true
-      - aws s3 rm s3://v0-e2e.docs.$DOMAIN --recursive || true
+      - |-
+        # Delete S3 documentation files
+        for environmentName in $listOfEnvironments
+        do
+          aws s3 rm s3://v0-$environmentName.docs.$DOMAIN --recursive || true
+        done
       - aws s3 rm s3://v0.docs.$DOMAIN --recursive || true # Prod
-      - aws s3 rm s3://v0-func.docs.$DOMAIN --recursive || true
-      - aws s3 rm s3://v0-rc.docs.$DOMAIN --recursive || true
-      - aws s3 rm s3://v0-rcf.docs.$DOMAIN --recursive || true
-      - # # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
       - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-documentation-v0-prod
-      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-testing
-      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-e2e
-      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-prod
-      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-func
-      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-rc
-      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-rcf
+      - |-
+        # # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
+        for environmentName in $listOfEnvironments
+        do
+          echo Skipping deletion of $PROJECT_NAME-api-documentation-v0-$environmentName stack because this stack can be retained and is expensive to re-create.
+          # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-$environmentName
+        done
       - # # Delete the Project ECR repositories.
-      - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force
+      - aws ecr delete-repository --repository-name $PROJECT_NAME-main --force || true
       - # Delete Pipeline
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-pipeline
       - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-pipeline

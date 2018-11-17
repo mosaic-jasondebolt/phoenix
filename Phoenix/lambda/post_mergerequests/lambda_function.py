@@ -38,7 +38,7 @@ def get_gitlab_merge_request_notes_url(project_id, merge_request_id, body):
 
 def get_gitlab_url():
     response = ssm_client.get_parameter(
-        Name='/microservice/{0}/global/gitlab-url'.format(os.environ['PROJECT_NAME']),
+        Name='/microservice/{0}/global/git-url'.format(os.environ['PROJECT_NAME']),
         WithDecryption=False
     )
     return response['Parameter']['Value']

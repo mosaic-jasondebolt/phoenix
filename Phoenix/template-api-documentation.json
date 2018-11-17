@@ -25,7 +25,7 @@
           "Fn::Join": [".", [{
               "Ref": "DomainPrefix"
             },
-            "PHX_MACRO_DOMAIN"
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
           ]]
         },
         "AccessControl": "PublicRead",
@@ -70,7 +70,7 @@
           "Comment": {
             "Fn::Join": ["-", [
               { "Ref": "DomainPrefix" },
-              "PHX_MACRO_DOMAIN"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             ]]
           }
         }
@@ -88,7 +88,7 @@
           "Aliases": [{
             "Fn::Join": [".", [
               { "Ref": "DomainPrefix" },
-              "PHX_MACRO_DOMAIN"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             ]]
           }],
           "DefaultRootObject": "index.html",
@@ -97,14 +97,14 @@
               "Id": {
                 "Fn::Join": [".", [
                   { "Ref": "DomainPrefix" },
-                  "PHX_MACRO_DOMAIN",
+                  {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
                   "s3.amazonaws.com"
                 ]]
               },
               "DomainName": {
                 "Fn::Join": [".", [
                   { "Ref": "DomainPrefix" },
-                  "PHX_MACRO_DOMAIN",
+                  {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
                   "s3.amazonaws.com"
                 ]]
               },
@@ -125,7 +125,7 @@
             "TargetOriginId": {
               "Fn::Join": [".", [
                 { "Ref": "DomainPrefix" },
-                "PHX_MACRO_DOMAIN",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
                 "s3.amazonaws.com"
               ]]
             },
@@ -149,7 +149,7 @@
           "PriceClass": "PriceClass_All",
           "Enabled": true,
           "ViewerCertificate": {
-            "AcmCertificateArn": "PHX_MACRO_SSL_CERTIFICATE_ARN_API_DOCS",
+            "AcmCertificateArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn-api-docs"},
             "SslSupportMethod": "sni-only",
             "MinimumProtocolVersion": "TLSv1.1_2016"
           },
@@ -162,7 +162,7 @@
           "Value": {
             "Fn::Join": [".", [
               { "Ref": "DomainPrefix" },
-              "PHX_MACRO_DOMAIN"
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             ]]
           }
         }]
@@ -235,7 +235,7 @@
         "Name": {
           "Fn::Join": ["-", [
             { "Ref": "DomainPrefix" },
-            "PHX_MACRO_DOMAIN",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
             "user-agent"
           ]]
         }
@@ -293,7 +293,7 @@
         "Name": {
           "Fn::Join": ["-", [
             { "Ref": "DomainPrefix" },
-            "PHX_MACRO_DOMAIN",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"},
             "ip-whitelist"
           ]]
         }
@@ -303,13 +303,13 @@
       "Type" : "AWS::Route53::RecordSetGroup",
       "DependsOn": "CloudFrontDistribution",
       "Properties" : {
-        "HostedZoneId": "PHX_MACRO_HOSTED_ZONE_ID",
+        "HostedZoneId": {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"},
         "RecordSets" : [
           {
             "Name": {
               "Fn::Join": [".", [
                 {"Ref": "DomainPrefix"},
-                "PHX_MACRO_DOMAIN"
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
               ]]
             },
             "Type" : "A",
@@ -332,7 +332,7 @@
           "https://",
           {"Ref": "DomainPrefix"},
           ".",
-          "PHX_MACRO_DOMAIN"
+          {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
         ]]
       }
     }

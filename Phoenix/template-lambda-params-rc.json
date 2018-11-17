@@ -1,7 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "rc",
-    "VPCPrefix": "testing",
-    "Version": "VERSION_ID"
-  }
-}
