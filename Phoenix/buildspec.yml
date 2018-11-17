@@ -18,6 +18,11 @@ phases:
       - IMAGE_TAG=$VERSION_ID
   build:
     commands:
+      - echo Validate aws templates
+      - pushd .
+      - cd $CODEBUILD_SRC_DIR/Phoenix
+      - python validate_template.py
+      - popd
       - echo Build started on `date`
       - listOfEnvironments='testing e2e prod func rc rcf'
       - |-
