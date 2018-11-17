@@ -106,8 +106,7 @@ phases:
 
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task.json $CODEBUILD_SRC_DIR
       - echo Building the Docker image from the Dockerfile.
-      - docker build -t $MAIN_REPOSITORY_URI:latest $CODEBUILD_SRC_DIR/Phoenix/ecs
-      - docker tag $MAIN_REPOSITORY_URI:latest $MAIN_REPOSITORY_URI:$IMAGE_TAG
+      - docker build -t $MAIN_REPOSITORY_URI:$IMAGE_TAG $CODEBUILD_SRC_DIR/Phoenix/ecs
 
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-lambda.json $CODEBUILD_SRC_DIR
       - cp $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain.json $CODEBUILD_SRC_DIR/template-api-custom-domain.json
@@ -152,7 +151,6 @@ phases:
       - python $CODEBUILD_SRC_DIR/Phoenix/release_codebuild.py build
       - # Push docker files
       - echo Pushing the Docker images...
-      - docker push $MAIN_REPOSITORY_URI:latest
       - docker push $MAIN_REPOSITORY_URI:$IMAGE_TAG
 artifacts:
     files:
