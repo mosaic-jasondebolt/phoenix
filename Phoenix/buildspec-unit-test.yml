@@ -25,6 +25,6 @@ phases:
     commands:
       - echo Build completed on `date`
       - # Manipulate CodeBuild artifacts if this is a merge request build
-      - python $CODEBUILD_SRC_DIR/Phoenix/merge_request_codebuild.py unit-test
+      - python $CODEBUILD_SRC_DIR/Phoenix/pull_request_codebuild.py unit-test
       - # Manipulate CodeBuild artifacts if this is a release build
       - python $CODEBUILD_SRC_DIR/Phoenix/release_codebuild.py unit-test

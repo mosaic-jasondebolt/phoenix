@@ -281,7 +281,7 @@
               "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
-              "Name" : "GITLAB_ACCESS_TOKEN",
+              "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/access-token"
             },
@@ -389,7 +389,7 @@
               "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
-              "Name" : "GITLAB_UNIT_TEST_ACCESS_TOKEN",
+              "Name" : "GITHUB_UNIT_TEST_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/unit-test-access-token"
             },
@@ -501,7 +501,7 @@
               "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
             },
             {
-              "Name" : "GITLAB_LINT_ACCESS_TOKEN",
+              "Name" : "GITHUB_LINT_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/lint-access-token"
             },

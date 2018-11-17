@@ -46,7 +46,6 @@ def put_ssm_secret(kwargs):
     del kwargs['SecretLength']
     kwargs['Type'] = 'SecureString'
     response = ssm_client.put_parameter(**kwargs)
-    print(response)
 
 def delete_ssm_secret(kwargs):
     print('deleting SSM secret')

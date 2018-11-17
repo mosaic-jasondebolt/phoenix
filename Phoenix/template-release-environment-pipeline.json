@@ -1120,7 +1120,7 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITLAB_ACCESS_TOKEN",
+              "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/access-token"
             },
@@ -1236,7 +1236,7 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITLAB_UNIT_TEST_ACCESS_TOKEN",
+              "Name" : "GITHUB_UNIT_TEST_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/unit-test-access-token"
             },
@@ -1353,7 +1353,7 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITLAB_LINT_ACCESS_TOKEN",
+              "Name" : "GITHUB_LINT_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value" : "/global/gitlab/codebuild/lint-access-token"
             },

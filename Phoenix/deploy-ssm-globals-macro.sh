@@ -25,7 +25,7 @@ VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 aws s3 mb s3://$LAMBDA_BUCKET_NAME
 
 # Upload the Python Lambda functions
-listOfPythonLambdaFunctions='macro ssm_secret'
+listOfPythonLambdaFunctions='macro ssm_secret delete_network_interface'
 for functionName in $listOfPythonLambdaFunctions
 do
   mkdir -p builds/$functionName

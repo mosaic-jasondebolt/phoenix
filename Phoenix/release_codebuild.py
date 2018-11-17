@@ -32,9 +32,9 @@ REPO_NAME = os.environ.get('REPO_NAME')
 SOURCE_BRANCH = os.environ.get('SOURCE_BRANCH')
 
 # These env variables are sometimes made avaialable in codebuild
-GITLAB_ACCESS_TOKEN = os.environ.get('GITLAB_ACCESS_TOKEN')
-GITLAB_UNIT_TEST_ACCESS_TOKEN = os.environ.get('GITLAB_UNIT_TEST_ACCESS_TOKEN')
-GITLAB_LINT_ACCESS_TOKEN = os.environ.get('GITLAB_LINT_ACCESS_TOKEN')
+GITHUB_ACCESS_TOKEN = os.environ.get('GITHUB_ACCESS_TOKEN')
+GITHUB_UNIT_TEST_ACCESS_TOKEN = os.environ.get('GITHUB_UNIT_TEST_ACCESS_TOKEN')
+GITHUB_LINT_ACCESS_TOKEN = os.environ.get('GITHUB_LINT_ACCESS_TOKEN')
 GIT_URL = os.environ.get('GIT_URL', '')
 
 # These env variables are always avaialable in AWS CodeBuild
@@ -117,8 +117,8 @@ if __name__ == '__main__':
     arg = sys.argv[1]
 
     if arg == 'build':
-        if not GITLAB_ACCESS_TOKEN:
-            print('No GITLAB_ACCESS_TOKEN environment variable has been set!')
+        if not GITHUB_ACCESS_TOKEN:
+            print('No GITHUB_ACCESS_TOKEN environment variable has been set!')
             sys.exit(0)
         if not PIPELINE_NAME:
             print('PIPELINE_NAME environment variable not set. This might be a non release build.')
@@ -126,14 +126,14 @@ if __name__ == '__main__':
         print('Running onBuildJobCompletion')
         onBuildJobCompletion()
     elif arg == 'unit-test':
-        if not GITLAB_UNIT_TEST_ACCESS_TOKEN:
-            print('No GITLAB_UNIT_TEST_ACCESS_TOKEN environment variable has been set!')
+        if not GITHUB_UNIT_TEST_ACCESS_TOKEN:
+            print('No GITHUB_UNIT_TEST_ACCESS_TOKEN environment variable has been set!')
             sys.exit(0)
         print('Running onUnitTestJobCompletion')
         onUnitTestJobCompletion()
     elif arg == 'lint':
-        if not GITLAB_LINT_ACCESS_TOKEN:
-            print('No GITLAB_LINT_ACCESS_TOKEN environment variable has been set!')
+        if not GITHUB_LINT_ACCESS_TOKEN:
+            print('No GITHUB_LINT_ACCESS_TOKEN environment variable has been set!')
             sys.exit(0)
         print('Running onLintJobCompletion')
         onLintJobCompletion()

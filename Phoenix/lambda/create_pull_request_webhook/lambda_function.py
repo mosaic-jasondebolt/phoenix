@@ -2,8 +2,6 @@ import os
 import json
 import boto3
 import botocore
-import random
-import string
 import requests
 from datetime import datetime
 import urllib.parse
@@ -39,40 +37,20 @@ def send_response(event, context, response_status, response_data, reason):
     requests.put(event['ResponseURL'], data=json.dumps(payload, default=str))
     print("Sent %s to %s" % (json.dumps(payload, default=str, indent=2), event['ResponseURL']))
 
-def get_random_secret(password_length=20):
-    password = ''
-    char_set = string.ascii_uppercase + string.ascii_lowercase + string.digits + '$'
-    while '$' not in password:
-        password = ''.join(random.sample(char_set * 6, int(password_length)))
-    return password
-
 def get_github_access_token():
     print('getting github access token')
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/global/github/access-token',
+        Name='/microservice/{0}/global/github/access-token'.format(os.environ['PROJECT_NAME']),
         WithDecryption=True
     )
-    print(response)
     return response['Parameter']['Value']
 
-def put_github_pull_request_secret_secret():
-    print('putting github pull request secret')
-    response = ssm_client.put_parameter(
-        Name='/microservice/phoenix/global/github/pull-request-secret',
-        Description='GitHub pull request secret.',
-        Value=get_random_secret(64),
-        Type='SecureString',
-        Overwrite=True
-    )
-    print(response)
-
-def get_github_pull_request_secret_secret():
+def get_github_pull_request_secret():
     print('getting github pull request secret')
     response = ssm_client.get_parameter(
-        Name='/microservice/phoenix/global/github/pull-request-secret',
+        Name='/microservice/{0}/global/github/pull-request-secret'.format(os.environ['PROJECT_NAME']),
         WithDecryption=True
     )
-    print(response)
     return response['Parameter']['Value']
 
 def create_webhook(kwargs, repo_name):
@@ -80,8 +58,7 @@ def create_webhook(kwargs, repo_name):
     # Create a secret token and save to SSM parameter store
     access_token = get_github_access_token()
     headers = {'Authorization': 'token {0}'.format(access_token)}
-    put_github_pull_request_secret_secret() # Puts the webhook secret into SSM parameter store
-    secret = get_github_pull_request_secret_secret() # Gets the secret from SSM parameter store
+    secret = get_github_pull_request_secret() # Gets the secret from SSM parameter store
     webhook_url = kwargs['config']['url']
     kwargs['name'] = 'web' # This must always be 'web' for webhooks.
     kwargs['config'] = {
@@ -104,7 +81,7 @@ def update_webhook(kwargs, repo_name):
     for webhook in response_obj:
         print('webook: ', webhook)
         if webhook['config']['url'] == kwargs['config']['url']:
-            secret = get_github_pull_request_secret_secret() # Gets the secret from SSM parameter store
+            secret = get_github_pull_request_secret() # Gets the secret from SSM parameter store
             kwargs['config'] = {
                 'url': kwargs['config']['url'],
                 'content_type': 'json',

@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Generates a merge request pipeline.",
+  "Description": "Generates a pull request pipeline.",
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
@@ -18,12 +18,8 @@
       "Description": "The name of the CodeCommit git repo",
       "Type": "String"
     },
-    "GitlabProjectId": {
-      "Description": "The project id if the Gitlab project",
-      "Type": "String"
-    },
-    "MergeRequestInternalId": {
-      "Description": "The merge request internal id of the gitlab merge request",
+    "PullRequestNumber": {
+      "Description": "The pull request internal id of the github pull request",
       "Type": "String"
     },
     "SourceBranch": {
@@ -400,7 +396,7 @@
                 }
               },
               {
-                "Name": "PostMergeRequest",
+                "Name": "PostPullRequest",
                 "ActionTypeId": {
                   "Category": "Invoke",
                   "Owner": "AWS",
@@ -416,8 +412,8 @@
                     "Fn::ImportValue": {
                       "Fn::Join": ["-", [
                         {"Ref": "ProjectName"},
-                        "merge-request-webhook",
-                        "LambdaPostMergeRequestFunctionName"
+                        "pull-request-webhook",
+                        "LambdaPostPullRequestFunctionName"
                       ]]
                     }
                   },
@@ -469,7 +465,7 @@
             "Value": {"Fn::Join": ["-", [
               "codebuild",
               {"Ref": "PipelineName"},
-              "merge-request",
+              "pull-request",
               "sg"
             ]]}
           }
@@ -525,14 +521,9 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "MergeRequestInternalId"}
+              "Value" : {"Ref": "PullRequestNumber"}
             },
             {
               "Name" : "PIPELINE_NAME",
@@ -562,15 +553,23 @@
             {
               "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/access-token"
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global",
+                "github",
+                "access-token"
+              ]]}
             },
             {
-              "Name" : "GIT_URL",
+              "Name" : "ORGANIZATION",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/git-url"
+                "global",
+                "github",
+                "organization"
               ]]}
             }
           ],
@@ -641,14 +640,9 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "MergeRequestInternalId"}
+              "Value" : {"Ref": "PullRequestNumber"}
             },
             {
               "Name" : "PIPELINE_NAME",
@@ -676,17 +670,25 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITHUB_UNIT_TEST_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/unit-test-access-token"
-            },
-            {
-              "Name" : "GIT_URL",
+              "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/git-url"
+                "global",
+                "github",
+                "access-token"
+              ]]}
+            },
+            {
+              "Name" : "ORGANIZATION",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global",
+                "github",
+                "organization"
               ]]}
             }
           ],
@@ -758,14 +760,9 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "MergeRequestInternalId"}
+              "Value" : {"Ref": "PullRequestNumber"}
             },
             {
               "Name" : "PIPELINE_NAME",
@@ -793,17 +790,25 @@
               "Value" : {"Ref": "LambdaBucketName"}
             },
             {
-              "Name" : "GITHUB_LINT_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/lint-access-token"
-            },
-            {
-              "Name" : "GIT_URL",
+              "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
                 {"Ref": "ProjectName"},
-                "global/git-url"
+                "global",
+                "github",
+                "access-token"
+              ]]}
+            },
+            {
+              "Name" : "ORGANIZATION",
+              "Type" : "PARAMETER_STORE",
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"Ref": "ProjectName"},
+                "global",
+                "github",
+                "organization"
               ]]}
             }
           ],

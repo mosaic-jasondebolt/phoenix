@@ -175,6 +175,32 @@
         "Timeout": "25"
       }
     },
+    "LambdaDeleteNetworkInterface": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"Ref": "IAMRole"},
+        "Environment": {
+          "Variables": {
+            "PHX_MACRO_PROJECT_NAME": {"Ref": "ProjectName"}
+          }
+        },
+        "Code": {
+          "S3Bucket" : {"Fn::Join": ["-", [
+            {"Ref": "OrganizationName"},
+            {"Ref": "ProjectName"},
+            "lambda"
+          ]]},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "delete_network_interface",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
     "MacroVersion": {
       "Type": "AWS::SSM::Parameter",
       "Properties": {
@@ -448,6 +474,20 @@
       },
       "Value": {
         "Fn::GetAtt": ["LambdaSSMSecret", "Arn"]
+      }
+    },
+    "LambdaDeleteNetworkInterfaceArn": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"Ref": "ProjectName"},
+            "ssm-globals-macro",
+            "LambdaDeleteNetworkInterfaceArn"
+          ]]
+        }
+      },
+      "Value": {
+        "Fn::GetAtt": ["LambdaDeleteNetworkInterface", "Arn"]
       }
     }
   }
