@@ -14,6 +14,8 @@ from boto3.session import Session
 ssm_client = boto3.client('ssm')
 code_pipeline_client = boto3.client('codepipeline')
 
+GITHUB_API_URL = 'https://api.github.com'
+
 class JSONObject:
   def __init__(self, dict):
       vars(self).update(dict)
