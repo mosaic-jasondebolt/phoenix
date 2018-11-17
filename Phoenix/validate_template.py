@@ -53,7 +53,7 @@ def main():
                     timestamp = str(time.time())
                     abs_path = os.path.abspath(file_path)
                     s3_file_name = timestamp.split('.')[0] + '-' + os.path.basename(abs_path)
-                    bucket = 'infratemp'
+                    bucket = 'infratemp' + timestamp.split('.')[0]
 
                     make_bucket(bucket)
                     s3_path = '{0}/{1}'.format(bucket, s3_file_name)
@@ -74,6 +74,12 @@ def main():
                     ret = subprocess.call(['aws', 's3', 'rm', 's3://{0}'.format(s3_path)])
                     cmd =  'aws s3 rm s3://{0}'.format( s3_path )
                     infra_status( cmd, ret)
+
+                    # delete the bucket
+                    ret = subprocess.call(['aws', 's3', 'rb', '--force', 's3://{0}'.format(bucket)])
+                    cmd =  'aws s3 rb --force s3://{0}'.format( bucket )
+                    infra_status( cmd, ret)
+
 
                     if result != 0:
                         text = 'Validation failed! aws cloudformation validate-template --template-url https://s3.amazonaws.com/{0}'.format(s3_path)
