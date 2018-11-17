@@ -67,6 +67,7 @@
   "Resources": {
     "GitHubWebhook": {
       "Type": "AWS::CodePipeline::Webhook",
+      "DependsOn": ["CodeBuild", "CodeBuildUnitTest", "CodeBuildLint"],
       "Properties": {
         "AuthenticationConfiguration": {
           "SecretToken": {"Ref": "Token"}
