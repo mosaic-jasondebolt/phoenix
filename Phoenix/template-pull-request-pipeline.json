@@ -14,6 +14,10 @@
       "Description": "The name of the CodePipeline.",
       "Type": "String"
     },
+    "GitHubOrganization": {
+      "Description": "The name of the GitHub organization where this repo resides",
+      "Type": "String"
+    },
     "RepoName": {
       "Description": "The name of the CodeCommit git repo",
       "Type": "String"
@@ -46,6 +50,10 @@
       "Description": "The CodePipeline service role that CodePipeline pipelines use.",
       "Type": "String"
     },
+    "Token": {
+      "Description": "Token used to create the MR webhook",
+      "Type": "String"
+    },
     "IAMRole": {
       "Description": "The IAM Role used to manage the pipeline stack.",
       "Type": "String"
@@ -57,27 +65,59 @@
     }
   },
   "Resources": {
+    "GitHubWebhook": {
+      "Type": "AWS::CodePipeline::Webhook",
+      "Properties": {
+        "AuthenticationConfiguration": {
+          "SecretToken": {"Ref": "Token"}
+        },
+        "Filters": [
+          {
+            "JsonPath": "$.ref",
+            "MatchEquals": {"Fn::Join": ["", [
+              "refs/heads/",
+              {"Ref": "SourceBranch"}
+            ]]}
+          }
+        ],
+        "Authentication": "GITHUB_HMAC",
+        "TargetPipeline": { "Ref" : "CodePipeline" },
+        "TargetAction": "Source",
+        "Name": {"Fn::Join": ["-", [
+          {"Ref": "ProjectName"},
+          "CodePipelineWebhook",
+          {"Ref": "SourceBranch"},
+          "Branch"
+        ]]},
+        "TargetPipelineVersion": { "Fn::GetAtt" : [ "CodePipeline", "Version" ] },
+        "RegisterWithThirdParty": "true"
+      }
+    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "Properties": {
         "RoleArn" : {"Ref": "CodePipelineServiceRoleArn"},
         "Name": {"Ref": "PipelineName"},
-        "Stages": [{
+        "Stages": [
+          {
             "Name": "Source",
             "Actions": [{
-              "Name": "SourceAction",
+              "Name": "Source",
               "ActionTypeId": {
                 "Category": "Source",
-                "Owner": "AWS",
+                "Owner": "ThirdParty",
                 "Version": "1",
-                "Provider": "CodeCommit"
+                "Provider": "GitHub"
               },
               "OutputArtifacts": [{
                 "Name": "SourceOutput"
               }],
               "Configuration": {
-                "RepositoryName": {"Ref": "RepoName"},
-                "BranchName": {"Ref": "SourceBranch"}
+                "Owner": {"Ref": "GitHubOrganization"},
+                "Repo": {"Ref": "RepoName"},
+                "PollForSourceChanges": "false",
+                "Branch": {"Ref": "SourceBranch"},
+                "OAuthToken": {"Ref": "Token"}
               },
               "RunOrder": 1
             }]
@@ -562,7 +602,7 @@
               ]]}
             },
             {
-              "Name" : "ORGANIZATION",
+              "Name" : "GITHUB_ORGANIZATION",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
@@ -681,7 +721,7 @@
               ]]}
             },
             {
-              "Name" : "ORGANIZATION",
+              "Name" : "GITHUB_ORGANIZATION",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",
@@ -801,7 +841,7 @@
               ]]}
             },
             {
-              "Name" : "ORGANIZATION",
+              "Name" : "GITHUB_ORGANIZATION",
               "Type" : "PARAMETER_STORE",
               "Value": {"Fn::Join": ["/", [
                 "/microservice",

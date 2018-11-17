@@ -186,6 +186,7 @@
             "CODE_BUILD_DOCKER_IMAGE": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
             "LAMBDA_BUCKET_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
             "IAM_ROLE": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+            "GITHUB_ORGANIZATION": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"},
             "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
               "/microservice/",
@@ -240,7 +241,8 @@
         "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Environment": {
           "Variables": {
-            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "GITHUB_ORGANIZATION": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"}
           }
         },
         "Code": {
@@ -334,7 +336,8 @@
         "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Environment": {
           "Variables": {
-            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "GITHUB_ORGANIZATION": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"}
           }
         },
         "Code": {

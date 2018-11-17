@@ -29,7 +29,7 @@ import requests
 
 # These env variables are passed in via CloudFormation
 PIPELINE_NAME = os.environ.get('PIPELINE_NAME')
-ORGANIZATION = os.environ.get('ORGANIZATION')
+GITHUB_ORGANIZATION = os.environ.get('GITHUB_ORGANIZATION')
 REPO_NAME = os.environ.get('REPO_NAME')
 SOURCE_BRANCH = os.environ.get('SOURCE_BRANCH')
 PULL_REQUEST_NUMBER = os.environ.get('PULL_REQUEST_NUMBER')
@@ -179,8 +179,8 @@ if __name__ == '__main__':
         print('You must pass in build, unit-test, or lint as an argument')
         sys.exit(0)
     # Any of the three following conditions may be met if this is a non-pull request build.
-    if not ORGANIZATION:
-        print('ORGANIZATION environment variable not set. This might be a non pull-request build.')
+    if not GITHUB_ORGANIZATION:
+        print('GITHUB_ORGANIZATION environment variable not set. This might be a non pull-request build.')
         sys.exit(0)
     if not REPO_NAME:
         print('REPO_NAME environment variable not set. This might be a non pull-request build.')

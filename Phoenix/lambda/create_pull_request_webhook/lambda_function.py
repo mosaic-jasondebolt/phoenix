@@ -54,7 +54,8 @@ def get_github_pull_request_secret():
     return response['Parameter']['Value']
 
 def create_webhook(kwargs, repo_name):
-    url = os.path.join(GITHUB_API_URL, 'repos/solmosaic/{0}/hooks'.format(repo_name))
+    url = os.path.join(GITHUB_API_URL, 'repos/{0}/{1}/hooks'.format(
+        os.environ['GITHUB_ORGANIZATION'], repo_name))
     # Create a secret token and save to SSM parameter store
     access_token = get_github_access_token()
     headers = {'Authorization': 'token {0}'.format(access_token)}
@@ -71,7 +72,8 @@ def create_webhook(kwargs, repo_name):
 
 def update_webhook(kwargs, repo_name):
     # Deletes all webhooks associated with a given name
-    webhook_api_url = 'repos/solmosaic/{0}/hooks'.format(repo_name)
+    webhook_api_url = 'repos/{0}/{1}/hooks'.format(
+        os.environ['GITHUB_ORGANIZATION'], repo_name)
     list_url = os.path.join(GITHUB_API_URL, webhook_api_url)
     access_token = get_github_access_token()
     headers = {'Authorization': 'token {0}'.format(access_token)}
@@ -94,7 +96,8 @@ def update_webhook(kwargs, repo_name):
 
 def delete_webhook(webhook_url, repo_name):
     # Deletes all webhooks associated with a given name
-    webhook_api_url = 'repos/solmosaic/{0}/hooks'.format(repo_name)
+    webhook_api_url = 'repos/{0}/{1}/hooks'.format(
+        os.environ['GITHUB_ORGANIZATION'], repo_name)
     list_url = os.path.join(GITHUB_API_URL, webhook_api_url)
     access_token = get_github_access_token()
     headers = {'Authorization': 'token {0}'.format(access_token)}

@@ -8,7 +8,7 @@ import urllib.parse
 import hmac
 import base64
 
-# Handles GitHub merge request events
+# Handles GitHub pull request events
 
 # For the full GitHub Pull Request REST API:
 # https://developer.github.com/v3/activity/events/types/#pullrequestevent
@@ -51,8 +51,8 @@ def get_microservice_bucket_name():
     return response['Parameter']['Value']
 
 def notify_github(pull_request_number, request_body):
-    url = os.path.join(GITHUB_API_URL, 'repos/solmosaic/{0}/issues/{1}/comments'.format(
-        os.environ['PROJECT_NAME'], pull_request_number))
+    url = os.path.join(GITHUB_API_URL, 'repos/{0}/{1}/issues/{2}/comments'.format(
+        os.environ['GITHUB_ORGANIZATION'], os.environ['PROJECT_NAME'], pull_request_number))
     payload = { "body": request_body }
     headers = {'Authorization': 'token {0}'.format(get_github_access_token())}
     response = requests.post(url, data=json.dumps(payload), headers=headers)
@@ -125,7 +125,7 @@ def lambda_handler(event, context):
 
         repo_name = body.pull_request.head.repo.name # reponame
         source_branch = body.pull_request.head.ref # The pull request branch name
-        pull_request_number = body.pull_request.number # Unique ID for the pull request within this repo.
+        pull_request_number = str(body.pull_request.number) # Unique ID for the pull request within this repo.
 
         stack_name = '{repo_name}-pull-request-{source_branch}-{pull_request_number}'.format(
             repo_name=repo_name,
@@ -134,7 +134,7 @@ def lambda_handler(event, context):
         )
         print('stack_name: ', stack_name)
 
-        template_name = 'template-merge-request-pipeline.json'
+        template_name = 'template-pull-request-pipeline.json'
         template_url = 'https://s3.amazonaws.com/{0}/cloudformation/{1}'.format(
             get_microservice_bucket_name(), template_name)
 
@@ -149,9 +149,11 @@ def lambda_handler(event, context):
             {'ParameterKey': 'CodePipelineServiceRoleArn', 'ParameterValue': os.environ['CODE_PIPELINE_SERVICE_ROLE_ARN']},
             {'ParameterKey': 'LambdaBucketName', 'ParameterValue': os.environ['LAMBDA_BUCKET_NAME']},
             {'ParameterKey': 'PipelineName', 'ParameterValue': stack_name},
+            {'ParameterKey': 'GitHubOrganization', 'ParameterValue': os.environ['GITHUB_ORGANIZATION']},
             {'ParameterKey': 'RepoName', 'ParameterValue': repo_name},
             {'ParameterKey': 'PullRequestNumber', 'ParameterValue': pull_request_number},
             {'ParameterKey': 'SourceBranch', 'ParameterValue': source_branch},
+            {'ParameterKey': 'Token', 'ParameterValue': get_github_access_token()},
             {'ParameterKey': 'IAMRole', 'ParameterValue': os.environ['IAM_ROLE']}
         ]
         print('Parameters: ', parameters)
@@ -227,3 +229,9 @@ def lambda_handler(event, context):
             "headers": {},
             "body": "Success!"
         }
+
+
+MONTH_EMOJI_MAP = {
+    10: ':jack_o_lantern: :white_check_mark: :ghost:',
+    12: ':christmas_tree: :white_check_mark: :gift:'
+}
