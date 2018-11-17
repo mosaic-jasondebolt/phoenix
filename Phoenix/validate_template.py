@@ -22,7 +22,7 @@ def main():
     Iterate over all cloud formation templates running validate command against them
     TODO: Stretch fork the validation into it's own process to make it faster... wait until they are all done and generate a nice report
     """
-    for file_path in glob.iglob('Phoenix/*.json'):
+    for file_path in glob.iglob('**/*.json'):
         if "params" not in file_path:
             print('Validating file: {0}'.format(file_path))
 
