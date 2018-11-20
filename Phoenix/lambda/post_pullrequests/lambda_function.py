@@ -20,7 +20,7 @@ class JSONObject:
   def __init__(self, dict):
       vars(self).update(dict)
 
-# Assign python values to values return from gitlab JSON reqeuest object
+# Assign python values to values return from github JSON reqeuest object
 false = False
 true = True
 null = None
@@ -206,7 +206,7 @@ def lambda_handler(event, context):
         bucket_name = get_microservice_bucket_name()
         domain = get_microservice_domain()
 
-        # Notify gitlab
+        # Notify github
         region = os.environ['AWS_DEFAULT_REGION']
         ecs_url = 'https://mr-{source_version}.ecs.{domain}'.format(
             source_version=source_version, domain=domain)

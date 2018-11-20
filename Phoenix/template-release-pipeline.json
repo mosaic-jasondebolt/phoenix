@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Generates a pull request pipeline.",
+  "Description": "Generates a release pipeline.",
   "Parameters": {
     "ProjectName": {
       "Description": "The name of your project.",
@@ -22,8 +22,8 @@
       "Description": "The name of the CodeCommit git repo",
       "Type": "String"
     },
-    "PullRequestNumber": {
-      "Description": "The pull request number of the github pull request",
+    "ReleaseNumber": {
+      "Description": "The release identifier",
       "Type": "String"
     },
     "SourceBranch": {
@@ -437,7 +437,7 @@
                 }
               },
               {
-                "Name": "PostPullRequest",
+                "Name": "PostRelease",
                 "ActionTypeId": {
                   "Category": "Invoke",
                   "Owner": "AWS",
@@ -453,8 +453,8 @@
                     "Fn::ImportValue": {
                       "Fn::Join": ["-", [
                         {"Ref": "ProjectName"},
-                        "pull-request-webhook",
-                        "LambdaPostPullRequestFunctionName"
+                        "release-webhook",
+                        "LambdaPostReleaseFunctionName"
                       ]]
                     }
                   },
@@ -506,7 +506,7 @@
             "Value": {"Fn::Join": ["-", [
               "codebuild",
               {"Ref": "PipelineName"},
-              "pull-request",
+              "release",
               "sg"
             ]]}
           }
@@ -564,7 +564,7 @@
             {
               "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "PullRequestNumber"}
+              "Value" : {"Ref": "ReleaseNumber"}
             },
             {
               "Name" : "PIPELINE_NAME",
@@ -683,7 +683,7 @@
             {
               "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "PullRequestNumber"}
+              "Value" : {"Ref": "ReleaseNumber"}
             },
             {
               "Name" : "PIPELINE_NAME",
@@ -803,7 +803,7 @@
             {
               "Name" : "PULL_REQUEST_NUMBER",
               "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "PullRequestNumber"}
+              "Value" : {"Ref": "ReleaseNumber"}
             },
             {
               "Name" : "PIPELINE_NAME",

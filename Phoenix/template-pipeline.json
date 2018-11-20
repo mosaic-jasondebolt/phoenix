@@ -244,13 +244,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -303,15 +299,7 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
@@ -352,13 +340,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -415,15 +399,7 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-unit-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
@@ -464,13 +440,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -527,15 +499,7 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-lint.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
@@ -576,13 +540,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -620,15 +580,7 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-post-prod-deploy.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []

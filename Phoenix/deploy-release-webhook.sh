@@ -32,10 +32,10 @@ fi
 # Convert create/update to uppercase
 OP=$(echo $1 | tr '/a-z/' '/A-Z/')
 
-aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-release-environment-pipeline.json" --delete
+aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-release-pipeline.json" --delete
 
 # Upload the Lambda functions
-listOfLambdaFunctions='release_webhook post_release gitlab_custom_authorizer'
+listOfLambdaFunctions='release_webhook create_release_webhook post_release'
 for functionName in $listOfLambdaFunctions
 do
   mkdir -p builds/$functionName

@@ -3,6 +3,7 @@ import json
 import string
 import os
 import boto3
+import copy
 import botocore
 
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
@@ -10,6 +11,13 @@ __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
 ssm_client = boto3.client('ssm')
 
 PROJECT_NAME = os.environ['PHX_MACRO_PROJECT_NAME']
+
+def safe_print_parameters(list_of_ssm_params):
+    ssm_list = copy.deepcopy(list_of_ssm_params)
+    for param in ssm_list:
+        if param['Type'] == 'SecureString':
+            param['Value'] = '*'*len(param['Value'])
+    print(json.dumps(ssm_list, indent=2, default=str))
 
 def get_ssm_params_by_path(path):
     """ Returns a list of SSM parameter object.
@@ -31,7 +39,7 @@ def get_ssm_params_by_path(path):
         args = {
             'Path': path,
             'Recursive': True,
-            'WithDecryption': False,
+            'WithDecryption': True,
             'MaxResults': 10,
         }
         if next_token:
@@ -41,18 +49,21 @@ def get_ssm_params_by_path(path):
         if not response.get('NextToken'):
             break
         next_token = response['NextToken']
-    print(json.dumps(result, indent=2, default=str))
+    safe_print_parameters(result)
     return result
 
 def get_ssm_map():
     replace_map = {}
+    safe_replace_map = {}
     ssm_path = '/microservice/{0}/'.format(PROJECT_NAME)
     ssm_params = get_ssm_params_by_path(ssm_path)
     for param in ssm_params:
         param_key, param_value = param['Name'], param['Value']
         # '/microservice/{project_name}/global/some-param-key' --> 'PHX_MACRO_SOME_PARAM_KEY'
         replace_map[param_key] = param_value
-    return replace_map
+        # Hide the value if this is an encrypted value
+        safe_replace_map[param_key] = param_value if param['Type'] != 'SecureString' else '*'*len(param['Value'])
+    return replace_map, safe_replace_map
 
 def macro_phoenix_ssm_replace(obj, replace_map, params_map):
     # Replaces dicts of {"PhoenixSSM": /microservice/{ProjectName}/../{Environment}/...}  with SSM values.
@@ -82,13 +93,12 @@ def lambda_handler(event, context):
     print(json.dumps(event, indent=2, default=str))
 
     fragment = event['fragment']
-    replace_map = get_ssm_map()
+    replace_map, safe_replace_map = get_ssm_map()
     params_map = event['templateParameterValues']
     params_map.update({'ProjectName': PROJECT_NAME}) # Add the ProjectName to the params map
-    print('REPLACE_MAP:', json.dumps(replace_map, indent=2, default=str))
+    print('REPLACE_MAP:', json.dumps(safe_replace_map, indent=2, default=str))
 
     macro_phoenix_ssm_replace(fragment, replace_map, params_map)
-    print(json.dumps(fragment, indent=2, default=str))
 
     return {
         "requestId": event['requestId'],

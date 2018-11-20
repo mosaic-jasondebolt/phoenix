@@ -11,23 +11,49 @@ from boto3.session import Session
 
 # Handles the final stages of the release pipeline, after all tests pass and the ECS container is deployed.
 
-# For the full GitLab Merge Request REST API:
-# https://docs.gitlab.com/ee/api/merge_requests.html
-
-# For the MergeRequest webhook example JSON body:
-# https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#merge-request-events
-
 ssm_client = boto3.client('ssm')
 code_pipeline_client = boto3.client('codepipeline')
+
+GITHUB_API_URL = 'https://api.github.com'
 
 class JSONObject:
   def __init__(self, dict):
       vars(self).update(dict)
 
-# Assign python values to values return from gitlab JSON reqeuest object
+# Assign python values to values return from github JSON reqeuest object
 false = False
 true = True
 null = None
+
+def get_github_access_token():
+    print('getting github access token')
+    response = ssm_client.get_parameter(
+        Name='/microservice/{0}/global/github/access-token'.format(os.environ['PROJECT_NAME']),
+        WithDecryption=True
+    )
+    return response['Parameter']['Value']
+
+def get_microservice_bucket_name():
+    response = ssm_client.get_parameter(
+        Name='/microservice/{0}/global/bucket-name'.format(os.environ['PROJECT_NAME']),
+        WithDecryption=True
+    )
+    return response['Parameter']['Value']
+
+def get_microservice_domain():
+    response = ssm_client.get_parameter(
+        Name='/microservice/{0}/global/domain'.format(os.environ['PROJECT_NAME']),
+        WithDecryption=True
+    )
+    return response['Parameter']['Value']
+
+def notify_github(release_number, request_body):
+    url = os.path.join(GITHUB_API_URL, 'repos/{0}/{1}/issues/{2}/comments'.format(
+        os.environ['GITHUB_ORGANIZATION'], os.environ['PROJECT_NAME'], release_number))
+    payload = { "body": request_body }
+    headers = {'Authorization': 'token {0}'.format(get_github_access_token())}
+    response = requests.post(url, data=json.dumps(payload), headers=headers)
+    print(json.dumps(response.json(), indent=2))
 
 def find_artifact(artifacts, name):
     """Finds the artifact 'name' among the 'artifacts'
@@ -60,7 +86,6 @@ def get_user_params(job_data):
         Exception: The JSON can't be decoded or a property is missing.
 
     """
-    print('Getting user params')
     try:
         # Get the user parameters which contain the stack, artifact and file settings
         user_parameters = job_data['actionConfiguration']['configuration']['UserParameters']
@@ -105,7 +130,7 @@ def get_file_as_string(s3, artifact, file_in_zip):
     """Gets the file artifact
 
     Downloads the artifact from the S3 artifact store to a temporary file
-    then extracts the zip and returns the file containing the GitLab info.
+    then extracts the zip and returns the file containing the GitHub info.
 
     Args:
         artifact: The artifact to download
@@ -161,33 +186,26 @@ def lambda_handler(event, context):
         json_obj = json.dumps(event, indent=4)
         print(json_obj)
         job_id = event['CodePipeline.job']['id']
-        print('job_id: ', job_id)
         job_data = event['CodePipeline.job']['data']
-        print('job_data: ', job_data)
         params = get_user_params(job_data)
-        print('params: ', params)
         artifacts = job_data['inputArtifacts']
-        print('artifacts: ', artifacts)
         artifact = params['artifact'] # The actual name of the CodePipeline artifact, such as 'MyApp' or 'SourceOutput'
-        print('artifact: ', artifact)
         file_name = params['file'] # The name of the file you want to access
-        print('file_name: ', file_name)
         artifact_data = find_artifact(artifacts, artifact)
-        print('artifact_data: ', artifact_data)
         s3 = setup_s3_client(job_data)
         file_str = get_file_as_string(s3, artifact_data, file_name)
-        print('file_str: ', file_str)
-        decoded_file_str = file_str.decode('utf-8')
-        print('decoded_file_str: ', decoded_file_str)
-        data_obj = json.loads(decoded_file_str)
-        print('data_obj: ', data_obj)
+        data_obj = json.loads(file_str.decode('utf-8'))
+        print("data_obj: ")
+        print(data_obj)
+
+        # We must notify CodePipeline of the job status or it will block the pipeline for ages
         put_job_success(job_id, 'Function complete')
     except Exception as e:
         print('Function failed due to exception.')
-        print(e)
 
         # We must notify CodePipeline of the job status or it will block the pipeline for ages
         put_job_failure(job_id, 'Function failed')
+        print(e)
 
     print('Function complete.')
     return "Complete."

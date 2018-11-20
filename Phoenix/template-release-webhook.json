@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Deploys an API Gateway endpoint that GitLab push events can invoke to setup/teardown a set of release pipelines",
+  "Description" : "Deploys an API Gateway endpoint that GitHub push events can invoke to setup/teardown release pipeline",
   "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
     "VPCPrefix": {
@@ -20,7 +20,7 @@
   "Resources": {
     "Latest": {
       "Type": "AWS::ApiGateway::Deployment",
-      "DependsOn": ["ReleasesPost"],
+      "DependsOn": ["ReleasePost"],
       "Properties": {
         "RestApiId": {"Ref": "RestAPI"},
         "Description": "Description here",
@@ -33,7 +33,7 @@
         "Description" : {"Fn::Join": ["", [
           "The ",
           {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          " GitLab Release ",
+          " GitHub Release ",
           " REST API (Release Candidate ",
           {"Ref": "Version"},
           ")"
@@ -45,33 +45,39 @@
         ]]}
       }
     },
-    "ReleasesResource": {
+    "ReleaseResource": {
       "Type" : "AWS::ApiGateway::Resource",
       "Properties" : {
         "ParentId" : { "Fn::GetAtt": ["RestAPI", "RootResourceId"] },
-        "PathPart" : "Releases",
+        "PathPart" : "Release",
         "RestApiId" : { "Ref": "RestAPI" }
       }
     },
-    "ReleasesPost": {
+    "ReleasePost": {
       "Type" : "AWS::ApiGateway::Method",
-      "DependsOn": ["LambdaReleases"],
+      "DependsOn": ["LambdaRelease"],
       "Properties" : {
         "RestApiId" : { "Ref": "RestAPI" },
-        "AuthorizationType" : "CUSTOM",
-        "AuthorizerId": {"Ref": "ApiGatewayCustomLambdaAuth"},
+        "AuthorizationType" : "NONE",
+        "RequestParameters": {
+          "method.request.header.X-Hub-Signature": true
+        },
         "HttpMethod": "POST",
-        "ResourceId" : { "Ref": "ReleasesResource" },
+        "ResourceId" : { "Ref": "ReleaseResource" },
         "MethodResponses": [
           {
             "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": false
+            },
+            "StatusCode": "401",
             "ResponseParameters": {
               "method.response.header.Access-Control-Allow-Origin": false
             }
           }
         ],
         "Integration": {
-          "Type" : "AWS",
+          "Type" : "AWS_PROXY",
           "IntegrationHttpMethod": "POST",
           "IntegrationResponses": [
             {
@@ -80,14 +86,22 @@
               },
               "ResponseTemplates" : { "application/json": "" },
               "StatusCode" : "200"
+            },
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              },
+              "ResponseTemplates" : { "application/json": "" },
+              "StatusCode" : "401"
             }
           ],
+          "PassthroughBehavior": "WHEN_NO_MATCH",
           "Uri": {"Fn::Join": ["", [
             "arn:aws:apigateway:",
             { "Ref": "AWS::Region" },
             ":lambda:path/2015-03-31/functions/",
             { "Fn::GetAtt": [
-              "LambdaReleases",
+              "LambdaRelease",
               "Arn"
             ]},
             "/invocations"
@@ -95,7 +109,36 @@
         }
       }
     },
-    "LambdaSG": {
+    "CustomResourceGitHubReleaseSecret": {
+      "Type": "Custom::GitHubReleaseSecret",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "ssm-globals-macro",
+              "LambdaSSMSecretArn"
+            ]]
+          }
+        },
+        "LambdaVersion": {"Ref": "Version"},
+        "SSMSecret": {
+          "Name": {"Fn::Join": ["/", [
+            "/microservice",
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "global",
+            "github",
+            "release-secret"
+          ]]},
+          "Description": "GitHub release secret used for the release webhook.",
+          "SecretLength": 64,
+          "Type": "SecureString",
+          "KeyId": "alias/aws/ssm",
+          "Overwrite": true
+        }
+      }
+    },
+    "LambdaReleaseSG": {
       "Properties": {
         "GroupDescription": "Release Lambda Security Group",
         "Tags": [
@@ -114,12 +157,27 @@
       },
       "Type": "AWS::EC2::SecurityGroup"
     },
-    "LambdaReleases": {
+    "DeleteLambdaReleaseInterfaceOnStackDelete": {
+      "Type": "Custom::DeleteLambdaReleaseInterfaceOnStackDelete",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "ssm-globals-macro",
+              "LambdaDeleteNetworkInterfaceArn"
+            ]]
+          }
+        },
+        "SecurityGroupId": {"Ref": "LambdaReleaseSG"}
+      }
+    },
+    "LambdaRelease": {
       "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaRole", "LambdaRolePolicy", "LambdaSG"],
+      "DependsOn": ["LambdaReleaseSG", "CustomResourceGitHubReleaseSecret"],
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaRole", "Arn"] },
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Environment": {
           "Variables": {
             "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
@@ -128,6 +186,7 @@
             "CODE_BUILD_DOCKER_IMAGE": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
             "LAMBDA_BUCKET_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
             "IAM_ROLE": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+            "GITHUB_ORGANIZATION": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"},
             "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
               "{{resolve:ssm:",
               "/microservice/",
@@ -155,7 +214,7 @@
         "Runtime": "python3.6",
         "VpcConfig": {
           "SecurityGroupIds": [
-            {"Ref": "LambdaSG"}
+            {"Ref": "LambdaReleaseSG"}
           ],
           "SubnetIds" : [
             {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
@@ -165,83 +224,75 @@
         "Timeout": "300"
       }
     },
-    "LambdaReleasesInvokePermission": {
+    "LambdaReleaseInvokePermission": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
-          "Fn::GetAtt": [ "LambdaReleases", "Arn" ]
+          "Fn::GetAtt": [ "LambdaRelease", "Arn" ]
         },
         "Action": "lambda:InvokeFunction",
         "Principal": "apigateway.amazonaws.com"
       }
     },
-    "LambdaRole": {
+    "LambdaCreateReleaseWebhook": {
+      "Type": "AWS::Lambda::Function",
       "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com",
-                  "codepipeline.amazonaws.com",
-                  "codebuild.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "dynamodb:*",
-                "cloudformation:*",
-                "codepipeline:*",
-                "codebuild:*",
-                "s3:*",
-                "ec2:*",
-                "ssm:*",
-                "kms:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole",
-                "iam:DeleteRole",
-                "iam:DeleteRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:CreateRole",
-                "iam:PassRole",
-                "iam:GetRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "APILambdaRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaRole"
+        "Handler": "lambda_function.lambda_handler",
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+        "Environment": {
+          "Variables": {
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "GITHUB_ORGANIZATION": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"}
           }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
+        },
+        "Code": {
+          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "create_release_webhook",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+    "CustomResourceCreateReleaseWebhook": {
+      "Type": "Custom::CreateReleaseWebhook",
+      "DependsOn": ["RestAPI", "LambdaCreateReleaseWebhook", "CustomResourceGitHubReleaseSecret"],
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": ["LambdaCreateReleaseWebhook", "Arn"]
+        },
+        "LambdaVersion": {"Ref": "Version"},
+        "GitHubWebhookParams": {
+          "active": true,
+          "events": [
+            "push"
+          ],
+          "config": {
+            "url": {
+              "Fn::Join": ["", [
+                "https://",
+                {"Ref": "RestAPI"},
+                ".",
+                "execute-api",
+                ".",
+                {"Ref": "AWS::Region"},
+                ".",
+                "amazonaws.com",
+                "/",
+                {"Ref": "StageName"},
+                "/",
+                "Release"
+              ]]
+            }
+          }
+        },
+        "RepoName": {
+          "PhoenixSSM": "/microservice/{ProjectName}/global/git-repo-name"
+        }
+      }
     },
     "LambdaPostReleaseSG": {
       "Properties": {
@@ -250,7 +301,7 @@
           {
             "Key": "Name",
             "Value": {"Fn::Sub": [
-              "${StackName}-post-rel-lambda-sg", {
+              "${StackName}-post-mr-lambda-sg", {
                 "StackName": {"Ref": "AWS::StackName"}
               }
             ]}
@@ -262,15 +313,31 @@
       },
       "Type": "AWS::EC2::SecurityGroup"
     },
+    "DeleteLambdaPostReleaseInterfaceOnStackDelete": {
+      "Type": "Custom::DeleteLambdaPostReleaseInterfaceOnStackDelete",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "ssm-globals-macro",
+              "LambdaDeleteNetworkInterfaceArn"
+            ]]
+          }
+        },
+        "SecurityGroupId": {"Ref": "LambdaPostReleaseSG"}
+      }
+    },
     "LambdaPostRelease": {
       "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaPostReleaseRole", "LambdaPostReleaseRolePolicy", "LambdaPostReleaseSG"],
+      "DependsOn": [ "LambdaPostReleaseSG"],
       "Properties": {
         "Handler": "lambda_function.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaPostReleaseRole", "Arn"] },
+        "Role": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Environment": {
           "Variables": {
-            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
+            "PROJECT_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            "GITHUB_ORGANIZATION": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"}
           }
         },
         "Code": {
@@ -303,226 +370,6 @@
         "Action": "lambda:InvokeFunction",
         "Principal": "codepipeline.amazonaws.com"
       }
-    },
-    "LambdaPostReleaseRole": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com",
-                  "codepipeline.amazonaws.com",
-                  "codebuild.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaPostReleaseRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "dynamodb:*",
-                "cloudformation:*",
-                "codepipeline:*",
-                "codebuild:*",
-                "s3:*",
-                "ec2:*",
-                "ssm:*",
-                "kms:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole",
-                "iam:DeleteRole",
-                "iam:DeleteRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:CreateRole",
-                "iam:PassRole",
-                "iam:GetRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          { "Ref": "AWS::StackName"},
-          "LambdaPostReleaseRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaPostReleaseRole"
-          }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
-    },
-    "LambdaGitlabCustomAuthorizerSG": {
-      "Properties": {
-        "GroupDescription": "Gitlab custom authorizer Lambda Security Group",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {"Fn::Sub": [
-              "${StackName}-post-rel-lambda-sg", {
-                "StackName": {"Ref": "AWS::StackName"}
-              }
-            ]}
-          }
-        ],
-        "VpcId": {
-          "Fn::ImportValue": "dev-vpc-VPC"
-        }
-      },
-      "Type": "AWS::EC2::SecurityGroup"
-    },
-    "LambdaGitlabCustomAuthorizer": {
-      "Type": "AWS::Lambda::Function",
-      "DependsOn": ["LambdaGitlabCustomAuthorizerRole", "LambdaGitlabCustomAuthorizerRolePolicy", "LambdaGitlabCustomAuthorizerSG"],
-      "Properties": {
-        "Handler": "lambda_function.lambda_handler",
-        "Role": { "Fn::GetAtt" : ["LambdaGitlabCustomAuthorizerRole", "Arn"] },
-        "Code": {
-          "S3Bucket" : {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
-          "S3Key" : {"Fn::Join": ["/", [
-            {"Ref": "Version"},
-            "gitlab_custom_authorizer",
-            "lambda_function.zip"
-          ]]}
-        },
-        "Runtime": "python2.7",
-        "VpcConfig": {
-          "SecurityGroupIds": [
-            {"Ref": "LambdaGitlabCustomAuthorizerSG"}
-          ],
-          "SubnetIds" : [
-            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ1"},
-            {"Fn::ImportValue": "dev-vpc-PrivateSubnetAZ2"}
-          ]
-        },
-        "Timeout": "25"
-      }
-    },
-    "LambdaGitlabCustomAuthorizerInvokePermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [ "LambdaGitlabCustomAuthorizer", "Arn" ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com"
-      }
-    },
-    "LambdaGitlabCustomAuthorizerRole": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sts:AssumeRole"
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "lambda.amazonaws.com",
-                  "s3.amazonaws.com",
-                  "apigateway.amazonaws.com",
-                  "codepipeline.amazonaws.com",
-                  "codebuild.amazonaws.com"
-                ]
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        }
-      },
-      "Type": "AWS::IAM::Role"
-    },
-    "LambdaGitlabCustomAuthorizerRolePolicy": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "lambda:*",
-                "apigateway:*",
-                "dynamodb:*",
-                "cloudformation:*",
-                "codepipeline:*",
-                "codebuild:*",
-                "s3:*",
-                "ec2:*",
-                "ssm:*",
-                "kms:*",
-                "logs:*",
-                "xray:*",
-                "sts:AssumeRole",
-                "iam:DeleteRole",
-                "iam:DeleteRolePolicy",
-                "iam:PutRolePolicy",
-                "iam:CreateRole",
-                "iam:PassRole",
-                "iam:GetRole"
-              ],
-              "Effect": "Allow",
-              "Resource": "*"
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "PolicyName": { "Fn::Join": ["-", [
-          { "Ref": "AWS::StackName"},
-          "LambdaGitlabCustomAuthorizerRole"
-        ]]},
-        "Roles": [
-          {
-            "Ref": "LambdaGitlabCustomAuthorizerRole"
-          }
-        ]
-      },
-      "Type": "AWS::IAM::Policy"
-    },
-    "ApiGatewayCustomLambdaAuth": {
-      "Type": "AWS::ApiGateway::Authorizer",
-      "Properties": {
-        "AuthType": "custom",
-        "AuthorizerCredentials": {
-          "Fn::GetAtt": [
-            "LambdaGitlabCustomAuthorizerRole", "Arn"
-          ]
-        },
-        "AuthorizerResultTtlInSeconds": 3600,
-        "AuthorizerUri": {"Fn::Join": ["", [
-          "arn:aws:apigateway:",
-          { "Ref": "AWS::Region" },
-          ":lambda:path/2015-03-31/functions/",
-          { "Fn::GetAtt": [
-            "LambdaGitlabCustomAuthorizer",
-            "Arn"
-            ]},
-            "/invocations"
-          ]]
-        },
-        "IdentitySource" : "method.request.header.X-Gitlab-Token",
-        "Name" : "gitlab-webhook-auth",
-        "RestApiId" : {"Ref": "RestAPI"},
-        "Type" : "TOKEN"
-      }
     }
   },
   "Outputs": {
@@ -538,13 +385,13 @@
       },
       "Value": {"Ref": "LambdaPostRelease"}
     },
-    "ReleasesURL": {
+    "ReleaseURL": {
       "Export": {
         "Name": {
           "Fn::Join": ["-", [
             {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
             "release-webhook",
-            "ReleasesURL"
+            "ReleaseURL"
           ]]
         }
       },
@@ -561,7 +408,7 @@
           "/",
           {"Ref": "StageName"},
           "/",
-          "Releases"
+          "Release"
         ]]
       }
     }
