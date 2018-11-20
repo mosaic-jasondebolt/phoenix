@@ -192,18 +192,18 @@ def lambda_handler(event, context):
                     create_or_update_stack(
                         create=True, stack_name=stack_name, template_url=template_url,
                         parameters=parameters)
-            except Exception as e:
-                print('Stack may have already been created, and that is OK.')
-                print('Error: {0}'.format(e))
-                print('Attempting to update stack')
-                try:
-                  create_or_update_stack(
-                      create=False, stack_name=stack_name, template_url=template_url,
-                      parameters=parameters)
-                except Exception as ex:
-                    print('Stack may not need to be updated.')
-                    print('Error: {0}'.format(ex))
-                    print('Continuing as normal.')
+                except Exception as e:
+                    print('Stack may have already been created, and that is OK.')
+                    print('Error: {0}'.format(e))
+                    print('Attempting to update stack')
+                    try:
+                        create_or_update_stack(
+                            create=False, stack_name=stack_name, template_url=template_url,
+                            parameters=parameters)
+                    except Exception as ex:
+                        print('Stack may not need to be updated.')
+                        print('Error: {0}'.format(ex))
+                        print('Continuing as normal.')
 
 
         return {
