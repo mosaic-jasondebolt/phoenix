@@ -61,8 +61,7 @@ def generate_lambda_gitlab_release_config():
       'RepoName': REPO_NAME,
       'SourceBranch': SOURCE_BRANCH,
       'ReleaseEnvironment': RELEASE_ENVIRONMENT,
-      'SourceVersion': CODEBUILD_RESOLVED_SOURCE_VERSION,
-      'ProjectId': GITLAB_PROJECT_ID
+      'SourceVersion': CODEBUILD_RESOLVED_SOURCE_VERSION
     }
     gitlab_lambda_config_file = open('gitlab-release.json', 'w')
     gitlab_lambda_config_file.write(json.dumps(gitlab_obj, indent=2))

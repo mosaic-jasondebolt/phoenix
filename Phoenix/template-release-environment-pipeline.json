@@ -991,36 +991,6 @@
                 }
               }
             ]
-          },
-          {
-            "Name": "PostRelease",
-            "Actions": [
-              {
-                "Name": "PostRelease",
-                "ActionTypeId": {
-                  "Category": "Invoke",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "Lambda"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "FunctionName": {
-                    "Fn::ImportValue": {
-                      "Fn::Join": ["-", [
-                        {"Ref": "ProjectName"},
-                        "release-webhook",
-                        "LambdaPostReleaseFunctionName"
-                      ]]
-                    }
-                  },
-                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab-release.json\"}"
-                }
-              }
-            ]
           }
         ],
         "ArtifactStore": {
@@ -1119,11 +1089,6 @@
               "Name" : "AWS_ACCOUNT_ID",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "AWS::AccountId"}
-            },
-            {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
             },
             {
               "Name" : "RELEASE_ENVIRONMENT",
@@ -1237,11 +1202,6 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "RELEASE_ENVIRONMENT",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "ReleaseEnvironment"}
@@ -1270,20 +1230,6 @@
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "LambdaBucketName"}
-            },
-            {
-              "Name" : "GITLAB_UNIT_TEST_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/unit-test-access-token"
-            },
-            {
-              "Name" : "GITLAB_URL",
-              "Type" : "PARAMETER_STORE",
-              "Value": {"Fn::Join": ["/", [
-                "/microservice",
-                {"Ref": "ProjectName"},
-                "global/gitlab-url"
-              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
@@ -1354,11 +1300,6 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "RELEASE_ENVIRONMENT",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "ReleaseEnvironment"}
@@ -1387,20 +1328,6 @@
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "LambdaBucketName"}
-            },
-            {
-              "Name" : "GITLAB_LINT_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/lint-access-token"
-            },
-            {
-              "Name" : "GITLAB_URL",
-              "Type" : "PARAMETER_STORE",
-              "Value": {"Fn::Join": ["/", [
-                "/microservice",
-                {"Ref": "ProjectName"},
-                "global/gitlab-url"
-              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
