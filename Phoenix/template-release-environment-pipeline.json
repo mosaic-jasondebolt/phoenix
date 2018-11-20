@@ -14,6 +14,10 @@
       "Description": "The name of the CodePipeline.",
       "Type": "String"
     },
+    "GitHubOrganization": {
+      "Description": "The name of the GitHub organization where this repo resides",
+      "Type": "String"
+    },
     "RepoName": {
       "Description": "The name of the CodeCommit git repo",
       "Type": "String"
