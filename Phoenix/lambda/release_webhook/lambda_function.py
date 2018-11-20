@@ -205,7 +205,6 @@ def lambda_handler(event, context):
                         print('Error: {0}'.format(ex))
                         print('Continuing as normal.')
 
-
         return {
             "isBase64Encoded" : "false",
             "statusCode": "200",
