@@ -3,12 +3,14 @@ import json
 import string
 import os
 import boto3
-import copy
 import botocore
+import tempfile
+import copy
 
 __author__ = "Jason DeBolt (jasondebolt@gmail.com)"
 
 ssm_client = boto3.client('ssm')
+s3_resource = boto3.resource('s3')
 
 PROJECT_NAME = os.environ['PHX_MACRO_PROJECT_NAME']
 
@@ -87,6 +89,60 @@ def macro_phoenix_ssm_replace(obj, replace_map, params_map):
                         obj[index] = replace_val
             macro_phoenix_ssm_replace(item, replace_map, params_map)
 
+def get_ssm_project_bucket_name():
+    ssm_path = '/microservice/{0}/global/bucket-name'.format(PROJECT_NAME)
+    response = ssm_client.get_parameter(
+        Name=ssm_path,
+        WithDecryption=False
+    )
+    return response['Parameter']['Value']
+
+def get_obj_from_s3_file(bucketname, filename):
+  tmp_file = tempfile.NamedTemporaryFile()
+  s3_resource.meta.client.download_file(bucketname, filename, tmp_file.name)
+  rfile = open(tmp_file.name, 'r')
+  result = json.loads(rfile.read())
+  rfile.close()
+  return result
+
+def macro_phoenix_s3_transform(obj, params_map):
+    """Replaces references like the following:
+
+    {"PhoenixS3Transform": "transform-filename.json"}
+    {"PhoenixS3Transform": {"Ref": "SomeFilenameParam"}
+
+    ..with JSON from a file in S3.
+
+    It is assume that the file has already been uploaded to the project S3 bucket
+    under the 'cloudformation' folder of the bucket.
+
+    This is similar to the CloudFormation Transform AWS::Include macro, but less limiting.
+    """
+    s3_bucket = get_ssm_project_bucket_name()
+    if isinstance(obj, dict):
+        for key in obj:
+            if isinstance(obj[key], dict):
+              if "PhoenixS3Transform" in obj[key]:
+                  filename = obj[key]["PhoenixS3Transform"]
+                  if isinstance(filename, dict) and "Ref" in filename:
+                      # This could be a {"Ref": "filename.txt"} reference.
+                      filename = params_map[filename["Ref"]]
+                  print('filename: ' + filename)
+                  obj[key] = get_obj_from_s3_file(s3_bucket, 'cloudformation/{0}'.format(filename))
+        for key, value in obj.items():
+            macro_phoenix_s3_transform(value, params_map)
+    elif isinstance(obj, list):
+        for index, item in enumerate(obj):
+            if isinstance(item, dict):
+                if "PhoenixS3Transform" in item:
+                    filename = item["PhoenixS3Transform"]
+                    if isinstance(filename, dict) and "Ref" in filename:
+                        # This could be a {"Ref": "filename.txt"} reference.
+                        filename = params_map[filename["Ref"]]
+                    print('filename: ' + filename)
+                    obj[index] = get_obj_from_s3_file(s3_bucket, 'cloudformation/{0}'.format(filename))
+            macro_phoenix_s3_transform(item, params_map)
+
 def lambda_handler(event, context):
     print(event)
     print(os.environ)
@@ -99,6 +155,8 @@ def lambda_handler(event, context):
     print('REPLACE_MAP:', json.dumps(safe_replace_map, indent=2, default=str))
 
     macro_phoenix_ssm_replace(fragment, replace_map, params_map)
+    macro_phoenix_s3_transform(fragment, params_map)
+    print(json.dumps(fragment, indent=2, default=str))
 
     return {
         "requestId": event['requestId'],
