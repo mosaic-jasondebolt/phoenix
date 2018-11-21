@@ -602,7 +602,13 @@
     },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
+      "DependsOn": [
+        "CodeBuildBucket",
+        "CodePipelineBucket",
+        "CodeBuild",
+        "CodeBuildLint",
+        "CodeBuildUnitTest"
+      ],
       "Properties": {
         "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},

@@ -87,7 +87,8 @@
           {"Ref": "ProjectName"},
           "CodePipelineWebhook",
           {"Ref": "SourceBranch"},
-          "Branch"
+          "Branch",
+          {"Ref": "ReleaseEnvironment"}
         ]]},
         "TargetPipelineVersion": { "Fn::GetAtt" : [ "CodePipeline", "Version" ] },
         "RegisterWithThirdParty": "true"
@@ -95,6 +96,7 @@
     },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
+      "DependsOn": ["CodeBuild", "CodeBuildUnitTest", "CodeBuildLint"],
       "Properties": {
         "RoleArn" : {"Ref": "CodePipelineServiceRoleArn"},
         "Name": {"Ref": "PipelineName"},
@@ -991,6 +993,36 @@
                 }
               }
             ]
+          },
+          {
+            "Name": "PostRelease",
+            "Actions": [
+              {
+                "Name": "PostRelease",
+                "ActionTypeId": {
+                  "Category": "Invoke",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "Lambda"
+                },
+                "InputArtifacts": [{
+                  "Name": "BuildOutput"
+                }],
+                "RunOrder": 3,
+                "Configuration": {
+                  "FunctionName": {
+                    "Fn::ImportValue": {
+                      "Fn::Join": ["-", [
+                        {"Ref": "ProjectName"},
+                        "release-webhook",
+                        "LambdaPostReleaseFunctionName"
+                      ]]
+                    }
+                  },
+                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab-release.json\"}"
+                }
+              }
+            ]
           }
         ],
         "ArtifactStore": {
@@ -1119,20 +1151,6 @@
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "LambdaBucketName"}
-            },
-            {
-              "Name" : "GITLAB_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/access-token"
-            },
-            {
-              "Name" : "GITLAB_URL",
-              "Type" : "PARAMETER_STORE",
-              "Value": {"Fn::Join": ["/", [
-                "/microservice",
-                {"Ref": "ProjectName"},
-                "global/gitlab-url"
-              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
