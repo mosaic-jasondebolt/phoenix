@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description" : "Deploys an API Gateway endpoint that a GitHub webhook event can invoke to execute a lambda function.",
+  "Description" : "Deploys a GitHub webhook on GitHub for one or more events, an API Gateawy endpoint, a Lambda webhook handler, a post webhook Lambda handler, and other resources required for launching GitHub webhooks.",
   "Transform" : ["ProjectLambdaMacro"],
   "Parameters": {
     "VPCPrefix": {
@@ -427,6 +427,19 @@
     }
   },
   "Outputs": {
+    "LambdaPostRequestFunctionName": {
+      "Export": {
+        "Name": {
+          "Fn::Join": ["-", [
+            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+            {"Ref": "APINameSuffix"},
+            "LambdaPostRequestFunctionName"
+          ]]
+        }
+      },
+      "Value": {"Ref": "LambdaPostRequest"},
+      "Condition": "IncludePostEventLambdaFunction"
+    },
     "WebhookEndpointURL": {
       "Export": {
         "Name": {
