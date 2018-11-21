@@ -105,7 +105,7 @@ def get_obj_from_s3_file(bucketname, filename):
   rfile.close()
   return result
 
-def macro_phoenix_s3_transform(obj, params_map):
+def macro_phoenix_s3_transform(obj, params_map, project_bucket_name):
     """Replaces references like the following:
 
     {"PhoenixS3Transform": "transform-filename.json"}
@@ -118,30 +118,29 @@ def macro_phoenix_s3_transform(obj, params_map):
 
     This is similar to the CloudFormation Transform AWS::Include macro, but less limiting.
     """
-    s3_bucket = get_ssm_project_bucket_name()
     if isinstance(obj, dict):
         for key in obj:
             if isinstance(obj[key], dict):
               if "PhoenixS3Transform" in obj[key]:
                   filename = obj[key]["PhoenixS3Transform"]
                   if isinstance(filename, dict) and "Ref" in filename:
-                      # This could be a {"Ref": "filename.txt"} reference.
+                      # This could be a {"Ref": "filename.json"} reference.
                       filename = params_map[filename["Ref"]]
                   print('filename: ' + filename)
                   obj[key] = get_obj_from_s3_file(s3_bucket, 'cloudformation/{0}'.format(filename))
         for key, value in obj.items():
-            macro_phoenix_s3_transform(value, params_map)
+            macro_phoenix_s3_transform(value, params_map, project_bucket_name)
     elif isinstance(obj, list):
         for index, item in enumerate(obj):
             if isinstance(item, dict):
                 if "PhoenixS3Transform" in item:
                     filename = item["PhoenixS3Transform"]
                     if isinstance(filename, dict) and "Ref" in filename:
-                        # This could be a {"Ref": "filename.txt"} reference.
+                        # This could be a {"Ref": "filename.json"} reference.
                         filename = params_map[filename["Ref"]]
                     print('filename: ' + filename)
                     obj[index] = get_obj_from_s3_file(s3_bucket, 'cloudformation/{0}'.format(filename))
-            macro_phoenix_s3_transform(item, params_map)
+            macro_phoenix_s3_transform(item, params_map, project_bucket_name)
 
 def lambda_handler(event, context):
     print(event)
@@ -154,8 +153,10 @@ def lambda_handler(event, context):
     params_map.update({'ProjectName': PROJECT_NAME}) # Add the ProjectName to the params map
     print('REPLACE_MAP:', json.dumps(safe_replace_map, indent=2, default=str))
 
+    project_bucket_name = get_ssm_project_bucket_name()
+
     macro_phoenix_ssm_replace(fragment, replace_map, params_map)
-    macro_phoenix_s3_transform(fragment, params_map)
+    macro_phoenix_s3_transform(fragment, params_map, project_bucket_name)
     print(json.dumps(fragment, indent=2, default=str))
 
     return {

@@ -34,7 +34,7 @@ echo "Make sure to update your git repo with this webhook"
 echo "Deploying release webhook"
 echo "Make sure to update your git repo with this webhook"
 echo "If you require release environments, add environments to 'ReleaseEnvironments' param in template-ssm-globals-macro-params.json"
-./deploy-release-webhook.sh create
+./deploy-github-webhook-release.sh create
 
 echo "Deploying microservice cleanup"
 ./deploy-microservice-cleanup.sh create

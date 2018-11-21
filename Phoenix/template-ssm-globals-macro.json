@@ -146,7 +146,7 @@
           ]]}
         },
         "Runtime": "python3.6",
-        "Timeout": "25"
+        "Timeout": "60"
       }
     },
     "LambdaSSMSecret": {
@@ -172,7 +172,7 @@
           ]]}
         },
         "Runtime": "python3.6",
-        "Timeout": "25"
+        "Timeout": "60"
       }
     },
     "LambdaDeleteNetworkInterface": {
@@ -198,7 +198,7 @@
           ]]}
         },
         "Runtime": "python3.6",
-        "Timeout": "25"
+        "Timeout": "60"
       }
     },
     "MacroVersion": {

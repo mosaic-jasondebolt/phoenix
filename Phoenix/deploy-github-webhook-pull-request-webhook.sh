@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-# Deploys a release API Gateway endpoint and Lambda handler to dynamically generate release pipelines.
+# Deploys a pull request API Gateway endpoint and Lambda handler to dynamically generate pull request pipelines.
 
 # USAGE:
-#   ./deploy-release-webhook.sh [create | update]
+#   ./deploy-github-webhook-pull-request.sh [create | update]
 #
 # EXAMPLES:
-#   ./deploy-release-webhook.sh create
-#   ./deploy-release-webhook.sh update
+#   ./deploy-github-webhook-pull-request.sh create
+#   ./deploy-github-webhook-pull-request.sh update
 
 # Extract JSON properties for a file into a local variable
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
@@ -18,7 +18,7 @@ MICROSERVICE_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-microservice
 LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
-STACK_NAME=$PROJECT_NAME-release-webhook
+STACK_NAME=$PROJECT_NAME-pull-request-webhook
 CHANGE_SET_NAME=$VERSION_ID
 # Allow developers to name the environment whatever they want, supporting multiple dev environments.
 
@@ -32,10 +32,10 @@ fi
 # Convert create/update to uppercase
 OP=$(echo $1 | tr '/a-z/' '/A-Z/')
 
-aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-release-environment-pipeline.json" --delete
+aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-pull-request-pipeline.json" --delete
 
 # Upload the Lambda functions
-listOfLambdaFunctions='release_webhook create_release_webhook'
+listOfLambdaFunctions='pull_request_webhook create_pull_request_webhook post_pullrequests'
 for functionName in $listOfLambdaFunctions
 do
   mkdir -p builds/$functionName
@@ -49,17 +49,17 @@ do
 done
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
-python parameters_generator.py template-release-webhook-params.json cloudformation > temp1.json
+python parameters_generator.py template-github-webhook-pull-request-params.json cloudformation > temp1.json
 
 # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
 sed "s/VERSION_ID/$VERSION_ID/g" temp1.json > temp2.json
 
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-body file://template-release-webhook.json
+aws cloudformation validate-template --template-body file://template-github-webhook.json
 
 aws cloudformation create-change-set --stack-name $STACK_NAME \
     --change-set-name $CHANGE_SET_NAME \
-    --template-body file://template-release-webhook.json \
+    --template-body file://template-github-webhook.json \
     --parameters file://temp2.json \
     --change-set-type $OP \
     --capabilities CAPABILITY_IAM \
