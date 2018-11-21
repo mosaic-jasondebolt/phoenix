@@ -993,36 +993,6 @@
                 }
               }
             ]
-          },
-          {
-            "Name": "PostRelease",
-            "Actions": [
-              {
-                "Name": "PostRelease",
-                "ActionTypeId": {
-                  "Category": "Invoke",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "Lambda"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "FunctionName": {
-                    "Fn::ImportValue": {
-                      "Fn::Join": ["-", [
-                        {"Ref": "ProjectName"},
-                        "release-webhook",
-                        "LambdaPostReleaseFunctionName"
-                      ]]
-                    }
-                  },
-                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab-release.json\"}"
-                }
-              }
-            ]
           }
         ],
         "ArtifactStore": {
