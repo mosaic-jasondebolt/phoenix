@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "Environment": "demo",
+    "Version": "VERSION_ID"
+  }
+}

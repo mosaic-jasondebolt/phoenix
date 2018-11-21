@@ -1,0 +1,6 @@
+{
+  "Parameters": {
+    "Environment": "demo",
+    "DomainPrefix": "v0-demo.docs"
+  }
+}
