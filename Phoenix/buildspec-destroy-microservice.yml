@@ -170,9 +170,9 @@ phases:
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-environments-$environmentName
         done
       - # Delete global SSM Params and Macro
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-globals-macro
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-globals-macro
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-globals-macro
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-globals-macro
+      - #python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-globals-macro
+      - #aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-globals-macro
   post_build:
     commands:
       - echo Build completed on `date`
