@@ -47,12 +47,15 @@ python parameters_generator.py temp1.json cloudformation > temp2.json
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-ssm-globals-macro-params.json cloudformation > temp1.json
 
+# Make macro name unique in the AWS account:
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
+sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-ssm-globals-macro.json > temp0.json
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-body file://template-ssm-globals-macro.json
+aws cloudformation validate-template --template-body file://temp0.json
 
 aws cloudformation $1-stack \
     --stack-name $STACK_NAME \
-    --template-body file://template-ssm-globals-macro.json \
+    --template-body file://temp0.json \
     --parameters file://temp2.json \
     --capabilities CAPABILITY_NAMED_IAM \
     --role-arn $CLOUDFORMATION_ROLE

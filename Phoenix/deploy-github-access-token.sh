@@ -14,7 +14,7 @@ set -e
 # and then "Authorize" else the token will not work.
 #
 # USAGE
-#   ./deploy-ssm-github-token.sh {Github Token}
+#   ./deploy-github-access-token.sh {Github Token}
 
 # Check for valid arguments
 if [ $# -ne 1 ]

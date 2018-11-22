@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description" : "Deploys a GitHub webhook on GitHub for one or more events, an API Gateawy endpoint, a Lambda webhook handler, a post webhook Lambda handler, and other resources required for launching GitHub webhooks.",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["__PROJECT_NAME__LambdaMacro"],
   "Parameters": {
     "VPCPrefix": {
       "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",

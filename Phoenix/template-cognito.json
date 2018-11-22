@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Creates AWS Cognito resources.",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["__PROJECT_NAME__LambdaMacro"],
   "Parameters": {
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",

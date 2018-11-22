@@ -31,12 +31,15 @@ CHANGE_SET_NAME=$VERSION_ID
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py template-ec2-params-dev.json cloudformation > temp1.json
 
+# Make macro name unique in the AWS account:
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
+sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-ec2.json > temp0.json
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-body file://template-ec2.json
+aws cloudformation validate-template --template-body file://temp0.json
 
 aws cloudformation create-change-set --stack-name $STACK_NAME \
     --change-set-name $CHANGE_SET_NAME \
-    --template-body file://template-ec2.json \
+    --template-body file://temp0.json \
     --parameters file://temp1.json \
     --change-set-type $OP \
     --capabilities CAPABILITY_NAMED_IAM \

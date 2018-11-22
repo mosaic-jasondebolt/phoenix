@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Deploys AWS resources required to support versioned API documentation. Resources include a static S3 website/bucket, Bucket policy, CloudFront distribution, Web Application Firewall ACL, WAF rules, and WAF predicates for managing API documentation access.",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["__PROJECT_NAME__LambdaMacro"],
   "Parameters": {
     "APIDocsUserAgent": {
       "Description": "The user agent used for API Documentation access",
