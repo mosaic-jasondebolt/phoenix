@@ -1,8 +1,0 @@
-{
-  "Parameters": {
-    "ProjectName": "PROJECT_NAME",
-    "Environment": "demo",
-    "Description": "The demo environment",
-    "Version": "VERSION_ID"
-  }
-}

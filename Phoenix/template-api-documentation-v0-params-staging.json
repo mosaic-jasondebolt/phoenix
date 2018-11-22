@@ -1,6 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "staging",
-    "DomainPrefix": "v0-staging.docs"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "Parameters": {
-    "ProjectName": "PROJECT_NAME",
-    "Environment": "staging",
-    "Description": "The staging environment",
-    "Version": "VERSION_ID"
-  }
-}

@@ -1,7 +1,0 @@
-{
-  "Parameters": {
-    "Environment": "staging",
-    "VPCPrefix": "testing",
-    "Version": "VERSION_ID"
-  }
-}
