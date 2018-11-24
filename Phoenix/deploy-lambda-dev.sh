@@ -36,7 +36,7 @@ CHANGE_SET_NAME=$VERSION_ID
 LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
 
 # Upload the Python Lambda functions
-listOfPythonLambdaFunctions='projects delete_network_interface alb_listener_rule'
+listOfPythonLambdaFunctions='projects delete_network_interface alb_listener_rule proxy'
 for functionName in $listOfPythonLambdaFunctions
 do
   mkdir -p builds/$functionName

@@ -58,6 +58,3 @@ do
 
   aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
 done
-
-# Cleanup
-rm temp1.json

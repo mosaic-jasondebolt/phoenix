@@ -59,7 +59,3 @@ aws cloudformation execute-change-set --stack-name $STACK_NAME \
     --change-set-name $CHANGE_SET_NAME
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
-
-# Cleanup
-rm temp1.json
-rm temp2.json
