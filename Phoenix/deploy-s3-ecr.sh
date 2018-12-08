@@ -1,10 +1,10 @@
 #!/bin/bash
 set -e
 
-# Creates the main AWS Code Pipeline for the microservice project.
+# Creates S3 buckets and ECR repositories for a microservice.
 #
 # USAGE
-#   ./deploy-pipeline.sh [create | update]
+#   ./deploy-s3-ecr.sh [create | update]
 
 # Check for valid arguments
 if [ $# -ne 1 ]
@@ -25,25 +25,43 @@ fi
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
 ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-ssm-globals-macro-params.json)
 PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
-MICROSERVICE_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-microservice
-STACK_NAME=$PROJECT_NAME-pipeline
+LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
+STACK_NAME=$PROJECT_NAME-s3-ecr
 ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID
 
-# Make macro name unique in the AWS account:
-# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
-sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-pipeline.json > temp0.json
+# Generate the lambda bucket if it doesn't already exist
+# We have to create this bucket outside of the s3 bucket stack since
+# the s3 stack launches a lambda function that depends on the source code
+# within this bucket already existing.
+aws s3 mb s3://$LAMBDA_BUCKET_NAME || true
 
-aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
-aws s3 cp temp0.json s3://$MICROSERVICE_BUCKET_NAME/cloudformation/template-pipeline.json
+# Upload the Python Lambda functions
+listOfPythonLambdaFunctions='delete_s3_files delete_ecr_repos'
+for functionName in $listOfPythonLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
+  pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
+  cd ../../
+  rm -rf builds
+done
 
 # Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-pipeline.json
+aws cloudformation validate-template --template-body file://template-s3-ecr.json
 
 aws cloudformation create-change-set --stack-name $STACK_NAME \
     --change-set-name $CHANGE_SET_NAME \
-    --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-pipeline.json \
+    --template-body file://template-s3-ecr.json \
+    --parameters \
+        ParameterKey=OrganizationName,ParameterValue=$ORGANIZATION_NAME \
+        ParameterKey=ProjectName,ParameterValue=$PROJECT_NAME \
+        ParameterKey=IAMRole,ParameterValue=$CLOUDFORMATION_ROLE \
+        ParameterKey=Version,ParameterValue=$VERSION_ID \
     --change-set-type $OP \
     --capabilities CAPABILITY_NAMED_IAM \
     --role-arn $CLOUDFORMATION_ROLE

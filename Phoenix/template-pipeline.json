@@ -8,83 +8,6 @@
     ]}
   },
   "Resources": {
-    "ECRMainRepository": {
-      "Type": "AWS::ECR::Repository",
-      "Properties": {
-        "RepositoryName": {
-          "Fn::Join": ["-", [
-            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-            "main"
-          ]]
-        },
-        "RepositoryPolicyText": {
-          "Version": "2008-10-17",
-          "Statement": [{
-              "Sid": "AllowPushPull",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": [{"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"}]
-              },
-              "Action": [
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:PutImage",
-                "ecr:InitiateLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:CompleteLayerUpload"
-              ]
-            },
-            {
-              "Sid": "CodeBuildAccess",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "codebuild.amazonaws.com"
-              },
-              "Action": [
-                "ecr:*"
-              ]
-            }
-          ]
-        }
-      }
-    },
-    "CodeBuildBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
-    "CodePipelineBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-pipeline-bucket-name"},
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
-    "LoadBalancerLogsBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/load-balancer-logs-bucket-name"},
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
     "CodePipelineFailedSNSTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
@@ -211,7 +134,6 @@
     },
     "CodeBuild": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -307,7 +229,6 @@
     },
     "CodeBuildUnitTest": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -407,7 +328,6 @@
     },
     "CodeBuildLint": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -507,7 +427,6 @@
     },
     "CodeBuildPostProdDeploy": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -603,8 +522,6 @@
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
       "DependsOn": [
-        "CodeBuildBucket",
-        "CodePipelineBucket",
         "CodeBuild",
         "CodeBuildLint",
         "CodeBuildUnitTest"

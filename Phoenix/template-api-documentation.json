@@ -63,6 +63,23 @@
         }
       }
     },
+    "CustomResourceDeleteS3Files": {
+      "Type": "Custom::DeleteS3Files",
+      "DependsOn": ["Bucket"],
+      "Properties": {
+        "ServiceToken": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "s3-ecr",
+              "LambdaDeleteS3FilesArn"
+            ]]
+          }
+        },
+        "LambdaVersion": {"Ref": "Version"},
+        "BucketNames": [{"Ref": "Bucket"}]
+      }
+    },
     "CloudFrontOriginAccessIdentity": {
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
       "Properties": {

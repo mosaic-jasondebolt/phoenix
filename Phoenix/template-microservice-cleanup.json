@@ -134,6 +134,11 @@
               "Name" : "DOMAIN",
               "Type" : "PLAINTEXT",
               "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
+            },
+            {
+              "Name" : "DELETE_STATEFUL_RESOURCES",
+              "Type" : "PLAINTEXT",
+              "Value" : "FALSE"
             }
           ],
           "Image": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
