@@ -138,7 +138,7 @@
             {
               "Name" : "ENVIRONMENTS_TO_DELETE",
               "Type" : "PLAINTEXT",
-              "Value" : "dev,testing"
+              "Value" : "dev testing rc"
             },
             {
               "Name" : "DELETE_ENVIRONMENT_STATEFUL_RESOURCES",

@@ -201,8 +201,8 @@ phases:
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-s3-ecr
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-s3-ecr
 
-          # Delete ACM (AWS Certificate Manager) stack
-          echo Deleting ACM (AWS Certificate Manager) stack
+          # Delete ACM AWS Certificate Manager stack
+          echo Deleting ACM AWS Certificate Manager stack
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-acm-certificates
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-acm-certificates
 
