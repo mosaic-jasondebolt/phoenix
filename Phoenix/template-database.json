@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Generates all database resources required for a microservice.",
-  "Transform" : ["__PROJECT_NAME__LambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Parameters": {
     "SnapshotIdentifier": {
       "Description": "The RDS Cluster Snapshot ID if you plan on restoring the DB cluster.",

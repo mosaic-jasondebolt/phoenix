@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Generates all resources required for a microservice.",
-  "Transform" : ["__PROJECT_NAME__LambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Conditions": {
     "ProjectUsesRootGitBranch" : {"Fn::Equals" : [
       {"PhoenixSSM": "/microservice/{ProjectName}/global/git-root-project-branch"},{"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"}

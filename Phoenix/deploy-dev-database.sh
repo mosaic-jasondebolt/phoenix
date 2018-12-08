@@ -55,7 +55,7 @@ python parameters_generator.py temp1.json cloudformation > temp2.json
 
 # Make macro name unique in the AWS account:
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
-sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-database.json > temp0.json
+sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-database.json > temp0.json
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://temp0.json
 

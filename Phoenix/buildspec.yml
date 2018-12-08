@@ -101,21 +101,21 @@ phases:
           python $CODEBUILD_SRC_DIR/Phoenix/parameters_generator.py $CODEBUILD_SRC_DIR/t-cognito-internals-params-$environmentName.json_temp codepipeline > $CODEBUILD_SRC_DIR/t-cognito-internals-params-$environmentName.json
         done
       - # Copy all templates to codebuild source directory
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-ssm-environments.json > $CODEBUILD_SRC_DIR/template-ssm-environments.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-database.json > $CODEBUILD_SRC_DIR/template-database.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-ec2.json > $CODEBUILD_SRC_DIR/template-ec2.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito.json > $CODEBUILD_SRC_DIR/template-cognito.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-ssm-environments.json > $CODEBUILD_SRC_DIR/template-ssm-environments.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-database.json > $CODEBUILD_SRC_DIR/template-database.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-ec2.json > $CODEBUILD_SRC_DIR/template-ec2.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito.json > $CODEBUILD_SRC_DIR/template-cognito.json
 
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task.json > $CODEBUILD_SRC_DIR/template-ecs-task.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-ecs-task.json > $CODEBUILD_SRC_DIR/template-ecs-task.json
       - echo Building the Docker image from the Dockerfile.
       - docker build -t $MAIN_REPOSITORY_URI:$IMAGE_TAG $CODEBUILD_SRC_DIR/Phoenix/ecs
 
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda.json > $CODEBUILD_SRC_DIR/template-lambda.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain.json > $CODEBUILD_SRC_DIR/template-api-custom-domain.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation.json > $CODEBUILD_SRC_DIR/template-api-documentation.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api.json > $CODEBUILD_SRC_DIR/template-api.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment.json > $CODEBUILD_SRC_DIR/template-api-deployment.json
-      - sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals.json > $CODEBUILD_SRC_DIR/template-cognito-internals.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-lambda.json > $CODEBUILD_SRC_DIR/template-lambda.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-custom-domain.json > $CODEBUILD_SRC_DIR/template-api-custom-domain.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-documentation.json > $CODEBUILD_SRC_DIR/template-api-documentation.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api.json > $CODEBUILD_SRC_DIR/template-api.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-api-deployment.json > $CODEBUILD_SRC_DIR/template-api-deployment.json
+      - sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" $CODEBUILD_SRC_DIR/Phoenix/template-cognito-internals.json > $CODEBUILD_SRC_DIR/template-cognito-internals.json
 
       - # Upload the Python Lambda functions
       - listOfPythonLambdaFunctions='projects api_internals password_generator delete_network_interface cognito_internals alb_listener_rule'

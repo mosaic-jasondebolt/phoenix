@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Generates all resources required to clean up/tear down microservice components.",
-  "Transform" : ["__PROJECT_NAME__LambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Resources": {
     "CodeBuildServiceRole": {
       "Type": "AWS::IAM::Role",

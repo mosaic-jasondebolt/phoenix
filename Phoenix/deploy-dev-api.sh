@@ -32,7 +32,7 @@ CHANGE_SET_NAME=$VERSION_ID
 
 # Make macro name unique in the AWS account:
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
-sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-api.json > temp0.json
+sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-api.json > temp0.json
 
 aws s3 cp temp0.json s3://$MICROSERVICE_BUCKET_NAME/cloudformation/template-api.json
 

@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description" : "Generates all resources required for a single container ECS service.",
-  "Transform" : ["__PROJECT_NAME__LambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Parameters": {
     "Environment": {
       "Description": "The environment to deploy the instance to.",

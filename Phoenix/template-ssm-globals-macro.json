@@ -102,11 +102,11 @@
     }
   },
   "Resources": {
-    "__PROJECT_NAME__LambdaMacro": {
+    "PROJECTNAMELambdaMacro": {
       "Type" : "AWS::CloudFormation::Macro",
       "DependsOn": "LambdaMacro",
       "Properties" : {
-        "Name" : "__PROJECT_NAME__LambdaMacro",
+        "Name" : "PROJECTNAMELambdaMacro",
         "Description" : "Lambda CloudFormation Macro",
         "FunctionName" : {"Fn::GetAtt": ["LambdaMacro", "Arn"]},
         "LogGroupName" : {"Ref": "LogGroup"},
