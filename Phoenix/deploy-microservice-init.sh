@@ -21,6 +21,9 @@ echo "Deploying GitHub token to SSM Parameter Store"
 echo "Deploying ACM SSL Certificates"
 ./deploy-acm-certificates.sh create
 
+echo "Deploying S3 buckets and ECR repos"
+./deploy-s3-ecr.sh create
+
 echo "Deploying global SSM parameters and CloudFormation Macro"
 ./deploy-ssm-globals-macro.sh create
 
