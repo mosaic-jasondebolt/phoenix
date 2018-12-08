@@ -16,7 +16,7 @@ if [ $# -ne 1 ]
 fi
 
 echo "Deploying GitHub token to SSM Parameter Store"
-./deploy-github-access-token.sh $1
+#./deploy-github-access-token.sh $1
 
 echo "Deploying ACM SSL Certificates"
 ./deploy-acm-certificates.sh create
