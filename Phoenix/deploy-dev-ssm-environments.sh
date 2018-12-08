@@ -4,11 +4,11 @@ set -e
 # Creates or updates AWS SSM Parameter for a dev environment.
 
 # USAGE:
-#   ./deploy-ssm-environments-dev.sh [create | update]
+#   ./deploy-dev-ssm-environments.sh [create | update]
 #
 # EXAMPLES:
-#   ./deploy-ssm-environments-dev.sh create
-#   ./deploy-ssm-environments-dev.sh update
+#   ./deploy-dev-ssm-environments.sh create
+#   ./deploy-dev-ssm-environments.sh update
 
 # Check for valid arguments
 if [ $# -ne 1 ]

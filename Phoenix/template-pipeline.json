@@ -68,20 +68,6 @@
         "RegisterWithThirdParty": "true"
       }
     },
-    "CodeBuildServiceRoleArnParam": {
-      "Type": "AWS::SSM::Parameter",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", [
-          "/microservice",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "global",
-          "code-build-service-role-arn"
-        ]]},
-        "Type": "String",
-        "Value": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
-        "Description": "The Code Build Service Role ARN"
-      }
-    },
     "CodeBuildSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
@@ -116,20 +102,6 @@
             ]]}
           }
         ]
-      }
-    },
-    "CodeBuildSecurityGroupParam": {
-      "Type": "AWS::SSM::Parameter",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", [
-          "/microservice",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "global",
-          "code-build-security-group"
-        ]]},
-        "Type": "String",
-        "Value": {"Ref": "CodeBuildSecurityGroup"},
-        "Description": "The Code Build security group ID"
       }
     },
     "CodeBuild": {
@@ -503,20 +475,6 @@
         },
         "TimeoutInMinutes": 60,
         "Tags": []
-      }
-    },
-    "CodePipelineServiceRoleArnParam": {
-      "Type": "AWS::SSM::Parameter",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", [
-          "/microservice",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "global",
-          "code-pipeline-service-role-arn"
-        ]]},
-        "Type": "String",
-        "Value": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
-        "Description": "The Code Pipeline Service Role ARN"
       }
     },
     "CodePipeline": {

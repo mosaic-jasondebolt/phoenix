@@ -1,22 +1,16 @@
 #!/bin/bash
 set -e
 
-# Update a full Lambda + API ApiGateway deployment.
+# Deploys an entire dev environment and also forcefully deploys/converges the dev API environment.
 
 # USAGE:
-#   ./deploy-api-dev-all.sh ..
+#   ./deploy-dev-environment.sh ..
 #        [create |
-#        [create_all |
-#         create_without_domain |
-#         update api-deploy {rest-api-id} {stage-name} |
-#         update swagger-postman {rest-api-id} {stage-name}]
+#         update api-deploy {rest-api-id} {stage-name} ]
 #
 # EXAMPLES:
-#   ./deploy-api-dev-all.sh create
-#   ./deploy-api-dev-all.sh create_all
-#   ./deploy-api-dev-all.sh create_without_domain
-#   ./deploy-api-dev-all.sh update api-deploy l1l5pcj1xc v0
-#   ./deploy-api-dev-all.sh update swagger-postman l1l5pcj1xc v0
+#   ./deploy-dev-environment.sh create
+#   ./deploy-dev-environment.sh update api-deploy l1l5pcj1xc v0
 
 # Extract JSON properties for a file into a local variable
 PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
@@ -26,29 +20,14 @@ API_DEPLOYMENT_STACK_NAME=$PROJECT_NAME-api-deployment-$ENVIRONMENT
 
 if [ $1 == "create" ]
   then
-    ./deploy-lambda-dev.sh $1
-    ./deploy-api-custom-domain-dev.sh $1
-    ./deploy-api-dev.sh $1
-    ./deploy-api-deployment-dev.sh $1
-fi
-
-if [ $1 == "create_all" ]
-  then
-    ./deploy-ssm-environments-dev.sh create
-    ./deploy-database-dev.sh create
-    ./deploy-ec2-dev.sh create
-    ./deploy-lambda-dev.sh create
-    ./deploy-ecs-main-task-dev.sh create ecs
-    ./deploy-api-custom-domain-dev.sh create
-    ./deploy-api-dev.sh create
-    ./deploy-api-deployment-dev.sh create
-fi
-
-if [ $1 == "create_without_domain" ]
-  then
-    ./deploy-lambda-dev.sh create
-    ./deploy-api-dev.sh create
-    ./deploy-api-deployment-dev.sh create
+    ./deploy-dev-ssm-environments.sh create
+    ./deploy-dev-database.sh create
+    ./deploy-dev-ec2.sh create
+    ./deploy-dev-lambda.sh create
+    ./deploy-dev-ecs-task-main.sh create ecs
+    ./deploy-dev-api-custom-domain.sh create
+    ./deploy-dev-api.sh create
+    ./deploy-dev-api-deployment.sh create
 fi
 
 API_ID=$3
@@ -69,16 +48,11 @@ swagger_postman() {
   open file:///$HOME/swagger_out/index.html
 }
 
-if [ $1 == "update" ] && [ $2 == "swagger-postman" ]
-  then
-    swagger_postman
-fi
-
-# Deploy or redoploy an "API deployment" from the API associated with the existing rest-api-id
+# Deploy or redoploys an "API deployment" from the API associated with the existing rest-api-id
 if [ $1 == "update" ] && [ $2 == "api-deploy" ]
   then
-    ./deploy-api-dev.sh update
-    ./deploy-api-deployment-dev.sh update # Calls the 'API internals' Lambda function which adds body template mappings.
+    ./deploy-dev-api.sh update
+    ./deploy-dev-api-deployment.sh update # Calls the 'API internals' Lambda function which adds body template mappings.
 
     aws apigateway delete-base-path-mapping --domain-name $ENVIRONMENT.$DOMAIN_NAME --base-path $VERSION
     aws apigateway delete-stage --rest-api-id $API_ID --stage-name $VERSION
@@ -89,9 +63,9 @@ if [ $1 == "update" ] && [ $2 == "api-deploy" ]
     aws apigateway create-base-path-mapping --domain-name $ENVIRONMENT.$DOMAIN_NAME --base-path $VERSION --rest-api-id $API_ID --stage $VERSION
 
     # The CloudFormation is super slow, hence the CLI calls above with do something similar but much faster.
-    #./deploy-api-deployment-dev.sh delete
+    #./deploy-dev-api-deployment.sh delete
     #aws cloudformation wait stack-delete-complete --stack-name $API_DEPLOYMENT_STACK_NAME
-    #./deploy-api-deployment-dev.sh create
+    #./deploy-dev-api-deployment.sh create
 
     swagger_postman
 

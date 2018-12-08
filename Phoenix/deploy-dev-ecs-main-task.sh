@@ -7,12 +7,12 @@ set -e
 # deploys the locally build docker image to the Dev ECS cluster in AWS.
 
 # USAGE:
-#   ./deploy-ecs-task-main-def.sh [create | update] [sbt | location of docker file]
+#   ./deploy-dev-ecs-task-main.sh [create | update] [sbt | location of docker file]
 #
 # EXAMPLES:
-#   ./deploy-ecs-task-main-def.sh update sbt --> Always use this command for Play/SBT projects.
-#   ./deploy-ecs-task-main-def.sh update .   --> Dockerfile in project root dir.
-#   ./deploy-ecs-task-main-def.sh update ecs   --> Dockerfile in ecs dir.
+#   ./deploy-dev-ecs-task-main.sh update sbt --> Always use this command for Play/SBT projects.
+#   ./deploy-dev-ecs-task-main.sh update .   --> Dockerfile in project root dir.
+#   ./deploy-dev-ecs-task-main.sh update ecs   --> Dockerfile in ecs dir.
 
 # Check for valid arguments
 if [ $# -ne 2 ]

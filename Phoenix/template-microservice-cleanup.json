@@ -136,7 +136,17 @@
               "Value" : {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
             },
             {
-              "Name" : "DELETE_STATEFUL_RESOURCES",
+              "Name" : "ENVIRONMENTS_TO_DELETE",
+              "Type" : "PLAINTEXT",
+              "Value" : "dev,testing"
+            },
+            {
+              "Name" : "DELETE_ENVIRONMENT_STATEFUL_RESOURCES",
+              "Type" : "PLAINTEXT",
+              "Value" : "FALSE"
+            },
+            {
+              "Name" : "DELETE_GLOBAL_PROJECT_STATEFUL_RESOURCES",
               "Type" : "PLAINTEXT",
               "Value" : "FALSE"
             }

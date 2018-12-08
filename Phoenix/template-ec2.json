@@ -526,13 +526,7 @@
             {"Ref": "Environment"}
           ]]
         },
-        "ServiceRole": {"Fn::Join": ["", [
-          "{{resolve:ssm:",
-          "/microservice/",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "/global/code-build-service-role-arn",
-          ":1}}"
-        ]]},
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-api-documentation.yml",
           "Type": "CODECOMMIT",

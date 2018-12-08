@@ -100,11 +100,11 @@ template-database-params JSON files.
 cd Phoenix
 ./deploy-vpc.sh create
 ./deploy-pipeline.sh create
-./deploy-database-dev.sh create
-./deploy-ec2-dev.sh create ecs
-./deploy-lambda-dev.sh create
-./deploy-api-dev.sh create
-./deploy-api-deployment-dev.sh create
+./deploy-dev-database.sh create
+./deploy-dev-ec2.sh create ecs
+./deploy-dev-lambda.sh create
+./deploy-dev-api.sh create
+./deploy-dev-api-deployment.sh create
 ```
 * If all of the above stacks complete, push to the master branch of the CodeCommit repo that was created.
 ```
@@ -127,7 +127,7 @@ cd Phoenix
 * Update all of the template-ecs-{environment} param files with your information.
 * Don't forget to specify which port you want to open on the container in the ecs param files.
 ```
-./deploy-ec2-dev.sh [create | update] [path location of folder containing dockerfile]
+./deploy-dev-ec2.sh [create | update] [path location of folder containing dockerfile]
 ```
 
 ### Deploying the entire microservice to production.

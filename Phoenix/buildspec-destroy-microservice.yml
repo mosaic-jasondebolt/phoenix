@@ -16,167 +16,198 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - echo Destroying $PROJECT_NAME microservice
+      - echo Destroying $PROJECT_NAME microservice $ENVIRONMENTS_TO_DELETE enviornments.
       - # Delete API Gateway deployments first
-      - listOfEnvironments=$(jq -r '.Parameters.PipelineEnvironments + "," + .Parameters.ReleaseEnvironments | gsub(" "; "") | split(",") | .[]' $CODEBUILD_SRC_DIR/Phoenix/template-ssm-globals-macro-params.json)
       - |-
         # Delete API Gateway
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-deployment-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-deployment-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-deployment-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-deployment-$environmentName
         done
 
         # Delete API Gateway API Deployment
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-$environmentName
         done
 
         # Delete Cognito Internals
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-internals-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-internals-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-internals-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-internals-$environmentName
         done
 
         # Delete ECS
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ecs-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ecs-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ecs-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-$environmentName
         done
 
         # Delete ECS Main Task
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ecs-main-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ecs-main-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ecs-main-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ecs-main-$environmentName
         done
 
         # Delete EC2
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ec2-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ec2-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ec2-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ec2-$environmentName
         done
 
-        if [ "$DELETE_STATEFUL_RESOURCES" = 'TRUE' ]
+        if [ "$DELETE_ENVIRONMENT_STATEFUL_RESOURCES" = 'TRUE' ]
         then
           # Delete Cognito
           echo Deleting Cognito stacks
-          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-prod
-          for environmentName in $listOfEnvironments
+          for environmentName in $ENVIRONMENTS_TO_DELETE
           do
+            python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-cognito-$environmentName
             python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-cognito-$environmentName
           done
-          for environmentName in $listOfEnvironments
+          for environmentName in $ENVIRONMENTS_TO_DELETE
           do
             aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-cognito-$environmentName
           done
         fi
 
         # Delete Lambda
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-lambda-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-lambda-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-lambda-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-lambda-$environmentName
         done
 
-        if [ "$DELETE_STATEFUL_RESOURCES" = 'TRUE' ]
+        if [ "$DELETE_ENVIRONMENT_STATEFUL_RESOURCES" = 'TRUE' ]
         then
           # Delete Database
           echo Deleting Database stacks
-          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-database-prod
-          for environmentName in $listOfEnvironments
+          for environmentName in $ENVIRONMENTS_TO_DELETE
           do
+            python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-database-$environmentName
             python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-database-$environmentName
           done
-          for environmentName in $listOfEnvironments
+          for environmentName in $ENVIRONMENTS_TO_DELETE
           do
             aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-database-$environmentName
           done
         fi
 
-        if [ "$DELETE_STATEFUL_RESOURCES" = 'TRUE' ]
+        if [ "$DELETE_ENVIRONMENT_STATEFUL_RESOURCES" = 'TRUE' ]
         then
           # Delete API Gateway Custom Domain
           echo Deleting API Gateway stacks
-          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-custom-domain-prod
-          for environmentName in $listOfEnvironments
+          for environmentName in $ENVIRONMENTS_TO_DELETE
           do
+            python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-custom-domain-$environmentName
             python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-custom-domain-$environmentName
           done
-          for environmentName in $listOfEnvironments
+          for environmentName in $ENVIRONMENTS_TO_DELETE
           do
             aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-custom-domain-$environmentName
           done
         fi
 
-      - # python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-documentation-v0-prod
-      - |-
-        if [ "$DELETE_STATEFUL_RESOURCES" = 'TRUE' ]
+        if [ "$DELETE_ENVIRONMENT_STATEFUL_RESOURCES" = 'TRUE' ]
         then
           # Delete V0 API Documentation CloudFront distro, S3 bucket, WAF, etc.
           echo Deleting V0 API Documentation CloudFront distro, S3 bucket, WAF stacks
-          for environmentName in $listOfEnvironments
+          for environmentName in $ENVIRONMENTS_TO_DELETE
           do
+            python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-documentation-v0-$environmentName
             python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-$environmentName
           done
         fi
-      - # Delete Pipeline
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-pipeline
-      - python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-pipeline
-      - aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-pipeline
-      # Delete all environment specific SSM Params
-      - |-
+
         # Delete all environment specific SSM Params
-        python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-environments-prod
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-environments-$environmentName
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-environments-$environmentName
         done
-        for environmentName in $listOfEnvironments
+        for environmentName in $ENVIRONMENTS_TO_DELETE
         do
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-environments-$environmentName
         done
 
-        if [ "$DELETE_STATEFUL_RESOURCES" = 'TRUE' ]
+        if [ "$DELETE_GLOBAL_PROJECT_STATEFUL_RESOURCES" = 'TRUE' ]
         then
+          # Delete release webhook
+          echo Deleting release webhook
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-release-webhook
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-release-webhook
+
+          # Delete pull request webhook
+          echo Deleting pull request webhook
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-pull-request-webhook
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-pull-request-webhook
+
+          # Delete pipeline
+          echo Deleting main pipeline
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-pipeline
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-pipeline
+
+          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-release-webhook
+          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-pull-request-webhook
+          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-pipeline
+
+          # Delete microservice cleanup
+          echo Deleting microservice cleanup
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-microservice-cleanup
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-microservice-cleanup
+          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-microservice-cleanup
+
           # Delete global SSM Params and Macro
           echo Deleting global SSM Params and Macro stack
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-globals-macro
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-ssm-globals-macro
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-ssm-globals-macro
+
+          # Delete S3 ECR stack
+          echo Deleting S3 ECR stack
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-s3-ecr
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-s3-ecr
+
+          # Delete ACM (AWS Certificate Manager) stack
+          echo Deleting ACM (AWS Certificate Manager) stack
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-acm-certificates
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-acm-certificates
+
+          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-s3-ecr
+          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-acm-certificates
         fi
       - # No Op
   post_build:

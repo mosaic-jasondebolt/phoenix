@@ -1,14 +1,18 @@
 #!/bin/bash
 set -e
 
-# Creates or updates AWS Cognito resources.
-
-# USAGE:
-#   ./deploy-cognito-dev.sh [create | update]
+# Creates or updates the database layer.
 #
-# EXAMPLES:
-#   ./deploy-cognito-dev.sh create
-#   ./deploy-cognito-dev.sh update
+# In this stack, the database passwords are automatically generated in Lambda,
+# encrypted, and stored in AWS SSM Parameter Store for later retrieval.
+#
+# The password in returned to the CloudFormation stack and used in the MasterUserPassword
+# parameter. All authored EC2 instances, ECS containers, etc. can then use the
+# default KMS SSM service Key to decrypt the MasterPassword and
+# initiate a database connection
+#
+# USAGE
+#   ./deploy-dev-database.sh [create | update]
 
 # Check for valid arguments
 if [ $# -ne 1 ]
@@ -23,23 +27,35 @@ OP=$(echo $1 | tr '/a-z/' '/A-Z/')
 CLOUDFORMATION_ROLE=$(jq -r '.Parameters.IAMRole' template-ssm-globals-macro-params.json)
 ORGANIZATION_NAME=$(jq -r '.Parameters.OrganizationName' template-ssm-globals-macro-params.json)
 PROJECT_NAME=$(jq -r '.Parameters.ProjectName' template-ssm-globals-macro-params.json)
-ENVIRONMENT=`jq -r '.Parameters.Environment' template-cognito-params-dev.json`
-STACK_NAME=$PROJECT_NAME-cognito-$ENVIRONMENT
+LAMBDA_BUCKET_NAME=$ORGANIZATION_NAME-$PROJECT_NAME-lambda
+ENVIRONMENT=`jq -r '.Parameters.Environment' template-database-params-dev.json`
+STACK_NAME=$PROJECT_NAME-database-$ENVIRONMENT
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID
 
+# Upload the Python Lambda functions
+listOfPythonLambdaFunctions='password_generator'
+for functionName in $listOfPythonLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
+  pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
+  cd ../../
+  rm -rf builds
+done
+
 # Replace the VERSION_ID string in the dev params file with the $VERSION_ID variable
-sed "s/VERSION_ID/$VERSION_ID/g" template-cognito-params-dev.json > temp1.json
+sed "s/VERSION_ID/$VERSION_ID/g" template-database-params-dev.json > temp1.json
 
 # Regenerate the dev params file into a format the the CloudFormation CLI expects.
 python parameters_generator.py temp1.json cloudformation > temp2.json
 
-# Validate the CloudFormation template before template execution.
-aws cloudformation validate-template --template-body file://template-cognito.json
-
 # Make macro name unique in the AWS account:
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
-sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-cognito.json > temp0.json
+sed "s/__PROJECT_NAME__LambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-database.json > temp0.json
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-body file://temp0.json
 
@@ -48,7 +64,7 @@ aws cloudformation create-change-set --stack-name $STACK_NAME \
     --template-body file://temp0.json \
     --parameters file://temp2.json \
     --change-set-type $OP \
-    --capabilities CAPABILITY_NAMED_IAM \
+    --capabilities CAPABILITY_IAM \
     --role-arn $CLOUDFORMATION_ROLE
 
 aws cloudformation wait change-set-create-complete \
@@ -59,3 +75,6 @@ aws cloudformation execute-change-set --stack-name $STACK_NAME \
     --change-set-name $CHANGE_SET_NAME
 
 aws cloudformation wait stack-$1-complete --stack-name $STACK_NAME
+
+# Cleanup
+rm -rf builds

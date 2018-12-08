@@ -4,11 +4,11 @@ set -e
 # Deploys the latest API Gateway for the dev API Gateway stage.
 
 # USAGE:
-#   ./deploy-api-dev.sh [create | update]
+#   ./deploy-dev-api.sh [create | update]
 #
 # EXAMPLES:
-#   ./deploy-api-dev.sh create
-#   ./deploy-api-dev.sh update
+#   ./deploy-dev-api.sh create
+#   ./deploy-dev-api.sh update
 
 # Check for valid arguments
 if [ $# -ne 1 ]

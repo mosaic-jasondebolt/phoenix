@@ -239,20 +239,8 @@
             "LAMBDA_BUCKET_NAME": {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"},
             "IAM_ROLE": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
             "GITHUB_ORGANIZATION": {"PhoenixSSM": "/microservice/{ProjectName}/global/github/organization"},
-            "CODE_BUILD_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
-              "{{resolve:ssm:",
-              "/microservice/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-              "/global/code-build-service-role-arn",
-              ":1}}"
-            ]]},
-            "CODE_PIPELINE_SERVICE_ROLE_ARN": {"Fn::Join": ["", [
-              "{{resolve:ssm:",
-              "/microservice/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-              "/global/code-pipeline-service-role-arn",
-              ":1}}"
-            ]]}
+            "CODE_BUILD_SERVICE_ROLE_ARN": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
+            "CODE_PIPELINE_SERVICE_ROLE_ARN": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"}
           }
         },
         "Code": {

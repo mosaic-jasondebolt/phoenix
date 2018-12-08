@@ -4,11 +4,11 @@ set -e
 # Deploys API documentation to dev S3 static websites.
 
 # USAGE:
-#   ./deploy-api-documentations-dev.sh [create | update]
+#   ./deploy-dev-api-documentation.sh [create | update]
 #
 # EXAMPLES:
-#   ./deploy-api-documentations-dev.sh create
-#   ./deploy-api-documentations-dev.sh update
+#   ./deploy-dev-api-documentation.sh create
+#   ./deploy-dev-api-documentation.sh update
 
 # Check for valid arguments
 if [ $# -ne 1 ]
