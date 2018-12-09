@@ -184,12 +184,6 @@ phases:
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-pull-request-webhook
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-pipeline
 
-          # Delete microservice cleanup
-          echo Deleting microservice cleanup
-          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-microservice-cleanup
-          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-microservice-cleanup
-          aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-microservice-cleanup
-
           # Delete global SSM Params and Macro
           echo Deleting global SSM Params and Macro stack
           python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-ssm-globals-macro
@@ -208,6 +202,11 @@ phases:
 
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-s3-ecr
           aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-acm-certificates
+
+          # Delete microservice cleanup
+          echo Deleting microservice cleanup
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-microservice-cleanup
+          python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-microservice-cleanup
         fi
       - # No Op
   post_build:
