@@ -225,14 +225,22 @@ def lambda_handler(event, context):
                 resource_server_scope=resource_server_scope)
         elif event['RequestType'] == 'Delete':
             if use_custom_domain:
-                domain_obj = cognito_client.describe_user_pool_domain(Domain=custom_domain)
-                cloudfront_domain = domain_obj['DomainDescription']['CloudFrontDistribution']
-                change_resource_record_set(
-                    hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_domain,
-                    record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='DELETE')
-            delete_resource_server(user_pool_id, resource_server_identifier)
-            #delete_user_pool_domain( # Keep this around as it is expensive to create and delete.
-            #    custom_domain=custom_domain, user_pool_id=user_pool_id)
+                pass
+                # Don't do anything here. We do not want to delete the custom domain
+                # because cognito only allows 4 custom domains per AWS account and deleting
+                # custom Cognito domains doesn't free up more domains.
+                # Leaving the code below just in case we want to forcefully remove a custom domain.
+                #domain_obj = cognito_client.describe_user_pool_domain(Domain=custom_domain)
+                #cloudfront_domain = domain_obj['DomainDescription']['CloudFrontDistribution']
+                #change_resource_record_set(
+                #    hosted_zone_id=hosted_zone_id, alias_target_hosted_zone_id=cloudfront_domain,
+                #    record_set_dns_name=cloudfront_domain, record_set_name=custom_domain, action='DELETE')
+                #delete_user_pool_domain( # Keep this around as it is expensive to create and delete.
+                #    custom_domain=custom_domain, user_pool_id=user_pool_id)
+            else:
+                delete_resource_server(user_pool_id, resource_server_identifier)
+                delete_user_pool_domain( # Keep this around as it is expensive to create and delete.
+                    custom_domain=custom_domain, user_pool_id=user_pool_id)
         else:
             print('No-Op. This function should only be used on create, update, and delete stack events.')
     except Exception as e:
