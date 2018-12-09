@@ -150,6 +150,10 @@ phases:
             python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py disable-termination-protection $PROJECT_NAME-api-documentation-v0-$environmentName
             python $CODEBUILD_SRC_DIR/Phoenix/cfn_stacks.py delete-if-exists $PROJECT_NAME-api-documentation-v0-$environmentName
           done
+          for environmentName in $ENVIRONMENTS_TO_DELETE
+          do
+            aws cloudformation wait stack-delete-complete --stack-name $PROJECT_NAME-api-documentation-v0-$environmentName
+          done
         fi
 
         # Delete all environment specific SSM Params
