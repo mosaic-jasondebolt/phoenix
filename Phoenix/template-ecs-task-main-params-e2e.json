@@ -17,6 +17,8 @@
     "MinTasksToScaleInInResponseToScaleInEvent": "1",
     "VPCPrefix": "testing",
     "WebSubnets": "Private",
+    "PlacementStrategiesType": "spread",
+    "PlacementStrategiesField": "attribute:ecs.availability-zone",
     "Version": "VERSION_ID"
   }
 }

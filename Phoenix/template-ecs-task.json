@@ -519,10 +519,12 @@
         "PlacementStrategies" : {
           "Fn::If" : [
             "HasPlacementStrategies",
-            {
-              "Type": { "Ref" : "PlacementStrategiesType" },
-              "Field": { "Ref" : "PlacementStrategiesField" }
-            },
+            [
+              {
+                "Type": { "Ref" : "PlacementStrategiesType" },
+                "Field": { "Ref" : "PlacementStrategiesField" }
+              }
+            ],
             {"Ref" : "AWS::NoValue"}
           ]
         },
