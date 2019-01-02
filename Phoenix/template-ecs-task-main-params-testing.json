@@ -2,7 +2,7 @@
   "Parameters": {
     "AssignPublicIp": "ENABLED",
     "ContainerPort": "5000",
-    "DesiredTaskCount": "2",
+    "DesiredTaskCount": "1",
     "ELBSubnets": "Private",
     "Scheme": "internal",
     "Environment": "testing",
