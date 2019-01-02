@@ -1,12 +1,12 @@
 {
   "Parameters": {
-    "DesiredECSInstances": "1",
+    "DesiredECSInstances": "2",
     "Environment": "testing",
     "DBEnvironment": "testing",
     "InstanceType": "c4.large",
     "LaunchType": "EC2",
-    "MaxECSInstances": "2",
-    "MinECSInstances": "1",
+    "MaxECSInstances": "3",
+    "MinECSInstances": "2",
     "VPCPrefix": "testing",
     "WebSubnets": "Private"
   }
