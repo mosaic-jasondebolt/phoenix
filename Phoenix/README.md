@@ -28,13 +28,27 @@ $ ./deploy-vpc.sh create
 * This token can be shared by all Phoenix projects in a single AWS account.
 * This token can saved in a browser using the Chrome browser plugin to add to the 'user-agent' header in requests.
 * Usage of this token in the browser is optional, but it can be useful when accessing API docs from over VPN.
+
 ```
 From you mac:
 $ pwgen 32 -1
-
-Save this token in the '/global/api-docs-user-agent' SSM parameter store parameter with the descripte "UserAgent used to authenticate with S3 static websites for API Documentation."
 ```
 
+Save the above generated token in the '/global/api-docs-user-agent' SSM parameter store parameter with
+the descripte "UserAgent used to authenticate with S3 static websites for API Documentation."
+
+
+#### AWS CodeBuild GitHub OAuth authorization
+* When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
+* Sign out of your OneLogin account.
+* Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
+* Once logged in, click on the GitHub app within OneLogin.
+* At the GitHub login screen, use the username and password specified in lastpass.
+* Verify that you are logged into GitHub as the mosaic-codebuild user and not your mosaic github user.
+* In the new AWS account, open the AWS CodeBuild console and a new job called "test".
+* Create a simple CodeBuild job using GitHub as the source, and click on the "Connect to GitHub" button.
+* A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
+* Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
 
 ### Initial Phoenix Project Setup
 - Create DNS hosted zone.
