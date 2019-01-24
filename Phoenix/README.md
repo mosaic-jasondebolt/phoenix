@@ -3,6 +3,9 @@
 
 ### Table of Contents
 
+* [Phoenix Overview](#phoenix-overview)
+    * [Phoenixt Networking](#phoenix-networking)
+    * [Phoenix Pipelines](#phoenix-pipelines)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
 ![Pipeline](/Phoenix/images/pipeline_1a.png)
@@ -10,6 +13,17 @@
 
 ### Phoenix Overview
 * Phoenix is a platform for launching multi-environment microservice projects on AWS.
+* Multiple Phoenix projects can be added to a single AWS account, but this is generally not recommended since there should be clear separation between between Phoenix microservices.
+
+#### Phoenix Networking
+* All Phoenix projects ship with a CloudFormation template for creating VPC's.
+* A Phoenix project can contain any number of VPC's, but there three environments supported (dev, testing, prod) out of the box.
+* Multiple Phoenix projects within the same AWS account can use the same VPC's.
+* The VPC CloudFormation stacks export values such as VPC and Subnet Id's to be imported by other CloudFormation stacks.
+* Each VPC includes the minimal networking resources for high availability, including 2 private subnets and 2 public subnets per VPC, each in different availability zones.
+* VPC templates can be modified if more or less networking resources are required.
+
+#### Phoenix Pipelines
 * A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
 * Each pipeline has a source stage, which is usually triggered from a Git repository webhook.
 * There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments.
@@ -18,7 +32,8 @@
 * After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice.
 * All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments.
 * Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
-* Optionally, pull request specific ephemeral pipelines can be added if your team requires these
+* Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
+
 
 ### One time configuration of your AWS account to work with Phoenix
 
@@ -31,6 +46,8 @@
 $ cd Phoenix
 $ ./deploy-vpc.sh create
 ```
+
+<img src="/Phoenix/images/vpc-1.png"/>
 
 #### Save the API docs user agent token in SSM parameter store for the account
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
@@ -45,12 +62,14 @@ $ pwgen 32 -1
 ```
 
 Save the above generated token in the '/global/api-docs-user-agent' SSM parameter store parameter with
-the descripte "UserAgent used to authenticate with S3 static websites for API Documentation."
+the descripte "UserAgent used to authenticate with S3 static websites for API Documentation." It this key already exists
+in SSM parameter store for the AWS account, you don't need to do anything.
 
 
 #### AWS CodeBuild GitHub OAuth authorization
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
 * When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
+* We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
 * Sign out of your OneLogin account.
 * Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
 * Once logged in, click on the GitHub app within OneLogin.
@@ -61,11 +80,15 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 * A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
 * Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
 
-![codebuild-github-1](/Phoenix/images/codebuild-github-1.png)
-![codebuild-github-2](/Phoenix/images/codebuild-github-2.png)
-![codebuild-github-3](/Phoenix/images/codebuild-github-3.png)
+<img src="/Phoenix/images/codebuild-github-1.png" width="500px"/>
+<img src="/Phoenix/images/codebuild-github-2.png" width="300px"/>
+<img src="/Phoenix/images/codebuild-github-3.png" width="300px"/>
 
 ### Initial Phoenix Project Setup
+#### Configuring the project config file
+* All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
+
+
 - Create DNS hosted zone.
     - Copy the ID of this hosted into into the HostedZoneId param of the project config file laster.
 - Create NS record in main account
@@ -85,7 +108,3 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 - After all stacks from the microservice-init script have been created, push to that master branch of the repo
 - $ git push origin master.
 
-
-### VPC Setup
-### AWS ACM Certificates
-### AWS S3 Buckets and ECR repos
