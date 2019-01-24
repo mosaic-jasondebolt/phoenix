@@ -32,12 +32,12 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 
 ### CloudFormation JSON Template Files
 Some of these CloudFormation files are global in scope, and some create stacks that are environment specific.
-For example, the "template-pipeline.json" file creates the main CI/CD pipeline for your Phoenix project, so
-this stack is global (created once). The "template-ec2.json" file, however, is environment specific, so there
-can be multiple stack instances of this template (one for each dev/testing/prod/etc environment).
+For example, the "template-pipeline.json" will create a single CloudFormation stack called "{project-name}-pipeline."
+An environment specific template like "template-ec2.json" has CloudFormation parameter files for each environment
+and will create stacks like "{project-name-}-ec2-prod", "{project-name}-ec2-testing", etc. 
 
 #### template-vpc.json
-This is an environment specific stack.
+This is an environment specific stack (dev, testing, prod). 21 VPC resources are created including VPC's, Internet Gateways, NAT gateways, routing tables, private/public subnets configured for high availability, and VPC Elastic IP's. These VPC stacks export values important by many other stacks.
 
 #### template-jenkins.json
 This is a global, non-environment specific CloudFormation stack.
