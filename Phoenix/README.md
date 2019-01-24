@@ -31,9 +31,13 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 
 
 ### CloudFormation JSON Template Files
+Some of these CloudFormation files are global in scope, and some create stacks that are environment specific.
+For example, the "template-pipeline.json" file creates the main CI/CD pipeline for your Phoenix project, so
+this stack is global (created once). The "template-ec2.json" file, however, is environment specific, so there
+can be multiple stack instances of this template (one for each dev/testing/prod/etc environment).
 
-#### template-vpc-.json
-This is a global, non-environment specific CloudFormation stack.
+#### template-vpc.json
+This is an environment specific stack.
 
 #### template-jenkins.json
 This is a global, non-environment specific CloudFormation stack.
