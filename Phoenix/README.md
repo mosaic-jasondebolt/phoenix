@@ -1,7 +1,7 @@
 # Phoenix Microservice
 <img src="/Phoenix/images/logo.png" height="70px"/>
 
-### Table of Contents
+## Table of Contents
 
 * [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
@@ -11,15 +11,15 @@
         * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
-### What is Phoenix
+## What is Phoenix
 Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation.
 
 A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments. 
 
-Phoenix is not a framework and it does not hide anything, which can be overwhelming for those not deeply familiar with AWS and CloudFormation. A good starting point would be the "deploy-microservice-init.sh" file, as this is the file used to bootstrap a Phoenix project. By executing this script, over 30 CloudFormation stacks are created for your Phoenix project.
+Phoenix is not a framework and it does not hide anything, which can be overwhelming for those not deeply familiar with AWS and CloudFormation. A good starting point would be to study the "deploy-microservice-init.sh" file, as this is the file used to bootstrap a Phoenix project. When this script is invoked, over 30 CloudFormation stacks are created for your Phoenix project.
 
 
-### Phoenix Overview
+## Phoenix Overview
 A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
 1) CloudFormation JSON template files.
 2) CloudFormation JSON parameter files.
@@ -29,7 +29,47 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 6) Python 3.6 Lambda functions.
 7) An example Dockerfile used for testing/debugging ECS deployments.
 
-#### Phoenix Networking
+
+### CloudFormation JSON Template Files
+
+#### template-vpc-.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-jenkins.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-acm-certificates.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-s3-ecr.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-ssm-globals-macro.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-pipeline.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-github-webhook.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-pull-request-pipeline.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-release-environments-pipeline.json
+This is a global, non-environment specific CloudFormation stack.
+
+#### template-microservice-cleanup.json
+This is a global, non-environment specific CloudFormation stack.
+
+
+
+
+
+
+### CloudFormation JSON Template Parameter Files
+
+### Phoenix Networking
 * All Phoenix projects ship with a CloudFormation template for creating VPC's.
 * A Phoenix project can contain any number of VPC's, but there three environments supported (dev, testing, prod) out of the box.
 * Multiple Phoenix projects within the same AWS account can use the same VPC's.
@@ -39,7 +79,7 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 
 <img src="/Phoenix/images/vpc-3.png"/>
 
-#### Phoenix Pipelines
+### Phoenix Pipelines
 * A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
 * Each pipeline has a source stage, which is usually triggered from a Git repository webhook.
 * There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments.
@@ -50,23 +90,23 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 * Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
 * Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
 
-##### GitHub Pull Request
+#### GitHub Pull Request
 ![Pipeline1](/Phoenix/images/pull-request-pipeline-4.png)
 
-##### GitHub Pull Request Pipeline
+#### GitHub Pull Request Pipeline
 ![Pipeline1](/Phoenix/images/pull-request-pipeline-1.png)
 ![Pipeline1](/Phoenix/images/pull-request-pipeline-2.png)
 ![Pipeline1](/Phoenix/images/pull-request-pipeline-3.png)
 
 
-##### Master Branch Pipeline
+#### Master Branch Pipeline
 ![Pipeline](/Phoenix/images/pipeline_1a.png)
 ![Pipeline](/Phoenix/images/pipeline_1b.png)
 
 
-### One time configuration of your AWS account to work with Phoenix
+## One time configuration of your AWS account to work with Phoenix
 
-#### Configure the VPC's
+### Configure the VPC's
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
 * Add appropriate CIDR ranges in the template-vpc-params-dev.json, template-vpc-params-testing.json, and template-vpc-params-prod.json files.
 * Ensure that all CIDR IP ranges are not currently used by any other Phoenix projects or other networks.
@@ -78,7 +118,7 @@ $ ./deploy-vpc.sh create
 
 <img src="/Phoenix/images/vpc-1.png"/>
 
-#### Save the API docs user agent token in SSM parameter store for the account
+### Save the API docs user agent token in SSM parameter store for the account
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
 * This is a secret token used to verify HTTP requests made to API documents served from the S3 bucket.
 * This token can be shared by all Phoenix projects in a single AWS account.
@@ -95,7 +135,7 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 in SSM parameter store for the AWS account, you don't need to do anything.
 
 
-#### AWS CodeBuild GitHub OAuth authorization
+### AWS CodeBuild GitHub OAuth authorization
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
 * When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
 * We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
@@ -113,8 +153,8 @@ in SSM parameter store for the AWS account, you don't need to do anything.
 <img src="/Phoenix/images/codebuild-github-2.png" width="300px"/>
 <img src="/Phoenix/images/codebuild-github-3.png" width="300px"/>
 
-### Initial Phoenix Project Setup
-#### Configuring the project config file
+## Initial Phoenix Project Setup
+### Configuring the project config file
 * All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
 
 
