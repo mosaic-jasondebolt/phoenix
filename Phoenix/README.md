@@ -61,7 +61,9 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 * A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
 * Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
 
-![Pipeline](/Phoenix/images/codebuild-github.png)
+![codebuild-github-1](/Phoenix/images/codebuild-github-1.png)
+![codebuild-github-2](/Phoenix/images/codebuild-github-2.png)
+![codebuild-github-3](/Phoenix/images/codebuild-github-3.png)
 
 ### Initial Phoenix Project Setup
 - Create DNS hosted zone.
