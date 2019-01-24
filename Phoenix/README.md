@@ -8,9 +8,6 @@
     * [Phoenix Pipelines](#phoenix-pipelines)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
-![Pipeline](/Phoenix/images/pipeline_1a.png)
-![Pipeline](/Phoenix/images/pipeline_1b.png)
-
 ### Phoenix Overview
 * Phoenix is a platform for launching multi-environment microservice projects on AWS.
 * Multiple Phoenix projects can be added to a single AWS account, but this is generally not recommended since there should be clear separation between between Phoenix microservices.
@@ -35,6 +32,9 @@
 * All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments.
 * Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
 * Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
+
+![Pipeline](/Phoenix/images/pipeline_1a.png)
+![Pipeline](/Phoenix/images/pipeline_1b.png)
 
 
 ### One time configuration of your AWS account to work with Phoenix
