@@ -23,6 +23,8 @@
 * Each VPC includes the minimal networking resources for high availability, including 2 private subnets and 2 public subnets per VPC, each in different availability zones.
 * VPC templates can be modified if more or less networking resources are required.
 
+<img src="/Phoenix/images/vpc-3.png"/>
+
 #### Phoenix Pipelines
 * A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
 * Each pipeline has a source stage, which is usually triggered from a Git repository webhook.
