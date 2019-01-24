@@ -32,6 +32,8 @@ $ cd Phoenix
 $ ./deploy-vpc.sh create
 ```
 
+<img src="/Phoenix/images/vpc-1.png" width="300px"/>
+
 #### Save the API docs user agent token in SSM parameter store for the account
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
 * This is a secret token used to verify HTTP requests made to API documents served from the S3 bucket.
