@@ -37,34 +37,37 @@ An environment specific template like "template-ec2.json" has CloudFormation par
 and will create stacks like "{project-name-}-ec2-prod", "{project-name}-ec2-testing", etc. 
 
 #### template-vpc.json
-This is an environment specific stack (dev, testing, prod). 21 VPC resources are created including VPC's, Internet Gateways, NAT gateways, routing tables, private/public subnets configured for high availability, and VPC Elastic IP's. These VPC stacks export values important by many other stacks.
+This is an environment specific template (dev, testing, prod). ~21 AWS resources are created including VPC's, Internet Gateways, NAT gateways, routing tables, private/public subnets configured for high availability, and VPC Elastic IP's. These VPC stacks export values important by many other stacks.
 
 #### template-jenkins.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template. While I highly recommend AWS CodeBuild rather than
+Jenkins for a number of reasons, this template can be used to spin up a single Jenkins node. This template is entirely optional, however.
 
 #### template-acm-certificates.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template. This template creates several different ACM SSL
+certificates used for things like ECS endpoints, API Gateway endpoints, Cognito Auth endpoints, and S3 website endpoints,
+all of which are supported by Phoenix.
 
 #### template-s3-ecr.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template.
 
 #### template-ssm-globals-macro.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template.
 
 #### template-pipeline.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template.
 
 #### template-github-webhook.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template.
 
 #### template-pull-request-pipeline.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template.
 
 #### template-release-environments-pipeline.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template.
 
 #### template-microservice-cleanup.json
-This is a global, non-environment specific CloudFormation stack.
+This is a global, non-environment specific CloudFormation template.
 
 
 
