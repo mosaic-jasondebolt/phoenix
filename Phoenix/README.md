@@ -6,6 +6,8 @@
 * [Phoenix Overview](#phoenix-overview)
     * [Phoenixt Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
+        * [GitHub Pull Request](#github-pull-request)
+        * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
 ### Phoenix Overview
@@ -33,6 +35,16 @@
 * Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
 * Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
 
+##### GitHub Pull Request
+![Pipeline1](/Phoenix/images/pull-request-pipeline-4.png)
+
+##### GitHub Pull Request Pipeline
+![Pipeline1](/Phoenix/images/pull-request-pipeline-1.png)
+![Pipeline1](/Phoenix/images/pull-request-pipeline-2.png)
+![Pipeline1](/Phoenix/images/pull-request-pipeline-3.png)
+
+
+##### Master Branch Pipeline
 ![Pipeline](/Phoenix/images/pipeline_1a.png)
 ![Pipeline](/Phoenix/images/pipeline_1b.png)
 
