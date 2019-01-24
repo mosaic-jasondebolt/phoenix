@@ -5,23 +5,26 @@
 
 * [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
-* [Phoenixt Networking](#phoenix-networking)
-* [Phoenix Pipelines](#phoenix-pipelines)
-    * [GitHub Pull Request](#github-pull-request)
-    * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
+    * [Phoenixt Networking](#phoenix-networking)
+    * [Phoenix Pipelines](#phoenix-pipelines)
+        * [GitHub Pull Request](#github-pull-request)
+        * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
 ### What is Phoenix
 Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments. 
 
 ### Phoenix Overview
-Phoenix provides the base boilerplate infrastructure required to launch a microservice on AWS. At its core,
-Phoenix is an organized way to consistently deploy CloudFormation templates to provision AWS infrastructure.
-Phoenix ships 
+A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
+1) CloudFormation JSON template files.
+2) CloudFormation JSON parameter files.
+3) Deployment shell scripts (mostly used for developer specific clouds).
+4) CodeBuild buildspec.yml files (These are like Jenkins jobs).
+5) Python helper scripts.
+6) Python 3.6 Lambda functions.
+7) An example Dockerfile used for testing/debugging ECS deployments.
 
-Multiple Phoenix projects can be added to a single AWS account, but this is generally not recommended since there should be clear separation between between Phoenix microservices.
-
-### Phoenix Networking
+#### Phoenix Networking
 * All Phoenix projects ship with a CloudFormation template for creating VPC's.
 * A Phoenix project can contain any number of VPC's, but there three environments supported (dev, testing, prod) out of the box.
 * Multiple Phoenix projects within the same AWS account can use the same VPC's.
@@ -31,7 +34,7 @@ Multiple Phoenix projects can be added to a single AWS account, but this is gene
 
 <img src="/Phoenix/images/vpc-3.png"/>
 
-### Phoenix Pipelines
+#### Phoenix Pipelines
 * A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
 * Each pipeline has a source stage, which is usually triggered from a Git repository webhook.
 * There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments.
