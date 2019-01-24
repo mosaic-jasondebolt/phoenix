@@ -32,7 +32,7 @@ $ cd Phoenix
 $ ./deploy-vpc.sh create
 ```
 
-<img src="/Phoenix/images/vpc-1.png" width="300px"/>
+<img src="/Phoenix/images/vpc-1.png"/>
 
 #### Save the API docs user agent token in SSM parameter store for the account
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
