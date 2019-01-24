@@ -47,7 +47,8 @@ $ pwgen 32 -1
 ```
 
 Save the above generated token in the '/global/api-docs-user-agent' SSM parameter store parameter with
-the descripte "UserAgent used to authenticate with S3 static websites for API Documentation."
+the descripte "UserAgent used to authenticate with S3 static websites for API Documentation." It this key already exists
+in SSM parameter store for the AWS account, you don't need to do anything.
 
 
 #### AWS CodeBuild GitHub OAuth authorization
@@ -69,6 +70,10 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 <img src="/Phoenix/images/codebuild-github-3.png" width="300px"/>
 
 ### Initial Phoenix Project Setup
+#### Configuring the project config file
+* All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
+
+
 - Create DNS hosted zone.
     - Copy the ID of this hosted into into the HostedZoneId param of the project config file laster.
 - Create NS record in main account
@@ -88,7 +93,3 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 - After all stacks from the microservice-init script have been created, push to that master branch of the repo
 - $ git push origin master.
 
-
-### VPC Setup
-### AWS ACM Certificates
-### AWS S3 Buckets and ECR repos
