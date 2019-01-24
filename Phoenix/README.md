@@ -53,6 +53,7 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 #### AWS CodeBuild GitHub OAuth authorization
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
 * When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
+* We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
 * Sign out of your OneLogin account.
 * Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
 * Once logged in, click on the GitHub app within OneLogin.
