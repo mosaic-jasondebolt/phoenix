@@ -5,6 +5,8 @@
 
 * [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
+    * [CloudFormation JSON Template Files](#cloudformation-json-template-files)
+        * [template-vpc.json](#template-vpc.json)
     * [Phoenixt Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
         * [GitHub Pull Request](#github-pull-request)
