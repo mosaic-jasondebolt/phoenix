@@ -3,17 +3,26 @@
 
 ### Table of Contents
 
+* [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
     * [Phoenixt Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
+        * [GitHub Pull Request](#github-pull-request)
+        * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
-![Pipeline](/Phoenix/images/pipeline_1a.png)
-![Pipeline](/Phoenix/images/pipeline_1b.png)
+### What is Phoenix
+Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments. 
 
 ### Phoenix Overview
-* Phoenix is a platform for launching multi-environment microservice projects on AWS.
-* Multiple Phoenix projects can be added to a single AWS account, but this is generally not recommended since there should be clear separation between between Phoenix microservices.
+A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
+1) CloudFormation JSON template files.
+2) CloudFormation JSON parameter files.
+3) Deployment shell scripts (mostly used for developer specific clouds).
+4) CodeBuild buildspec.yml files (These are like Jenkins jobs).
+5) Python helper scripts.
+6) Python 3.6 Lambda functions.
+7) An example Dockerfile used for testing/debugging ECS deployments.
 
 #### Phoenix Networking
 * All Phoenix projects ship with a CloudFormation template for creating VPC's.
@@ -35,6 +44,19 @@
 * All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments.
 * Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
 * Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
+
+##### GitHub Pull Request
+![Pipeline1](/Phoenix/images/pull-request-pipeline-4.png)
+
+##### GitHub Pull Request Pipeline
+![Pipeline1](/Phoenix/images/pull-request-pipeline-1.png)
+![Pipeline1](/Phoenix/images/pull-request-pipeline-2.png)
+![Pipeline1](/Phoenix/images/pull-request-pipeline-3.png)
+
+
+##### Master Branch Pipeline
+![Pipeline](/Phoenix/images/pipeline_1a.png)
+![Pipeline](/Phoenix/images/pipeline_1b.png)
 
 
 ### One time configuration of your AWS account to work with Phoenix
