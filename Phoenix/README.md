@@ -3,10 +3,7 @@
 
 ### Table of Contents
 
-* [Creating a Phoenix project in a new AWS account](#creating-a-phoenix-project-in-a-new-aws-account)
-* [VPC Setup](#vpc-setup)
-* [AWS ACM Certificates](#aws-acm-certificates)
-* [AWS S3 Buckets and ECR Repos](#aws-s3-buckets-and-ecr-repos)
+* [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
 ![Pipeline](/Phoenix/images/pipeline_1a.png)
 ![Pipeline](/Phoenix/images/pipeline_1b.png)
@@ -23,7 +20,7 @@
 * Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
 * Optionally, pull request specific ephemeral pipelines can be added if your team requires these
 
-### Creating a Phoenix project in a "NEW" AWS account
+### One time configuration of your AWS account to work with Phoenix
 
 #### Configure the VPC's
 * These steps are only required for new Phoenix projects in NEW AWS accounts.
@@ -63,6 +60,8 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 * Create a simple CodeBuild job using GitHub as the source, and click on the "Connect to GitHub" button.
 * A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
 * Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
+
+![Pipeline](/Phoenix/images/codebuild-github.png)
 
 ### Initial Phoenix Project Setup
 - Create DNS hosted zone.
