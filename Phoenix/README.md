@@ -3,6 +3,9 @@
 
 ### Table of Contents
 
+* [Phoenix Overview](#phoenix-overview)
+    * [Phoenixt Networking](#phoenix-networking)
+    * [Phoenix Pipelines](#phoenix-pipelines)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
 ![Pipeline](/Phoenix/images/pipeline_1a.png)
@@ -10,6 +13,17 @@
 
 ### Phoenix Overview
 * Phoenix is a platform for launching multi-environment microservice projects on AWS.
+* Multiple Phoenix projects can be added to a single AWS account, but this is generally not recommended since there should be clear separation between between Phoenix microservices.
+
+#### Phoenix Networking
+* All Phoenix projects ship with a CloudFormation template for creating VPC's.
+* A Phoenix project can contain any number of VPC's, but there three environments supported (dev, testing, prod) out of the box.
+* Multiple Phoenix projects within the same AWS account can use the same VPC's.
+* The VPC CloudFormation stacks export values such as VPC and Subnet Id's to be imported by other CloudFormation stacks.
+* Each VPC includes the minimal networking resources for high availability, including 2 private subnets and 2 public subnets per VPC, each in different availability zones.
+* VPC templates can be modified if more or less networking resources are required.
+
+#### Phoenix Pipelines
 * A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
 * Each pipeline has a source stage, which is usually triggered from a Git repository webhook.
 * There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments.
@@ -18,7 +32,8 @@
 * After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice.
 * All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments.
 * Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
-* Optionally, pull request specific ephemeral pipelines can be added if your team requires these
+* Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
+
 
 ### One time configuration of your AWS account to work with Phoenix
 
