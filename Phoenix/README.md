@@ -12,7 +12,7 @@
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
 ### What is Phoenix
-Phoenix is a platform for launching highly available, multi-environment, <a href=""https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments. 
+Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments. 
 
 ### Phoenix Overview
 Phoenix provides the base boilerplate infrastructure required to launch a microservice on AWS. At its core,
