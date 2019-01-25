@@ -6,16 +6,30 @@
 * [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
     * [CloudFormation JSON Template Files](#cloudformation-json-template-files)
-        * [template-vpc.json](#template-vpcjson)
-        * [template-jenkins.json](#template-jenkinsjson)
-        * [template-acm-certificates.json](#template-acm-certificatesjson)
-        * [template-s3-ecr.json](#template-s3-ecrjson)
-        * [template-ssm-globals-macro.json](#template-ssm-globals-macrojson)
-        * [template-pipeline.json](#template-pipelinejson)
-        * [template-github-webhook.json](#template-github-webhookjson)
-        * [template-pull-request-pipeline.json](#template-pull-request-pipelinejson)
-        * [template-release-environments-pipeline.json](#template-release-environments-pipelinejson)
-        * [template-microservice-cleanup.json](#template-microservice-cleanupjson)
+        * [Account Specific Stacks](#account-specific-stacks)
+            * [template-vpc.json](#template-vpcjson)
+            * [template-jenkins.json](#template-jenkinsjson)
+        * [Project Specific Stacks](#project-specific-stacks)
+            * [template-acm-certificates.json](#template-acm-certificatesjson)
+            * [template-s3-ecr.json](#template-s3-ecrjson)
+            * [template-ssm-globals-macro.json](#template-ssm-globals-macrojson)
+            * [template-pipeline.json](#template-pipelinejson)
+            * [template-github-webhook.json](#template-github-webhookjson)
+            * [template-pull-request-pipeline.json](#template-pull-request-pipelinejson)
+            * [template-release-environments-pipeline.json](#template-release-environments-pipelinejson)
+            * [template-microservice-cleanup.json](#template-microservice-cleanupjson)
+        * [Environment (dev, testing, prod, etc.) Specific Stacks](#environment-specific-stacks)
+            * [template-ssm-environments.json](#template-ssm-environmentsjson)
+            * [template-database.json](#template-databasejson)
+            * [template-ec2.json](#template-ec2json)
+            * [template-lambda.json](#template-lambdajson)
+            * [template-cognito.json](#template-cognitojson)
+            * [template-cognito-internals.json](#template-cognito-internalsjson)
+            * [template-api-custom-domain.json](#template-api-custom-domainjson)
+            * [template-api-documentation.json](#template-api-documentationjson)
+            * [template-api.json](#template-apijson)
+            * [template-deployment.json](#template-deploymentjson)
+            * [template-ecs-task.json](#template-ecs-taskjson)
     * [Phoenixt Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
         * [GitHub Pull Request](#github-pull-request)
@@ -42,45 +56,60 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 
 
 ### CloudFormation JSON Template Files
-Some of these CloudFormation files are global in scope, and some create stacks that are environment specific.
-For example, the "template-pipeline.json" will create a single CloudFormation stack called "{project-name}-pipeline."
-An environment specific template like "template-ec2.json" has CloudFormation parameter files for each environment
-and will create stacks like "{project-name-}-ec2-prod", "{project-name}-ec2-testing", etc. 
+An AWS account may include multiple Phoenix projects, and each Phoenix project may include multiple environments like
+"dev" for developer and pull-request resources, "testing" for testing/staging/qa resources, and "prod" for production
+resources. Phoenix cloudformation templates are used at the account level, project level, and environment level.
 
-#### template-vpc.json
+Phoenix ships with many types of CloudFormation templates. Some templates only map to one stack instance, whereas
+other templates may have multiple stacks. For example, The same VPC template may create a dev VPC stack, a testing VPC stack, and a prod VPC stack. All dev resources are deployed into the dev VPC, all testing resources are deployed into the testing VPC, etc. Dev resources can only talk to other dev resources, and only prod resources can talk to prod resources. These environment specific VPC's can be accessed by resources within multiple Phoenix projects in the same AWS account. The
+VPC stacks are shared by multiple Phoenix projects in the same AWS account.
+
+The "template-pipeline.json" template is used to create a stack named "{project-name}-pipeline.json". This CI/CD pipeline
+is shared by all environments, so only one stack instance should be created for this template.
+
+The "template-ec2.json" stack includes EC2 resources for a single environment. Since there can be multiple environments per Phoenix project, there may multiple stacks associated with this template. The stack name for testing and prod EC2 resources would be named "{project-name}-ec2-testing" and "{project-name}-ec2-prod", respectively.
+
+#### Account Specific Stacks
+The following templates are used to create stacks to used across the entire AWS account, possibly hosting several Phoenix projects. The stack name will be {template-name}.
+
+##### template-vpc.json
 This is an environment specific template (dev, testing, prod). ~21 AWS resources are created including VPC's, Internet Gateways, NAT gateways, routing tables, private/public subnets configured for high availability, and VPC Elastic IP's. These VPC stacks export values important by many other stacks.
 
-#### template-jenkins.json
+##### template-jenkins.json
 This is a global, non-environment specific CloudFormation template. While I highly recommend AWS CodeBuild rather than
 Jenkins for a number of reasons, this template can be used to spin up a single Jenkins node. This template is entirely optional, however.
 
-#### template-acm-certificates.json
+#### Project Specific Stacks
+The following templates are scoped to a single Phoenix project. Most of these templates are associated with a single stack.
+The stack name will be {project-name}-{template-name}.
+
+##### template-acm-certificates.json
 This is a global, non-environment specific CloudFormation template. This template creates several different ACM SSL
 certificates used for things like ECS endpoints, API Gateway endpoints, Cognito Auth endpoints, and S3 website endpoints,
 all of which are supported by Phoenix.
 
-#### template-s3-ecr.json
+##### template-s3-ecr.json
 This is a global, non-environment specific CloudFormation template. This template creates an ECR repository for your
 projects docker images as well as several S3 buckets. Logging buckets are created for CodePipeline, CodeBuild, and
 Elastic Load Balancer Logs. Additional buckets are created for source code artifacts like Lambda source bundles
 and Phoenix CloudFormation templates. 
 
-#### template-ssm-globals-macro.json
+##### template-ssm-globals-macro.json
 This is a global, non-environment specific CloudFormation template. This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a>
 and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function
 that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
 
-#### template-pipeline.json
+##### template-pipeline.json
 This is a global, non-environment specific CloudFormation template. This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation stacks of any Phoenix project.
 
-#### template-github-webhook.json
+##### template-github-webhook.json
 This is neither a global nor environment specific template, but the template can have multiple stack instances. This template deploys a GitHub webhook on GitHub for one or more events, an API Gateawy endpoint, a Lambda webhook handler, a post webhook Lambda handler, and other resources required for launching GitHub webhooks. The API Gateway endpoint sits between GitHub and Lambda and it used to receive the webhook event from GitHub. This is a very powerful template that can potentially be used to created dozens of GitHub webhooks of different types. Currently Phoenix ships with two stacks (parameter files) for this template, one for pull requests (template-github-webhook-pull-request-params.json) and another for release events (template-github-webhook-release-params.json).
 
-#### template-pull-request-pipeline.json
+##### template-pull-request-pipeline.json
 This is a pull request specific template, supporting multiple stack instances. Each stack instance of this template is associated with a GitHub pull request pipeline. This stack(s) associated with this template are created/updated/deleted
 from within a Lambda function that listens for pull request events from GitHub.
 
-#### template-release-environments-pipeline.json
+##### template-release-environments-pipeline.json
 This is a release specific template, supporting multiple stack instances. Each stack instance of this template is associated with a release into a specific release environment. This stack(s) associated with this template are created/updated/deleted
 from within a Lambda function that listens for push events from GitHub where the branch matches the regular expression
 pattern "release-\d{8}$". See the "release_webhook" Lambda function in the lambda folder for details.
@@ -90,6 +119,32 @@ This is a global, non-environment specific CloudFormation template. This templat
 all AWS resources for one or more environments (dev, testing, prod, etc). The "buildspec-destory-microservice.yml" buildspec
 deletes CloudFormation stacks in the appropriate order. A project admin can manually kick off this CodeBuild job to completely destory one or more Phoenix environments.
 
+#### Environment Specific Stacks
+The following templates are scoped to one or more environments (dev, testing, prod, etc) for a single Phoenix project.
+There may be several stack instances per template, each scoped to an different environment. The stack name will be
+{project-name}-{template-name}-{environment}.
+
+##### template-ssm-environments.json
+
+##### template-database.json
+
+##### template-ec2.json
+
+##### template-lambda.json
+
+##### template-cognito.json
+
+##### template-cognito-internals.json
+
+##### template-api-custom-domain.json
+
+##### template-api-documentation.json
+
+##### template-api.json
+
+##### template-deployment.json
+
+##### template-ecs-task.json
 
 
 ### CloudFormation JSON Template Parameter Files
