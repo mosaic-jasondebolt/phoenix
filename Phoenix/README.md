@@ -123,6 +123,11 @@ There may be several stack instances per template, each scoped to an different e
 {project-name}-{template-name}-{environment}.
 
 ##### template-ssm-environments.json
+This template is used to create environment specific CloudFormation stacks. Any kind of environment specific project
+parameters/config can be stored as SSM parameters in this template. Once deployed, these parameters are made available
+to all other CloudFormation stacks. If you look at the "template-ssm-environments.json" template, you'll see a
+"DescriptionParam" parameter with a key ending with "description". The value associated with this parameter is stored in
+SSM parameter store can can be accessed in other CloudFormation templates (See the "Description" value in the Outputs section of the "template-lambda.json" for an example of importing these values). CloudFormation macros make this possible.
 
 ##### template-database.json
 
