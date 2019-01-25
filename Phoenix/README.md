@@ -58,16 +58,14 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 ### CloudFormation JSON Template Files
 An AWS account may include multiple Phoenix projects, and each Phoenix project may include multiple environments like
 "dev" for developer and pull-request resources, "testing" for testing/staging/qa resources, and "prod" for production
-resources. Phoenix cloudformation templates are used at the account level, project level, and environment level.
+resources. Phoenix cloudformation templates are scoped to the account level, project level, and environment level.
 
-Phoenix ships with many types of CloudFormation templates. Some templates only map to one stack instance, whereas
-other templates may have multiple stacks. For example, The same VPC template may create a dev VPC stack, a testing VPC stack, and a prod VPC stack. All dev resources are deployed into the dev VPC, all testing resources are deployed into the testing VPC, etc. Dev resources can only talk to other dev resources, and only prod resources can talk to prod resources. These environment specific VPC's can be accessed by resources within multiple Phoenix projects in the same AWS account. The
-VPC stacks are shared by multiple Phoenix projects in the same AWS account.
+The "template-vpc.json" file is an **account specific** as well as an **environment specific** stack. This template may create a dev VPC stack, a testing VPC stack, and a prod VPC stack. These VPC stacks can be shared by multiple Phoenix projects. 
 
-The "template-pipeline.json" template is used to create a stack named "{project-name}-pipeline.json". This CI/CD pipeline
-is shared by all environments, so only one stack instance should be created for this template.
+The "template-pipeline.json" file is a **project specific** stack. This template is used to create a stack named "{project-name}-pipeline.json". This CI/CD pipeline is shared by all environments, so only one stack instance should be created for this template.
 
-The "template-ec2.json" stack includes EC2 resources for a single environment. Since there can be multiple environments per Phoenix project, there may multiple stacks associated with this template. The stack name for testing and prod EC2 resources would be named "{project-name}-ec2-testing" and "{project-name}-ec2-prod", respectively.
+The "template-ec2.json" file is an **environment specific** stack. Stack names may include "{project-name}-ec2-testing" and
+"{project-name}-ec2-prod".
 
 #### Account Specific Stacks
 The following templates are used to create stacks to used across the entire AWS account, possibly hosting several Phoenix projects. The stack name will be {template-name}.
