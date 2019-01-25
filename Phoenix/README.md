@@ -9,9 +9,9 @@
         * [template-vpc.json](#template-vpcjson)
         * [template-jenkins.json](#template-jenkinsjson)
         * [template-acm-certificates.json](#template-acm-certificatesjson)
-        * [template-s3-ecr.json](#template-s3-ecr)
+        * [template-s3-ecr.json](#template-s3-ecrjson)
         * [template-ssm-globals-macro.json](#template-ssm-globals-macrojson)
-        * [template-pipeline.json](#template-pipeline)
+        * [template-pipeline.json](#template-pipelinejson)
         * [template-github-webhook.json](#template-github-webhookjson)
         * [template-pull-request-pipeline.json](#template-pull-request-pipelinejson)
         * [template-release-environments-pipeline.json](#template-release-environments-pipelinejson)
@@ -60,13 +60,20 @@ certificates used for things like ECS endpoints, API Gateway endpoints, Cognito 
 all of which are supported by Phoenix.
 
 #### template-s3-ecr.json
-This is a global, non-environment specific CloudFormation template.
+This is a global, non-environment specific CloudFormation template. This template creates an ECR repository for your
+projects docker images as well as several S3 buckets. Logging buckets are created for CodePipeline, CodeBuild, and
+Elastic Load Balancer Logs. Additional buckets are created for source code artifacts like Lambda source bundles
+and Phoenix CloudFormation templates. 
 
 #### template-ssm-globals-macro.json
-This is a global, non-environment specific CloudFormation template.
+This is a global, non-environment specific CloudFormation template. This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a>
+and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function
+that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
 
 #### template-pipeline.json
-This is a global, non-environment specific CloudFormation template.
+This is a global, non-environment specific CloudFormation template. This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which 
+sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation
+stacks of any Phoenix project.
 
 #### template-github-webhook.json
 This is a global, non-environment specific CloudFormation template.
