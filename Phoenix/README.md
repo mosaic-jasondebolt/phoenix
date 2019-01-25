@@ -71,34 +71,26 @@ The "template-ec2.json" file is an **environment specific** stack. Stack names m
 The following templates are used to create stacks to used across the entire AWS account, possibly hosting several Phoenix projects. The stack name will be {template-name}.
 
 ##### template-vpc.json
-This is an environment specific template (dev, testing, prod). ~21 AWS resources are created including VPC's, Internet Gateways, NAT gateways, routing tables, private/public subnets configured for high availability, and VPC Elastic IP's. These VPC stacks export values important by many other stacks.
+Approximately 21 AWS resources are created including VPC's, Internet Gateways, NAT gateways, routing tables, private/public subnets configured for high availability, and VPC Elastic IP's. These VPC stacks export values important by many other stacks.
 
 ##### template-jenkins.json
-This is a global, non-environment specific CloudFormation template. While I highly recommend AWS CodeBuild rather than
-Jenkins for a number of reasons, this template can be used to spin up a single Jenkins node. This template is entirely optional, however.
+While I highly recommend AWS CodeBuild rather than Jenkins for a number of reasons, this template can be used to spin up a single Jenkins node. This template is entirely optional, however.
 
 #### Project Specific Stacks
 The following templates are scoped to a single Phoenix project. Most of these templates are associated with a single stack.
 The stack name will be {project-name}-{template-name}.
 
 ##### template-acm-certificates.json
-This is a global, non-environment specific CloudFormation template. This template creates several different ACM SSL
-certificates used for things like ECS endpoints, API Gateway endpoints, Cognito Auth endpoints, and S3 website endpoints,
-all of which are supported by Phoenix.
+This template creates several different ACM SSL certificates used for things like ECS endpoints, API Gateway endpoints, Cognito Auth endpoints, and S3 website endpoints, all of which are supported by Phoenix.
 
 ##### template-s3-ecr.json
-This is a global, non-environment specific CloudFormation template. This template creates an ECR repository for your
-projects docker images as well as several S3 buckets. Logging buckets are created for CodePipeline, CodeBuild, and
-Elastic Load Balancer Logs. Additional buckets are created for source code artifacts like Lambda source bundles
-and Phoenix CloudFormation templates. 
+This template creates an ECR repository for your projects docker images as well as several S3 buckets. Logging buckets are created for CodePipeline, CodeBuild, and Elastic Load Balancer Logs. Additional buckets are created for source code artifacts like Lambda source bundles and Phoenix CloudFormation templates. 
 
 ##### template-ssm-globals-macro.json
-This is a global, non-environment specific CloudFormation template. This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a>
-and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function
-that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
+This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a> and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
 
 ##### template-pipeline.json
-This is a global, non-environment specific CloudFormation template. This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation stacks of any Phoenix project.
+This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation stacks of any Phoenix project.
 
 ##### template-github-webhook.json
 This is neither a global nor environment specific template, but the template can have multiple stack instances. This template deploys a GitHub webhook on GitHub for one or more events, an API Gateawy endpoint, a Lambda webhook handler, a post webhook Lambda handler, and other resources required for launching GitHub webhooks. The API Gateway endpoint sits between GitHub and Lambda and it used to receive the webhook event from GitHub. This is a very powerful template that can potentially be used to created dozens of GitHub webhooks of different types. Currently Phoenix ships with two stacks (parameter files) for this template, one for pull requests (template-github-webhook-pull-request-params.json) and another for release events (template-github-webhook-release-params.json).
@@ -108,13 +100,10 @@ This is a pull request specific template, supporting multiple stack instances. E
 from within a Lambda function that listens for pull request events from GitHub.
 
 ##### template-release-environments-pipeline.json
-This is a release specific template, supporting multiple stack instances. Each stack instance of this template is associated with a release into a specific release environment. This stack(s) associated with this template are created/updated/deleted
-from within a Lambda function that listens for push events from GitHub where the branch matches the regular expression
-pattern "release-\d{8}$". See the "release_webhook" Lambda function in the lambda folder for details.
+Each stack instance of this template is associated with a release into a specific release environment. This stack(s) associated with this template are created/updated/deleted from within a Lambda function that listens for push events from GitHub where the branch matches the regular expression pattern "release-\d{8}$". See the "release_webhook" Lambda function in the lambda folder for details.
 
 #### template-microservice-cleanup.json
-This is a global, non-environment specific CloudFormation template. This template creates an AWS CodeBuild job that destroys
-all AWS resources for one or more environments (dev, testing, prod, etc). The "buildspec-destory-microservice.yml" buildspec
+This template creates an AWS CodeBuild job that destroys all AWS resources for one or more environments (dev, testing, prod, etc). The "buildspec-destory-microservice.yml" buildspec
 deletes CloudFormation stacks in the appropriate order. A project admin can manually kick off this CodeBuild job to completely destory one or more Phoenix environments.
 
 #### Environment Specific Stacks
@@ -123,6 +112,8 @@ There may be several stack instances per template, each scoped to an different e
 {project-name}-{template-name}-{environment}.
 
 ##### template-ssm-environments.json
+This template deploys environment specific SSM parameters for your project. Any kind of environment specific project parameters/config can be stored as SSM parameters in this template. Once deployed, these parameters are stored in SSM Parameter Store and made available to all other CloudFormation stacks.
+
 Many teams store project configuration values in source code config files. This is a violation of the Twelve-Factor App
 rule of <a href="https://12factor.net/config">store config in the environment, not the source code<a>. 
    
@@ -130,10 +121,6 @@ Phoenix has an easy solution for centrally storing project or environment specif
 available to AWS resources (EC2 instances, Lambda functions, ECS containers, CodeBuild jobs, etc.) via IAM policies.
 This eliminates differences in dev/test/prod parity, increases visibility of configuration values, enhances security,
 and provides a single "source of truth" for your project configuration values. All configuration values are stored in AWS SSM Parameter store, which is currently a free service.
-
-This template is used to create environment specific CloudFormation stacks. Any kind of environment specific project
-parameters/config can be stored as SSM parameters in this template. Once deployed, these parameters are stored in SSM
-Parameter Store and made available to all other CloudFormation stacks.
 
 If you look at the "template-ssm-environments.json" template, you'll see a "DescriptionParam" parameter with a key ending with "description". The value associated with this parameter is stored in SSM parameter store can can be accessed in other CloudFormation templates (See the "Description" value in the Outputs section of the "template-lambda.json" for an example of importing these values). Simply add environment specific parameters to the "template-ssm-environments.json" file
 and add new config values in all of the "template-ssm-environments-params-{environment}.json" parameter files before
@@ -143,10 +130,16 @@ The "PROJECTNAMELambdaMacro" transform at the top section of many CloudFormation
 function in the "Phoenix/lambda" folder make this possible.
 
 ##### template-database.json
+This template deploys an Aurora MySQL cluster and supports
+cluster restores from snapshots. A custom Lambda resource within the template auomatically generates a password for new
+database instances, with some support for password rotation as well. There is also a CodeBuild job defined in this template
+that can be used for database migrations within the CI/CD CodePipeline.
 
 ##### template-ec2.json
+This template creates an EC2 launch configuration, auto scaling group, security groups, EC2 instances, load balancers, an other EC2 resources.
 
 ##### template-lambda.json
+
 
 ##### template-cognito.json
 
