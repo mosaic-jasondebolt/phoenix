@@ -66,21 +66,30 @@ Elastic Load Balancer Logs. Additional buckets are created for source code artif
 and Phoenix CloudFormation templates. 
 
 #### template-ssm-globals-macro.json
-This is a global, non-environment specific CloudFormation template. This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a>
+This is a global, non-environment specific CloudFormation template.
+
+The CloudFormation stacks associated with this template are deployed/updated from a developer workstation using the "deploy-ssm-globals-macro.sh" script.
+
+This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a>
 and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function
 that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
 
 #### template-pipeline.json
-This is a global, non-environment specific CloudFormation template. This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which 
-sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation
-stacks of any Phoenix project.
+This is a global, non-environment specific CloudFormation template.
+
+The CloudFormation stacks associated with this template are deployed/updated from a developer workstation using the "deploy-pipeline.sh" script.
+
+This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation stacks of any Phoenix project.
 
 #### template-github-webhook.json
-This is a global, non-environment specific CloudFormation template. This template deploys a GitHub webhook on GitHub for one or more events, an API Gateawy endpoint, a Lambda webhook handler, a post webhook Lambda handler, and other resources required for launching GitHub webhooks. It's a very general template that can potentially be used to created dozens of GitHub webhooks of different types. Currently Phoenix ships with two stacks (parameter files) for this template, one for pull requests (template-github-webhook-pull-request-params.json) and another for release events (template-github-webhook-release-params.json).
+This is neither a global nor environment specific template, but the template can have multiple stack instances.
 
+The CloudFormation stacks associated with this template are deployed/updated from a developer workstation using the "deploy-github-webhook-pull-request.sh" script.
+
+This template deploys a GitHub webhook on GitHub for one or more events, an API Gateawy endpoint, a Lambda webhook handler, a post webhook Lambda handler, and other resources required for launching GitHub webhooks. The API Gateway endpoint sits between GitHub and Lambda and it used to receive the webhook event from GitHub. This is a very powerful template that can potentially be used to created dozens of GitHub webhooks of different types. Currently Phoenix ships with two stacks (parameter files) for this template, one for pull requests (template-github-webhook-pull-request-params.json) and another for release events (template-github-webhook-release-params.json).
 
 #### template-pull-request-pipeline.json
-This is a global, non-environment specific CloudFormation template.
+This is a pull request specific template, supporting multiple stack instances. Each stack instance of this template is associated with a GitHub pull request pipeline. 
 
 #### template-release-environments-pipeline.json
 This is a global, non-environment specific CloudFormation template.
