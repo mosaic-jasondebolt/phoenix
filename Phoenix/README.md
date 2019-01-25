@@ -76,7 +76,8 @@ sends SNS notifications to the project email upon pipeline failure. This is one 
 stacks of any Phoenix project.
 
 #### template-github-webhook.json
-This is a global, non-environment specific CloudFormation template.
+This is a global, non-environment specific CloudFormation template. This template deploys a GitHub webhook on GitHub for one or more events, an API Gateawy endpoint, a Lambda webhook handler, a post webhook Lambda handler, and other resources required for launching GitHub webhooks. It's a very general template that can potentially be used to created dozens of GitHub webhooks of different types. Currently Phoenix ships with two stacks (parameter files) for this template, one for pull requests (template-github-webhook-pull-request-params.json) and another for release events (template-github-webhook-release-params.json).
+
 
 #### template-pull-request-pipeline.json
 This is a global, non-environment specific CloudFormation template.
