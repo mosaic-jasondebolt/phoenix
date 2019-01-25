@@ -123,11 +123,24 @@ There may be several stack instances per template, each scoped to an different e
 {project-name}-{template-name}-{environment}.
 
 ##### template-ssm-environments.json
+Many teams store project configuration values in source code config files. This is a violation of the Twelve-Factor App
+rule of <a href="https://12factor.net/config">store config in the environment, not the source code<a>. 
+   
+Phoenix has an easy solution for centrally storing project or environment specific configuration values and making them
+available to AWS resources (EC2 instances, Lambda functions, ECS containers, CodeBuild jobs, etc.) via IAM policies.
+This eliminates differences in dev/test/prod parity, increases visibility of configuration values, enhances security,
+and provides a single "source of truth" for your project configuration values. All configuration values are stored in AWS SSM Parameter store, which is currently a free service.
+
 This template is used to create environment specific CloudFormation stacks. Any kind of environment specific project
-parameters/config can be stored as SSM parameters in this template. Once deployed, these parameters are made available
-to all other CloudFormation stacks. If you look at the "template-ssm-environments.json" template, you'll see a
-"DescriptionParam" parameter with a key ending with "description". The value associated with this parameter is stored in
-SSM parameter store can can be accessed in other CloudFormation templates (See the "Description" value in the Outputs section of the "template-lambda.json" for an example of importing these values). CloudFormation macros make this possible.
+parameters/config can be stored as SSM parameters in this template. Once deployed, these parameters are stored in SSM
+Parameter Store and made available to all other CloudFormation stacks.
+
+If you look at the "template-ssm-environments.json" template, you'll see a "DescriptionParam" parameter with a key ending with "description". The value associated with this parameter is stored in SSM parameter store can can be accessed in other CloudFormation templates (See the "Description" value in the Outputs section of the "template-lambda.json" for an example of importing these values). Simply add environment specific parameters to the "template-ssm-environments.json" file
+and add new config values in all of the "template-ssm-environments-params-{environment}.json" parameter files before
+updating these stacks. All stored values will be made available to other authorized AWS resources.
+
+The "PROJECTNAMELambdaMacro" transform at the top section of many CloudFormation templates as well as the "macro" lambda
+function in the "Phoenix/lambda" folder make this possible.
 
 ##### template-database.json
 
