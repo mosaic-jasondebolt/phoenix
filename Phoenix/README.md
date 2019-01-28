@@ -174,6 +174,20 @@ as altering the request body. I used a custom lambda function here to avoid doze
 within template-api.json.
 
 ##### template-ecs-task.json
+This template generates all resources required for a single ECS task service. An ECS task can inlude up to 10 containers
+(1 main container and 9 sidecar containers). If more than one service (which may include up to 10 containers) is required for your Phoenix project, you can create a new set of parameter files and create multiple stack instances of this template. There
+are no limits to the number of services are containers that can be deployed from a Phoenix project. The only limits are AWS 
+limits.
+
+This is probably one of the more advanced CloudFormation templates within Phoenix. It can be used to deploy ECS tasks using
+either Fargate or EC2. It deploys a CloudWatch logs group, a single task definition, an ECS service, an Application Load
+Balancer along with ALB listeners, Auto Scaling rules/alarms/policies based on 500 response errors, security groups, and
+a DNS record set that points to the ALB endpoint. There are also some predefined environment variables that are passed
+into the ECS task, but these can be removed. The lambda password generator and RDS password retriever are legacy and
+can probably also be removed.
+
+Phoenix ships with 4 parameter files for this template (template-ecs-task-**main**-params-{dev,e2e,testing,prod}.json). If your Phoenix project requires, say, a worker service for processing images from an SQS queue, you would create 4 more template files (template-ecs-task-**images**-params-{dev,e2e,testing,prod}.json). Make sure to update all other relevant files
+(buildspec.yml, template-pipeline.json, etc.) to ensure this new ECS service is deployed. 
 
 
 ### CloudFormation JSON Template Parameter Files
