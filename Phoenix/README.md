@@ -35,8 +35,8 @@
             * [Dev Environment](#dev-environment)
                 * [Dev Parameter Files](#dev-parameter-files)
                 * [Dev Deploy Scripts](#dev-deploy-scripts)
-            * [E2E Environment](#e2e-environment)
             * [Testing Environment](#testing-environment)
+            * [E2E Environment](#e2e-environment)
             * [Prod Environment](#prod-environment)
         * [Adding Environments](#adding-environments)
         * [Removing Environments](#removing-environments)
@@ -232,15 +232,28 @@ All CloudFormation parameter files that end with "*-params-dev.json" are gitigno
 parameter files from clashing with eachother. 
 
 ###### Dev Deploy Scripts
+A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
+13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
 
+A developer will execute these scripts locally whenever AWS infrastructure changes are made via CloudFormation templates. For example, if a developer wants to add a new Lambda function to production, they would first add the function to "template-lambda.json" and run "deploy-dev-lambda.sh update" to deploy the lambda function into their dev environment, assuming their dev environment is already up and running. The developer would then test the function in their own isolated dev cloud. Once the developer is satisfied with the lambda function, they will create a new branch, a pull request, and the code will be merged into the master branch. Once the code is merged into the master branch, the lambda function is deployed into testing, e2e, and finally into production.
 
-##### E2E Environment
-E2E stands for "End-to-End". This environment is intended to be used for an additional level of testing between the testing and production environments. The E2E stage may include very expensive or time consuming integration tests that could be decoupled from the main integration tests run in the testing environment. Like all environments shipped this Phoenix, this environment can be removed for most projects.
+Note that developers do not have their own AWS CodePipelines within the Phoenix platform. Instead, developers deploy to one
+stack at at time using one of the dev deploy scripts. Since pipelines work best when multiple stacks need to be created/updated together in a consistent, orchestrated way, pipelines are overkill for developer workflows.
+
+Phoenix deploys all dev resources into the "dev" VPC provided by "template-vpc.json".
 
 ##### Testing Environment
+The Testing environment is an isolated environment for deploying AWS resources used for testing before production. 
+One a testing environment is deployed, a suite of tests can operate on the testing environment. These tests occur after
+the testing environment is deployed to. Such tests may include integration tests, browser tests, load tests, and security
+related tests on infrastructure. Phoenix deploys all testing resources into the "testing" VPC provided by "template-vpc.json".
 
+##### E2E Environment
+E2E stands for "End-to-End". This environment is intended to be used for an additional level of testing between the testing and production environments. The E2E stage may include very expensive or time consuming integration tests that could be decoupled from the main integration tests run in the testing environment. Like all environments shipped this Phoenix, this environment can be removed for most projects. Phoenix deploys all E2E resources into the "testing" VPC provided by "template-vpc.json". There is no need to create a separate VPC just for e2e environments.
 
 ##### Prod Environment
+
+Phoenix deploys all prod resources into the "prod" VPC provided by "template-vpc.json".
 
 #### Adding Environments
 You can add more environments to your Phoenix project by doing the following.
