@@ -139,11 +139,22 @@ that can be used for database migrations within the CI/CD CodePipeline.
 This template creates an EC2 launch configuration, auto scaling group, security groups, EC2 instances, load balancers, an other EC2 resources.
 
 ##### template-lambda.json
-
+This template contains Lambda functions and all resources required for deploying lambda functions, such as IAM roles
+and security groups. Phoenix ships with a VPC proxy lambda function which can proxy HTTP requests from API Gateay to
+to private instances in an ECS cluster. A example "Project" Lambda function which handles requests from API Gateway
+is also provided. Note that Lambda functions that require access to private EC2 or ECS resources must be placed in
+a VPC. 
 
 ##### template-cognito.json
+This template creates AWS Cognito resources such as an AppClient and UserPool. Like all CloudFormation templates, this
+template can be extended.
 
 ##### template-cognito-internals.json
+This template creates AWS Cognito resources that are not fully supported in AWS CloudFormation, such as user pool auth
+domains, resource servers, user pool clients, and route53 record sets. Cognito is one of the AWS services that doesn't have all resources covered/provisionable by CloudFormation. This template solves this problem by using an <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html"> AWS Lambda-backed Custom Resource</a> within the template. Within the template, a Lambda function
+is created from the "lambda/cognito_internals" Python code, and invokes the code during stack create/update/delete operations.
+After the lambda function is invoked, it returns data and control back to the CloudFormation stack. 
+
 
 ##### template-api-custom-domain.json
 
