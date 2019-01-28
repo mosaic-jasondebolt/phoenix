@@ -35,6 +35,7 @@
         * [E2E Environment](#e2e-environment)
         * [Testing Environment](#testing-environment)
         * [Prod Environment](#prod-environment)
+        * [Adding Environments](#adding-environments)
     * [Phoenix Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
         * [GitHub Pull Request](#github-pull-request)
@@ -198,6 +199,8 @@ Phoenix ships with 4 parameter files for this template (template-ecs-task-**main
 CloudFormation uses parameter files to deploy a single template to multiple environments. Currently, Phoenix ships with four
 different environments (dev, e2e, testing, and prod).
 
+Environments can be added, renamed, or removed entirely. 
+
 #### Dev Environment
 
 #### E2E Environment
@@ -205,6 +208,31 @@ different environments (dev, e2e, testing, and prod).
 #### Testing Environment
 
 #### Prod Environment
+
+#### Adding Environments
+You can add more environments to your Phoenix project by doing the following.
+1. Add the environment name "template-ssm-globals-macro-params.json"
+    * Add the name of your new environment to the "PipelineEnvironments" comma delimited list.
+    * Deploy the updated parameter to SSM with "./deploy-ssm-globals-macro.sh update"
+2. Execute the "generate_environment_params.py" helper script to generate the parameter files locally.
+    * Execute "python generate_environment_params.py {your-environment-name}"
+    * See the docstring of the python generate_environment_params.py script for details.
+3. Update the new environment's parameter files with appropriate values.
+    * You should see "template-*-params-{your-new-environment}.json" files in your local Phoenix project.
+4. Update "template-pipeline.json" with a pipeline stage for your new environment.
+   * Copy the entire "DeployToTesting" section, paste to a different area of the template, and rename.
+    ```
+    {
+      "Name": "DeployToTesting",
+      "Actions": [
+        {
+          ...
+        }
+      ]
+     }
+    ```
+5. Update the pipeline stack with "./deploy-pipeline.sh update"
+6. Create a git commit and push your new parameter files to the master branch of your project.
 
 
 ### Deployment Shell Scripts
