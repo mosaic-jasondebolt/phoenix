@@ -30,7 +30,7 @@
             * [template-api.json](#template-apijson)
             * [template-api-deployment.json](#template-api-deploymentjson)
             * [template-ecs-task.json](#template-ecs-taskjson)
-    * [Phoenixt Networking](#phoenix-networking)
+    * [Phoenix Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
         * [GitHub Pull Request](#github-pull-request)
         * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
@@ -46,13 +46,13 @@ Phoenix is not a framework and it does not hide anything, which can be overwhelm
 
 ## Phoenix Overview
 A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
-1) CloudFormation JSON template files.
-2) CloudFormation JSON parameter files.
-3) Deployment shell scripts (mostly used for developer specific clouds).
-4) CodeBuild buildspec.yml files (These are like Jenkins jobs).
-5) Python helper scripts.
-6) Python 3.6 Lambda functions.
-7) An example Dockerfile used for testing/debugging ECS deployments.
+1) [CloudFormation JSON Template Files](#cloudformation-json-template-files)
+2) [CloudFormation JSON Parameter Files](#cloudformation-json-parameter-files)
+3) [Deployment Shell Scripts](#deployment-shell-scripts) (mostly used for developer specific clouds)
+4) [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files) (These are like Jenkins jobs)
+5) [Python Helper Scripts](#python-helper-scripts)
+6) [Python 3.6 Lambda Functions](#python-36-lambda-functions)
+7) [Example Dockerfile used for testing/debugging ECS deployments](#example-dockerfile)
 
 
 ### CloudFormation JSON Template Files
@@ -189,8 +189,18 @@ can probably also be removed.
 Phoenix ships with 4 parameter files for this template (template-ecs-task-**main**-params-{dev,e2e,testing,prod}.json). If your Phoenix project requires, say, a worker service for processing images from an SQS queue, you would create 4 more template files (template-ecs-task-**images**-params-{dev,e2e,testing,prod}.json). Make sure to update all other relevant files
 (buildspec.yml, template-pipeline.json, etc.) to ensure this new ECS service is deployed. 
 
+### CloudFormation JSON Parameter Files
 
-### CloudFormation JSON Template Parameter Files
+### Deployment Shell Scripts
+
+### CodeBuild buildspec.yml Files
+
+### Python Helper Scripts
+
+### Python 3.6 Lambda Functions
+
+### Example Dockerfile
+
 
 ### Phoenix Networking
 * All Phoenix projects ship with a CloudFormation template for creating VPC's.
