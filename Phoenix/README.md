@@ -33,6 +33,8 @@
     * [CloudFormation JSON Parameter Files](#cloudformation-json-parameter-files)
         * [Environments](#environments)
             * [Dev Environment](#dev-environment)
+                * [Dev Parameter Files](#dev-parameter-files)
+                * [Dev Deploy Scripts](#dev-deploy-scripts)
             * [E2E Environment](#e2e-environment)
             * [Testing Environment](#testing-environment)
             * [Prod Environment](#prod-environment)
@@ -217,12 +219,26 @@ own SQS queues, lambda functions, ECS clusters, RDS instances, and API Gateway d
 loops for infrastructure very fast since it provides developers the confidence that their isolated clouds will
 not impact production or any other environment.
 
-These dev environments are complete "developer clouds" that deploy the exact same resources that are deployed
-to in production, although they may be less scalable (fewer compute resources) to save $$. 
+These dev environments are complete "developer clouds" that deploy the exact same AWS resources that are deployed
+to in production, although they may be less scalable (fewer compute resources, lower limit on cpu and memory, etc.) to save on costs. Each developer on your team may have their own developer environment.
+
+###### Dev Parameter Files
+When a new developer joins your project, they should run "python generate_dev_params.py dev{username}" where "username"
+is an all lowercase (no dashes, underscores, or dots) alias for the developer. For example, developer Jane Doe
+would run the command "python generate_dev_params.py devjane" to generate her dev CoudFormation parameter files. Since these
+files are gitignored, they will show up in your IDE/filesystem but cannot be checked into Git.
+
+All CloudFormation parameter files that end with "*-params-dev.json" are gitignored by default to keep different developer
+parameter files from clashing with eachother. 
+
+###### Dev Deploy Scripts
+
 
 ##### E2E Environment
+E2E stands for "End-to-End". This environment is intended to be used for an additional level of testing between the testing and production environments. The E2E stage may include very expensive or time consuming integration tests that could be decoupled from the main integration tests run in the testing environment. Like all environments shipped this Phoenix, this environment can be removed for most projects.
 
 ##### Testing Environment
+
 
 ##### Prod Environment
 
