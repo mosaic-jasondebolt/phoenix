@@ -28,7 +28,7 @@
             * [template-api-custom-domain.json](#template-api-custom-domainjson)
             * [template-api-documentation.json](#template-api-documentationjson)
             * [template-api.json](#template-apijson)
-            * [template-deployment.json](#template-deploymentjson)
+            * [template-api-deployment.json](#template-api-deploymentjson)
             * [template-ecs-task.json](#template-ecs-taskjson)
     * [Phoenixt Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
@@ -155,14 +155,23 @@ domains, resource servers, user pool clients, and route53 record sets. Cognito i
 is created from the "lambda/cognito_internals" Python code, and invokes the code during stack create/update/delete operations.
 After the lambda function is invoked, it returns data and control back to the CloudFormation stack. 
 
-
 ##### template-api-custom-domain.json
+This template deploys a <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-custom-domains.html">custom domain name</a> for your API Gateway API endpoints. It also create an DNS record set
+in Route53 which points to this custom domain. When you deploy an edge-optimized API, API Gateway sets up an Amazon CloudFront distribution and a DNS record to map the API domain name to the CloudFront distribution domain name. Requests for the API are then routed to API Gateway through the mapped CloudFront distribution.
 
 ##### template-api-documentation.json
+This template deploys AWS resources required to support versioned API documentation. Resources include a static S3 website/bucket, Bucket policy, CloudFront distribution, Web Application Firewall ACL, WAF rules, and WAF predicates for managing API documentation access.
 
 ##### template-api.json
+This template deploys your API Gateway REST API. This includes all API REST resources and methods, along with API
+models, auth types, and any other API Gateway resources specific to an API.
 
-##### template-deployment.json
+##### template-api-deployment.json
+This template deploys that API specified in "template-api.json". Note that the declaration of the API (template-api.json) is
+deployed separately from the deployment of the API (template-api-deployment.json). This is because API Gateway deployments are static, immutable "snaphots in time" of a given API. Once an API has been deployed, it cannot be changed, only replaced. This template also contains an <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html"> AWS Lambda-backed Custom Resource</a> from the Python source code in the "lambda/api_internals" folder. The
+lambda function updates the API Gateway with a custom method integration that adds custom headers to the request, as well
+as altering the request body. I used a custom lambda function here to avoid dozens of identical hard coded Python code
+within template-api.json.
 
 ##### template-ecs-task.json
 
