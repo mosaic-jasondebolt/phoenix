@@ -30,6 +30,11 @@
             * [template-api.json](#template-apijson)
             * [template-api-deployment.json](#template-api-deploymentjson)
             * [template-ecs-task.json](#template-ecs-taskjson)
+    * [CloudFormation JSON Parameter Files](#cloudformation-json-parameter-files)
+        * [Dev Environment](#dev-environment)
+        * [E2E Environment](#e2e-environment)
+        * [Testing Environment](#testing-environment)
+        * [Prod Environment](#prod-environment)
     * [Phoenix Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
         * [GitHub Pull Request](#github-pull-request)
@@ -190,6 +195,17 @@ Phoenix ships with 4 parameter files for this template (template-ecs-task-**main
 (buildspec.yml, template-pipeline.json, etc.) to ensure this new ECS service is deployed. 
 
 ### CloudFormation JSON Parameter Files
+CloudFormation uses parameter files to deploy a single template to multiple environments. Currently, Phoenix ships with four
+different environments (dev, e2e, testing, and prod).
+
+#### Dev Environment
+
+#### E2E Environment
+
+#### Testing Environment
+
+#### Prod Environment
+
 
 ### Deployment Shell Scripts
 
