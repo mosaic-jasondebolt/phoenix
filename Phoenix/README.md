@@ -31,10 +31,11 @@
             * [template-api-deployment.json](#template-api-deploymentjson)
             * [template-ecs-task.json](#template-ecs-taskjson)
     * [CloudFormation JSON Parameter Files](#cloudformation-json-parameter-files)
-        * [Dev Environment](#dev-environment)
-        * [E2E Environment](#e2e-environment)
-        * [Testing Environment](#testing-environment)
-        * [Prod Environment](#prod-environment)
+        * [Environments](#environments)
+            * [Dev Environment](#dev-environment)
+            * [E2E Environment](#e2e-environment)
+            * [Testing Environment](#testing-environment)
+            * [Prod Environment](#prod-environment)
         * [Adding Environments](#adding-environments)
         * [Removing Environments](#removing-environments)
     * [Phoenix Networking](#phoenix-networking)
@@ -202,7 +203,9 @@ different environments (dev, e2e, testing, and prod).
 
 Environments can be added, renamed, or removed entirely. 
 
-#### Dev Environment
+#### Environments
+
+##### Dev Environment
 Phoenix supports multiple dev environments. There are 2 basic types of dev environments supported within Phoenix:
 
 1. Developer specific
@@ -217,11 +220,11 @@ not impact production or any other environment.
 These dev environments are complete "developer clouds" that deploy the exact same resources that are deployed
 to in production, although they may be less scalable (fewer compute resources) to save $$. 
 
-#### E2E Environment
+##### E2E Environment
 
-#### Testing Environment
+##### Testing Environment
 
-#### Prod Environment
+##### Prod Environment
 
 #### Adding Environments
 You can add more environments to your Phoenix project by doing the following.
