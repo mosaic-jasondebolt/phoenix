@@ -202,6 +202,19 @@ different environments (dev, e2e, testing, and prod).
 Environments can be added, renamed, or removed entirely. 
 
 #### Dev Environment
+Phoenix supports multiple dev environments. There are 2 basic types of dev environments supported within Phoenix:
+
+1. Developer specific
+2. Github pull request specific
+
+Developer Specific environments are environments used only by a given developer to assist in development of not
+only application source code, but infrastructure source code (CloudFormation templates). Developers can have their
+own SQS queues, lambda functions, ECS clusters, RDS instances, and API Gateway deployments. This makes feedback
+loops for infrastructure very fast since it provides developers the confidence that their isolated clouds will
+not impact production or any other environment.
+
+These dev environments are complete "developer clouds" that deploy the exact same resources that are deployed
+to in production, although they may be less scalable (fewer compute resources) to save $$. 
 
 #### E2E Environment
 
