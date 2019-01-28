@@ -36,6 +36,7 @@
         * [Testing Environment](#testing-environment)
         * [Prod Environment](#prod-environment)
         * [Adding Environments](#adding-environments)
+        * [Removing Environments](#removing-environments)
     * [Phoenix Networking](#phoenix-networking)
     * [Phoenix Pipelines](#phoenix-pipelines)
         * [GitHub Pull Request](#github-pull-request)
@@ -247,6 +248,30 @@ You can add more environments to your Phoenix project by doing the following.
 5. Update the pipeline stack with "./deploy-pipeline.sh update"
 6. Create a git commit and push your new parameter files to the master branch of your project.
 
+#### Removing Environments
+You can remove environments from your Phoenix project by doing the following.
+1. Remove the environment name "template-ssm-globals-macro-params.json"
+    * Remove the name of the environment from the "PipelineEnvironments" comma delimited list.
+    * Deploy the updated parameter to SSM with "./deploy-ssm-globals-macro.sh update"
+2. Execute the "generate_environment_params.py" helper script to generate the parameter files locally.
+    * Execute "python generate_environment_params.py {your-environment-name} **--delete**"
+    * See the docstring of the python generate_environment_params.py script for details.
+3. Verify that the environment parameter files have been deleted in your local project's Phoenix folder:
+    * You should no longer see "template-*-params-{your-new-environment}.json" files in your local Phoenix project.
+4. Update "template-pipeline.json" with a pipeline stage for your new environment.
+   * Remove the entire "DeployTo{name-of-environment}" section from within "template-pipeline.json":
+    ```
+    {
+      "Name": "DeployTo{name-of-environment}",
+      "Actions": [
+        {
+          ...
+        }
+      ]
+     }
+    ```
+5. Update the pipeline stack with "./deploy-pipeline.sh update"
+6. Create a git commit and push your new parameter files to the master branch of your project.
 
 ### Deployment Shell Scripts
 
