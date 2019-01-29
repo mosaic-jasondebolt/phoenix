@@ -382,6 +382,57 @@ within a Phoenix projects are deployed to via **AWS CodePipeline**.
 #### Account Specific Shell Scripts
 
 ##### deploy-vpc.sh
+This scripts deploys "template-vpc.json" in 3 different environments (dev, testing, prod).
+
+USAGE:
+```
+./deploy-vpc.sh create
+./deploy-vpc.sh update
+```
+
+A Phoenix project can contain any number of VPC's, but there three environments supported (dev, testing, prod) out of the box. Multiple Phoenix projects within the same AWS account can use the same VPC's. The VPC CloudFormation stacks export values such as VPC and Subnet Id's to be imported by other CloudFormation stacks. Each VPC includes the minimal networking resources for high availability, including 2 private subnets and 2 public subnets per VPC, each in different availability zones. VPC templates can be modified if more or less networking resources are required.
+
+You can use AWS CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html"> Stack Imports</a> to import physical ID's and ARN's from the VPC stacks. Below is an example of
+an environment aware template ("template-ecs-task.json") that imports the correct subnet ID's for for a given environment (dev, testing, prod) and a given subnet configuration (public or private):
+```
+"Parameters": {
+    "VPCPrefix": {
+      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
+      "Type": "String"
+    },
+    "PublicOrPrivate": {
+      "Description": "The type of subnets to place the ELB for this service in.",
+      "AllowedValues": ["Public", "Private"],
+      "Default": "Public",
+      "Type": "String"
+    },
+    ...
+  },
+  "Resources": {
+   ...
+            "Subnets" : [
+              {"Fn::ImportValue": { "Fn::Sub": [
+                "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ1", {
+                  "VPCPrefix": {"Ref": "VPCPrefix"},
+                  "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
+                }]
+              }},
+              {"Fn::ImportValue": { "Fn::Sub": [
+                "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ2", {
+                  "VPCPrefix": {"Ref": "VPCPrefix"},
+                  "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
+                }]
+              }}
+            ]
+    ...
+    }
+```
+
+This may evaluate to:
+```
+subnets: [ 'subnet-02e14d8b95a3b75f3', 'subnet-0e070b582f9c4add2']
+```
+
 
 ##### deploy-jenkins.sh
 
@@ -408,6 +459,7 @@ within a Phoenix projects are deployed to via **AWS CodePipeline**.
 
 #### Developer Environment Specific Shell Scripts
 
+
 A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
 13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
 
@@ -422,16 +474,6 @@ A dev deploy script is a shell script within Phoenix that matches the file patte
 
 ### Example Dockerfile
 
-
-### Phoenix Networking
-* All Phoenix projects ship with a CloudFormation template for creating VPC's.
-* A Phoenix project can contain any number of VPC's, but there three environments supported (dev, testing, prod) out of the box.
-* Multiple Phoenix projects within the same AWS account can use the same VPC's.
-* The VPC CloudFormation stacks export values such as VPC and Subnet Id's to be imported by other CloudFormation stacks.
-* Each VPC includes the minimal networking resources for high availability, including 2 private subnets and 2 public subnets per VPC, each in different availability zones.
-* VPC templates can be modified if more or less networking resources are required.
-
-<img src="/Phoenix/images/vpc-3.png"/>
 
 ### Phoenix Pipelines
 * A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
