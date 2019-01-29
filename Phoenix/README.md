@@ -265,7 +265,14 @@ related tests on infrastructure. Phoenix deploys all testing resources into the 
 E2E stands for "End-to-End". This environment is intended to be used for an additional level of testing between the testing and production environments. The E2E stage may include very expensive or time consuming integration tests that could be decoupled from the main integration tests run in the testing environment. Like all environments shipped this Phoenix, this environment can be removed for most projects. Phoenix deploys all E2E resources into the "testing" VPC provided by "template-vpc.json". There is no need to create a separate VPC just for e2e environments.
 
 ##### Prod Environment
-The production environment 
+The production environment is where all production infrastructure and build artifacts are deployed into. The same source code and build artifacts that are deployed into both testing and e2e environments are deployed into production. Also, the same
+CloudFormation templates that are deployed into both testing and e2e environments are deployed into production. The only
+difference between testing, e2e, and production environments should be the configuration, which can be found in CloudFormation
+parameter files. These configuration values are used to configure AWS infrastructure and are made available to various
+execution environments for build artifacts to consume. The execution environments include those supporting Lambda runtimes, ECS container runtimes, AWS CodeBuild runtimes, or virtual machine runtimes on EC2. 
+
+In the future, Phoenix may support multiple production environments for blue/green type deployments across entire environments using CNAME switching. Blue/green deployments are already available for some indiviual components within an environment, such
+as ECS services and Lambda functions.
 
 Phoenix deploys all prod resources into the "prod" VPC provided by "template-vpc.json".
 
