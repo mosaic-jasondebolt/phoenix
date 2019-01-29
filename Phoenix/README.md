@@ -44,7 +44,18 @@
         * [Removing Environments](#removing-environments)
     * [Deployment Shell Scripts](#deployment-shell-scripts)
         * [Account Specific Shell Scripts](#account-specific-shell-scripts)
+             * [deploy-vpc.sh](#deploy-vpcsh)
+             * [deploy-jenkins.sh](#deploy-jenkinssh)
         * [Project Specific Shell Scripts](#project-specific-shell-scripts)
+            * [deploy-acm-certificates.sh](#deploy-acm-certificatessh)
+            * [deploy-s3-ecr.sh](#deploy-acm-certificatessh)
+            * [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh)
+            * [deploy-pipeline.sh](#deploy-pipelinesh)
+            * [deploy-github-access-token.sh](#deploy-github-access-tokensh)
+            * [deploy-github-webhook-pull-request.sh](#deploy-github-webhook-pull-requestsh)
+            * [deploy-github-webhook-release.sh](#deploy-github-webhook-releasesh)
+            * [deploy-microservice-init.sh](#deploy-microservice-initsh)
+            * [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh)
         * [Developer Environment Specific Shell Scripts](#developer-environment-specific-shell-scripts)
     * [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files)
     * [Python Helper Scripts](#python-helper-scripts)
@@ -368,10 +379,32 @@ It is important to note that deployment shell scripts **do not** deploy to any p
 These shell scripts are scoped only to the account, project, or developer specific environments. All of the other environments
 within a Phoenix projects are deployed to via **AWS CodePipeline**. 
 
-
 #### Account Specific Shell Scripts
 
+##### deploy-vpc.sh
+
+##### deploy-jenkins.sh
+
+
 #### Project Specific Shell Scripts
+
+##### deploy-acm-certificates.sh
+
+##### deploy-s3-ecr.sh
+
+##### deploy-ssm-globals-macro.sh
+
+##### deploy-pipeline.sh
+
+##### deploy-github-access-token.sh
+
+##### deploy-github-webhook-pull-request.sh
+
+##### deploy-github-webhook-release.sh
+
+##### deploy-microservice-init.sh
+
+##### deploy-microservice-cleanup.sh
 
 #### Developer Environment Specific Shell Scripts
 
