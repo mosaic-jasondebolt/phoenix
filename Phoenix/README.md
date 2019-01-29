@@ -381,6 +381,9 @@ These shell scripts are scoped only to the account, project, or developer specif
 within a Phoenix projects are deployed to via **AWS CodePipeline**. 
 
 ### Account Specific Shell Scripts
+Account specific deployment scripts are used to deploy CloudFormation stacks used across the entire AWS account. These
+scripts will probably not be used by application developers. Usage will likely be limited to DevOps team members
+when create a new AWS account for a new Phoenix project.
 
 #### deploy-vpc.sh
 Deploys a dev VPC, a testing VPC, and a prod VPC.
@@ -406,7 +409,7 @@ template-vpc-params-prod.json
 #### deploy-jenkins.sh
 Deploys a single Jenkins instance.
 
-USAGE:
+Usage:
 ```
 ./deploy-jenkins.sh
 ```
@@ -422,10 +425,26 @@ template-jenkins.json
 template-jenkins-params.json
 ```
 
-
 ### Project Specific Shell Scripts
+Project specific deployment scripts are used to deploy CloudFormation stacks used across all environments (dev, testing, prod, etc.) of a Phoenix project. These scripts will probably not be used by most application developers. Usage will likely be limited to team leads for a given Phoenix project, or DevOps team members. The only scripts that developers probably
+need to be aware of are "deploy-pipeline.sh" and "deploy-ssm-globas-macro.sh".
 
 #### deploy-acm-certificates.sh
+Deploys AWS ACM Certificates for a Phoenix project in a single CloudFormation stack. Upon running this script,
+**you must login into the <a href="https://console.aws.amazon.com/acm/home?region=us-east-1#/">AWS ACM console</a>
+and manually approve the creation of CNAMES for each certificate**.
+
+Usage:
+```
+./deploy-acm-certificates.sh create
+./deploy-acm-certificates.sh update
+```
+
+Related Files:
+```
+deploy-acm-certifactes.sh
+template-acm-certificates.json
+```
 
 #### deploy-s3-ecr.sh
 
@@ -442,6 +461,7 @@ template-jenkins-params.json
 #### deploy-microservice-init.sh
 
 #### deploy-microservice-cleanup.sh
+
 
 ### Developer Environment Specific Shell Scripts
 
