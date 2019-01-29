@@ -61,11 +61,11 @@
 * [Python Helper Scripts](#python-helper-scripts)
 * [Python 3.6 Lambda Functions](#python-36-lambda-functions)
 * [Example Dockerfile used for testing/debugging ECS deployments](#example-dockerfile)
+* [CloudFormation Stack Imports](#cloudformation-stack-imports)
 * [Phoenix Pipelines](#phoenix-pipelines)
     * [GitHub Pull Request](#github-pull-request)
     * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
-
 
 
 ## What is Phoenix
@@ -383,9 +383,9 @@ within a Phoenix projects are deployed to via **AWS CodePipeline**.
 ### Account Specific Shell Scripts
 
 #### deploy-vpc.sh
-This scripts deploys "template-vpc.json" in 3 different environments (dev, testing, prod).
+Deploys a dev VPC, a testing VPC, and a prod VPC.
 
-USAGE:
+Usage:
 ```
 ./deploy-vpc.sh create
 ./deploy-vpc.sh update
@@ -393,6 +393,74 @@ USAGE:
 
 A Phoenix project can contain any number of VPC's, but there three environments supported (dev, testing, prod) out of the box. Multiple Phoenix projects within the same AWS account can use the same VPC's. The VPC CloudFormation stacks export values such as VPC and Subnet Id's to be imported by other CloudFormation stacks. Each VPC includes the minimal networking resources for high availability, including 2 private subnets and 2 public subnets per VPC, each in different availability zones. VPC templates can be modified if more or less networking resources are required.
 
+Related Files:
+```
+deploy-vpc.sh
+template-vpc.json
+template-vpc-params-dev.json
+template-vpc-params-testing.json
+template-vpc-params-prod.json
+```
+
+
+#### deploy-jenkins.sh
+Deploys a single Jenkins instance.
+
+USAGE:
+```
+./deploy-jenkins.sh
+```
+
+You can deploy the Jenkins instance in a private or public subnet, but private is recommended. If you need to
+update this stack, it it recommended to delete the stack and restore it again from a snapshot. If this CloudFormation stack is deleted, an EBS volume snapshot is created. 
+
+
+Related Files:
+```
+deploy-jenkins.sh
+template-jenkins.json
+template-jenkins-params.json
+```
+
+
+### Project Specific Shell Scripts
+
+#### deploy-acm-certificates.sh
+
+#### deploy-s3-ecr.sh
+
+#### deploy-ssm-globals-macro.sh
+
+#### deploy-pipeline.sh
+
+#### deploy-github-access-token.sh
+
+#### deploy-github-webhook-pull-request.sh
+
+#### deploy-github-webhook-release.sh
+
+#### deploy-microservice-init.sh
+
+#### deploy-microservice-cleanup.sh
+
+### Developer Environment Specific Shell Scripts
+
+
+A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
+13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
+
+
+
+
+## CodeBuild buildspec.yml Files
+
+## Python Helper Scripts
+
+## Python 3.6 Lambda Functions
+
+## Example Dockerfile
+
+#### CloudFormation Stack Imports
 You can use AWS CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html"> Stack Imports</a> to import physical ID's and ARN's from the VPC stacks. Below is an example of
 an environment aware template ("template-ecs-task.json") that imports the correct subnet ID's for for a given environment (dev, testing, prod) and a given subnet configuration (public or private):
 ```
@@ -434,46 +502,6 @@ This may evaluate to:
 subnets: [ 'subnet-02e14d8b95a3b75f3', 'subnet-0e070b582f9c4add2']
 ```
 
-
-#### deploy-jenkins.sh
-
-
-### Project Specific Shell Scripts
-
-#### deploy-acm-certificates.sh
-
-#### deploy-s3-ecr.sh
-
-#### deploy-ssm-globals-macro.sh
-
-#### deploy-pipeline.sh
-
-#### deploy-github-access-token.sh
-
-#### deploy-github-webhook-pull-request.sh
-
-#### deploy-github-webhook-release.sh
-
-#### deploy-microservice-init.sh
-
-#### deploy-microservice-cleanup.sh
-
-### Developer Environment Specific Shell Scripts
-
-
-A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
-13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
-
-
-
-
-## CodeBuild buildspec.yml Files
-
-## Python Helper Scripts
-
-## Python 3.6 Lambda Functions
-
-## Example Dockerfile
 
 
 ## Phoenix Pipelines
