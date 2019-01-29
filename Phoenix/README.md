@@ -459,8 +459,7 @@ avoid hitting the ECR limit.
 S3 buckets are created for load balancer logs, storing versioned lambda functions, code build logs, code pipeline logs,
 and project cloudformation templates.
 
-This stack also creates a few lambda custom function to automatically delete S3 files and ECR images when S3 buckets and
-ECR repositories are deleted.
+This stack also creates and calls a few custom lambda functions to automatically delete S3 files and ECR images when S3 buckets and ECR repositories are deleted upon stack deletion. If these lambda functions didn't exist, this stack would not be able to be deleted since S3 buckets and ECR repos cannot be deleted if they contain artifacts/files.
 
 Usage:
 ```
@@ -472,9 +471,27 @@ Related Files:
 ```
 deploy-s3-ecr.sh
 template-s3-ecr.json
+lambda/delete_s3_files/lambda_function.py
+lambda/delete_ecr_repos/lambda_function.py
 ```
 
 #### deploy-ssm-globals-macro.sh
+Deploys project wide configuration values, such as project and domain name, into SSM Parameter Store. This script also
+deploys an <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">AWS CloudFormation Macro Lambda function</a> as well as other project wide macros.
+
+
+Usage:
+```
+./deploy-ssm-globals-macro.sh create
+./deploy-ssm-globals-macro.sh update
+```
+
+Related Files:
+```
+deploy-ssm-globals-macro.sh
+template-ssm-globals-macro-params.json
+template-ssm-globals-macro.json
+```
 
 #### deploy-pipeline.sh
 
