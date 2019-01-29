@@ -214,13 +214,22 @@ Phoenix supports multiple dev environments. There are 2 basic types of dev envir
 2. Github pull request specific
 
 Developer Specific environments are environments used only by a given developer to assist in development of not
-only application source code, but infrastructure source code (CloudFormation templates). Developers can have their
+only application source code, but also infrastructure code (CloudFormation templates). Developers can have their
 own SQS queues, lambda functions, ECS clusters, RDS instances, and API Gateway deployments. This makes feedback
 loops for infrastructure very fast since it provides developers the confidence that their isolated clouds will
 not impact production or any other environment.
 
 These dev environments are complete "developer clouds" that deploy the exact same AWS resources that are deployed
-to in production, although they may be less scalable (fewer compute resources, lower limit on cpu and memory, etc.) to save on costs. Each developer on your team may have their own developer environment.
+to in production, although they may be less scalable (fewer compute resources, lower limit on cpu and memory, etc.)
+to save on costs. Each developer on your team may have their own developer environment.
+
+There is no "single" dev environment within Phoenix. However, there may be shared resources across all dev environments,
+such as RDS/Aurora/MySQL database instances. The reason for sharing expensive resources like databases is to save on costs.
+However, keep in mind that you may need to scale up shared dev environment resources to handle workloads associated with larger development teams. For example, increasing the instance size of a dev Aurora MySQL instance will allow a larger number of db connections from many different developer environments.
+
+GitHub pull request specific environments are similar to developer specific environments, but instead of being scoped
+to the developer, they are scoped to a specific GitHub pull request. Also, whereas developer specific environments
+have no pipelines, GitHub pull requests **do** have pipelines. These pipelines are ephemeral and live as long as the pull request is open. Any new git commits that are pushed to the branch associated with the pull request will send revisions down the pull request pipeline, building and optionally deploying new artifacts along the way into a separate, isolated AWS environment. The build/test/lint CodeBuild jobs associated with the pull request pipelines point to the same buildspec.yml files as are used in all other environments, including production.
 
 ###### Dev Parameter Files
 When a new developer joins your project, they should run "python generate_dev_params.py dev{username}" where "username"
@@ -252,6 +261,7 @@ related tests on infrastructure. Phoenix deploys all testing resources into the 
 E2E stands for "End-to-End". This environment is intended to be used for an additional level of testing between the testing and production environments. The E2E stage may include very expensive or time consuming integration tests that could be decoupled from the main integration tests run in the testing environment. Like all environments shipped this Phoenix, this environment can be removed for most projects. Phoenix deploys all E2E resources into the "testing" VPC provided by "template-vpc.json". There is no need to create a separate VPC just for e2e environments.
 
 ##### Prod Environment
+The production environment 
 
 Phoenix deploys all prod resources into the "prod" VPC provided by "template-vpc.json".
 
