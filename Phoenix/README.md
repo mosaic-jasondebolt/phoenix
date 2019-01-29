@@ -479,6 +479,43 @@ lambda/delete_ecr_repos/lambda_function.py
 Deploys project wide configuration values, such as project and domain name, into SSM Parameter Store. This script also
 deploys an <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">AWS CloudFormation Macro Lambda function</a> as well as other project wide macros.
 
+The project wide configuration values include, but aren't limited to, the following:
+* Organization name
+    * This would typically be the name of the company/organization associated with the repo.
+* Project name
+    * The name of your project.
+* Git repo name
+    * The name of your git repository in GitHub.
+* Git root project branch
+    * The name of the git branch used to deploy to production
+* Git current project branch
+    * This is a deprecated field that can just be the same as the root project branch.
+* GitHub organization
+    * The name of your GitHub Organization
+* Domain
+    * The name of your domain (use "api.your-domain.com" for API's, and "your-domain.com" for applications)
+* Hosted Zone ID
+    * You must manually create a public hosted zone in the AWS Route53 console and enter this ID here.
+* Key pair name
+    * You must manually create an EC2 SSH key and enter the name of the key here (use "us-east-1-{your-aws-account-id}"
+* Notification email
+    * An email to send build notification to and other alerts
+* IAM Role
+    * You must manually create an IAM role with admin permissions which includes secretsmanager.amazonaws.com, cloudformation.amazonaws.com, codepipeline.amazonaws.com, codebuild.amazonaws.com, and lambda.amazonaws.com in the trust policy. This will get you started, but should obviously be changed if strong security is a concern.
+* Code Build Docker Image
+    * Enter the ID, including the image tag, of the ECR image you are using for your AWS CodeBuild jobs.
+* NodeJS Build Docker Image
+    * For build that require NodeJS, enter the ID, including the image tag, of the ECR image you are using. You can also just use the same ID as the code build docker image above.
+* Git URL
+    * This can just be "https://github.com"
+* Pipeline Environments
+    * A comma delimited list of environment names you wish to deploy to in the main pipeline.
+* Release Environments
+    * A comma delimited list of release environment names you wish to deploy to in all release pipelines.
+* Version
+    * The VERSION_ID value in this field will usually be replace with a timestamp from one of the deployment shell scripts.
+
+
 
 Usage:
 ```
