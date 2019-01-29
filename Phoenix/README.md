@@ -33,6 +33,8 @@
     * [CloudFormation JSON Parameter Files](#cloudformation-json-parameter-files)
         * [Environments](#environments)
             * [Dev Environment](#dev-environment)
+                * [Developer Specific Environments](#developer-specific-environments)
+                * [GitHub Pull Request Specific Environments](#github-pull-request-specific-environments)
                 * [Dev Parameter Files](#dev-parameter-files)
                 * [Dev Deploy Scripts](#dev-deploy-scripts)
             * [Testing Environment](#testing-environment)
@@ -213,6 +215,7 @@ Phoenix supports multiple dev environments. There are 2 basic types of dev envir
 1. Developer specific
 2. Github pull request specific
 
+###### Developer Specific Environments
 Developer Specific environments are environments used only by a given developer to assist in development of not
 only application source code, but also infrastructure code (CloudFormation templates). Developers can have their
 own SQS queues, lambda functions, ECS clusters, RDS instances, and API Gateway deployments. This makes feedback
@@ -227,6 +230,7 @@ There is no "single" dev environment within Phoenix. However, there may be share
 such as RDS/Aurora/MySQL database instances. The reason for sharing expensive resources like databases is to save on costs.
 However, keep in mind that you may need to scale up shared dev environment resources to handle workloads associated with larger development teams. For example, increasing the instance size of a dev Aurora MySQL instance will allow a larger number of db connections from many different developer environments.
 
+###### GitHub Pull Request Specific Environments
 GitHub pull request specific environments are similar to developer specific environments, but instead of being scoped
 to the developer, they are scoped to a specific GitHub pull request. Also, whereas developer specific environments
 have no pipelines, GitHub pull requests **do** have pipelines. These pipelines are ephemeral and live as long as the pull request is open. Any new git commits that are pushed to the branch associated with the pull request will send revisions down the pull request pipeline, building and optionally deploying new artifacts along the way into a separate, isolated AWS environment. The build/test/lint CodeBuild jobs associated with the pull request pipelines point to the same buildspec.yml files as are used in all other environments, including production.
