@@ -484,6 +484,22 @@ All SSM parameters deployed from this script are deployed to the following SSM p
 /microservice/{your-project-name}/global/{ssm-parameter-key}
 ```
 
+You can access SSM parameters in the <a href="https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Parameters:sort=Name">AWS EC2 console here</a>.
+
+This script also deploys three different Lambda functions. One function is responsible for deleting network interfaces
+associated with VPC Lambda functions (Lambda functions deployed within a VPC) that do not get automatically cleaned up
+when deleting CloudFormation stacks with Lambda functions. If this function didn't exist within Phoenix, it could take up
+to 45 minutes to delete CloudFormation stacks with VPC Lambda functions. You can read more about this issue <a href="https://forums.aws.amazon.com/thread.jspa?messageID=756642">here</a>. Another function is responsible for creating/updating/deleting encrypted SSM secrets during CloudFormation create/update/delete operations. Both of these
+functions have exported ARN's that can be imported and used by other CloudFormation stacks.
+
+Lastly, there is a CloudFormation Lambda Macro function that reads all SSM parameters into memory and renders CloudFormation templates dynamically. This macro is used by most Phoenix CloudFormation templates. The macro solves the following problems:
+
+1. Provides central storage of global and environment specific SSM parameters across a small known set of files.
+2. Avoids duplication of "template-ssm-globals-macro-params.json" params accross dozens of Cloudformation parameter files.
+3. Avoids the CloudFormation limit of 60 SSM parameters per stack.
+4. Avoids rate limiting associated with bursty SSM parameter calls from CloudFormation stacks.
+5. Avoids having to add dozens of parameters to each CloudFormation template.
+6. Enables easier git merges between the core Phoenix repository and other Phoenix repositories since project config is limited to a small group of files.
 
 
 Usage:
@@ -540,9 +556,6 @@ The project wide configuration values include, but aren't limited to, the follow
 * Version
     * The VERSION_ID value in this field will usually be replace with a timestamp from one of the deployment shell scripts.
 
-
-
-In addition to deploying SSM parameters
 
 
 #### deploy-pipeline.sh
