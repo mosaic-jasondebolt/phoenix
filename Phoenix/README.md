@@ -364,6 +364,11 @@ All shell scripts within Phoenix follow the same pattern:
 6. Create and execute CloudFormation change set
 
 
+It is important to note that deployment shell scripts **do not** deploy to any pipeline environments (testing, e2e, prod).
+These shell scripts are scoped only to the account, project, or developer specific environments. All of the other environments
+within a Phoenix projects are deployed to via **AWS CodePipeline**. 
+
+
 #### Account Specific Shell Scripts
 
 #### Project Specific Shell Scripts
