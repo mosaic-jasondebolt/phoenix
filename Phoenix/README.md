@@ -479,6 +479,31 @@ lambda/delete_ecr_repos/lambda_function.py
 Deploys project wide configuration values, such as project and domain name, into SSM Parameter Store. This script also
 deploys an <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">AWS CloudFormation Macro Lambda function</a> as well as other project wide macros.
 
+All SSM parameters deployed from this script are deployed to the following SSM path:
+```
+/microservice/{your-project-name}/global/{ssm-parameter-key}
+```
+
+
+
+Usage:
+```
+./deploy-ssm-globals-macro.sh create
+./deploy-ssm-globals-macro.sh update
+```
+
+Related Files:
+```
+deploy-ssm-globals-macro.sh
+template-ssm-globals-macro-params.json
+template-ssm-globals-macro.json
+lambda/macro/lambda_function.py
+lambda/delete_network_interface/lambda_function.py
+lambda/ssm_secret/lambda_function.py
+```
+
+Before deploying this script, you must configure your project values in "template-ssm-globals-macro-params.json":
+
 The project wide configuration values include, but aren't limited to, the following:
 * Organization name
     * This would typically be the name of the company/organization associated with the repo.
@@ -517,18 +542,8 @@ The project wide configuration values include, but aren't limited to, the follow
 
 
 
-Usage:
-```
-./deploy-ssm-globals-macro.sh create
-./deploy-ssm-globals-macro.sh update
-```
+In addition to deploying SSM parameters
 
-Related Files:
-```
-deploy-ssm-globals-macro.sh
-template-ssm-globals-macro-params.json
-template-ssm-globals-macro.json
-```
 
 #### deploy-pipeline.sh
 
