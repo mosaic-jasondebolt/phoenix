@@ -43,6 +43,9 @@
         * [Adding Environments](#adding-environments)
         * [Removing Environments](#removing-environments)
     * [Deployment Shell Scripts](#deployment-shell-scripts)
+        * [Account Specific Shell Scripts](#account-specific-shell-scripts)
+        * [Project Specific Shell Scripts](#project-specific-shell-scripts)
+        * [Developer Environment Specific Shell Scripts](#developer-environment-specific-shell-scripts)
     * [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files)
     * [Python Helper Scripts](#python-helper-scripts)
     * [Python 3.6 Lambda Functions](#python-36-lambda-functions)
@@ -332,6 +335,46 @@ You can remove environments from your Phoenix project by doing the following.
 6. Create a git commit and push your new parameter files to the master branch of your project.
 
 ### Deployment Shell Scripts
+Phoenix uses shell scripts for deploying both CloudFormation stacks and Lambda functions. There are 3 types of shell scripts
+within Phoenix: 
+
+1. Account Specific
+2. Project Specific
+3. Developer Environment Specific
+
+The account specific shell scripts deploy CloudFormation stacks that can be shared account multiple Phoenix projects in
+the same AWS account. This currently includes dev/testing/prod VPC stacks and the Jenkins stack (which is optional).
+These scripts are mostly used by DevOps when creating a new AWS account.
+
+The project specific shell scripts deploy CloudFormation stacks and Lambda functions shared by all environments within
+a single Phoenix project. This includes S3 buckets, ECR repos, GitHub webhook infrastructure, the main project pipeline,
+ACM/SSL certificates, etc. These scripts are mostly used by DevOps when creating a new AWS account, but may also be used
+by a project team lead to alter the pipeline or to add global SSM parameters.
+
+The developer environment specific shell scripts deploy "developer cloud" CloudFormation stacks and Lambda functions. These
+shell scripts make up the bulk of shell scripts within Phoenix are used mostly be developers who make changes to AWS
+infrastructure via CloudFormation templates.
+
+All shell scripts within Phoenix follow the same pattern:
+1. Validate shell script arguments
+2. Extract properties from the "template-ssm-globals-macro-params.json" file and store in local variables.
+3. Build Lambda zip bundles and upload to S3 bucket (optional step)
+4. Massage the CloudFormation template and parameter file a little (Set VERSION_ID, make macro name unique, etc.)
+5. Validate the CloudFormation template
+6. Create and execute CloudFormation change set
+
+
+#### Account Specific Shell Scripts
+
+#### Project Specific Shell Scripts
+
+#### Developer Environment Specific Shell Scripts
+
+A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
+13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
+
+
+
 
 ### CodeBuild buildspec.yml Files
 
