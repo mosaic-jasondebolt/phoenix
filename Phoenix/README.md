@@ -414,8 +414,12 @@ Usage:
 ./deploy-jenkins.sh
 ```
 
-You can deploy the Jenkins instance in a private or public subnet, but private is recommended. If you need to
-update this stack, it it recommended to delete the stack and restore it again from a snapshot. If this CloudFormation stack is deleted, an EBS volume snapshot is created. 
+You can deploy the Jenkins instance in a private or public subnet, but private is recommended. This instance is deployed
+into the dev VPC by default, but this can be changed.
+
+A CNAME with a default prefix of "jenkins.{your-domain}", where {your-domain} can be found in "template-ssm-globals-macro-params.json" is added by default, but this can be changed. 
+
+If you need to update this stack, it it recommended to delete the stack and restore it again from a snapshot. If this CloudFormation stack is deleted, an EBS volume snapshot is created.
 
 
 Related Files:
@@ -447,6 +451,28 @@ template-acm-certificates.json
 ```
 
 #### deploy-s3-ecr.sh
+Deploys S3 buckets and an ECR repository for your Phoenix project.
+
+A single ECR repository is created with a life cycle policy that removes docker images after the first 900 images to
+avoid hitting the ECR limit.
+
+S3 buckets are created for load balancer logs, storing versioned lambda functions, code build logs, code pipeline logs,
+and project cloudformation templates.
+
+This stack also creates a few lambda custom function to automatically delete S3 files and ECR images when S3 buckets and
+ECR repositories are deleted.
+
+Usage:
+```
+./deploy-s3-ecr.sh create
+./deploy-s3-ecr.sh update
+```
+
+Related Files:
+```
+deploy-s3-ecr.sh
+template-s3-ecr.json
+```
 
 #### deploy-ssm-globals-macro.sh
 
