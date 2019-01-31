@@ -646,6 +646,13 @@ Usage:
 #### deploy-github-webhook-pull-request.sh
 Deploys a pull request API Gateway endpoint and Lambda handler to dynamically generate pull request pipelines.
 
+This script deploys a CloudFormation stack that does the following:
+1. Deploys an API Gateway endpoint (for the GitHub webhook to send the pull request event to)
+2. Generates a shared secret used by both GitHub and Lambda to HMAC authenticate requests (stored in SSM parameter store)
+3. Creates the GitHub webhook with the shared secret and sets the webhook URL to the API Gateway endpoint.
+4. Creates a Lambda function for receiving the webhook event which orhestrates pull request pipelines.
+5. Creates another Lambda function which handles the final step of a pull request pipeline run.
+
 This script is usually executed by the DevOps team when creating a new Phoenix project. 
 
 Usage:
