@@ -57,6 +57,18 @@
         * [deploy-microservice-init.sh](#deploy-microservice-initsh)
         * [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh)
     * [Developer Environment Specific Shell Scripts](#developer-environment-specific-shell-scripts)
+        * [deploy-dev-api-custom-domainsh](#deploy-dev-api-custom-domainsh)
+        * [deploy-dev-api-deploymentsh](#deploy-dev-api-deploymentsh)
+        * [deploy-dev-api-documentationsh](#deploy-dev-api-documentationsh)
+        * [deploy-dev-apish](#deploy-dev-apish)
+        * [deploy-dev-cognito-internalssh](#deploy-dev-cognito-internalssh)
+        * [deploy-dev-cognitosh](#deploy-dev-cognitosh)
+        * [deploy-dev-databasesh](#deploy-dev-databasesh)
+        * [deploy-dev-ec2sh](#deploy-dev-ec2sh)
+        * [deploy-dev-ecs-task-mainsh](#deploy-dev-ecs-task-mainsh)
+        * [deploy-dev-lambdash](#deploy-dev-lambdash)
+        * [deploy-dev-ssm-environmentssh](#deploy-dev-ssm-environmentssh)
+        * [deploy-devsh](#deploy-devsh)
 * [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files)
 * [Python Helper Scripts](#python-helper-scripts)
 * [Python 3.6 Lambda Functions](#python-36-lambda-functions)
@@ -593,6 +605,32 @@ template-pipeline.json
 
 
 ### Developer Environment Specific Shell Scripts
+
+
+#### deploy-dev-api-custom-domain.sh
+
+#### deploy-dev-api-deployment.sh
+
+#### deploy-dev-api-documentation.sh
+
+#### deploy-dev-api.sh
+
+#### deploy-dev-cognito-internals.sh
+
+#### deploy-dev-cognito.sh
+
+#### deploy-dev-database.sh
+
+#### deploy-dev-ec2.sh
+
+#### deploy-dev-ecs-task-main.sh
+
+#### deploy-dev-lambda.sh
+
+#### deploy-dev-ssm-environments.sh
+
+#### deploy-dev.sh
+
 
 
 A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
