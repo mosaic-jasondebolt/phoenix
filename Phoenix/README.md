@@ -557,8 +557,29 @@ The project wide configuration values include, but aren't limited to, the follow
     * The VERSION_ID value in this field will usually be replace with a timestamp from one of the deployment shell scripts.
 
 
-
 #### deploy-pipeline.sh
+Deploys an AWS CodePipeline for CI/CD on the main branch of your project. This will probably be the most frequently used
+non-dev deployment script. You can add or remove pipeline stages and actions to your pipeline using this script. To do so,
+just edit "template-pipeline.json" after reviewing the <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codepipeline-pipeline.html">CloudFormation AWS::CodePipeline::Pipeline</a> resource. A pipeline includes <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages.html">Stages</a>, which consist of one or more <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages-actions.html">Actions</a>. Actions have a <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html#action-requirements">Action Configuration</a> for specifying the behavior of the action, like building with AWS CodeBuild, Deploying with CloudFormation, or invoking a Lambda function. Actions and be run in parallel or sequentially within a stage using a numerica stage-scoped value called a "RunOrder". Actions can also be blocked until manual approval. 
+
+It is important to note that pushing changes to "template-pipeline.json" to your master branch does not update the pipeline.
+To update the pipeline, you must run "./deploy-pipeline.sh update".
+
+Since this template is so large, this deployment script first uploads the template to S3 before creating the stack. This is
+because the template size is greater than <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cloudformation-limits.html">51,200 bytes</a> and therefore cannot be read from locally when using the CloudFormation CLI.
+
+Usage:
+```
+./deploy-pipeline.sh create
+./deploy-pipeline.sh update
+```
+
+Related Files:
+```
+deploy-pipeline.sh
+template-pipeline.json
+```
+
 
 #### deploy-github-access-token.sh
 
@@ -629,7 +650,6 @@ This may evaluate to:
 ```
 subnets: [ 'subnet-02e14d8b95a3b75f3', 'subnet-0e070b582f9c4add2']
 ```
-
 
 
 ## Phoenix Pipelines
