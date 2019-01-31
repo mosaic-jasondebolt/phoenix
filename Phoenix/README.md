@@ -638,13 +638,32 @@ When creating the webhook in GitHub, give it a name like "{YourProjectName}Webho
 and give in the "repo" and "admin:repo_hook" scopes. Also be sure to select "Enable SSO"
 and then "Authorize" else the token will not work.
 
-Usage
+Usage:
 ```
   ./deploy-github-access-token.sh {Github Token}
 ```
 
-
 #### deploy-github-webhook-pull-request.sh
+Deploys a pull request API Gateway endpoint and Lambda handler to dynamically generate pull request pipelines.
+
+This script is usually executed by the DevOps team when creating a new Phoenix project. 
+
+Usage:
+```
+  ./deploy-github-webhook-pull-request.sh create
+  ./deploy-github-webhook-pull-request.sh update
+```
+
+Related Files:
+```
+deploy-github-webhook-pull-request.sh
+template-pull-request-pipeline.json
+template-github-webhook.json
+lambda/pull_request_webhook/lambda_function.py
+lambda/create_pull_request_webhook/lambda_function.py
+lambda/post_pullrequests/lambda_function.py
+```
+
 
 #### deploy-github-webhook-release.sh
 
