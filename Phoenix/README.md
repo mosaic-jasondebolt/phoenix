@@ -57,21 +57,53 @@
         * [deploy-microservice-init.sh](#deploy-microservice-initsh)
         * [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh)
     * [Developer Environment Specific Shell Scripts](#developer-environment-specific-shell-scripts)
-        * [deploy-dev-api-custom-domainsh](#deploy-dev-api-custom-domainsh)
-        * [deploy-dev-api-deploymentsh](#deploy-dev-api-deploymentsh)
-        * [deploy-dev-api-documentationsh](#deploy-dev-api-documentationsh)
-        * [deploy-dev-apish](#deploy-dev-apish)
-        * [deploy-dev-cognito-internalssh](#deploy-dev-cognito-internalssh)
-        * [deploy-dev-cognitosh](#deploy-dev-cognitosh)
-        * [deploy-dev-databasesh](#deploy-dev-databasesh)
-        * [deploy-dev-ec2sh](#deploy-dev-ec2sh)
-        * [deploy-dev-ecs-task-mainsh](#deploy-dev-ecs-task-mainsh)
-        * [deploy-dev-lambdash](#deploy-dev-lambdash)
-        * [deploy-dev-ssm-environmentssh](#deploy-dev-ssm-environmentssh)
-        * [deploy-devsh](#deploy-devsh)
+        * [deploy-dev-api-custom-domain.sh](#deploy-dev-api-custom-domainsh)
+        * [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh)
+        * [deploy-dev-api-documentation.sh](#deploy-dev-api-documentationsh)
+        * [deploy-dev-api.sh](#deploy-dev-apish)
+        * [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh)
+        * [deploy-dev-cognito.sh](#deploy-dev-cognitosh)
+        * [deploy-dev-database.sh](#deploy-dev-databasesh)
+        * [deploy-dev-ec2.sh](#deploy-dev-ec2sh)
+        * [deploy-dev-ecs-task-main.sh](#deploy-dev-ecs-task-mainsh)
+        * [deploy-dev-lambda.sh](#deploy-dev-lambdash)
+        * [deploy-dev-ssm-environments.sh](#deploy-dev-ssm-environmentssh)
+        * [deploy-dev.sh](#deploy-devsh)
 * [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files)
+    * [buildspec-api-documentation.yml](#buildspec-api-documentationyml)
+    * [buildspec-destroy-microservice.yml](#buildspec-destroy-microserviceyml)
+    * [buildspec-integration-test.yml](#buildspec-integration-testyml)
+    * [buildspec-lint.yml](#buildspec-lintyml)
+    * [buildspec-post-prod-deploy.yml](#buildspec-post-prod-deployyml)
+    * [buildspec-rds-migration.yml](#buildspec-rds-migrationyml)
+    * [buildspec-unit-test.yml](#buildspec-unit-testyml)
+    * [buildspec.yml](#buildspecyml)
 * [Python Helper Scripts](#python-helper-scripts)
+    * [parameters_generator.py](#parameters_generatorpy)
+    * [search_and_replace.py](#search_and_replacepy)
+    * [generate_environment_params.py](#generate_environment_paramspy)
+    * [rename_ssm_parameter.py](#rename_ssm_parameterpy)
+    * [cfn_stacks.py](#cfn_stackspy)
+    * [generate_dev_params.py](#generate_dev_paramspy)
+    * [pull_request_codebuild.py](#pull_request_codebuildpy)
 * [Python 3.6 Lambda Functions](#python-36-lambda-functions)
+    * [alb_listener_rule](#alb_listener_rule)
+    * [api_internals](#api_internals)
+    * [cognito_internals](#cognito_internals)
+    * [create_pull_request_webhook](#create_pull_request_webhook)
+    * [create_release_webhook](#create_release_webhook)
+    * [delete_ecr_repos](#delete_ecr_repos)
+    * [delete_network_interface](#delete_network_interface)
+    * [delete_s3_files](#delete_s3_files)
+    * [macro](#macro)
+    * [password_generator](#password_generator)
+    * [post_pullrequests](#post_pullrequests)
+    * [projects](#projects)
+    * [proxy](#proxy)
+    * [pull_request_webhook](#pull_request_webhook)
+    * [release_webhook](#release_webhook)
+    * [ssm_secret](#ssm_secret)
+    * [vpc_proxy](#vpc_proxy)
 * [Example Dockerfile used for testing/debugging ECS deployments](#example-dockerfile)
 * [CloudFormation Stack Imports](#cloudformation-stack-imports)
 * [Phoenix Pipelines](#phoenix-pipelines)
@@ -605,7 +637,8 @@ template-pipeline.json
 
 
 ### Developer Environment Specific Shell Scripts
-
+A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
+13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
 
 #### deploy-dev-api-custom-domain.sh
 
@@ -633,19 +666,83 @@ template-pipeline.json
 
 
 
-A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
-13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
-
-
-
-
 ## CodeBuild buildspec.yml Files
+
+### buildspec-api-documentation.yml
+
+### buildspec-destroy-microservice.yml
+
+### buildspec-integration-test.yml
+
+### buildspec-lint.yml
+
+### buildspec-post-prod-deploy.yml
+
+### buildspec-rds-migration.yml
+
+### buildspec-unit-test.yml
+
+### buildspec.yml
+
 
 ## Python Helper Scripts
 
+### parameters_generator.py
+
+### search_and_replace.py
+
+### generate_environment_params.py
+
+### rename_ssm_parameter.py
+
+### cfn_stacks.py
+
+### generate_dev_params.py
+
+### pull_request_codebuild.py
+
+
 ## Python 3.6 Lambda Functions
 
+### alb_listener_rule
+
+### api_internals
+
+### cognito_internals
+
+### create_pull_request_webhook
+
+### create_release_webhook
+
+### delete_ecr_repos
+
+### delete_network_interface
+
+### delete_s3_files
+
+### macro
+
+### password_generator
+
+### post_pullrequests
+
+### projects
+
+### proxy
+
+### pull_request_webhook
+
+### release_webhook
+
+### ssm_secret
+
+### vpc_proxy
+
+
+
 ## Example Dockerfile
+
+
 
 #### CloudFormation Stack Imports
 You can use AWS CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html"> Stack Imports</a> to import physical ID's and ARN's from the VPC stacks. Below is an example of
@@ -767,7 +864,6 @@ in SSM parameter store for the AWS account, you don't need to do anything.
 ## Initial Phoenix Project Setup
 ### Configuring the project config file
 * All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
-
 
 - Create DNS hosted zone.
     - Copy the ID of this hosted into into the HostedZoneId param of the project config file laster.
