@@ -624,8 +624,25 @@ deploy-pipeline.sh
 template-pipeline.json
 ```
 
-
 #### deploy-github-access-token.sh
+Uploads a GitHub access token into SSM Parameter Store that is used to create webhooks and make GitHub API requests. This script is usually run by the DevOps team when creating a new Phoenix project.
+
+You must generate an access token within GitHub and pass it to this script. To generate a token, install pwgen locally and run 'pwgen 32 -1'.
+
+This token is used in the following ways:
+1) To create the webhook associated with the main pipeline of your project.
+2) To create any other webhooks (pull requests, releases, etc.)
+3) Making GitHub API calls through Lambda Custom Resources within CloudFormation templates.
+
+When creating the webhook in GitHub, give it a name like "{YourProjectName}Webhook"
+and give in the "repo" and "admin:repo_hook" scopes. Also be sure to select "Enable SSO"
+and then "Authorize" else the token will not work.
+
+Usage
+```
+  ./deploy-github-access-token.sh {Github Token}
+```
+
 
 #### deploy-github-webhook-pull-request.sh
 
