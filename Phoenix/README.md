@@ -692,6 +692,37 @@ Related Files:
 ```
 
 #### deploy-microservice-cleanup.sh
+Creates or updates a single CodeBuild job capable of destroying one or more environments and all AWS resources within that environment by deleting CloudFormation stacks in the correct order.
+
+Note that invoking this script does not actually execute the CodeBuild job. To execute the CodeBuild job, you must
+login to the CodeBuild console and kick off the "deploy-{project-name}-microservice" job. Click "Start Build", then click
+"Environment Variable Override". Edit the following environment variables:
+
+ENVIRONMENTS_TO_DELETE:
+- This is a space delimited list of environment you'd like to delete.
+- All CloudFormation stacks associated with this environment will be deleted.
+
+DELETE_ENVIRONMENT_STATEFUL_RESOURCES:
+- Whether to delete the stateful environment related resources associated with the environment.
+- Stateful resources include RDS database instances, API documentation S3 buckets, Cognito resources, and API Custom Domain.
+
+DELETE_GLOBAL_PROJECT_STATEFUL_RESOURCES:
+- Whether to delete the global resources associated with the project.
+- Global stateful resources include the pull request webhook, release webhook, pipeline, global SSM parameters, S3 buckets, ECR repository, ACM certificates, and the microservice cleanup stack.
+
+Finally, click "Start Build" to delete the CloudFormation stacks.
+
+Usage:
+```
+  ./deploy-microservice-cleanup.sh create
+  ./deploy-microservice-cleanup.sh update
+```
+
+Related Files:
+```
+template-microservice-cleanup.json
+buildspec-destroy-microservice.yml
+```
 
 
 ### Developer Environment Specific Shell Scripts
