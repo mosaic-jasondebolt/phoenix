@@ -110,6 +110,7 @@
     * [GitHub Pull Request](#github-pull-request)
     * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
 * [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
+* [Initial Phoenix Project Setup](#initial-phoenix-project-setup)
 
 
 ## What is Phoenix
@@ -675,7 +676,8 @@ lambda/post_pullrequests/lambda_function.py
 #### deploy-github-webhook-release.sh
 
 #### deploy-microservice-init.sh
-This script bootstraps a new Phoenix project. Before invoking this script, you must follow the steps in [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
+This script bootstraps a new Phoenix project. Before invoking this script, you must follow the steps in both [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix) and 
+[Initial Phoenix Project Setup](#initial-phoenix-project-setup)
 
 For details on the {GitHub token} argument, see the deploy-github-access-token.sh script.
 
