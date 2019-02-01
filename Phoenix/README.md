@@ -688,7 +688,8 @@ Usage:
 
 Related Files:
 ```
-./deploy-github-access-token.sh
+deploy-microservice-init.sh
+deploy-github-access-token.sh
 ```
 
 #### deploy-microservice-cleanup.sh
@@ -720,16 +721,54 @@ Usage:
 
 Related Files:
 ```
+deploy-microservice-cleanup.sh
 template-microservice-cleanup.json
 buildspec-destroy-microservice.yml
 ```
 
-
 ### Developer Environment Specific Shell Scripts
 A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
-13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
+13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts. 
+
+Note that these developer script are for deploying to developer environments only. None of these dev deploy scripts will
+deploy to a testing, ec2, prod, pull request, or any other non-dev specific environment. Each developer on a team may execute
+any shell script starting with "deploy-dev" safely without impacting production or any other environment.
+
+Before running these scripts, a developer must execute the [generate_dev_params.py](#generate_dev_paramspy) Python script
+with a unique dev environment name. Also, the ordering of calling these scripts should be in the following order:
+
+```
+./deploy-dev-ssm-environments.sh create
+./deploy-dev-database.sh create --> Optional. If this stack already exists, skip this script.
+./deploy-dev-ec2.sh create
+./deploy-dev-lambda.sh create
+./deploy-dev-ecs-task-main.sh create ecs
+./deploy-dev-api-custom-domain.sh create
+./deploy-dev-api.sh create
+./deploy-dev-api-deployment.sh create
+```
+
+Since all developer environments share a single Aurora database MySQL instance, the "deploy-dev-database.sh" script
+only needs to be executed once for the entire Project. Individual devlopers do not need to invoke this script. 
+
 
 #### deploy-dev-api-custom-domain.sh
+Deploys an API Gateway Custom Domain for your project's API.
+
+When you deploy an edge-optimized API, API Gateway sets up an Amazon CloudFront distribution and a DNS record to map the API domain name to the CloudFront distribution domain name. Requests for the API are then routed to API Gateway through the mapped CloudFront distribution.
+
+Usage:
+```
+  ./deploy-dev-api-custom-domain.sh create
+  ./deploy-dev-api-custom-domain.sh update
+```
+
+Related Files:
+```
+deploy-dev-api-custom-domain.sh
+template-api-custom-domain.json
+template-api-custom-domain-params-dev.json
+```
 
 #### deploy-dev-api-deployment.sh
 
