@@ -788,7 +788,6 @@ the underlying API or the CloudFormation code. You can <a href="https://stackove
 via the API Gateway console. If you are deploying to an API Gateway stage for a developer environment, running the
 "deploy-api-environment.sh" shell script will automagically do this for you by making the appropriate AWS CLI calls so
  you don't have to redeploy to a stage using the AWS console.
-   
 
 Usage:
 ```
@@ -804,8 +803,28 @@ template-api-params-dev.json
 lambda/api_internals/lambda_function.py
 ```
 
-
 #### deploy-dev-api-documentation.sh
+Deploys AWS resources required to support versioned API documentation. Resources include a static S3 website/bucket, Bucket policy, CloudFront distribution, Web Application Firewall ACL, WAF rules, and WAF predicates for managing API documentation access.
+
+Note that this does not deploy API documentation itself. It just deploys the infrastructure required for hosting API
+documentation securely.
+
+It's challenging to store documentation in an S3 static **website** without exposting it to the world. While using a VPC endpoint to remove S3 bucket access from the internet works, this requires a lot of networking infrastructure to work with our VPN. The solution I chose was to add a "/global/api-docs-user-agent" SSM parameter to all Phoenix enabled AWS accounts and store a token used to auth HTTP requests made to the API documentation. This token is used by AWS Web Application Firewall to authenticate requests. API documentation viewers can install the "User-Agent Switcher for Google Chrome" extension to automatically pass this token to HTTP requests. You can view <a href="http://agibalov.io/2017/10/03/A-funny-way-to-restrict-access-to-website-hosted-on-S3/">this post</a> for details. This method provides a very minimal level of security, and it's easy to leak this referer token to the world. It may to better to remove this functionality in the future
+and just expose API documentation publicly, even for internal API's, since API's shouldn't contain any sensitive info anyway.
+
+Usage:
+```
+  ./deploy-dev-api-documentation.sh create
+  ./deploy-dev-api-documentation.sh update
+```
+
+Related Files:
+```
+deploy-dev-api-documentation.sh
+template-api-documentation.json
+template-api-documentation-{v0,v1,etc}-params-dev.json
+```
+
 
 #### deploy-dev-api.sh
 
