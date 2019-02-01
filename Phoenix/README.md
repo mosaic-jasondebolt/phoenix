@@ -675,6 +675,19 @@ lambda/post_pullrequests/lambda_function.py
 #### deploy-github-webhook-release.sh
 
 #### deploy-microservice-init.sh
+This script bootstraps a new Phoenix project. Before invoking this script, you must follow the steps in [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
+
+For details on the {GitHub token} argument, see the deploy-github-access-token.sh script.
+
+Usage:
+```
+  ./deploy-microservice-init.sh {GitHub token}
+```
+
+Related Files:
+```
+./deploy-github-access-token.sh
+```
 
 #### deploy-microservice-cleanup.sh
 
