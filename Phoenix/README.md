@@ -114,7 +114,8 @@
 
 
 ## What is Phoenix
-Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation.
+Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt in, 
+a Senior DevOps Engineer at Mosaic, in late mid to late 2019.
 
 A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments. 
 
@@ -783,7 +784,7 @@ lots of copy pasting and code duplication, so a <a href="https://docs.aws.amazon
 it.
 
 It's important to note that **CloudFormation does not update previously deployed API Gateway stages** even if you change
-the underlying API or the CloudFormation code. You can <a href="https://stackoverflow.com/questions/41423439/cloudformation-doesnt-deploy-to-api-gateway-stages-on-update>view this issue in detail here</a>. To redeploy to a state, you can deploy
+the underlying API or the CloudFormation code. You can <a href="https://stackoverflow.com/questions/41423439/cloudformation-doesnt-deploy-to-api-gateway-stages-on-update">view this issue in detail here</a>. To redeploy to a state, you can deploy
 via the API Gateway console. If you are deploying to an API Gateway stage for a developer environment, running the
 "deploy-api-environment.sh" shell script will automagically do this for you by making the appropriate AWS CLI calls so
  you don't have to redeploy to a stage using the AWS console.
