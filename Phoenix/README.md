@@ -730,7 +730,7 @@ buildspec-destroy-microservice.yml
 A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
 13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts. 
 
-Note that these developer script are for deploying to developer environments only. None of these dev deploy scripts will
+Note that these developer scripts are for deploying to developer environments only. None of these dev deploy scripts will
 deploy to a testing, ec2, prod, pull request, or any other non-dev specific environment. Each developer on a team may execute
 any shell script starting with "deploy-dev" safely without impacting production or any other environment.
 
@@ -742,7 +742,7 @@ with a unique dev environment name. Also, the ordering of calling these scripts 
 ./deploy-dev-database.sh create --> Optional. If this stack already exists, skip this script.
 ./deploy-dev-ec2.sh create
 ./deploy-dev-lambda.sh create
-./deploy-dev-ecs-task-main.sh create ecs
+./deploy-dev-ecs-task-main.sh create ecs --> Replace "ecs" with "sbt" for Scala projects.
 ./deploy-dev-api-custom-domain.sh create
 ./deploy-dev-api.sh create
 ./deploy-dev-api-deployment.sh create
@@ -751,6 +751,8 @@ with a unique dev environment name. Also, the ordering of calling these scripts 
 Since all developer environments share a single Aurora database MySQL instance, the "deploy-dev-database.sh" script
 only needs to be executed once for the entire Project. Individual devlopers do not need to invoke this script. 
 
+To delete a developer environment, See the instructions in [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh) 
+to manually invoke a CodeBuild job to delete the developer environment.
 
 #### deploy-dev-api-custom-domain.sh
 Deploys an API Gateway Custom Domain for your project's API.
@@ -771,6 +773,36 @@ template-api-custom-domain-params-dev.json
 ```
 
 #### deploy-dev-api-deployment.sh
+Deploys an immutable API Gateway deployment (API Snapshot) of a given API configuration. This script also deploys
+additional configuration on the API that is not easily configurable using raw CloudFormation.
+
+Within API Gateway resource methods, you can add a custom "Mapping Template" within the "Integration Request" portion
+of the method congiruation. These mappings allow manipulation of the request headers and body before forwarding to Lambda.
+These mapping templates use <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html">Apache Velocity</a> and are quite verbose. Hard coding these mappings directly into the CloudFormation template would require
+lots of copy pasting and code duplication, so a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda backed custom resource</a> was added to this template to automatically add this mapping template to any API methods that require
+it.
+
+It's important to note that **CloudFormation does not update previously deployed API Gateway stages** even if you change
+the underlying API or the CloudFormation code. You can <a href="https://stackoverflow.com/questions/41423439/cloudformation-doesnt-deploy-to-api-gateway-stages-on-update>view this issue in detail here</a>. To redeploy to a state, you can deploy
+via the API Gateway console. If you are deploying to an API Gateway stage for a developer environment, running the
+"deploy-api-environment.sh" shell script will automagically do this for you by making the appropriate AWS CLI calls so
+ you don't have to redeploy to a stage using the AWS console.
+   
+
+Usage:
+```
+  ./deploy-dev-api-deployment.sh create
+  ./deploy-dev-api-deployment.sh update
+```
+
+Related Files:
+```
+deploy-dev-api-deployment.sh
+template-api-deployment
+template-api-params-dev.json
+lambda/api_internals/lambda_function.py
+```
+
 
 #### deploy-dev-api-documentation.sh
 
