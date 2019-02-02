@@ -57,18 +57,20 @@
         * [deploy-microservice-init.sh](#deploy-microservice-initsh)
         * [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh)
     * [Developer Environment Specific Shell Scripts](#developer-environment-specific-shell-scripts)
-        * [deploy-dev-api-custom-domain.sh](#deploy-dev-api-custom-domainsh)
-        * [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh)
-        * [deploy-dev-api-documentation.sh](#deploy-dev-api-documentationsh)
-        * [deploy-dev-api.sh](#deploy-dev-apish)
-        * [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh)
-        * [deploy-dev-cognito.sh](#deploy-dev-cognitosh)
+        * [API Dev Deployment Scripts](#api-dev-deployment-scripts)
+            * [deploy-dev-api-custom-domain.sh](#deploy-dev-api-custom-domainsh)
+            * [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh)
+            * [deploy-dev-api-documentation.sh](#deploy-dev-api-documentationsh)
+            * [deploy-dev-api.sh](#deploy-dev-apish)
+            * [deploy-dev.sh](#deploy-devsh)
+        * [Cognito Dev Deployment Scripts](#cognito-dev-deployment-scripts)
+            * [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh)
+            * [deploy-dev-cognito.sh](#deploy-dev-cognitosh)
         * [deploy-dev-database.sh](#deploy-dev-databasesh)
         * [deploy-dev-ec2.sh](#deploy-dev-ec2sh)
         * [deploy-dev-ecs-task-main.sh](#deploy-dev-ecs-task-mainsh)
         * [deploy-dev-lambda.sh](#deploy-dev-lambdash)
         * [deploy-dev-ssm-environments.sh](#deploy-dev-ssm-environmentssh)
-        * [deploy-dev.sh](#deploy-devsh)
 * [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files)
     * [buildspec-api-documentation.yml](#buildspec-api-documentationyml)
     * [buildspec-destroy-microservice.yml](#buildspec-destroy-microserviceyml)
@@ -755,7 +757,9 @@ only needs to be executed once for the entire Project. Individual devlopers do n
 To delete a developer environment, See the instructions in [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh) 
 to manually invoke a CodeBuild job to delete the developer environment.
 
-#### deploy-dev-api-custom-domain.sh
+#### API Dev Deployment Scripts
+
+##### deploy-dev-api-custom-domain.sh
 Deploys an API Gateway Custom Domain for your project's API.
 
 When you deploy an edge-optimized API, API Gateway sets up an Amazon CloudFront distribution and a DNS record to map the API domain name to the CloudFront distribution domain name. Requests for the API are then routed to API Gateway through the mapped CloudFront distribution.
@@ -773,7 +777,7 @@ template-api-custom-domain.json
 template-api-custom-domain-params-dev.json
 ```
 
-#### deploy-dev-api-deployment.sh
+##### deploy-dev-api-deployment.sh
 Deploys an immutable API Gateway deployment (API Snapshot) of a given API configuration. This script also deploys
 additional configuration on the API that is not easily configurable using raw CloudFormation.
 
@@ -803,7 +807,7 @@ template-api-params-dev.json
 lambda/api_internals/lambda_function.py
 ```
 
-#### deploy-dev-api-documentation.sh
+##### deploy-dev-api-documentation.sh
 Deploys AWS resources required to support versioned API documentation. Resources include a static S3 website/bucket, Bucket policy, CloudFront distribution, Web Application Firewall ACL, WAF rules, and WAF predicates for managing API documentation access.
 
 Note that this does not deploy API documentation itself. It just deploys the infrastructure required for hosting API
@@ -832,10 +836,12 @@ template-api-documentation-{v0,v1,etc}-params-dev.json
 ```
 
 
-#### deploy-dev-api.sh
+##### deploy-dev-api.sh
 Deploys an API Gateway API into a development environment.
 
 This deploys an API Gateway API, API resources, API methods, and any other API Gateway related resources.
+
+There are 2 different scripts that developers can used to deploy 
 
 
 Usage:
@@ -870,7 +876,11 @@ template-api.json
 template-api-params-dev.json
 ```
 
-#### deploy-dev-cognito-internals.sh
+#### deploy-dev.sh
+
+#### Cognito Dev Deployment Scripts
+
+##### deploy-dev-cognito-internals.sh
 
 Usage:
 ```
@@ -884,7 +894,7 @@ deploy-dev-cognito-internals.sh
 
 ```
 
-#### deploy-dev-cognito.sh
+##### deploy-dev-cognito.sh
 
 #### deploy-dev-database.sh
 
@@ -896,7 +906,6 @@ deploy-dev-cognito-internals.sh
 
 #### deploy-dev-ssm-environments.sh
 
-#### deploy-dev.sh
 
 
 
