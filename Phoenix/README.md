@@ -837,6 +837,7 @@ Deploys an API Gateway API into a development environment.
 
 This deploys an API Gateway API, API resources, API methods, and any other API Gateway related resources.
 
+
 Usage:
 ```
 When first creating this stack, use the 'deploy-dev-api.sh' script:
@@ -856,6 +857,11 @@ Where 'v0' is the API stage you are deploying to and 'l1l5pcj1xc' is an example 
 
 You can find the REST API ID for your developer API between a set of parentheses in the gray nav bar at the top of the <a href="https://console.aws.amazon.com/apigateway">API Gateway Console</a> after clicking on your API on the left sidebar.
 
+Before running "deploy-dev.sh", make sure to install <a href="https://www.npmjs.com/package/spectacle-docs">spectacle-docs</a> using the following command:
+```
+npm install -g spectacle-docs
+```
+
 Related Files:
 ```
 deploy-dev-api.sh
@@ -865,6 +871,18 @@ template-api-params-dev.json
 ```
 
 #### deploy-dev-cognito-internals.sh
+
+Usage:
+```
+  ./deploy-dev-cognito-internals.sh create
+  ./deploy-dev-cognito-internals.sh update
+```
+
+Related Files:
+```
+deploy-dev-cognito-internals.sh
+
+```
 
 #### deploy-dev-cognito.sh
 
