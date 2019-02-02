@@ -758,6 +758,27 @@ To delete a developer environment, See the instructions in [deploy-microservice-
 to manually invoke a CodeBuild job to delete the developer environment.
 
 #### API Dev Deployment Scripts
+There are five developer API related deployment scripts:
+
+Use by DevOps:
+* [deploy-dev-api-custom-domain.sh](#deploy-dev-api-custom-domainsh)
+* [deploy-dev-api-documentation.sh](#deploy-dev-api-documentationsh)
+
+Used by developers:
+* [deploy-dev-api.sh](#deploy-dev-apish)
+* [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh)
+* [deploy-dev.sh](#deploy-devsh)
+
+Both the [deploy-dev-api-custom-domain.sh](#deploy-dev-api-custom-domainsh) and [deploy-dev-api-documentation.sh](#deploy-dev-api-documentationsh) are scripts that are mostly used by DevOps and can be ignored by developers.
+
+The understand the differences between the three API scripts used by developers ([deploy-dev-api.sh](#deploy-dev-apish), [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh), and [deploy-dev.sh](#deploy-devsh)), developers must understand some basic <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-basic-concept.html">API Gateway Concepts</a>.
+
+When running the [deploy-dev-api.sh](#deploy-dev-apish) script, it will update the API deployed in the Resources section of
+your API in the <a href="https://console.aws.amazon.com/apigateway">API Gateway Console</a>, but will not be deployed in the
+Stages section of your API. To deploy the API into the Stages section, you must run the [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh) script. Deploying your API deployment to a stage like V0 or V1 will make your API accessible via a nice looking URL like "https://devjason.api.you-domain.com/v0".
+
+You cannot re-run [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh). To work around this, you should use the [deploy-dev.sh](#deploy-devsh) script with the correct arguments to see changes in your stage.
+
 
 ##### deploy-dev-api-custom-domain.sh
 Deploys an API Gateway Custom Domain for your project's API.
