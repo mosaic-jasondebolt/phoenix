@@ -856,7 +856,6 @@ template-api-documentation.json
 template-api-documentation-{v0,v1,etc}-params-dev.json
 ```
 
-
 ##### deploy-dev-api.sh
 Deploys an API Gateway API into a development environment.
 
