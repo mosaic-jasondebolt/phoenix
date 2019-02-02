@@ -812,6 +812,12 @@ documentation securely.
 It's challenging to store documentation in an S3 static **website** without exposting it to the world. While using a VPC endpoint to remove S3 bucket access from the internet works, this requires a lot of networking infrastructure to work with our VPN. The solution I chose was to add a "/global/api-docs-user-agent" SSM parameter to all Phoenix enabled AWS accounts and store a token used to auth HTTP requests made to the API documentation. This token is used by AWS Web Application Firewall to authenticate requests. API documentation viewers can install the "User-Agent Switcher for Google Chrome" extension to automatically pass this token to HTTP requests. You can view <a href="http://agibalov.io/2017/10/03/A-funny-way-to-restrict-access-to-website-hosted-on-S3/">this post</a> for details. This method may only be slightly better than having
 publicly exposed API documentation and is insufficient for securing senstive information contained in API documentation. API documentation should not contain sensitive information, but having some level of privacy minimizes potential attack surface area. The Chrome extension should be **disabled** when not viewing API documentation to avoid page rendering issues when accessing websites that rely on this header.
 
+API versioning works like this. The V0 API stage is intended to be used for the latest, most bleeding edge API development. It is not a stable version for releasing externally consumable API's. Once the team is ready to launch, a V1 stage can be
+added by creating V1 template parameter files can a V1 api deployment stage in the pipeline. Try to stick with V1 as long
+as possible before adding a V2 API.
+
+Each developer may have their own V0, V1, V2, ... API deployments that can mirror what is running in other environments such as testing and production.
+
 Usage:
 ```
   ./deploy-dev-api-documentation.sh create
