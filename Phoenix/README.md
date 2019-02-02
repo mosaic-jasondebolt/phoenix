@@ -786,7 +786,7 @@ it.
 It's important to note that **CloudFormation does not update previously deployed API Gateway stages** even if you change
 the underlying API or the CloudFormation code. You can <a href="https://stackoverflow.com/questions/41423439/cloudformation-doesnt-deploy-to-api-gateway-stages-on-update">view this issue in detail here</a>. To redeploy to a state, you can deploy
 via the API Gateway console. If you are deploying to an API Gateway stage for a developer environment, running the
-"deploy-api-environment.sh" shell script will automagically do this for you by making the appropriate AWS CLI calls so
+[deploy-dev.sh](#deploy-devsh) shell script will automagically do this for you by making the appropriate AWS CLI calls so
  you don't have to redeploy to a stage using the AWS console.
 
 Usage:
@@ -833,6 +833,36 @@ template-api-documentation-{v0,v1,etc}-params-dev.json
 
 
 #### deploy-dev-api.sh
+Deploys an API Gateway API into a development environment.
+
+This deploys an API Gateway API, API resources, API methods, and any other API Gateway related resources.
+
+Usage:
+```
+When first creating this stack, use the 'deploy-dev-api.sh' script:
+
+  ./deploy-dev-api.sh create
+  
+For updates, it's better to use the 'deploy-dev.sh' script:
+
+  ./deploy-dev.sh update ..
+  
+For example:
+
+  ./deploy-dev-environment.sh update api-deploy l1l5pcj1xc v0
+
+Where 'v0' is the API stage you are deploying to and 'l1l5pcj1xc' is an example API Gateway REST API ID.
+```
+
+You can find the REST API ID for your developer API between a set of parentheses in the gray nav bar at the top of the <a href="https://console.aws.amazon.com/apigateway">API Gateway Console</a> after clicking on your API on the left sidebar.
+
+Related Files:
+```
+deploy-dev-api.sh
+deploys-dev.sh
+template-api.json
+template-api-params-dev.json
+```
 
 #### deploy-dev-cognito-internals.sh
 
