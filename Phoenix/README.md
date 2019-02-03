@@ -1091,7 +1091,7 @@ template-ecs-task-worker-{environment}-params.json
 ```
 
 The following deploys scripts would also be created (or the existing ecs dev deploy script could be parameterized):
-``
+```
 deploy-dev-ecs-task-frontend.sh
 deploy-dev-ecs-task-backend.sh
 deploy-dev-ecs-task-worker.sh
