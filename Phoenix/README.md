@@ -215,6 +215,21 @@ cluster restores from snapshots. A custom Lambda resource within the template au
 database instances, with some support for password rotation as well. There is also a CodeBuild job defined in this template
 that can be used for database migrations within the CI/CD CodePipeline.
 
+For further detail on the following:
+
+* Creating a new database stack (without a snapshot)
+* Updating a database stack (without a snapshot)
+* Creating a database stack (with a snapshot)
+* Updating a database stack (with a snapshot)
+* Deleting a database instance
+* Password rotation
+* Finding historical passwords in SSM parameter store
+* Testing Plan for the Lambda password generator
+
+See <a href="https://docs.google.com/document/d/16UUY3h-4wU372XF8D0Fs1IQ3ABLrO-Vjn5ao2YkB84M/edit#">Phoenix for Datbase Admins</a>
+
+See [deploy-dev-database.sh](#deploy-dev-databasesh) for more detail.
+
 #### template-ec2.json
 This template creates an EC2 launch configuration, auto scaling group, security groups, EC2 instances, load balancers, an other EC2 resources.
 
@@ -1015,14 +1030,103 @@ lambda/password_generator/lambda_function.py
 ```
 
 #### deploy-dev-ec2.sh
+Generates developer cloud EC2 resources, some of which may run one or more ECS tasks/services in a given environment.
+
+Phoenix tries to decouple EC2 resources from ECS resource by providing separate templates for EC2 and ECS resources.
+There is a tiny bit of ECS configuration within the EC2 template, however. For example, Phoenix uses the EC2 template
+to create the ECS cluster resource. We could have instead provision the ECS cluster in the ECS template, but then
+each stack instance of the ECS template would create a new cluster, which probably isn't desired.
+
+Also, the EC2 template is aware of whether or not Fargate is used instead of EC2 from the computer layer of ECS,
+and will set to AutoScalingGroup to 0 if Fargate is used since no EC2 instances are required in this case.
+
+This EC2 template also includes an API Documentation CodeBuild job which generates environment specific API documentation
+artifacts and deploys them to an static website S3 bucket. Because this CodeBuild job is environment specific, it must
+live in an environment specific stack and connect live in buildspec.yml. The EC2 template was chosen for this CodeBuild
+job, but it could have been any other environment specific template.
+
+Usage:
+```
+  ./deploy-dev-ec2.sh create
+  ./deploy-dev-ec2.sh update
+```
+
+Related Files:
+```
+deploy-dev-ec2.sh
+template-ec2.json
+template-ec2-params-dev.json
+```
 
 #### deploy-dev-ecs-task-main.sh
+Generates a random docker image tag, builds a docker image, updates the CloudFormation parameters file with the new image tag,
+and either creates or updates a developer cloud CloudFormation stack which deploys the locally build docker image to the
+Dev ECS cluster in AWS.
+
+This is probably one of the most complex templates within Phoenix. This shell script does the following:
+1. Builds a local image from a local Dockerfile
+    * The second argument of this script should be a folder that includes a Dockerfile.
+    * If using a scala/sbt generated Dockerfile, you must do the following:
+        * Make sure the relative path of "server/target/docker/stage" in the shell script points to your projects Dockerfile, else change it.
+        * Pass in the value of "sbt" rather than the folder location of the Dockerfile as the second argument to this shell script.
+2. Tags the Docker image with a timestamp (in non-developer environments, the first 7 characters of the Git commit is used)
+3. Pushes the tagged docker image to the ECR repo
+4. Creates/updates the developer ECS task to use the tagged Docker image. Visit the URL to view the live dev ECS service.
+
+
+##### Multiple Task/Service/Container Scenario:
+Within Phoenix, developers have the ability to configure their own isolated developer ECS clusters with as many ECS tasks/services
+as needed. Each ECS task can include up to 10 Docker containers (usually a main container and 9 sidecar containers). There
+is one ECS task per stack instance of "template-ecs-task.json". Phoenix ships with a default/main ECS task
+called "main" but there can be many tasks. For example, a project might have a "worker" task that has 3 supporting sidecar
+containers for logging, monitoring, and caching. In addition, this project may have separate "frontend" and "backend" tasks/services for handling frontend and backend requests, each also having sidecar containers for logging, and caching. So, 3 different tasks/services
+with 3 * (1 + 3) = 12 containers in total. Since all tasks/services have similar task configuration, they are all use the same
+"template-ecs-task.json" template to configure their tasks. For each environment, the following parameter files could be created for
+this setup:
+
+```
+template-ecs-task-frontend-{environment}-params.json
+template-ecs-task-backend-{environment}-params.json
+template-ecs-task-worker-{environment}-params.json
+
+deploy-dev-ecs-task-frontend.sh
+deploy-dev-ecs-task-backend.sh
+deploy-dev-ecs-task-worker.sh
+```
+
+To launch the above tasks into a pipeline, new Pipeline actions would have to be added to all pipeline files
+and all relevant buildspec YAML files would also need to be updated. All of the above task types (frontend, backend, worker)
+could potentially use the same "template-ecs-task.json" template, but if the task definitions diverge significantly, you
+could create new templates for each task type:
+
+```
+template-ecs-task-frontend.json
+template-ecs-task-backend.json
+template-ecs-task-worker.json
+```
+
+This flexibility of adding new CloudFormation files, creating your own shell scripts, and updating your Pipeline files
+as you see fits highlights that Phoenix is not a framework. Phoenix allows you to author your own CloudFormation templates
+and deploy them in many different ways (locally, in a pipeline, from Lambda, etc.).
+
+Usage:
+```
+    ./deploy-dev-ecs-task-main.sh [ create | update ] sbt --> Always use this command for Play/SBT projects.
+    ./deploy-dev-ecs-task-main.sh [ create | update ] .   --> Dockerfile in project root dir.
+    ./deploy-dev-ecs-task-main.sh [ create | update ] ecs   --> Dockerfile in ecs dir.
+```
+
+Related Files:
+```
+deploy-dev-ecs-task-main.sh
+template-ecs-task.json
+template-ecs-task-params-dev.json
+lambda/password_generator/lambda_function.py
+```
 
 #### deploy-dev-lambda.sh
 
 #### deploy-dev-ssm-environments.sh
-
-
 
 
 ## CodeBuild buildspec.yml Files
