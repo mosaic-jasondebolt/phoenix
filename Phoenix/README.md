@@ -64,8 +64,8 @@
             * [deploy-dev-api.sh](#deploy-dev-apish)
             * [deploy-dev.sh](#deploy-devsh)
         * [Cognito Dev Deployment Scripts](#cognito-dev-deployment-scripts)
-            * [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh)
             * [deploy-dev-cognito.sh](#deploy-dev-cognitosh)
+            * [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh)
         * [deploy-dev-database.sh](#deploy-dev-databasesh)
         * [deploy-dev-ec2.sh](#deploy-dev-ec2sh)
         * [deploy-dev-ecs-task-main.sh](#deploy-dev-ecs-task-mainsh)
@@ -116,10 +116,10 @@
 
 
 ## What is Phoenix
-Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt in, 
+Phoenix is a platform for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt in,
 a Senior DevOps Engineer at Mosaic, in late mid to late 2019.
 
-A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments. 
+A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments.
 
 Phoenix is not a framework and it does not hide anything, which can be overwhelming for those not deeply familiar with AWS and CloudFormation. A good starting point would be to study the "deploy-microservice-init.sh" file, as this is the file used to bootstrap a Phoenix project. When this script is invoked, over 30 CloudFormation stacks are created for your Phoenix project.
 
@@ -140,7 +140,7 @@ An AWS account may include multiple Phoenix projects, and each Phoenix project m
 "dev" for developer and pull-request resources, "testing" for testing/staging/qa resources, and "prod" for production
 resources. Phoenix cloudformation templates are scoped to the account level, project level, and environment level.
 
-The "template-vpc.json" file is an **account specific** as well as an **environment specific** stack. This template may create a dev VPC stack, a testing VPC stack, and a prod VPC stack. These VPC stacks can be shared by multiple Phoenix projects. 
+The "template-vpc.json" file is an **account specific** as well as an **environment specific** stack. This template may create a dev VPC stack, a testing VPC stack, and a prod VPC stack. These VPC stacks can be shared by multiple Phoenix projects.
 
 The "template-pipeline.json" file is a **project specific** stack. This template is used to create a stack named "{project-name}-pipeline.json". This CI/CD pipeline is shared by all environments, so only one stack instance should be created for this template.
 
@@ -164,7 +164,7 @@ The stack name will be {project-name}-{template-name}.
 This template creates several different ACM SSL certificates used for things like ECS endpoints, API Gateway endpoints, Cognito Auth endpoints, and S3 website endpoints, all of which are supported by Phoenix.
 
 #### template-s3-ecr.json
-This template creates an ECR repository for your projects docker images as well as several S3 buckets. Logging buckets are created for CodePipeline, CodeBuild, and Elastic Load Balancer Logs. Additional buckets are created for source code artifacts like Lambda source bundles and Phoenix CloudFormation templates. 
+This template creates an ECR repository for your projects docker images as well as several S3 buckets. Logging buckets are created for CodePipeline, CodeBuild, and Elastic Load Balancer Logs. Additional buckets are created for source code artifacts like Lambda source bundles and Phoenix CloudFormation templates.
 
 #### template-ssm-globals-macro.json
 This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a> and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
@@ -195,8 +195,8 @@ There may be several stack instances per template, each scoped to an different e
 This template deploys environment specific SSM parameters for your project. Any kind of environment specific project parameters/config can be stored as SSM parameters in this template. Once deployed, these parameters are stored in SSM Parameter Store and made available to all other CloudFormation stacks.
 
 Many teams store project configuration values in source code config files. This is a violation of the Twelve-Factor App
-rule of <a href="https://12factor.net/config">store config in the environment, not the source code<a>. 
-   
+rule of <a href="https://12factor.net/config">store config in the environment, not the source code<a>.
+
 Phoenix has an easy solution for centrally storing project or environment specific configuration values and making them
 available to AWS resources (EC2 instances, Lambda functions, ECS containers, CodeBuild jobs, etc.) via IAM policies.
 This eliminates differences in dev/test/prod parity, increases visibility of configuration values, enhances security,
@@ -223,7 +223,7 @@ This template contains Lambda functions and all resources required for deploying
 and security groups. Phoenix ships with a VPC proxy lambda function which can proxy HTTP requests from API Gateay to
 to private instances in an ECS cluster. A example "Project" Lambda function which handles requests from API Gateway
 is also provided. Note that Lambda functions that require access to private EC2 or ECS resources must be placed in
-a VPC. 
+a VPC.
 
 #### template-cognito.json
 This template creates AWS Cognito resources such as an AppClient and UserPool. Like all CloudFormation templates, this
@@ -233,7 +233,7 @@ template can be extended.
 This template creates AWS Cognito resources that are not fully supported in AWS CloudFormation, such as user pool auth
 domains, resource servers, user pool clients, and route53 record sets. Cognito is one of the AWS services that doesn't have all resources covered/provisionable by CloudFormation. This template solves this problem by using an <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html"> AWS Lambda-backed Custom Resource</a> within the template. Within the template, a Lambda function
 is created from the "lambda/cognito_internals" Python code, and invokes the code during stack create/update/delete operations.
-After the lambda function is invoked, it returns data and control back to the CloudFormation stack. 
+After the lambda function is invoked, it returns data and control back to the CloudFormation stack.
 
 #### template-api-custom-domain.json
 This template deploys a <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-custom-domains.html">custom domain name</a> for your API Gateway API endpoints. It also create an DNS record set
@@ -256,7 +256,7 @@ within template-api.json.
 #### template-ecs-task.json
 This template generates all resources required for a single ECS task service. An ECS task can inlude up to 10 containers
 (1 main container and 9 sidecar containers). If more than one service (which may include up to 10 containers) is required for your Phoenix project, you can create a new set of parameter files and create multiple stack instances of this template. There
-are no limits to the number of services are containers that can be deployed from a Phoenix project. The only limits are AWS 
+are no limits to the number of services are containers that can be deployed from a Phoenix project. The only limits are AWS
 limits.
 
 This is probably one of the more advanced CloudFormation templates within Phoenix. It can be used to deploy ECS tasks using
@@ -267,13 +267,13 @@ into the ECS task, but these can be removed. The lambda password generator and R
 can probably also be removed.
 
 Phoenix ships with 4 parameter files for this template (template-ecs-task-**main**-params-{dev,e2e,testing,prod}.json). If your Phoenix project requires, say, a worker service for processing images from an SQS queue, you would create 4 more template files (template-ecs-task-**images**-params-{dev,e2e,testing,prod}.json). Make sure to update all other relevant files
-(buildspec.yml, template-pipeline.json, etc.) to ensure this new ECS service is deployed. 
+(buildspec.yml, template-pipeline.json, etc.) to ensure this new ECS service is deployed.
 
 ## CloudFormation JSON Parameter Files
 CloudFormation uses parameter files to deploy a single template to multiple environments. Currently, Phoenix ships with four
 different environments (dev, e2e, testing, and prod).
 
-Environments can be added, renamed, or removed entirely. 
+Environments can be added, renamed, or removed entirely.
 
 ### Environments
 
@@ -310,7 +310,7 @@ would run the command "python generate_dev_params.py devjane" to generate her de
 files are gitignored, they will show up in your IDE/filesystem but cannot be checked into Git.
 
 All CloudFormation parameter files that end with "*-params-dev.json" are gitignored by default to keep different developer
-parameter files from clashing with eachother. 
+parameter files from clashing with eachother.
 
 ##### Dev Deploy Scripts
 A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
@@ -324,7 +324,7 @@ stack at at time using one of the dev deploy scripts. Since pipelines work best 
 Phoenix deploys all dev resources into the "dev" VPC provided by "template-vpc.json".
 
 #### Testing Environment
-The Testing environment is an isolated environment for deploying AWS resources used for testing before production. 
+The Testing environment is an isolated environment for deploying AWS resources used for testing before production.
 One a testing environment is deployed, a suite of tests can operate on the testing environment. These tests occur after
 the testing environment is deployed to. Such tests may include integration tests, browser tests, load tests, and security
 related tests on infrastructure. Phoenix deploys all testing resources into the "testing" VPC provided by "template-vpc.json".
@@ -337,7 +337,7 @@ The production environment is where all production infrastructure and build arti
 CloudFormation templates that are deployed into both testing and e2e environments are deployed into production. The only
 difference between testing, e2e, and production environments should be the configuration, which can be found in CloudFormation
 parameter files. These configuration values are used to configure AWS infrastructure and are made available to various
-execution environments for build artifacts to consume. The execution environments include those supporting Lambda runtimes, ECS container runtimes, AWS CodeBuild runtimes, or virtual machine runtimes on EC2. 
+execution environments for build artifacts to consume. The execution environments include those supporting Lambda runtimes, ECS container runtimes, AWS CodeBuild runtimes, or virtual machine runtimes on EC2.
 
 In the future, Phoenix may support multiple production environments for blue/green type deployments across entire environments using CNAME switching. Blue/green deployments are already available for some indiviual components within an environment, such
 as ECS services and Lambda functions.
@@ -396,7 +396,7 @@ You can remove environments from your Phoenix project by doing the following.
 
 ## Deployment Shell Scripts
 Phoenix uses shell scripts for deploying both CloudFormation stacks and Lambda functions. There are 3 types of shell scripts
-within Phoenix: 
+within Phoenix:
 
 1. Account Specific
 2. Project Specific
@@ -426,7 +426,7 @@ All shell scripts within Phoenix follow the same pattern:
 
 It is important to note that deployment shell scripts **do not** deploy to any pipeline environments (testing, e2e, prod).
 These shell scripts are scoped only to the account, project, or developer specific environments. All of the other environments
-within a Phoenix projects are deployed to via **AWS CodePipeline**. 
+within a Phoenix projects are deployed to via **AWS CodePipeline**.
 
 ### Account Specific Shell Scripts
 Account specific deployment scripts are used to deploy CloudFormation stacks used across the entire AWS account. These
@@ -465,7 +465,7 @@ Usage:
 You can deploy the Jenkins instance in a private or public subnet, but private is recommended. This instance is deployed
 into the dev VPC by default, but this can be changed.
 
-A CNAME with a default prefix of "jenkins.{your-domain}", where {your-domain} can be found in "template-ssm-globals-macro-params.json" is added by default, but this can be changed. 
+A CNAME with a default prefix of "jenkins.{your-domain}", where {your-domain} can be found in "template-ssm-globals-macro-params.json" is added by default, but this can be changed.
 
 If you need to update this stack, it it recommended to delete the stack and restore it again from a snapshot. If this CloudFormation stack is deleted, an EBS volume snapshot is created.
 
@@ -608,7 +608,7 @@ The project wide configuration values include, but aren't limited to, the follow
 #### deploy-pipeline.sh
 Deploys an AWS CodePipeline for CI/CD on the main branch of your project. This will probably be the most frequently used
 non-dev deployment script. You can add or remove pipeline stages and actions to your pipeline using this script. To do so,
-just edit "template-pipeline.json" after reviewing the <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codepipeline-pipeline.html">CloudFormation AWS::CodePipeline::Pipeline</a> resource. A pipeline includes <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages.html">Stages</a>, which consist of one or more <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages-actions.html">Actions</a>. Actions have a <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html#action-requirements">Action Configuration</a> for specifying the behavior of the action, like building with AWS CodeBuild, Deploying with CloudFormation, or invoking a Lambda function. Actions and be run in parallel or sequentially within a stage using a numerica stage-scoped value called a "RunOrder". Actions can also be blocked until manual approval. 
+just edit "template-pipeline.json" after reviewing the <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-codepipeline-pipeline.html">CloudFormation AWS::CodePipeline::Pipeline</a> resource. A pipeline includes <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages.html">Stages</a>, which consist of one or more <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-codepipeline-pipeline-stages-actions.html">Actions</a>. Actions have a <a href="https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html#action-requirements">Action Configuration</a> for specifying the behavior of the action, like building with AWS CodeBuild, Deploying with CloudFormation, or invoking a Lambda function. Actions and be run in parallel or sequentially within a stage using a numerica stage-scoped value called a "RunOrder". Actions can also be blocked until manual approval.
 
 It is important to note that pushing changes to "template-pipeline.json" to your master branch does not update the pipeline.
 To update the pipeline, you must run "./deploy-pipeline.sh update".
@@ -657,7 +657,7 @@ This script deploys a CloudFormation stack that does the following:
 4. Creates a Lambda function for receiving the webhook event which orhestrates pull request pipelines.
 5. Creates another Lambda function which handles the final step of a pull request pipeline run.
 
-This script is usually executed by the DevOps team when creating a new Phoenix project. 
+This script is usually executed by the DevOps team when creating a new Phoenix project.
 
 Usage:
 ```
@@ -679,7 +679,7 @@ lambda/post_pullrequests/lambda_function.py
 #### deploy-github-webhook-release.sh
 
 #### deploy-microservice-init.sh
-This script bootstraps a new Phoenix project. Before invoking this script, you must follow the steps in both [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix) and 
+This script bootstraps a new Phoenix project. Before invoking this script, you must follow the steps in both [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix) and
 [Initial Phoenix Project Setup](#initial-phoenix-project-setup)
 
 For details on the {GitHub token} argument, see the deploy-github-access-token.sh script.
@@ -730,8 +730,8 @@ buildspec-destroy-microservice.yml
 ```
 
 ### Developer Environment Specific Shell Scripts
-A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-*.sh". There are currently
-13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts. 
+A dev deploy script is a shell script within Phoenix that matches the file pattern of "deploy-dev-\*.sh". There are currently
+13 such scripts, all of which deploy one or more dev environment CloudFormation stacks. All [Environment Specific Stacks](#environment-specific-stacks) have dev deployment scripts.
 
 Note that these developer scripts are for deploying to developer environments only. None of these dev deploy scripts will
 deploy to a testing, ec2, prod, pull request, or any other non-dev specific environment. Each developer on a team may execute
@@ -752,9 +752,9 @@ with a unique dev environment name. Also, the ordering of calling these scripts 
 ```
 
 Since all developer environments share a single Aurora database MySQL instance, the "deploy-dev-database.sh" script
-only needs to be executed once for the entire Project. Individual devlopers do not need to invoke this script. 
+only needs to be executed once for the entire Project. Individual devlopers do not need to invoke this script.
 
-To delete a developer environment, See the instructions in [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh) 
+To delete a developer environment, See the instructions in [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh)
 to manually invoke a CodeBuild job to delete the developer environment.
 
 #### API Dev Deployment Scripts
@@ -861,7 +861,7 @@ Deploys an API Gateway API into a development environment.
 
 This deploys an API Gateway API, API resources, API methods, and any other API Gateway related resources.
 
-There are 2 different scripts that developers can used to deploy 
+There are 2 different scripts that developers can used to deploy
 
 
 Usage:
@@ -869,11 +869,11 @@ Usage:
 When first creating this stack, use the 'deploy-dev-api.sh' script:
 
   ./deploy-dev-api.sh create
-  
+
 For updates, it's better to use the 'deploy-dev.sh' script:
 
   ./deploy-dev.sh update ..
-  
+
 For example:
 
   ./deploy-dev-environment.sh update api-deploy l1l5pcj1xc v0
@@ -888,6 +888,9 @@ Before running "deploy-dev.sh", make sure to install <a href="https://www.npmjs.
 npm install -g spectacle-docs
 ```
 
+
+See [deploy-dev.sh](#deploy-devsh) for more details.
+
 Related Files:
 ```
 deploy-dev-api.sh
@@ -897,10 +900,69 @@ template-api-params-dev.json
 ```
 
 #### deploy-dev.sh
+This script does the following:
+1. Calls all of the appropriate dev scripts in the correct order to spin up an entire developer environment.
+2. Deploys and updates a developer API deployment in API Gateway.
+3. Launches local API documentation in the browser using <a href="https://www.npmjs.com/package/spectacle-docs">spectacle-docs</a>.
+
+You may notice that this script makes aws apigateway API calls directly to forcefully delete and recreate API stages.
+This is not possible using CloudFormation alone, so API calls are necessary.
+
+Usage:
+```
+    ./deploy-dev-environment.sh create --> Creates entire developer environment.
+    ./deploy-dev-environment.sh update api-deploy {rest-api-id} {stage-name} --> Deploys/updates API and locally launches API docs.
+
+Where 'stage-name' is the API stage you are deploying to (v0, v1, etc) and 'rest-api-id' is an API Gateway REST API ID.
+```
+
+You can find the REST API ID for your developer API between a set of parentheses in the gray nav bar at the top of the <a href="https://console.aws.amazon.com/apigateway">API Gateway Console</a> after clicking on your API on the left sidebar.
+
+Before running "deploy-dev.sh", make sure to install <a href="https://www.npmjs.com/package/spectacle-docs">spectacle-docs</a> using the following command:
+```
+npm install -g spectacle-docs
+```
+
+See [deploy-dev-api.sh](#deploy-dev-apish) for more details.
+
+Related Files:
+```
+deploy-dev.sh
+deploy-dev-api.sh
+deploy-dev-api-deployment.sh
+template-api-deployment-params-dev.sh
+```
 
 #### Cognito Dev Deployment Scripts
+The Cognito developer scripts launch developer specific Cognito user pools, user pool clients, app client ID's,
+and auth domains. Developers can test Cognito changes in their own dev cloud before merging changes into the main
+pipeline.
+
+##### deploy-dev-cognito.sh
+Creates a Cognito app client and Cognito user pool for a developer cloud. This app client can be used as
+an authorizor for API Gateway requests.
+
+Usage:
+```
+  ./deploy-dev-cognito.sh create
+  ./deploy-dev-cognito.sh update
+```
+
+Related Files:
+```
+deploy-dev-cognito.sh
+template-cognito.json
+template-cognito-params-dev.json
+```
 
 ##### deploy-dev-cognito-internals.sh
+Creates additional Cognito configuration for Cognito resources not supported by CloudFormation.
+
+Take a look at the lambda function in the "lambda/cognito_internals" folder to see what resources
+are provisioned with this script. It creates a Cognito resource server, a route53 record set
+for an auth domain, and optionally a custom auth domain. Note that there is a hard limit of
+4 custom auth domains per account, so it is only recommended to use "custom" auth domain
+for production while using non-custom auth domains for all other environments.
 
 Usage:
 ```
@@ -911,12 +973,46 @@ Usage:
 Related Files:
 ```
 deploy-dev-cognito-internals.sh
-
+template-cognito-internals.json
+template-cognito-internals-params-dev.json
+lambda/cognito_internals/lambda_function.py
 ```
 
-##### deploy-dev-cognito.sh
-
 #### deploy-dev-database.sh
+This script deploys an Aurora MySQL cluster and supports cluster restores from snapshots. A custom Lambda resource within the template auomatically generates a password for new database instances, with some support for password rotation as well. There is also a CodeBuild job defined in this template that can be used for database migrations within the CI/CD CodePipeline.
+
+Note that all developer clouds use the same dev database instance. This means the single dev database instance must
+be able to handle load and connections from potentially several developer database clouds. Make sure to update
+"template-database-params-dev.json" with a larger instance type if you plan on supporting several developer clouds.
+
+This script is invoked once per Phoenix project since the dev database is shared accross multiple dev clouds.
+It is possible to provide developers within their own databases with some modification in various files.
+
+For further detail on the following:
+
+* Creating a new database stack (without a snapshot)
+* Updating a database stack (without a snapshot)
+* Creating a database stack (with a snapshot)
+* Updating a database stack (with a snapshot)
+* Deleting a database instance
+* Password rotation
+* Finding historical passwords in SSM parameter store
+* Testing Plan for the Lambda password generator
+
+See <a href="https://docs.google.com/document/d/16UUY3h-4wU372XF8D0Fs1IQ3ABLrO-Vjn5ao2YkB84M/edit#">Phoenix for Datbase Admins</a>
+
+Usage:
+```
+  ./deploy-dev-database.sh update
+```
+
+Related Files:
+```
+deploy-dev-database.sh
+template-database.json
+template-database-params-dev.json
+lambda/password_generator/lambda_function.py
+```
 
 #### deploy-dev-ec2.sh
 
@@ -1138,7 +1234,7 @@ in SSM parameter store for the AWS account, you don't need to do anything.
 - In the AWS CodeBuild console
     - Make sure you are logged into GitHub as the mosaic-codebuild user
     - Create a CodeBuild project called ‘test’
-    - In the Source section, link to GitHub using OAuth. 
+    - In the Source section, link to GitHub using OAuth.
     - Click the dialog box that pops up. You only need to do this once for the AWS account.
 - Copy the mosaic-codebuild GitHub access token from lastpass
     - You will pass this token into the ‘./deploy-microservice-init.sh’ shell script.
@@ -1146,4 +1242,3 @@ in SSM parameter store for the AWS account, you don't need to do anything.
     - ./deploy-microservice-init.sh {token}
 - After all stacks from the microservice-init script have been created, push to that master branch of the repo
 - $ git push origin master.
-
