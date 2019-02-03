@@ -69,6 +69,9 @@
         * [deploy-dev-database.sh](#deploy-dev-databasesh)
         * [deploy-dev-ec2.sh](#deploy-dev-ec2sh)
         * [deploy-dev-ecs-task-main.sh](#deploy-dev-ecs-task-mainsh)
+            * [Updating your ECS service](#updating-your-ecs-service)
+            * [Viewing your ECS service](#viewing-your-ecs-service)
+            * [Multiple Service/Task/Container Scenario](#multiple-taskservicecontainer-scenario)
         * [deploy-dev-lambda.sh](#deploy-dev-lambdash)
         * [deploy-dev-ssm-environments.sh](#deploy-dev-ssm-environmentssh)
 * [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files)
@@ -1056,6 +1059,15 @@ artifacts and deploys them to an static website S3 bucket. Because this CodeBuil
 live in an environment specific stack and connect live in buildspec.yml. The EC2 template was chosen for this CodeBuild
 job, but it could have been any other environment specific template.
 
+Befor executing this script (or any developer script), you must complete a one-time configuration of your developer params:
+```
+    cd Phoenix
+    python generate_dev_params.py dev{your-lowercase-firstname}
+    
+    For example, if you username is john.doe:
+      python generate_dev_params.py devjohn
+```
+
 Usage:
 ```
   ./deploy-dev-ec2.sh create
@@ -1084,8 +1096,28 @@ This is probably one of the most complex templates within Phoenix. This shell sc
 3. Pushes the tagged docker image to the ECR repo
 4. Creates/updates the developer ECS task to use the tagged Docker image. Visit the URL to view the live dev ECS service.
 
+##### Viewing your ECS service
+To view your developer cloud ECS service, access the URL via the CloudFormation console:
+1. Open the <a href="https://console.aws.amazon.com/cloudformation/home">CloudFormation console</a> (make sure to switch to the right AWS region, us-east-1 is the default)
+2. In the "Filter stacks" text field, type "ecs" and press enter.
+3. Click on the stack with your username ({project-name}-ecs-main-dev{your-first-name})
+4. Click on the "Outputs" tab
+5. Click on the service URL (make sure you are logged into VPN since all ECS resources are in a private subnet by default)
 
-##### Multiple Task/Service/Container Scenario:
+##### Updating your ECS service
+To make changes to your ECS service:
+1. Edit "template-ecs-task-main-params-dev.json"
+    * Change "DesiredTaskCount" to 2
+2. Update the stack:
+    * cd Phoenix
+    * ./deploy-dev-ecs-task-main.sh update {path-to-folder-with-Dockerfile}
+3. Open the <a href="https://console.aws.amazon.com/ecs/home">ECS Console</a> in the correct region to view your service
+4. Click on your developer cluster
+5. Click on the "Tasks" tab for your service
+6. Verify that the number of task changed from 1 to 2.
+7. Change the Change "DesiredTaskCount" back to 1, update, and verify the number of tasks again.
+
+##### Multiple Task/Service/Container Scenario
 Within Phoenix, developers have the ability to configure their own isolated developer ECS clusters with as many ECS tasks/services
 as needed. Each ECS task can include up to 10 Docker containers (usually a main container and 9 sidecar containers). There
 is one ECS task per stack instance of "template-ecs-task.json". Phoenix ships with a default/main ECS task
@@ -1129,6 +1161,8 @@ In the above example, the networking and service discovery can be added by follo
 This flexibility of adding new CloudFormation files, creating your own shell scripts, updating your Pipeline files,
 and configuring networking & service discovery as you see fit highlights that Phoenix is **not a framework**. AWS is LEGO,
 and Phoenix is just a set of instructions to build microservice LEGO castles.
+
+
 
 Usage:
 ```
