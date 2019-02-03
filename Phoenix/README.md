@@ -69,6 +69,8 @@
         * [deploy-dev-database.sh](#deploy-dev-databasesh)
         * [deploy-dev-ec2.sh](#deploy-dev-ec2sh)
         * [deploy-dev-ecs-task-main.sh](#deploy-dev-ecs-task-mainsh)
+            * [Updating your ECS service](#updating-your-ecs-service)
+            * [Viewing your ECS service](#viewing-your-ecs-service)
             * [Multiple Service/Task/Container Scenario](#multiple-taskservicecontainer-scenario)
         * [deploy-dev-lambda.sh](#deploy-dev-lambdash)
         * [deploy-dev-ssm-environments.sh](#deploy-dev-ssm-environmentssh)
@@ -1090,6 +1092,19 @@ To view your developer cloud ECS service, access the URL via the CloudFormation 
 3. Click on the stack with your username ({project-name}-ecs-main-dev{your-first-name})
 4. Click on the "Outputs" tab
 5. Click on the service URL (make sure you are logged into VPN since all ECS resources are in a private subnet by default)
+
+##### Updating your ECS service
+To make changes to your ECS service:
+1. Edit "template-ecs-task-main-params-dev.json"
+    * Change "DesiredTaskCount" to 2
+2. Update the stack:
+    * cd Phoenix
+    * ./deploy-dev-ecs-task-main.sh update {path-to-folder-with-Dockerfile}
+3. Open the <a href="https://console.aws.amazon.com/ecs/home">ECS Console</a> in the correct region to view your service
+4. Click on your developer cluster
+5. Click on the "Tasks" tab for your service
+6. Verify that the number of task changed from 1 to 2.
+7. Change the Change "DesiredTaskCount" back to 1, update, and verify the number of tasks again.
 
 ##### Multiple Task/Service/Container Scenario
 Within Phoenix, developers have the ability to configure their own isolated developer ECS clusters with as many ECS tasks/services
