@@ -124,6 +124,17 @@ Phoenix is not a framework and it does not hide anything, which can be overwhelm
 
 *AWS is LEGO, and Phoenix is just a set of instructions to build microservice LEGO castles.*
 
+## Prerequisites
+Working with Phoenix without strong knowledge of CloudFormation is an exercise in frustration. Take some time to learn it.
+
+1. Introductory CloudFormation
+    * <a href="https://aws.amazon.com/cloudformation/getting-started/">AWS CloudFormation Getting Started</a>
+    * <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/GettingStarted.html">Getting Started with AWS CloudFormation</a>
+2. Advanced CloudFormation (pick one from below)
+    *
+    <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
+    * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
+
 ## Phoenix Overview
 A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
 1) [CloudFormation JSON Template Files](#cloudformation-json-template-files)
