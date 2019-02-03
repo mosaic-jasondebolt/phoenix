@@ -123,7 +123,7 @@ A Phoenix project ships with multi-environment VPC configuration, complex CI/CD 
 
 Phoenix is not a framework and it does not hide anything, which can be overwhelming for those not deeply familiar with AWS and CloudFormation. A good starting point would be to study the "deploy-microservice-init.sh" file, as this is the file used to bootstrap a Phoenix project. When this script is invoked, over 30 CloudFormation stacks are created for your Phoenix project.
 
-### AWS is LEGO, and Phoenix is just a set of instructions to build microservice LEGO castles.
+*AWS is LEGO, and Phoenix is just a set of instructions to build microservice LEGO castles.*
 
 ## Phoenix Overview
 A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
