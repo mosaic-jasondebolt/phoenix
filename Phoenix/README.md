@@ -123,6 +123,7 @@ A Phoenix project ships with multi-environment VPC configuration, complex CI/CD 
 
 Phoenix is not a framework and it does not hide anything, which can be overwhelming for those not deeply familiar with AWS and CloudFormation. A good starting point would be to study the "deploy-microservice-init.sh" file, as this is the file used to bootstrap a Phoenix project. When this script is invoked, over 30 CloudFormation stacks are created for your Phoenix project.
 
+### AWS is LEGO, and Phoenix is just a set of instructions to build microservice LEGO castles.
 
 ## Phoenix Overview
 A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
@@ -1080,15 +1081,18 @@ as needed. Each ECS task can include up to 10 Docker containers (usually a main 
 is one ECS task per stack instance of "template-ecs-task.json". Phoenix ships with a default/main ECS task
 called "main" but there can be many tasks. For example, a project might have a "worker" task that has 3 supporting sidecar
 containers for logging, monitoring, and caching. In addition, this project may have separate "frontend" and "backend" tasks/services for handling frontend and backend requests, each also having sidecar containers for logging, and caching. So, 3 different tasks/services
-with 3 * (1 + 3) = 12 containers in total. Since all tasks/services have similar task configuration, they are all use the same
-"template-ecs-task.json" template to configure their tasks. For each environment, the following parameter files could be created for
+with 3 * (1 + 3) = 12 containers in total. Since all tasks/services have similar task configuration in our example, they all use the
+same "template-ecs-task.json" template to configure their tasks. **For each environment**, the following files could be created for
 this setup:
 
 ```
 template-ecs-task-frontend-{environment}-params.json
 template-ecs-task-backend-{environment}-params.json
 template-ecs-task-worker-{environment}-params.json
+```
 
+The following deploys scripts would also be created (or the existing ecs dev deploy script could be parameterized):
+``
 deploy-dev-ecs-task-frontend.sh
 deploy-dev-ecs-task-backend.sh
 deploy-dev-ecs-task-worker.sh
@@ -1105,9 +1109,16 @@ template-ecs-task-backend.json
 template-ecs-task-worker.json
 ```
 
-This flexibility of adding new CloudFormation files, creating your own shell scripts, and updating your Pipeline files
-as you see fits highlights that Phoenix is not a framework. Phoenix allows you to author your own CloudFormation templates
-and deploy them in many different ways (locally, in a pipeline, from Lambda, etc.).
+In the above example, the networking and service discovery can be added by following documentation:
+* <a href="https://aws.amazon.com/blogs/aws/amazon-ecs-service-discovery/">ECS Service Discovery Blog Post</a>
+* <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-discovery.html">ECS Service Discovery Documentation</a>
+* <a href="https://aws.amazon.com/cloud-map/">AWS CloudMap</a>
+    * <a href="https://aws.amazon.com/about-aws/whats-new/2018/11/introducing-aws-cloud-map/">AWS Cloud Map Blog Post</a>
+    * <a href="https://aws.amazon.com/blogs/aws/aws-cloud-map-easily-create-and-maintain-custom-maps-of-your-applications/">AWS Cloud Map Blog Post</a>
+
+This flexibility of adding new CloudFormation files, creating your own shell scripts, updating your Pipeline files,
+and configuring networking & service discovery as you see fit highlights that Phoenix is **not a framework**. AWS is LEGO,
+and Phoenix is just a set of instructions to build microservice LEGO castles.
 
 Usage:
 ```
