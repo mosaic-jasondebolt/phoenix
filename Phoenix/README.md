@@ -145,8 +145,7 @@ Working with Phoenix without strong knowledge of CloudFormation is an exercise i
     * <a href="https://aws.amazon.com/cloudformation/getting-started/">AWS CloudFormation Getting Started</a>
     * <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/GettingStarted.html">Getting Started with AWS CloudFormation</a>
 2. Advanced CloudFormation (pick one from below)
-    *
-    <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
+    * <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
     * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
 
 ## CloudFormation JSON Template Files
