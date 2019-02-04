@@ -6,6 +6,7 @@
 * [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
 * [Prerequisites](#prerequisites)
+* [Why No Nested Stacks](#why-no-nested-stacks)
 * [CloudFormation JSON Template Files](#cloudformation-json-template-files)
     * [Account Specific Stacks](#account-specific-stacks)
         * [template-vpc.json](#template-vpcjson)
@@ -147,6 +148,13 @@ Working with Phoenix without strong knowledge of CloudFormation is an exercise i
 2. Advanced CloudFormation (pick one from below)
     * <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
     * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
+
+## Why no Nested Stacks?
+At the time Phoenix was first developed, Cloudformation Nested Stacks had several limitations. These limitations included
+lack of support for <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/create-reusable-transform-function-snippets-and-add-to-your-template-with-aws-include-transform.html">AWS::Include</a> transforms, Cloudformation
+macros and more. Nested stacks can also become difficult to work with for large sets of stacks, sometimes becoming
+completely stuck (requiring AWS support to fix). In December 2018, Cloudformation macro support was added to Nested Stacks,
+so it may be possible to refactor Phoenix to leverage Nested Stacks in the near future.
 
 ## CloudFormation JSON Template Files
 An AWS account may include multiple Phoenix projects, and each Phoenix project may include multiple environments like
