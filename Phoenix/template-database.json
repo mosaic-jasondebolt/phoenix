@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Generates all database resources required for a microservice.",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Parameters": {
     "SnapshotIdentifier": {
       "Description": "The RDS Cluster Snapshot ID if you plan on restoring the DB cluster.",
@@ -505,13 +505,7 @@
             {"Ref": "Environment"}
           ]]
         },
-        "ServiceRole": {"Fn::Join": ["", [
-          "{{resolve:ssm:",
-          "/microservice/",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "/global/code-build-service-role-arn",
-          ":1}}"
-        ]]},
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-rds-migration.yml",
           "Type": "CODECOMMIT",
@@ -660,13 +654,7 @@
             {"Ref": "Environment"}
           ]]
         },
-        "ServiceRole": {"Fn::Join": ["", [
-          "{{resolve:ssm:",
-          "/microservice/",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "/global/code-build-service-role-arn",
-          ":1}}"
-        ]]},
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-integration-test.yml",
           "Type": "CODECOMMIT",

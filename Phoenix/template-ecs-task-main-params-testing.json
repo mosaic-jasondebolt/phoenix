@@ -13,10 +13,12 @@
     "HealthCheckGracePeriodSeconds": "60",
     "ImageVersion": "IMAGE_TAG",
     "LaunchType": "EC2",
-    "MaxTasksToScaleOutInResponseTo500Errors": "2",
-    "MinTasksToScaleInInResponseToScaleInEvent": "1",
+    "MaxTasksToScaleOutInResponseTo500Errors": "3",
+    "MinTasksToScaleInInResponseToScaleInEvent": "2",
     "VPCPrefix": "testing",
     "WebSubnets": "Private",
+    "PlacementStrategiesType": "spread",
+    "PlacementStrategiesField": "attribute:ecs.availability-zone",
     "Version": "VERSION_ID"
   }
 }

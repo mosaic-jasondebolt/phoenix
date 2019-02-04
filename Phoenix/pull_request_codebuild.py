@@ -135,7 +135,8 @@ def _parse_json(path):
 def send_status(build_type):
     # Build can can be 'build', 'lint', 'unit-test', etc.
     url = os.path.join(
-        GITHUB_API_URL, 'repos/solmosaic/phoenix/statuses/{0}'.format(
+        GITHUB_API_URL, 'repos/{0}/{1}/statuses/{2}'.format(
+            GITHUB_ORGANIZATION, REPO_NAME,
             CODEBUILD_RESOLVED_SOURCE_VERSION))
     payload = {
         'state': 'success',

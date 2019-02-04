@@ -31,9 +31,12 @@ ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID
 
-# Generate the MICROSERVICE bucket if it doesn't already exist
-aws s3 mb s3://$MICROSERVICE_BUCKET_NAME || true
+# Make macro name unique in the AWS account:
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
+sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-pipeline.json > temp0.json
+
 aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-*.json" --delete
+aws s3 cp temp0.json s3://$MICROSERVICE_BUCKET_NAME/cloudformation/template-pipeline.json
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-pipeline.json

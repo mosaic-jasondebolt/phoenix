@@ -89,7 +89,7 @@
       "Type": "String"
     },
     "Version": {
-      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a developers username. If nothing else, changes in this parameter value will update the stack.",
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a timestamp. If nothing else, changes in this parameter value will update the stack.",
       "Type": "String"
     }
   },
@@ -102,11 +102,11 @@
     }
   },
   "Resources": {
-    "ProjectLambdaMacro": {
+    "PROJECTNAMELambdaMacro": {
       "Type" : "AWS::CloudFormation::Macro",
       "DependsOn": "LambdaMacro",
       "Properties" : {
-        "Name" : "ProjectLambdaMacro",
+        "Name" : "PROJECTNAMELambdaMacro",
         "Description" : "Lambda CloudFormation Macro",
         "FunctionName" : {"Fn::GetAtt": ["LambdaMacro", "Arn"]},
         "LogGroupName" : {"Ref": "LogGroup"},
@@ -146,7 +146,7 @@
           ]]}
         },
         "Runtime": "python3.6",
-        "Timeout": "25"
+        "Timeout": "60"
       }
     },
     "LambdaSSMSecret": {
@@ -172,7 +172,7 @@
           ]]}
         },
         "Runtime": "python3.6",
-        "Timeout": "25"
+        "Timeout": "60"
       }
     },
     "LambdaDeleteNetworkInterface": {
@@ -198,7 +198,7 @@
           ]]}
         },
         "Runtime": "python3.6",
-        "Timeout": "25"
+        "Timeout": "60"
       }
     },
     "MacroVersion": {

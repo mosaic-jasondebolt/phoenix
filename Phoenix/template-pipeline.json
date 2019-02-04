@@ -1,90 +1,13 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Generates all resources required for a microservice.",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Conditions": {
     "ProjectUsesRootGitBranch" : {"Fn::Equals" : [
       {"PhoenixSSM": "/microservice/{ProjectName}/global/git-root-project-branch"},{"PhoenixSSM": "/microservice/{ProjectName}/global/git-current-project-branch"}
     ]}
   },
   "Resources": {
-    "ECRMainRepository": {
-      "Type": "AWS::ECR::Repository",
-      "Properties": {
-        "RepositoryName": {
-          "Fn::Join": ["-", [
-            {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-            "main"
-          ]]
-        },
-        "RepositoryPolicyText": {
-          "Version": "2008-10-17",
-          "Statement": [{
-              "Sid": "AllowPushPull",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": [{"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"}]
-              },
-              "Action": [
-                "ecr:GetDownloadUrlForLayer",
-                "ecr:BatchGetImage",
-                "ecr:BatchCheckLayerAvailability",
-                "ecr:PutImage",
-                "ecr:InitiateLayerUpload",
-                "ecr:UploadLayerPart",
-                "ecr:CompleteLayerUpload"
-              ]
-            },
-            {
-              "Sid": "CodeBuildAccess",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "codebuild.amazonaws.com"
-              },
-              "Action": [
-                "ecr:*"
-              ]
-            }
-          ]
-        }
-      }
-    },
-    "CodeBuildBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
-    "CodePipelineBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-pipeline-bucket-name"},
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
-    "LoadBalancerLogsBucket": {
-      "Type": "AWS::S3::Bucket",
-      "Properties": {
-        "BucketName": {"PhoenixSSM": "/microservice/{ProjectName}/global/load-balancer-logs-bucket-name"},
-        "LifecycleConfiguration": {
-          "Rules": [{
-            "ExpirationInDays": 180,
-            "Status": "Enabled"
-          }]
-        }
-      }
-    },
     "CodePipelineFailedSNSTopic": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
@@ -145,20 +68,6 @@
         "RegisterWithThirdParty": "true"
       }
     },
-    "CodeBuildServiceRoleArnParam": {
-      "Type": "AWS::SSM::Parameter",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", [
-          "/microservice",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "global",
-          "code-build-service-role-arn"
-        ]]},
-        "Type": "String",
-        "Value": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
-        "Description": "The Code Build Service Role ARN"
-      }
-    },
     "CodeBuildSecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
@@ -195,23 +104,8 @@
         ]
       }
     },
-    "CodeBuildSecurityGroupParam": {
-      "Type": "AWS::SSM::Parameter",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", [
-          "/microservice",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "global",
-          "code-build-security-group"
-        ]]},
-        "Type": "String",
-        "Value": {"Ref": "CodeBuildSecurityGroup"},
-        "Description": "The Code Build security group ID"
-      }
-    },
     "CodeBuild": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -244,13 +138,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -283,7 +173,13 @@
             {
               "Name" : "GITHUB_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/access-token"
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                "global",
+                "github",
+                "access-token"
+              ]]}
             },
             {
               "Name" : "GIT_URL",
@@ -303,15 +199,7 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
@@ -319,7 +207,6 @@
     },
     "CodeBuildUnitTest": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -352,13 +239,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -391,7 +274,13 @@
             {
               "Name" : "GITHUB_UNIT_TEST_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/unit-test-access-token"
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                "global",
+                "github",
+                "access-token"
+              ]]}
             },
             {
               "Name" : "GIT_URL",
@@ -415,15 +304,7 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-unit-test.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
@@ -431,7 +312,6 @@
     },
     "CodeBuildLint": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -464,13 +344,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -503,7 +379,13 @@
             {
               "Name" : "GITHUB_LINT_ACCESS_TOKEN",
               "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/lint-access-token"
+              "Value": {"Fn::Join": ["/", [
+                "/microservice",
+                {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+                "global",
+                "github",
+                "access-token"
+              ]]}
             },
             {
               "Name" : "GIT_URL",
@@ -527,15 +409,7 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-lint.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
@@ -543,7 +417,6 @@
     },
     "CodeBuildPostProdDeploy": {
       "Type": "AWS::CodeBuild::Project",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
       "Properties": {
         "VpcConfig": {
           "SecurityGroupIds": [
@@ -576,13 +449,9 @@
           }
         },
         "Artifacts": {
-          "Type": "S3",
-          "Location": {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
-          "NamespaceType": "BUILD_ID",
-          "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "Packaging": "NONE"
+          "Type": "CODEPIPELINE"
         },
-        "BadgeEnabled": "true",
+        "BadgeEnabled": "false",
         "Cache": {
           "Location": {
             "Fn::Join": ["", [{"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-bucket-name"},
@@ -620,37 +489,19 @@
         "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-post-prod-deploy.yml",
-          "Type": "CODECOMMIT",
-          "Location": {
-            "Fn::Join": ["", [
-              "https://git-codecommit.",
-              {"Ref": "AWS::Region"},
-              ".amazonaws.com/v1/repos/",
-              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
-            ]]
-          }
+          "Type": "CODEPIPELINE"
         },
         "TimeoutInMinutes": 60,
         "Tags": []
       }
     },
-    "CodePipelineServiceRoleArnParam": {
-      "Type": "AWS::SSM::Parameter",
-      "Properties": {
-        "Name": {"Fn::Join": ["/", [
-          "/microservice",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "global",
-          "code-pipeline-service-role-arn"
-        ]]},
-        "Type": "String",
-        "Value": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
-        "Description": "The Code Pipeline Service Role ARN"
-      }
-    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
-      "DependsOn": ["CodeBuildBucket", "CodePipelineBucket"],
+      "DependsOn": [
+        "CodeBuild",
+        "CodeBuildLint",
+        "CodeBuildUnitTest"
+      ],
       "Properties": {
         "RoleArn": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Name": {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},

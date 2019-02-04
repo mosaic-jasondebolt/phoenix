@@ -14,12 +14,12 @@
       "Description": "The name of the CodePipeline.",
       "Type": "String"
     },
-    "RepoName": {
-      "Description": "The name of the CodeCommit git repo",
+    "GitHubOrganization": {
+      "Description": "The name of the GitHub organization where this repo resides",
       "Type": "String"
     },
-    "GitlabProjectId": {
-      "Description": "The project id if the Gitlab project",
+    "RepoName": {
+      "Description": "The name of the CodeCommit git repo",
       "Type": "String"
     },
     "SourceBranch": {
@@ -46,6 +46,10 @@
       "Description": "The CodePipeline service role that CodePipeline pipelines use.",
       "Type": "String"
     },
+    "Token": {
+      "Description": "Token used to create the release branch webhook",
+      "Type": "String"
+    },
     "IAMRole": {
       "Description": "The IAM Role used to manage the pipeline stack.",
       "Type": "String"
@@ -61,27 +65,61 @@
     }
   },
   "Resources": {
+    "GitHubWebhook": {
+      "Type": "AWS::CodePipeline::Webhook",
+      "Properties": {
+        "AuthenticationConfiguration": {
+          "SecretToken": {"Ref": "Token"}
+        },
+        "Filters": [
+          {
+            "JsonPath": "$.ref",
+            "MatchEquals": {"Fn::Join": ["", [
+              "refs/heads/",
+              {"Ref": "SourceBranch"}
+            ]]}
+          }
+        ],
+        "Authentication": "GITHUB_HMAC",
+        "TargetPipeline": { "Ref" : "CodePipeline" },
+        "TargetAction": "Source",
+        "Name": {"Fn::Join": ["-", [
+          {"Ref": "ProjectName"},
+          "CodePipelineWebhook",
+          {"Ref": "SourceBranch"},
+          "Branch",
+          {"Ref": "ReleaseEnvironment"}
+        ]]},
+        "TargetPipelineVersion": { "Fn::GetAtt" : [ "CodePipeline", "Version" ] },
+        "RegisterWithThirdParty": "true"
+      }
+    },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
+      "DependsOn": ["CodeBuild", "CodeBuildUnitTest", "CodeBuildLint"],
       "Properties": {
         "RoleArn" : {"Ref": "CodePipelineServiceRoleArn"},
         "Name": {"Ref": "PipelineName"},
-        "Stages": [{
+        "Stages": [
+          {
             "Name": "Source",
             "Actions": [{
-              "Name": "SourceAction",
+              "Name": "Source",
               "ActionTypeId": {
                 "Category": "Source",
-                "Owner": "AWS",
+                "Owner": "ThirdParty",
                 "Version": "1",
-                "Provider": "CodeCommit"
+                "Provider": "GitHub"
               },
               "OutputArtifacts": [{
                 "Name": "SourceOutput"
               }],
               "Configuration": {
-                "RepositoryName": {"Ref": "RepoName"},
-                "BranchName": {"Ref": "SourceBranch"}
+                "Owner": {"Ref": "GitHubOrganization"},
+                "Repo": {"Ref": "RepoName"},
+                "PollForSourceChanges": "false",
+                "Branch": {"Ref": "SourceBranch"},
+                "OAuthToken": {"Ref": "Token"}
               },
               "RunOrder": 1
             }]
@@ -955,36 +993,6 @@
                 }
               }
             ]
-          },
-          {
-            "Name": "PostRelease",
-            "Actions": [
-              {
-                "Name": "PostRelease",
-                "ActionTypeId": {
-                  "Category": "Invoke",
-                  "Owner": "AWS",
-                  "Version": "1",
-                  "Provider": "Lambda"
-                },
-                "InputArtifacts": [{
-                  "Name": "BuildOutput"
-                }],
-                "RunOrder": 3,
-                "Configuration": {
-                  "FunctionName": {
-                    "Fn::ImportValue": {
-                      "Fn::Join": ["-", [
-                        {"Ref": "ProjectName"},
-                        "release-webhook",
-                        "LambdaPostReleaseFunctionName"
-                      ]]
-                    }
-                  },
-                  "UserParameters": "{\"artifact\": \"BuildOutput\", \"file\": \"gitlab-release.json\"}"
-                }
-              }
-            ]
           }
         ],
         "ArtifactStore": {
@@ -1085,11 +1093,6 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "RELEASE_ENVIRONMENT",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "ReleaseEnvironment"}
@@ -1118,20 +1121,6 @@
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "LambdaBucketName"}
-            },
-            {
-              "Name" : "GITHUB_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/access-token"
-            },
-            {
-              "Name" : "GIT_URL",
-              "Type" : "PARAMETER_STORE",
-              "Value": {"Fn::Join": ["/", [
-                "/microservice",
-                {"Ref": "ProjectName"},
-                "global/git-url"
-              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
@@ -1201,11 +1190,6 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "RELEASE_ENVIRONMENT",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "ReleaseEnvironment"}
@@ -1234,20 +1218,6 @@
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "LambdaBucketName"}
-            },
-            {
-              "Name" : "GITHUB_UNIT_TEST_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/unit-test-access-token"
-            },
-            {
-              "Name" : "GIT_URL",
-              "Type" : "PARAMETER_STORE",
-              "Value": {"Fn::Join": ["/", [
-                "/microservice",
-                {"Ref": "ProjectName"},
-                "global/git-url"
-              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},
@@ -1318,11 +1288,6 @@
               "Value" : {"Ref": "AWS::AccountId"}
             },
             {
-              "Name" : "GITLAB_PROJECT_ID",
-              "Type" : "PLAINTEXT",
-              "Value" : {"Ref": "GitlabProjectId"}
-            },
-            {
               "Name" : "RELEASE_ENVIRONMENT",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "ReleaseEnvironment"}
@@ -1351,20 +1316,6 @@
               "Name" : "LAMBDA_BUCKET_NAME",
               "Type" : "PLAINTEXT",
               "Value" : {"Ref": "LambdaBucketName"}
-            },
-            {
-              "Name" : "GITHUB_LINT_ACCESS_TOKEN",
-              "Type" : "PARAMETER_STORE",
-              "Value" : "/global/gitlab/codebuild/lint-access-token"
-            },
-            {
-              "Name" : "GIT_URL",
-              "Type" : "PARAMETER_STORE",
-              "Value": {"Fn::Join": ["/", [
-                "/microservice",
-                {"Ref": "ProjectName"},
-                "global/git-url"
-              ]]}
             }
           ],
           "Image": {"Ref": "CodeBuildDockerImage"},

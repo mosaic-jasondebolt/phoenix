@@ -1,6 +1,7 @@
 {
   "Parameters": {
     "Environment": "testing",
-    "DomainPrefix": "v0-testing.docs"
+    "DomainPrefix": "v0-testing.docs",
+    "Version": "VERSION_ID"
   }
 }

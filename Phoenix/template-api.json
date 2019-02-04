@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description" : "Deploys an API (RESTful or not)",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Parameters": {
     "Environment": {
       "Description": "The environment (dev, testing, prod, etc.) to deploy to.",
@@ -52,12 +52,6 @@
                     ":root"
                   ]]},
                   {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
-                  {"Fn::Join": ["", [
-                    "arn:aws:iam::",
-                    {"Ref": "AWS::AccountId"},
-                    ":role/",
-                    "PhoenixUIAdmins"
-                  ]]},
                   {"Fn::If": [
                     "IsProd",
                     { "Ref" : "AWS::NoValue" },

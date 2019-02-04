@@ -10,7 +10,7 @@
 
 # EXAMPLES:
 #  phx aws s3 ls
-#  phx ./deploy-database-dev.sh update
+#  phx ./deploy-dev-database.sh update
 #  phx python generage_dev_params.py {your username}
 #  phx python search_and_replace.py . {search string} {replace string}
 

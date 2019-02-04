@@ -23,7 +23,7 @@
       "Type": "String"
     },
     "PullRequestNumber": {
-      "Description": "The pull request internal id of the github pull request",
+      "Description": "The pull request number of the github pull request",
       "Type": "String"
     },
     "SourceBranch": {
@@ -67,7 +67,6 @@
   "Resources": {
     "GitHubWebhook": {
       "Type": "AWS::CodePipeline::Webhook",
-      "DependsOn": ["CodeBuild", "CodeBuildUnitTest", "CodeBuildLint"],
       "Properties": {
         "AuthenticationConfiguration": {
           "SecretToken": {"Ref": "Token"}
@@ -96,6 +95,7 @@
     },
     "CodePipeline": {
       "Type": "AWS::CodePipeline::Pipeline",
+      "DependsOn": ["CodeBuild", "CodeBuildUnitTest", "CodeBuildLint"],
       "Properties": {
         "RoleArn" : {"Ref": "CodePipelineServiceRoleArn"},
         "Name": {"Ref": "PipelineName"},
@@ -454,7 +454,7 @@
                       "Fn::Join": ["-", [
                         {"Ref": "ProjectName"},
                         "pull-request-webhook",
-                        "LambdaPostPullRequestFunctionName"
+                        "LambdaPostRequestFunctionName"
                       ]]
                     }
                   },

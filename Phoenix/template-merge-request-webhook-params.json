@@ -1,6 +1,0 @@
-{
-  "Parameters": {
-    "Version": "VERSION_ID",
-    "VPCPrefix": "dev"
-  }
-}

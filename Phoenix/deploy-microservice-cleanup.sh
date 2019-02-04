@@ -25,7 +25,11 @@ ENVIRONMENT='all'
 VERSION_ID=$ENVIRONMENT-`date '+%Y-%m-%d-%H%M%S'`
 CHANGE_SET_NAME=$VERSION_ID
 
-aws s3 sync . s3://$MICROSERVICE_BUCKET_NAME/cloudformation --exclude "*" --include "template-microservice-cleanup.json" --delete
+# Make macro name unique in the AWS account:
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudformation-macro.html#cfn-cloudformation-macro-name
+sed "s/PROJECTNAMELambdaMacro/${PROJECT_NAME}LambdaMacro/g" template-microservice-cleanup.json > temp0.json
+
+aws s3 cp temp0.json s3://$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice-cleanup.json
 
 # Validate the CloudFormation template before template execution.
 aws cloudformation validate-template --template-url https://s3.amazonaws.com/$MICROSERVICE_BUCKET_NAME/cloudformation/template-microservice-cleanup.json

@@ -3,6 +3,7 @@ set -e
 
 # Saves a GitHub access token to SSM parameter store for your project.
 # You must generate an access token within GitHub and pass it to this script.
+# To generate a token, install pwgen locally and run 'pwgen 32 -1'.
 #
 # This token is used in the following ways:
 #  - To create the webhook associated with the main pipeline of your project.
@@ -14,7 +15,7 @@ set -e
 # and then "Authorize" else the token will not work.
 #
 # USAGE
-#   ./deploy-ssm-github-token.sh {Github Token}
+#   ./deploy-github-access-token.sh {Github Token}
 
 # Check for valid arguments
 if [ $# -ne 1 ]

@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description" : "Generates EC2 resources, some of which may run one or more ECS tasks/services in a given environment.",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Parameters": {
     "Environment": {
       "Description": "The environment to deploy the instance to.",
@@ -526,13 +526,7 @@
             {"Ref": "Environment"}
           ]]
         },
-        "ServiceRole": {"Fn::Join": ["", [
-          "{{resolve:ssm:",
-          "/microservice/",
-          {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
-          "/global/code-build-service-role-arn",
-          ":1}}"
-        ]]},
+        "ServiceRole": {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"},
         "Source": {
           "BuildSpec": "Phoenix/buildspec-api-documentation.yml",
           "Type": "CODECOMMIT",

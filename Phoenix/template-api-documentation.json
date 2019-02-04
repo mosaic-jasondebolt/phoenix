@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Deploys AWS resources required to support versioned API documentation. Resources include a static S3 website/bucket, Bucket policy, CloudFront distribution, Web Application Firewall ACL, WAF rules, and WAF predicates for managing API documentation access.",
-  "Transform" : ["ProjectLambdaMacro"],
+  "Transform" : ["PROJECTNAMELambdaMacro"],
   "Parameters": {
     "APIDocsUserAgent": {
       "Description": "The user agent used for API Documentation access",
@@ -14,6 +14,10 @@
     },
     "DomainPrefix": {
       "Description": "The prefix name for the bucket (i.e some.prefix.{PROJECT_DOMAIN}).",
+      "Type": "String"
+    },
+    "Version": {
+      "Description": "The identifier/version within the S3Key where the version of Lambda code intented to be deployed in this CloudFormation stack can be found (s3://bucket/{identifier}/foo/foo.py). In non-dev environments, this identifier may be v_{first 7 chars of git SHA1}. In dev, this may be a timestamp. If nothing else, changes in this parameter value will update the stack.",
       "Type": "String"
     }
   },
@@ -61,6 +65,23 @@
             }
           ]
         }
+      }
+    },
+    "CustomResourceDeleteS3Files": {
+      "Type": "Custom::DeleteS3Files",
+      "DependsOn": ["Bucket"],
+      "Properties": {
+        "ServiceToken": {
+          "Fn::ImportValue": {
+            "Fn::Join": ["-", [
+              {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"},
+              "s3-ecr",
+              "LambdaDeleteS3FilesArn"
+            ]]
+          }
+        },
+        "LambdaVersion": {"Ref": "Version"},
+        "BucketNames": [{"Ref": "Bucket"}]
       }
     },
     "CloudFrontOriginAccessIdentity": {
