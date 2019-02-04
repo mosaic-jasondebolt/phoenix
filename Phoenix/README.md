@@ -1449,6 +1449,13 @@ does support it however.
 Original Git Repo:
 https://github.com/jheller/alb-rule/blob/master/lambda/alb_listener_rule.py
 
+Related Files:
+```
+deploy-dev-lambda.sh
+template-lambda.json
+buildspec.yml
+```
+
 
 ### api_internals
 A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for altering the request body of API Gateway HTTP requests being sent
@@ -1456,13 +1463,48 @@ to Lambda functions.
 
 See [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh) for details.
 
+Related Files:
+```
+deploy-dev-api-deployment.sh
+template-api-deployment.json
+buildspec.yml
+```
+
 ### cognito_internals
 A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for creating/updating/delete Cognito resources that are not supported
 by CloudFormation.
 
 See [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh) and [template-cognito-internals.json](#template-cognito-internalsjson) for details.
 
+Related Files:
+```
+deploy-dev-cognito-internals.sh
+template-cognito-internals.json
+buildspec.yml
+```
+
 ### create_pull_request_webhook
+Creates a GitHub webhook within GitHub for sending pull request webhooks.
+
+View the full GitHub Pull Request REST API <a href="https://developer.github.com/v3/activity/events/types/#pullrequestevent">here</a>.
+
+This Lambda function calls three lambda functions depending on the stack even type:
+1. create_webook()
+2. update_webhook()
+3. delete_webhook()
+
+When "create_webhook" is called, it grabs the project's Git access token from SSM parameter store and makes a GitHub
+API call to create a pull request webook. When the CloudFormation stack is deleted, this Lambda function automatically
+deletes the GitHub webhook.
+
+Related Files:
+```
+deploy-github-webhook-pull-request.sh
+template-github-pull-request-params.json
+Phoenix/lambda/create_pull_request_webhook
+Phoenix/lambda/pull_request_webhook
+Phoenix/lambda/post_pullrequests
+```
 
 ### create_release_webhook
 
