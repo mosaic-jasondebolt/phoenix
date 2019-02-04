@@ -1484,7 +1484,7 @@ buildspec.yml
 ```
 
 ### create_pull_request_webhook
-Creates a GitHub webhook within GitHub for sending pull request webhooks.
+Creates a GitHub webhook within GitHub for sending pull request events to an endpoint.
 
 View the full GitHub Pull Request REST API <a href="https://developer.github.com/v3/activity/events/types/#pullrequestevent">here</a>.
 
@@ -1493,20 +1493,34 @@ This Lambda function calls three lambda functions depending on the stack even ty
 2. update_webhook()
 3. delete_webhook()
 
-When "create_webhook" is called, it grabs the project's Git access token from SSM parameter store and makes a GitHub
-API call to create a pull request webook. When the CloudFormation stack is deleted, this Lambda function automatically
-deletes the GitHub webhook.
+When "create_webhook" is called, it grabs the project's Git access token and a shared pull request secret from SSM parameter store and makes a GitHub API call to create a pull request webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
 
 Related Files:
 ```
 deploy-github-webhook-pull-request.sh
-template-github-pull-request-params.json
+template-github-webhook-pull-request-params.json
 Phoenix/lambda/create_pull_request_webhook
 Phoenix/lambda/pull_request_webhook
 Phoenix/lambda/post_pullrequests
 ```
 
 ### create_release_webhook
+Creates a GitHub webhook within GitHub for sending release related events to an endpoint.
+
+This Lambda function calls three lambda functions depending on the stack even type:
+1. create_webook()
+2. update_webhook()
+3. delete_webhook()
+
+When "create_webhook" is called, it grabs the project's Git access token and a shared release secret from SSM parameter store and makes a GitHub API call to create a release webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
+
+Related Files:
+```
+deploy-github-webhook-release.sh
+template-github-webhook-release-params.json
+Phoenix/lambda/create_release_webhook
+Phoenix/lambda/release_webhook
+```
 
 ### delete_ecr_repos
 
@@ -1563,7 +1577,7 @@ an environment aware template ("template-ecs-task.json") that imports the correc
                   "VPCPrefix": {"Ref": "VPCPrefix"},
                   "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
                 }]
-              }},
+               }},
               {"Fn::ImportValue": { "Fn::Sub": [
                 "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ2", {
                   "VPCPrefix": {"Ref": "VPCPrefix"},
