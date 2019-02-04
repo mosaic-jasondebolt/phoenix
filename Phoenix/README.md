@@ -1523,6 +1523,13 @@ Phoenix/lambda/release_webhook
 ```
 
 ### delete_ecr_repos
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that automatically deletes all images in one or more ECR repos, as well as the ECR repo itself. This is particularly useful for automatically deleting ECR repos upon stack deletion since CloudFormation cannot delete non-empty ECR repos.
+
+Related Files:
+```
+deploy-s3-ecr.sh
+template-s3-ecr.json
+```
 
 ### delete_network_interface
 
