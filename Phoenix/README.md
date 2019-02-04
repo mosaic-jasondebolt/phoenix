@@ -1261,6 +1261,32 @@ Example:
 ```
 
 ### generate_environment_params.py
+Generates CloudFormation JSON environment specific parameter files.
+
+This script just copies all of the *params-testing.json files and generates
+namespaced *-params-{environment}.json files. If the '--delete' flag is passed
+in, all files matching *-params-{environment}.json will be deleted.
+
+Typically you'll only need to run this script once per new environment. It is
+a utility script to make is easier to generate all of the cloudformation
+parameter files for a new environment.
+
+The 'environment' arg can be something like 'staging' or 'rc'.
+When CloudFormation stacks are launched using these parameter files,
+all AWS resources will be identified by this environment such as
+URL's, ECS clusters, Lambda functions, etc.
+
+Usage:
+```
+    python generate_environment_params.py {environment}
+    python generate_environment_params.py {environment} --delete
+```
+
+Examples:
+```
+    python generate_environment_params.py staging
+    python generate_environment_params.py staging --delete
+```
 
 ### rename_ssm_parameter.py
 
