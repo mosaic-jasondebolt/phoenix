@@ -1382,6 +1382,59 @@ As long as you have the environment variables set as specified in the
 initializer, you can run this script either locally or on AWS CodeBuild.
 
 ## Python 3.6 Lambda Functions
+Phoenix leverage AWS Lambda for many event based workloads, such as handling GitHub webhooks or cleaning up AWS resources
+during stack deletions.
+
+All Lambda functions are located in the "lambda" subfolder of the Phoenix directory. Most of these functions use the
+Python3.6 runtime but a few use NodeJS.
+
+There are many frameworks out there that deploy Lambda functions, but Phoenix deploys Lambda simply by zipping up the
+file contents, saving the zip to a versioned S3 folder (either using a timestamp or a git commit SHA1), and provisioning
+the Lambda functions using CloudFormation (which then pick up the source in the versioned S3 folder).
+
+For example, the shell code snippet below loops through some function names within the "Phoenix/lambda" folder:
+```
+listOfPythonLambdaFunctions='projects delete_network_interface alb_listener_rule proxy'
+for functionName in $listOfPythonLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
+  pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
+  cd ../../
+  rm -rf builds
+done
+```
+
+Where $LAMBDA_BUCKET_NAME is usually {organization-name}-{project-name}-lambda and the $VERSION_ID is usually a
+timestamp for developer deployments or a git SHA1 for pipeline deployments.
+
+The CloudFormation code snippet below deploys the Lambda function itself:
+```
+    "LambdaProjects": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket" : "your-bucket-name",
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "projects",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+```
+
+Where the above function deploys a Python Lambda function that times out after 25 seconds. The source code of the Lambda
+function would be found at "s3://your-bucket-name/$VERSION_ID/projects/lambda_function.zip", which is where our
+shell code above deployed it to on the first loop iteration.
+
 
 ### alb_listener_rule
 
