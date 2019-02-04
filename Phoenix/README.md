@@ -1289,6 +1289,22 @@ Examples:
 ```
 
 ### rename_ssm_parameter.py
+Renames SSM parameter **keys** from an old value to a new value, optionally for encrypted parameters (True|False).
+
+Use this script only for parameters that are **not deployed via CloudFormation** (see template-ssm-globals-macro-params.json). This is because CloudFormation contains the source of truth for parameter names.
+
+You can use this script refactor the base paths of several manually configured SSM parameters, such as for secrets and tokens.
+
+Usage:
+```
+    python rename_ssm_parameter.py {old_param_key} {new_param_key} [True | False]
+```
+
+Examples:
+```
+    python rename_ssm_parameter.py /some/param/key /some/param/new-key True --> param is encrypted.
+    python rename_ssm_parameter.py /some/param/key /some/param/new-key False --> param is not encrypted
+```
 
 ### cfn_stacks.py
 
