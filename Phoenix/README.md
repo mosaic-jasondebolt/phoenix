@@ -1307,6 +1307,22 @@ Examples:
 ```
 
 ### cfn_stacks.py
+Helper script used to make CloudFormation API calls.
+
+Add functions to this script when making CloudFormation CLI calls from shell code or buildspec YAML files involves
+more complex logic.
+
+Usage:
+```
+    python cfn_stacks.py delete-if-exists {stack_name}
+    python cfn_stacks.py disable-termination-protection {stack_name}
+```
+
+Examples:
+```
+    python cfn_stacks.py delete-if-exists some-stack-name
+    python cfn_stacks.py disable-termination-protection some-stack-name
+```
 
 ### generate_dev_params.py
 
