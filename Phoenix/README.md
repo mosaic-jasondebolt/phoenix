@@ -1325,6 +1325,32 @@ Examples:
 ```
 
 ### generate_dev_params.py
+Generates CloudFormation JSON dev parameter files.
+
+This script just copies all of the *params-testing.json files and generates
+namespaced *params-dev.json files. Dev param files are used only by developers when
+launching CloudFormation stacks during local development.
+
+The 'environment_name' arg can be something like 'dev{username}' where
+username is the developers username. When CloudFormation stacks are launched
+using these parameter files, many AWS resources will be identified by this
+environment_name such as URL's, ECS clusters, Lambda functions, etc.
+
+Usually this script only needs to be invoked once per team member per project. When a new developer starts working
+with Phoenix for the first time, they should run this script once in their local project git repo.
+
+The *params-dev.json files are ignored by .gitignore so so the dev parameter files associated with different
+developers do not conflict/clash with eachother. This script's exection impacts local files only.
+
+Usage:
+```
+    python generate_dev_params.py {environment_name}
+```
+
+Examples:
+```
+    python generate_dev_params.py devjason
+```
 
 ### pull_request_codebuild.py
 
