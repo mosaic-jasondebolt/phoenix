@@ -1240,6 +1240,25 @@ If "codepipeline" is specified, the "temp.json" file would be used in CodePipeli
 ```
  
 ### search_and_replace.py
+Recursively searches and replaces all strings in a given directory for a given file pattern.
+
+This is a very simple but extremely useful Python script, especially for refactoring.
+
+Usage:
+```
+  $ python search_and_replace.py {directory_to_search} {string_to_find} {replacement_string} {pattern}
+```
+
+Example:
+  The following Recursively searches for the string FOO and replaces with BAR
+  for all text files in the current directory and all subdirectories.
+
+```
+  $ python search_and_replace.py . FOO BAR    ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR file.txt  ==> Matches a single file.
+  $ python search_and_replace.py . FOO BAR "*"  ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR "*.txt"  ==> Matches
+```
 
 ### generate_environment_params.py
 
