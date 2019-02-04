@@ -1437,8 +1437,24 @@ shell code above deployed it to on the first loop iteration.
 
 
 ### alb_listener_rule
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for creating ALB redirection rules.
+
+This is particularly useful for adding HTTP->HTTPS redirects to Application
+Load Balancers.
+
+At the time this was created, AWS had introduced redirect rules on ALBs but
+had not yet made them available in CloudFormation. The boto3 Python library
+does support it however.
+
+Original Git Repo:
+https://github.com/jheller/alb-rule/blob/master/lambda/alb_listener_rule.py
+
 
 ### api_internals
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for altering the request body of API Gateway HTTP requests being sent
+to Lambda functions.
+
+See [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh) for details.
 
 ### cognito_internals
 
