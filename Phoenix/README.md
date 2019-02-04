@@ -154,7 +154,7 @@ At the time Phoenix was first developed, Cloudformation Nested Stacks had severa
 lack of support for <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/create-reusable-transform-function-snippets-and-add-to-your-template-with-aws-include-transform.html">AWS::Include</a> transforms, Cloudformation
 macros and more. Nested stacks can also become difficult to work with for large sets of stacks, sometimes becoming
 completely stuck (requiring AWS support to fix). In December 2018, Cloudformation macro support was added to Nested Stacks,
-so it may be possible to refactor Phoenix to leverage Nested Stacks in the near future.
+so it may be possible to refactor Phoenix to leverage Nested Stacks in the near future. If this occurs, it would probably be  best to decouple stacksets for the expensive, heavy resources such as RDS instances, API gateway custom domains, and CloudFront distributions from the faster, lightweight resources such as ECS, Lambda, DynamoDB, and API Gateway deployments.
 
 ## CloudFormation JSON Template Files
 An AWS account may include multiple Phoenix projects, and each Phoenix project may include multiple environments like
@@ -1211,9 +1211,34 @@ lambda/password_generator/lambda_function.py
 
 
 ## Python Helper Scripts
+Phoenix ships with various Python scripts to automate various tasks. The naming convention for these Python script files
+is to use underscores.
 
 ### parameters_generator.py
+Converts CloudFormation parameters to the native format expected by the CloudFormation CLI.
 
+Code Pipeline expects <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab2c13c15c13">this format</a> for CloudFormation parameters, while CloudFormation expects <a href="https://aws.amazon.com/blogs/devops/passing-parameters-to-cloudformation-stacks-with-the-aws-cli-and-powershell/">this format</a>.
+
+This Python script is often called from the main buildspec.yml file and also many of the local shell scripts.
+
+Usage:
+```
+    python parameters_generator.py template.json {cloudformation | codepipeline} > temp.json
+```
+
+Where "template.json" is in either cloudformation or codepipeline parameter format and the next argument
+specifies which format is desired in the output file.
+
+If "cloudformation" is specified, the "temp.json" file would be used in CloudFormation CLI calls:
+```
+    aws cloudformation create-stack --stack-name <stack_name> --template-body file://template.json --parameters file://temp.json
+```
+
+If "codepipeline" is specified, the "temp.json" file would be used in CodePipeline deployment actions (see template-pipeline.json):
+```
+    "TemplateConfiguration": "BuildOutput::temp.json",
+```
+ 
 ### search_and_replace.py
 
 ### generate_environment_params.py
