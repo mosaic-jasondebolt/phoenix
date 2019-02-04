@@ -1353,7 +1353,32 @@ Examples:
 ```
 
 ### pull_request_codebuild.py
+Handles CodeBuild jobs executing in the context of a GitHub Pull Request.
 
+```
+    python pull_request_codebuild.py [build | unit-test | lint]
+```
+
+This script is usually invoked in the "post_build" step of the following buildspec YAML files:
+```
+    buildspec.yml
+    buildspec-unit-test.yml
+    buildspec-lint.yml
+```
+
+The main function of this Python script is to notify GitHub of build/unit-test/lint CodeBuild job statuses (pass or fail?) during GitHub pull request pipeline executions.
+
+The Python script accesses environment variables availabe on the host. Within AWS CodeBuild, these environment variables will automatically be set from the 'template-pull-request-pipeline.json' CloudFormation stack, which
+is created by a Lambda function that is invoked by a GitHub webhook for pull request events.
+
+This script does the following:
+1) Persists a github.json file that is passed by CodePipeline to a Lambda function.
+2) Notifies GitHub of the status of AWS CodeBuild jobs.
+3) Generates an ECS parameter template specifically for spinning up
+   a dev ECS instance used during code review.
+
+As long as you have the environment variables set as specified in the
+initializer, you can run this script either locally or on AWS CodeBuild.
 
 ## Python 3.6 Lambda Functions
 
