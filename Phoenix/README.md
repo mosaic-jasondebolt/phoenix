@@ -1361,6 +1361,8 @@ Handles CodeBuild jobs executing in the context of a GitHub Pull Request.
     python pull_request_codebuild.py [build | unit-test | lint]
 ```
 
+The main function of this Python script is to notify GitHub of build/unit-test/lint CodeBuild job statuses (pass or fail?) during GitHub pull request pipeline executions.
+
 This script is usually invoked in the "post_build" step of the following buildspec YAML files:
 ```
     buildspec.yml
@@ -1368,10 +1370,7 @@ This script is usually invoked in the "post_build" step of the following buildsp
     buildspec-lint.yml
 ```
 
-The main function of this Python script is to notify GitHub of build/unit-test/lint CodeBuild job statuses (pass or fail?) during GitHub pull request pipeline executions.
-
-The Python script accesses environment variables availabe on the host. Within AWS CodeBuild, these environment variables will automatically be set from the 'template-pull-request-pipeline.json' CloudFormation stack, which
-is created by a Lambda function that is invoked by a GitHub webhook for pull request events.
+This script accesses environment variables available on the CodeBuild node host to determine what to do. These environment variables are automatically set on the CodeBuild job definition from the 'template-pull-request-pipeline.json' CloudFormation stack. This stack is created by a Lambda function that is invoked by a GitHub webhook for pull request events.
 
 This script does the following:
 1) Persists a github.json file that is passed by CodePipeline to a Lambda function.
