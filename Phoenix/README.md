@@ -1457,6 +1457,10 @@ to Lambda functions.
 See [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh) for details.
 
 ### cognito_internals
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for creating/updating/delete Cognito resources that are not supported
+by CloudFormation.
+
+See [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh) and [template-cognito-internals.json](#template-cognito-internalsjson) for details.
 
 ### create_pull_request_webhook
 
