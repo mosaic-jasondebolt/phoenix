@@ -6,6 +6,7 @@
 * [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
 * [Prerequisites](#prerequisites)
+* [Why No Nested Stacks](#why-no-nested-stacks)
 * [CloudFormation JSON Template Files](#cloudformation-json-template-files)
     * [Account Specific Stacks](#account-specific-stacks)
         * [template-vpc.json](#template-vpcjson)
@@ -120,7 +121,9 @@
 
 
 ## What is Phoenix
-Phoenix is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt, a Senior DevOps Engineer at Mosaic, in 2018.
+Phoenix is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform.
+
+It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt, a Senior DevOps Engineer at Mosaic, in 2018.
 
 A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments.
 
@@ -147,6 +150,13 @@ Working with Phoenix without strong knowledge of CloudFormation is an exercise i
 2. Advanced CloudFormation (pick one from below)
     * <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
     * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
+
+## Why no Nested Stacks?
+At the time Phoenix was first developed, Cloudformation Nested Stacks had several limitations. These limitations included
+lack of support for <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/create-reusable-transform-function-snippets-and-add-to-your-template-with-aws-include-transform.html">AWS::Include</a> transforms, Cloudformation
+macros and more. Nested stacks can also become difficult to work with for large sets of stacks, sometimes becoming
+completely stuck (requiring AWS support to fix). In December 2018, Cloudformation macro support was added to Nested Stacks,
+so it may be possible to refactor Phoenix to leverage Nested Stacks in the near future. If this occurs, it would probably be  best to decouple stacksets for the expensive, heavy resources such as RDS instances, API gateway custom domains, and CloudFront distributions from the faster, lightweight resources such as ECS, Lambda, DynamoDB, and API Gateway deployments.
 
 ## CloudFormation JSON Template Files
 An AWS account may include multiple Phoenix projects, and each Phoenix project may include multiple environments like
@@ -1203,49 +1213,434 @@ lambda/password_generator/lambda_function.py
 
 
 ## Python Helper Scripts
+Phoenix ships with various Python scripts to automate various tasks. The naming convention for these Python script files
+is to use underscores.
 
 ### parameters_generator.py
+Converts CloudFormation parameters to the native format expected by the CloudFormation CLI.
 
+Code Pipeline expects <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab2c13c15c13">this format</a> for CloudFormation parameters, while CloudFormation expects <a href="https://aws.amazon.com/blogs/devops/passing-parameters-to-cloudformation-stacks-with-the-aws-cli-and-powershell/">this format</a>.
+
+This Python script is often called from the main buildspec.yml file and also many of the local shell scripts.
+
+Usage:
+```
+    python parameters_generator.py template.json {cloudformation | codepipeline} > temp.json
+```
+
+Where "template.json" is in either cloudformation or codepipeline parameter format and the next argument
+specifies which format is desired in the output file.
+
+If "cloudformation" is specified, the "temp.json" file would be used in CloudFormation CLI calls:
+```
+    aws cloudformation create-stack --stack-name <stack_name> --template-body file://template.json --parameters file://temp.json
+```
+
+If "codepipeline" is specified, the "temp.json" file would be used in CodePipeline deployment actions (see template-pipeline.json):
+```
+    "TemplateConfiguration": "BuildOutput::temp.json",
+```
+ 
 ### search_and_replace.py
+Recursively searches and replaces all strings in a given directory for a given file pattern.
+
+This is a very simple but extremely useful Python script, especially for refactoring.
+
+Usage:
+```
+  $ python search_and_replace.py {directory_to_search} {string_to_find} {replacement_string} {pattern}
+```
+
+Example:
+  The following Recursively searches for the string FOO and replaces with BAR
+  for all text files in the current directory and all subdirectories.
+
+```
+  $ python search_and_replace.py . FOO BAR    ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR file.txt  ==> Matches a single file.
+  $ python search_and_replace.py . FOO BAR "*"  ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR "*.txt"  ==> Matches
+```
 
 ### generate_environment_params.py
+Generates CloudFormation JSON environment specific parameter files.
+
+This script just copies all of the *params-testing.json files and generates
+namespaced *-params-{environment}.json files. If the '--delete' flag is passed
+in, all files matching *-params-{environment}.json will be deleted.
+
+Typically you'll only need to run this script once per new environment. It is
+a utility script to make is easier to generate all of the cloudformation
+parameter files for a new environment.
+
+The 'environment' arg can be something like 'staging' or 'rc'.
+When CloudFormation stacks are launched using these parameter files,
+all AWS resources will be identified by this environment such as
+URL's, ECS clusters, Lambda functions, etc.
+
+Usage:
+```
+    python generate_environment_params.py {environment}
+    python generate_environment_params.py {environment} --delete
+```
+
+Examples:
+```
+    python generate_environment_params.py staging
+    python generate_environment_params.py staging --delete
+```
 
 ### rename_ssm_parameter.py
+Renames SSM parameter **keys** from an old value to a new value, optionally for encrypted parameters (True|False).
+
+Use this script only for parameters that are **not deployed via CloudFormation** (see template-ssm-globals-macro-params.json). This is because CloudFormation contains the source of truth for parameter names.
+
+You can use this script refactor the base paths of several manually configured SSM parameters, such as for secrets and tokens.
+
+Usage:
+```
+    python rename_ssm_parameter.py {old_param_key} {new_param_key} [True | False]
+```
+
+Examples:
+```
+    python rename_ssm_parameter.py /some/param/key /some/param/new-key True --> param is encrypted.
+    python rename_ssm_parameter.py /some/param/key /some/param/new-key False --> param is not encrypted
+```
 
 ### cfn_stacks.py
+Helper script used to make CloudFormation API calls.
+
+Add functions to this script when making CloudFormation CLI calls from shell code or buildspec YAML files involves
+more complex logic.
+
+Usage:
+```
+    python cfn_stacks.py delete-if-exists {stack_name}
+    python cfn_stacks.py disable-termination-protection {stack_name}
+```
+
+Examples:
+```
+    python cfn_stacks.py delete-if-exists some-stack-name
+    python cfn_stacks.py disable-termination-protection some-stack-name
+```
 
 ### generate_dev_params.py
+Generates CloudFormation JSON dev parameter files.
+
+This script just copies all of the *params-testing.json files and generates
+namespaced *params-dev.json files. Dev param files are used only by developers when
+launching CloudFormation stacks during local development.
+
+The 'environment_name' arg can be something like 'dev{username}' where
+username is the developers username. When CloudFormation stacks are launched
+using these parameter files, many AWS resources will be identified by this
+environment_name such as URL's, ECS clusters, Lambda functions, etc.
+
+Usually this script only needs to be invoked once per team member per project. When a new developer starts working
+with Phoenix for the first time, they should run this script once in their local project git repo.
+
+The *params-dev.json files are ignored by .gitignore so so the dev parameter files associated with different
+developers do not conflict/clash with eachother. This script's exection impacts local files only.
+
+Usage:
+```
+    python generate_dev_params.py {environment_name}
+```
+
+Examples:
+```
+    python generate_dev_params.py devjason
+```
 
 ### pull_request_codebuild.py
+Handles CodeBuild jobs executing in the context of a GitHub Pull Request.
 
+```
+    python pull_request_codebuild.py [build | unit-test | lint]
+```
+
+The main function of this Python script is to notify GitHub of build/unit-test/lint CodeBuild job statuses (pass or fail?) during GitHub pull request pipeline executions.
+
+This script is usually invoked in the "post_build" step of the following buildspec YAML files:
+```
+    buildspec.yml
+    buildspec-unit-test.yml
+    buildspec-lint.yml
+```
+
+This script accesses environment variables available on the CodeBuild node host to determine what to do. These environment variables are automatically set on the CodeBuild job definition from the 'template-pull-request-pipeline.json' CloudFormation stack. This stack is created by a Lambda function that is invoked by a GitHub webhook for pull request events.
+
+This script does the following:
+1) Persists a github.json file that is passed by CodePipeline to a Lambda function.
+2) Notifies GitHub of the status of AWS CodeBuild jobs.
+3) Generates an ECS parameter template specifically for spinning up
+   a dev ECS instance used during code review.
+
+As long as you have the environment variables set as specified in the
+initializer, you can run this script either locally or on AWS CodeBuild.
 
 ## Python 3.6 Lambda Functions
+Phoenix leverage AWS Lambda for many event based workloads, such as handling GitHub webhooks or cleaning up AWS resources
+during stack deletions.
+
+All Lambda functions are located in the "lambda" subfolder of the Phoenix directory. Most of these functions use the
+Python3.6 runtime but a few use NodeJS.
+
+There are many frameworks out there that deploy Lambda functions, but Phoenix deploys Lambda simply by zipping up the
+file contents, saving the zip to a versioned S3 folder (either using a timestamp or a git commit SHA1), and provisioning
+the Lambda functions using CloudFormation (which then pick up the source in the versioned S3 folder).
+
+For example, the shell code snippet below loops through some function names within the "Phoenix/lambda" folder:
+```
+listOfPythonLambdaFunctions='projects delete_network_interface alb_listener_rule proxy'
+for functionName in $listOfPythonLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
+  pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
+  cd ../../
+  rm -rf builds
+done
+```
+
+Where $LAMBDA_BUCKET_NAME is usually {organization-name}-{project-name}-lambda and the $VERSION_ID is usually a
+timestamp for developer deployments or a git SHA1 for pipeline deployments.
+
+The CloudFormation code snippet below deploys the Lambda function itself:
+```
+    "LambdaProjects": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket" : "your-bucket-name",
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "projects",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+```
+
+Where the above function deploys a Python Lambda function that times out after 25 seconds. The source code of the Lambda
+function would be found at "s3://your-bucket-name/$VERSION_ID/projects/lambda_function.zip", which is where our
+shell code above deployed it to on the first loop iteration.
+
 
 ### alb_listener_rule
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for creating ALB redirection rules.
+
+This is particularly useful for adding HTTP->HTTPS redirects to Application
+Load Balancers.
+
+At the time this was created, AWS had introduced redirect rules on ALBs but
+had not yet made them available in CloudFormation. The boto3 Python library
+does support it however.
+
+Original Git Repo:
+https://github.com/jheller/alb-rule/blob/master/lambda/alb_listener_rule.py
+
+Related Files:
+```
+deploy-dev-lambda.sh
+template-lambda.json
+buildspec.yml
+```
+
 
 ### api_internals
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for altering the request body of API Gateway HTTP requests being sent
+to Lambda functions.
+
+See [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh) for details.
+
+Related Files:
+```
+deploy-dev-api-deployment.sh
+template-api-deployment.json
+buildspec.yml
+```
 
 ### cognito_internals
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for creating/updating/delete Cognito resources that are not supported
+by CloudFormation.
+
+See [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh) and [template-cognito-internals.json](#template-cognito-internalsjson) for details.
+
+Related Files:
+```
+deploy-dev-cognito-internals.sh
+template-cognito-internals.json
+buildspec.yml
+```
 
 ### create_pull_request_webhook
+Creates a GitHub webhook within GitHub for sending pull request events to an endpoint.
+
+View the full GitHub Pull Request REST API <a href="https://developer.github.com/v3/activity/events/types/#pullrequestevent">here</a>.
+
+This Lambda function calls three lambda functions depending on the stack even type:
+1. create_webook()
+2. update_webhook()
+3. delete_webhook()
+
+When "create_webhook" is called, it grabs the project's Git access token and a shared pull request secret from SSM parameter store and makes a GitHub API call to create a pull request webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
+
+Related Files:
+```
+deploy-github-webhook-pull-request.sh
+template-github-webhook-pull-request-params.json
+Phoenix/lambda/create_pull_request_webhook
+Phoenix/lambda/pull_request_webhook
+Phoenix/lambda/post_pullrequests
+```
 
 ### create_release_webhook
+Creates a GitHub webhook within GitHub for sending release related events to an endpoint.
+
+This Lambda function calls three lambda functions depending on the stack even type:
+1. create_webook()
+2. update_webhook()
+3. delete_webhook()
+
+When "create_webhook" is called, it grabs the project's Git access token and a shared release secret from SSM parameter store and makes a GitHub API call to create a release webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
+
+Related Files:
+```
+deploy-github-webhook-release.sh
+template-github-webhook-release-params.json
+Phoenix/lambda/create_release_webhook
+Phoenix/lambda/release_webhook
+```
 
 ### delete_ecr_repos
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that automatically deletes all images in one or more ECR repos, as well as the ECR repo itself. This is particularly useful for automatically deleting ECR repos upon stack deletion since CloudFormation cannot delete non-empty ECR repos.
+
+Related Files:
+```
+deploy-s3-ecr.sh
+template-s3-ecr.json
+```
 
 ### delete_network_interface
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that force deletes the ENI associated with a Lambda function residing
+inside of a VPC upon stack deletion. There is currently a <a href="https://forums.aws.amazon.com/thread.jspa?messageID=756642">bug</a> where CloudFormation fails to delete lambda functions (functions that are created inside of a VPC) upon stack deletion. As a result, the stack will hang.
+
+Some Lambda functions are deployed into an VPC. When Cloudformation stacks with these functions are deleted, the stack will
+wait up to **45 minutes** for the Elastic Networking Interface (ENI) associated with the Lambdas to be deleted. 
+
+Before I wrote this function, I had to complete the following to delete CloudFormation stacks that had VPC Lambdas:
+1. Find security group id associated with the Lambda function
+2. Open the EC2 console and click on the "elastic networkg interface" section
+3. Search for the ENI associated with the security
+4. Delete the ENI
+5. Wait a few minutes for CloudFormation to detect the deleted ENI and finally delete the stack
+
+The "delete_network_interface" function automates the above steps, so cleanup happens automatically.
+
+Related Files:
+```
+deploy-dev-lambda.sh
+deploy-ssm-globals-macro.sh
+template-ssm-globals-macro.json
+buildspec.yml
+```
 
 ### delete_s3_files
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that automatically deletes all files in one or more S3 buckets upon
+stack deletion.
+
+This is useful when deleting S3 bucket resources in CloudFormation since CloudFormation cannot delete non-empty S3 buckets
+when CloudFormation stacks are deleted.
+
+Related Files:
+```
+deploy-s3-ecr.sh
+deploy-dev-api-documentation.sh
+template-s3-ecr.json
+buildspec.yml
+```
 
 ### macro
 
 ### password_generator
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that generates, encrypts, and stores RDS or Aurora instance MasterUser passwords in SSM parameter store.
+
+Optionally retrieves passwords and returns to a Cloudformation stack. However, this is not recommended as it would expose the
+password in the CloudFormation logs. It's better to have the application query SSM parameter store instead.
+
+Related Files:
+```
+deploy-dev-database.sh
+template-database.json
+buildspec.yml
+```
 
 ### post_pullrequests
+Handles the final stages of the pull request pipeline, after all tests pass and the ECS container is deployed.
+
+The function is called from the CodePipeline service during the final action of a Pull Request Pipeline. Note that
+this function is only called if a pull request environment is deployed to.
+
+The Lambda function does the following:
+1. Receives a CodePipeline event object.
+2. Extracts the ECS URL and Git Commit SHA1 from the CodePipeline event object.
+3. Generates the below request body to send to GitHub:
+   ```
+   View deployed container (<a href={ecr-url}>{ecr-url}</a>) @ commit {git-commit-sha1}
+   ```
+4. Sends the request via the GitHub API to the pull request associated with pipeline.
+   
+Related Files:
+```
+deploy-github-webhook-pull-request.sh
+pull_request_codebuild.py
+template-github-webhook-pull-request-params.json
+```
 
 ### projects
+This is a Lambda function used for testing purposes.
+
+This function can be called by invoking the "/projects" API gateway endpoint within the API Gateway console.
+The projects function demonstrates how to write up a Lambda function to API Gateway. It can be deleted as long as all
+references to this file are deleted as well (see Related Files below).
+
+Related Files:
+```
+template-api.json
+template-lambda.json
+deploy-dev-lambda.sh
+buildspec.yml
+```
 
 ### proxy
+A bare bones Lambda proxy that does the following:
+
+1. Receives an HTTP request from API Gateway.
+2. Forwards the HTTP request to another server.
+3. Returns the HTTP response back to API Gateway.
+
+The reason Lambda proxy functions are useful it because API Gateway can forward requests to Lambda functions
+that are deployed in a VPC. These Lambda functions can then forward the request to other resources in the VPC.
+
+API Gateway can forward request to public IP address, but not to private IP's associated with a VPC resources. The workaround
+is to forward the requests to a VPC Lambda, which can then proxy the request to a private IP.
+
+Related Files:
+```
+deploy-dev-lambda.sh
+template-lambda.json
+buildspec.yml
+```
 
 ### pull_request_webhook
 
@@ -1286,7 +1681,7 @@ an environment aware template ("template-ecs-task.json") that imports the correc
                   "VPCPrefix": {"Ref": "VPCPrefix"},
                   "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
                 }]
-              }},
+               }},
               {"Fn::ImportValue": { "Fn::Sub": [
                 "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ2", {
                   "VPCPrefix": {"Ref": "VPCPrefix"},
