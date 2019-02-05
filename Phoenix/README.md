@@ -1643,6 +1643,26 @@ buildspec.yml
 ```
 
 ### pull_request_webhook
+Handles GitHub pull request events from GitHub.
+
+This is probably the most important Lambda function within Phoenix since it orchestrates pull request pipelines.
+This function creates, updates, and deletes pull request pipelines upon receiving GitHub pull request events
+from GitHub. This function depends on [create_pull_request_webhook](#create_pull_request_webhook) having already
+been deployed.
+
+After [create_pull_request_webhook](#create_pull_request_webhook) creates a single webhook to handle all pull
+request events from GitHub, these pull request events will later be consumed by yet another lambda function (this one, 
+[pull_request_webhook](#pull_request_webhook)). The "pull_request_webhook" function sits behind API Gateway and processes
+the pull request event by creating, updating, or deleting a pull request pipeline. If a pull request is deleted,
+the pull request pipeline as well as all AWS resources deployed in the pipeline (EC2 instances, ECS clusters, etc.)
+are deleted as well.
+
+Related Files:
+```
+deploy-github-webhook-pull-request.sh
+template-github-webhook-pull-request-params.json
+template-github-webhook.json
+```
 
 ### release_webhook
 
