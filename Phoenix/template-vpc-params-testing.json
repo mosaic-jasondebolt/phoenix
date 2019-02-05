@@ -1,11 +1,11 @@
 {
   "Parameters": {
     "Environment": "testing",
-    "VPCCidrBlock": "10.55.0.0/16",
-    "PrivateSubnet1CidrBlock": "10.55.1.0/24",
-    "PrivateSubnet2CidrBlock": "10.55.3.0/24",
-    "PublicSubnet1CidrBlock": "10.55.2.0/24",
-    "PublicSubnet2CidrBlock": "10.55.4.0/24",
+    "VPCCidrBlock": "10.45.0.0/16",
+    "PrivateSubnet1CidrBlock": "10.45.1.0/24",
+    "PrivateSubnet2CidrBlock": "10.45.3.0/24",
+    "PublicSubnet1CidrBlock": "10.45.2.0/24",
+    "PublicSubnet2CidrBlock": "10.45.4.0/24",
     "Tenancy": "default"
   }
 }

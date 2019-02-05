@@ -1,11 +1,11 @@
 {
   "Parameters": {
     "Environment": "dev",
-    "VPCCidrBlock": "10.53.0.0/16",
-    "PrivateSubnet1CidrBlock": "10.53.1.0/24",
-    "PrivateSubnet2CidrBlock": "10.53.3.0/24",
-    "PublicSubnet1CidrBlock": "10.53.2.0/24",
-    "PublicSubnet2CidrBlock": "10.53.4.0/24",
+    "VPCCidrBlock": "10.43.0.0/16",
+    "PrivateSubnet1CidrBlock": "10.43.1.0/24",
+    "PrivateSubnet2CidrBlock": "10.43.3.0/24",
+    "PublicSubnet1CidrBlock": "10.43.2.0/24",
+    "PublicSubnet2CidrBlock": "10.43.4.0/24",
     "Tenancy": "default"
   }
 }
