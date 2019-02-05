@@ -1623,6 +1623,24 @@ buildspec.yml
 ```
 
 ### proxy
+A bare bones Lambda proxy that does the following:
+
+1. Receives an HTTP request from API Gateway.
+2. Forwards the HTTP request to another server.
+3. Returns the HTTP response back to API Gateway.
+
+The reason Lambda proxy functions are useful it because API Gateway can forward requests to Lambda functions
+that are deployed in a VPC. These Lambda functions can then forward the request to other resources in the VPC.
+
+API Gateway can forward request to public IP address, but not to private IP's associated with a VPC resources. The workaround
+is to forward the requests to a VPC Lambda, which can then proxy the request to a private IP.
+
+Related Files:
+```
+deploy-dev-lambda.sh
+template-lambda.json
+buildspec.yml
+```
 
 ### pull_request_webhook
 
