@@ -1532,6 +1532,20 @@ template-s3-ecr.json
 ```
 
 ### delete_network_interface
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that force deletes the ENI associated with a Lambda function residing
+inside of a VPC. There is currently a <a href="https://forums.aws.amazon.com/thread.jspa?messageID=756642">bug</a> where CloudFormation fails to delete lambda functions (functions that are created inside of a VPC) upon stack deletion.
+
+Some Lambda functions are deployed into an VPC. When VPC Lambda functions are deployed via CloudFormation, the stack will
+wait up to **45 minutes** for the Elastic Networking Interface (ENI) associated with the Lambda to be deleted. 
+
+Before I wrote this function, I had to complete the following to delete CloudFormation stacks that had VPC Lambdas:
+1. Find security group id associated with the Lambda function
+2. Open the EC2 console and click on the "elastic networkg interface" section
+3. Search for the ENI associated with the security
+4. Delete the ENI
+5. Wait a few minutes for CloudFormation to detect the deleted ENI and finally delete the stack
+
+The "delete_network_interface" function automates the above steps, so cleanup happens automatically.
 
 ### delete_s3_files
 
