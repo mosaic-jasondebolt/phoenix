@@ -1608,6 +1608,19 @@ template-github-webhook-pull-request-params.json
 ```
 
 ### projects
+This is a Lambda function used for testing purposes.
+
+This function can be called by invoking the "/projects" API gateway endpoint within the API Gateway console.
+The projects function demonstrates how to write up a Lambda function to API Gateway. It can be deleted as long as all
+references to this file are deleted as well (see Related Files below).
+
+Related Files:
+```
+template-api.json
+template-lambda.json
+deploy-dev-lambda.sh
+buildspec.yml
+```
 
 ### proxy
 
