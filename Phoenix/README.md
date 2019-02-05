@@ -1573,8 +1573,37 @@ buildspec.yml
 ### macro
 
 ### password_generator
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that generates, encrypts, and stores RDS or Aurora instance MasterUser passwords in SSM parameter store.
+
+Optionally retrieves passwords and returns to a Cloudformation stack. However, this is not recommended as it would expose the
+password in the CloudFormation logs. It's better to have the application query SSM parameter store instead.
+
+Related Files:
+```
+deploy-dev-database.sh
+template-database.json
+buildspec.yml
+```
 
 ### post_pullrequests
+Handles the final stages of the pull request pipeline, after all tests pass and the ECS container is deployed.
+
+The function is called from the CodePipeline service during the final action of a Pull Request Pipeline. Note that
+this function is only called if a pull request environment is deployed to.
+
+The Lambda function does the following:
+1. Receives a CodePipeline event object.
+2. Extracts the ECS URL and Git Commit SHA1 from the CodePipeline event object.
+3. Generates the below request body to send to GitHub:
+   * 'View deployed container (<a href={ecr-url}>{ecr-url}</a>) @ commit {git-commit-sha1}'
+4. Sends the request via the GitHub API to the pull request associated with pipeline.
+   
+Related Files:
+```
+deploy-github-webhook-pull-request.sh
+pull_request_codebuild.py
+template-github-webhook-pull-request-params.json
+```
 
 ### projects
 
