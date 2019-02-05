@@ -1547,7 +1547,28 @@ Before I wrote this function, I had to complete the following to delete CloudFor
 
 The "delete_network_interface" function automates the above steps, so cleanup happens automatically.
 
+Related Files:
+```
+deploy-dev-lambda.sh
+deploy-ssm-globals-macro.sh
+template-ssm-globals-macro.json
+buildspec.yml
+```
+
 ### delete_s3_files
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that automatically deletes all files in one or more S3 buckets upon
+stack deletion.
+
+This is useful when deleting S3 bucket resources in CloudFormation since CloudFormation cannot delete non-empty S3 buckets
+when CloudFormation stacks are deleted.
+
+Related Files:
+```
+deploy-s3-ecr.sh
+deploy-dev-api-documentation.sh
+template-s3-ecr.json
+buildspec.yml
+```
 
 ### macro
 
