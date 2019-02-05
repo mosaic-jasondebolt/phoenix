@@ -1595,7 +1595,9 @@ The Lambda function does the following:
 1. Receives a CodePipeline event object.
 2. Extracts the ECS URL and Git Commit SHA1 from the CodePipeline event object.
 3. Generates the below request body to send to GitHub:
-   * 'View deployed container (<a href={ecr-url}>{ecr-url}</a>) @ commit {git-commit-sha1}'
+   ```
+   View deployed container (<a href={ecr-url}>{ecr-url}</a>) @ commit {git-commit-sha1}
+   ```
 4. Sends the request via the GitHub API to the pull request associated with pipeline.
    
 Related Files:
