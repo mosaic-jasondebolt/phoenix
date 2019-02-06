@@ -1495,6 +1495,8 @@ This Lambda function calls three lambda functions depending on the stack even ty
 
 When "create_webhook" is called, it grabs the project's Git access token and a shared pull request secret from SSM parameter store and makes a GitHub API call to create a pull request webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
 
+This function creates the pull request webhook. The [pull_request_webhook](#pull_request_webhook) processes webhook events to orchestrate pull request pipelines.
+
 Related Files:
 ```
 deploy-github-webhook-pull-request.sh
@@ -1513,6 +1515,8 @@ This Lambda function calls three lambda functions depending on the stack even ty
 3. delete_webhook()
 
 When "create_webhook" is called, it grabs the project's Git access token and a shared release secret from SSM parameter store and makes a GitHub API call to create a release webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
+
+This function creates the release webhook. The [release_webhook](#release_webhook) processes webhook events to orchestrate release pipelines.
 
 Related Files:
 ```
@@ -1561,6 +1565,10 @@ stack deletion.
 
 This is useful when deleting S3 bucket resources in CloudFormation since CloudFormation cannot delete non-empty S3 buckets
 when CloudFormation stacks are deleted.
+
+If this Lambda function did not exist, you would not be able to delete the S3/ECR stacks without first deleting the following:
+1. All files in all CloudFormation created S3 buckets.
+2. All images in all CloudFormation created ECR repositories.
 
 Related Files:
 ```
@@ -1643,7 +1651,7 @@ buildspec.yml
 ```
 
 ### pull_request_webhook
-Handles GitHub pull request events from GitHub.
+Handles <a href="https://developer.github.com/v3/activity/events/types/#pullrequestevent">GitHub pull request events</a> from GitHub.
 
 This is probably the most important Lambda function within Phoenix since it orchestrates pull request pipelines.
 This function creates, updates, and deletes pull request pipelines upon receiving GitHub pull request events
@@ -1665,10 +1673,49 @@ template-github-webhook.json
 ```
 
 ### release_webhook
-Handler for receiving <a href="https://developer.github.com/v3/activity/events/types/#pushevent">GitHub push events</a> associated with release branches from GitHub.
+Handles <a href="https://developer.github.com/v3/activity/events/types/#pushevent">GitHub push events</a> associated with release branches from GitHub.
 
+This function depends on [create_release_webhook](#create_release_webhook) having already been deployed.
 
+A release branch is any branch matching the pattern "release-\d{8}$". So, a release on December 15th 2018 would have a git branch like "release-20181215" and a separate release pipeline for every release environment in your [template-ssm-globals-macro.json](#template-ssm-globals-macrojson) file.
 
+To create a release environment, do the following:
+1. Create the [release_webhook](#create_release_webhook) if it already hasn't been created.
+2. Create and checkout a new git branch locally with a branch name matching the pattern "release-\d{8}$":
+    * You can use 8 digits for today's date in YYYYMMDD format.
+3. Provide a named environment like "staging" in the "ReleaseEnvironments" parameter of the
+[template-ssm-globals-macro.json](#template-ssm-globals-macrojson) file.
+    * A comma delimted list for multiple release environments is allowed.
+4. Update the "ssm-globals-macro" stack and wait for the stack to complete.
+```
+    ./deploy-ssm-globals-macro.sh update
+```
+5. Create CloudFormation parameter files for your new release environment.
+    * See [generate_environment_params.py](#generate_environment_paramspy) for details.
+```
+    python generate_environment_params.py staging
+```
+6. Git commit these changes in the release branch and push the branch to github.
+7. Open AWS CodePipeline and view one or pipelines pertaining to your release environments.
+
+Notes on release environments:
+* You can have many release pipelines (each associated with a separate, isolated environment)
+* Each environment has its own EC2 instances, security groups, lambda functions, URL's, etc.
+* All release pipelines listen to the same release branch, so you should try to have only one release branch at a time.
+* Deleting a release branch will delete all release pipelines, but will not delete the release environment's AWS resources.
+* Creating a new release branch and pushing changes to it will do the following:
+    * Create new release pipelines, one for each release environment.
+    * Create or update all release environments.
+    * Any existing release environments associated with other release branchs will be overwritten.
+* To delete a release environment, execute the [destroy microservice](#deploy-microservice-cleanupsh) CodeBuild job
+  for the release environment in question.
+    
+Related Files:
+```
+deploy-github-webhook-release.sh
+template-github-webhook-release-params.json
+template-github-webhook.json
+```
 
 ### ssm_secret
 
