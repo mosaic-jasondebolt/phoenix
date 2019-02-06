@@ -1738,7 +1738,9 @@ Creates, updates, and deletes **secret** SSM parameters in parameter store.
 tokens that can be easily replaced. In fact, GitHub webhook tokens are currently all that this function is used for.
 
 If you look at [template-github-webhook.json](#template-github-webhookjson) you will see that this Lambda function is
-used to create a 
+used to create a CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> called "CustomResourceGitHubSecret". This custom resource
+invokes the lambda function which generates a 100 character secret that is persisted to SSM parameter store. This
+same secret is used by both the 
 
 do not use this Lambda function for any password type secrets that are used to access data, such as database secrets.
 
