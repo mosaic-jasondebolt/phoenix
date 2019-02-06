@@ -163,9 +163,11 @@ Working with Phoenix without strong knowledge of CloudFormation is an exercise i
 A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral. Each pipeline has a source stage, which is usually triggered from a Git repository webhook. There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments. Both source code and artifacts can be scanned for security and/or static analysis. If the build, testing, and linting stages pass, the artifacts (lambda functions, docker images, etc.) are deployed into a testing environment. After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice. All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments. Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources. Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
 
 ## Initial Phoenix Project Setup
+
 ### Preparing an AWS account to work with Phoenix
+
 #### Configure the VPC's
-* These steps are only required for new Phoenix projects in NEW AWS accounts.
+* These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
 * Add appropriate CIDR ranges in the template-vpc-params-dev.json, template-vpc-params-testing.json, and template-vpc-params-prod.json files.
 * Ensure that all CIDR IP ranges are not currently used by any other Phoenix projects or other networks.
 * Deploy the VPC's
@@ -175,7 +177,7 @@ $ ./deploy-vpc.sh create
 ```
 
 #### Save the API docs user agent token
-* These steps are only required for new Phoenix projects in NEW AWS accounts.
+* These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
 * This is a secret token used to verify HTTP requests made to API documents served from the S3 bucket.
 * This token can be shared by all Phoenix projects in a single AWS account.
 * This token can saved in a browser using the Chrome browser plugin to add to the 'user-agent' header in requests.
@@ -191,7 +193,7 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 in SSM parameter store for the AWS account, you don't need to do anything.
 
 #### AWS CodeBuild GitHub OAuth authorization
-* These steps are only required for new Phoenix projects in NEW AWS accounts.
+* These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
 * When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
 * We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
 1. Sign out of your OneLogin account.
@@ -205,6 +207,7 @@ in SSM parameter store for the AWS account, you don't need to do anything.
 9. Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
 
 ### Creating a Phoenix project
+
 #### Configuring the project config file
 * All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
 
