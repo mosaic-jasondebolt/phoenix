@@ -1665,6 +1665,10 @@ template-github-webhook.json
 ```
 
 ### release_webhook
+Handler for receiving <a href="https://developer.github.com/v3/activity/events/types/#pushevent">GitHub push events</a> associated with release branches from GitHub.
+
+
+
 
 ### ssm_secret
 
