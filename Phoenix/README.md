@@ -1741,7 +1741,7 @@ GitHub webhooks required a shared secret between the sender (GitHub) and the rec
 1. At the time the webhook is created ([template-github-webhook.json](#template-github-webhookjson))
 2. At the time the webhook event is received/handled by Lambda:
     * ([pull_request_webhook](#pull_request_webhook)))
-    * ([pull_request_webhook](#pull_request_webhook)))
+    * ([release_webhook](#release_webhook)))
 
 If you look at [template-github-webhook.json](#template-github-webhookjson) you will see that this Lambda function is
 used to create a CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> called "CustomResourceGitHubSecret". This custom resource
