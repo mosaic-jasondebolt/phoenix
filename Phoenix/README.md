@@ -111,6 +111,7 @@
     * [release_webhook](#release_webhook)
     * [ssm_secret](#ssm_secret)
     * [vpc_proxy](#vpc_proxy)
+* [Non-Python Lambda Functions](#non-python-lambda-functions)
 * [Example Dockerfile used for testing/debugging ECS deployments](#example-dockerfile)
 * [CloudFormation Stack Imports](#cloudformation-stack-imports)
 * [Phoenix Pipelines](#phoenix-pipelines)
@@ -1758,7 +1759,11 @@ template-github-webhook-pull-request-params.json
 template-github-webhook.json
 ```
 
+
+## Non-Python Lambda Functions
+
 ### vpc_proxy
+
 
 
 
