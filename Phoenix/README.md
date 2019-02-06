@@ -1761,10 +1761,26 @@ template-github-webhook.json
 
 
 ## Non-Python Lambda Functions
+Whenever possible, try to use Python3.6 for all Lambda functions within Phoenix, as well as for all local Python scripts.
+Sometimes this isn't possible since off-the-shelf Lambda functions can be leveraged to solve common problems.
 
 ### vpc_proxy
+Proxies HTTP requests from API Gateway to resources in a VPC.
+
+To isolate critical parts of their app’s architecture, we often rely on Virtual Private Cloud (VPC) and private subnets. Today, Amazon API Gateway cannot directly integrate with endpoints that live within a VPC without internet access. However, it is possible to proxy calls to your VPC endpoints using AWS Lambda functions.
+
+This is exactly how to function is used. This function is nearly identical to the one documented in the <a href="https://aws.amazon.com/blogs/compute/using-api-gateway-with-vpc-endpoints-via-aws-lambda/">Using API Gateway with VPC endpoints via AWS Lambda</a> blog post.
 
 
+Related Files:
+```
+lambda/vpc_proxy/lambda_function.py
+deploy-dev-lambda.sh
+template-lambda.json
+lambda/api_internals/lambda_function.py
+template-api.json
+template-api-deployment.json
+```
 
 
 ## Example Dockerfile
