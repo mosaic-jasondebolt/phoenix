@@ -6,6 +6,7 @@
 * [What is Phoenix?](#what-is-phoenix)
 * [Phoenix Overview](#phoenix-overview)
 * [Prerequisites](#prerequisites)
+* [Phoenix Pipelines](#phoenix-pipelines)
 * [Initial Phoenix Project Setup](#initial-phoenix-project-setup)
     * [Preparing an AWS account to work with Phoenix](#preparing-an-aws-account-to-work-with-phoenix)
         * [Configure the VPC's](#configure-the-vpcs)
@@ -157,7 +158,10 @@ Working with Phoenix without strong knowledge of CloudFormation is an exercise i
 2. Advanced CloudFormation (pick one from below)
     * <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
     * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
-    
+ 
+## Phoenix Pipelines
+A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral. Each pipeline has a source stage, which is usually triggered from a Git repository webhook. There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments. Both source code and artifacts can be scanned for security and/or static analysis. If the build, testing, and linting stages pass, the artifacts (lambda functions, docker images, etc.) are deployed into a testing environment. After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice. All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments. Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources. Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
+
 ## Initial Phoenix Project Setup
 ### Preparing an AWS account to work with Phoenix
 #### Configure the VPC's
@@ -1853,74 +1857,8 @@ template-api.json
 template-api-deployment.json
 ```
 
-
 ## Example Dockerfile
 
 
 
-#### CloudFormation Stack Imports
-You can use AWS CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html"> Stack Imports</a> to import physical ID's and ARN's from the VPC stacks. Below is an example of
-an environment aware template ("template-ecs-task.json") that imports the correct subnet ID's for for a given environment (dev, testing, prod) and a given subnet configuration (public or private):
-```
-"Parameters": {
-    "VPCPrefix": {
-      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
-      "Type": "String"
-    },
-    "PublicOrPrivate": {
-      "Description": "The type of subnets to place the ELB for this service in.",
-      "AllowedValues": ["Public", "Private"],
-      "Default": "Public",
-      "Type": "String"
-    },
-    ...
-  },
-  "Resources": {
-   ...
-            "Subnets" : [
-              {"Fn::ImportValue": { "Fn::Sub": [
-                "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ1", {
-                  "VPCPrefix": {"Ref": "VPCPrefix"},
-                  "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
-                }]
-               }},
-              {"Fn::ImportValue": { "Fn::Sub": [
-                "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ2", {
-                  "VPCPrefix": {"Ref": "VPCPrefix"},
-                  "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
-                }]
-              }}
-            ]
-    ...
-    }
-```
 
-This may evaluate to:
-```
-subnets: [ 'subnet-02e14d8b95a3b75f3', 'subnet-0e070b582f9c4add2']
-```
-
-
-## Phoenix Pipelines
-* A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
-* Each pipeline has a source stage, which is usually triggered from a Git repository webhook.
-* There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments.
-* Both source code and artifacts can be scanned for security and/or static analysis.
-* If the build, testing, and linting stages pass, the artifacts (lambda functions, docker images, etc.) are deployed into a testing environment.
-* After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice.
-* All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments.
-* Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
-* Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
-
-### GitHub Pull Request
-![Pipeline1](/Phoenix/images/pull-request-pipeline-4.png)
-
-### GitHub Pull Request Pipeline
-![Pipeline1](/Phoenix/images/pull-request-pipeline-1.png)
-![Pipeline1](/Phoenix/images/pull-request-pipeline-2.png)
-![Pipeline1](/Phoenix/images/pull-request-pipeline-3.png)
-
-
-### Master Branch Pipeline
-![Pipeline](/Phoenix/images/pipeline_1a.png)
-![Pipeline](/Phoenix/images/pipeline_1b.png)
