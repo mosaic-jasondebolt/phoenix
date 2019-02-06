@@ -1451,6 +1451,7 @@ https://github.com/jheller/alb-rule/blob/master/lambda/alb_listener_rule.py
 
 Related Files:
 ```
+lambda/alb_listener_rule/lambda_function.py
 deploy-dev-lambda.sh
 template-lambda.json
 buildspec.yml
@@ -1465,6 +1466,7 @@ See [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh) for details.
 
 Related Files:
 ```
+lambda/api_internals/lambda_function.py
 deploy-dev-api-deployment.sh
 template-api-deployment.json
 buildspec.yml
@@ -1478,6 +1480,7 @@ See [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh) and [temp
 
 Related Files:
 ```
+lambda/cognito_internals/lambda_function.py
 deploy-dev-cognito-internals.sh
 template-cognito-internals.json
 buildspec.yml
@@ -1499,6 +1502,7 @@ This function creates the pull request webhook. The [pull_request_webhook](#pull
 
 Related Files:
 ```
+lambda/create_pull_request_webhook/lambda_function.py
 deploy-github-webhook-pull-request.sh
 template-github-webhook-pull-request-params.json
 Phoenix/lambda/create_pull_request_webhook
@@ -1520,6 +1524,7 @@ This function creates the release webhook. The [release_webhook](#release_webhoo
 
 Related Files:
 ```
+lambda/create_release_webhook/lambda_function.py
 deploy-github-webhook-release.sh
 template-github-webhook-release-params.json
 Phoenix/lambda/create_release_webhook
@@ -1531,6 +1536,7 @@ A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/U
 
 Related Files:
 ```
+lambda/delete_ecr_repos/lambda_function.py
 deploy-s3-ecr.sh
 template-s3-ecr.json
 ```
@@ -1553,6 +1559,7 @@ The "delete_network_interface" function automates the above steps, so cleanup ha
 
 Related Files:
 ```
+lambda/delete_network_interface/lambda_function.py
 deploy-dev-lambda.sh
 deploy-ssm-globals-macro.sh
 template-ssm-globals-macro.json
@@ -1572,6 +1579,7 @@ If this Lambda function did not exist, you would not be able to delete the S3/EC
 
 Related Files:
 ```
+lambda/delete_s3_file/lambda_function.py
 deploy-s3-ecr.sh
 deploy-dev-api-documentation.sh
 template-s3-ecr.json
@@ -1588,6 +1596,7 @@ password in the CloudFormation logs. It's better to have the application query S
 
 Related Files:
 ```
+lambda/password_generator/lambda_function.py
 deploy-dev-database.sh
 template-database.json
 buildspec.yml
@@ -1610,6 +1619,7 @@ The Lambda function does the following:
    
 Related Files:
 ```
+lambda/post_pullrequests/lambda_function.py
 deploy-github-webhook-pull-request.sh
 pull_request_codebuild.py
 template-github-webhook-pull-request-params.json
@@ -1624,6 +1634,7 @@ references to this file are deleted as well (see Related Files below).
 
 Related Files:
 ```
+lambda/project/lambda_function.py
 template-api.json
 template-lambda.json
 deploy-dev-lambda.sh
@@ -1645,6 +1656,7 @@ is to forward the requests to a VPC Lambda, which can then proxy the request to 
 
 Related Files:
 ```
+lambda/proxy/lambda_function.py
 deploy-dev-lambda.sh
 template-lambda.json
 buildspec.yml
@@ -1667,6 +1679,7 @@ are deleted as well.
 
 Related Files:
 ```
+lambda/pull_request_webhook/lambda_function.py
 deploy-github-webhook-pull-request.sh
 template-github-webhook-pull-request-params.json
 template-github-webhook.json
@@ -1712,12 +1725,31 @@ Notes on release environments:
     
 Related Files:
 ```
+lambda/release_webhook/lambda_function.py
 deploy-github-webhook-release.sh
 template-github-webhook-release-params.json
 template-github-webhook.json
 ```
 
 ### ssm_secret
+Creates, updates, and deletes **secret** SSM parameters in parameter store.
+
+**warning** these secrets are deleted upon stack deletion. Only used these secrets for things like GitHub webhook
+tokens that can be easily replaced. In fact, GitHub webhook tokens are currently all that this function is used for.
+
+If you look at [template-github-webhook.json](#template-github-webhookjson) you will see that this Lambda function is
+used to create a 
+
+do not use this Lambda function for any password type secrets that are used to access data, such as database secrets.
+
+
+Related Files:
+```
+lambda/ssm_secret/lambda_function.py
+deploy-ssm-globals-macro.sh
+template-ssm-globals-macro.json
+template-github-webhook.json
+```
 
 ### vpc_proxy
 
