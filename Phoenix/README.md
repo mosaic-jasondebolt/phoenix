@@ -121,11 +121,6 @@
     * [vpc_proxy](#vpc_proxy)
 * [Non-Python Lambda Functions](#non-python-lambda-functions)
 * [Example Dockerfile used for testing/debugging ECS deployments](#example-dockerfile)
-* [CloudFormation Stack Imports](#cloudformation-stack-imports)
-* [Phoenix Pipelines](#phoenix-pipelines)
-    * [GitHub Pull Request](#github-pull-request)
-    * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
-* [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
 
 
 ## What is Phoenix
