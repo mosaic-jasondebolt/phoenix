@@ -1268,22 +1268,45 @@ lambda/password_generator/lambda_function.py
 
 
 ## CodeBuild buildspec.yml Files
+A <a href="https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html">build spec</a> is a collection of build commands and related settings, in YAML format, that AWS CodeBuild uses to run a build. You can include a build spec as part of the source code or you can define a build spec when you create a build project. For information about how a build spec works, see <a href="https://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html#concepts-how-it-works">How AWS CodeBuild Works</a>.
 
-### buildspec-api-documentation.yml
+Phoenix groups CodeBuild jobs into three different types:
+1. Build Stage
+2. Environment Specific
+3. Manually Invoked
 
-### buildspec-destroy-microservice.yml
+"Build Stage" CodeBuild jobs run in the "Build" stage of a code pipeline, before any environments are deployed to. These jobs, build artifacts, run unit tests against code, and run static analysis or lint checks on the code. If any of these jobs
+fail, the pipeline stops.
 
-### buildspec-integration-test.yml
+"Environment Specific" CodeBuild jobs run in a specific deployment stage (testing, ec2, prod) of a CodePipeline. These CodeBuild jobs often require infrastructure like RDS databases to be up before the job starts. For example, "buildspec-rds-migration.yml" runs a database migration for a specific database deployed in a given environment. If any of these jobs
+fail, the deployment stage is failed in that environment.
 
-### buildspec-lint.yml
+"Manually Invoked" CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
 
-### buildspec-post-prod-deploy.yml
+### Build Stage CodeBuild jobs
 
-### buildspec-rds-migration.yml
+#### buildspec.yml
 
-### buildspec-unit-test.yml
+#### buildspec-unit-test.yml
 
-### buildspec.yml
+#### buildspec-lint.yml
+
+### Environment Specific CodeBuild jobs
+
+#### buildspec-api-documentation.yml
+Publishes environment specific API documentation
+
+This buildspec runs near the end of a deployment stage for a given pipeline environment (testing, e2e, prod, etc.). 
+
+#### buildspec-integration-test.yml
+
+#### buildspec-rds-migration.yml
+
+#### buildspec-post-prod-deploy.yml
+
+###  Manually Invoked CodeBuild jobs
+
+#### buildspec-destroy-microservice.yml
 
 
 ## Python Helper Scripts
