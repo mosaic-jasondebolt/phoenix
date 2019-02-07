@@ -1287,6 +1287,8 @@ fail, the deployment stage is failed in that environment.
 "Manually Invoked" CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
 
 ### Build Stage CodeBuild jobs
+These CodeBuild jobs run in the "Build" stage of a code pipeline, before any environments are deployed to. These jobs, build artifacts, run unit tests against code, and run static analysis or lint checks on the code. If any of these jobs
+fail, the pipeline stops.
 
 #### buildspec.yml
 
@@ -1295,11 +1297,16 @@ fail, the deployment stage is failed in that environment.
 #### buildspec-lint.yml
 
 ### Environment Specific CodeBuild jobs
+These CodeBuild jobs run in a specific deployment stage (testing, ec2, prod) of a CodePipeline. These CodeBuild jobs often require infrastructure like RDS databases to be up before the job starts. For example, "buildspec-rds-migration.yml" runs a database migration for a specific database deployed in a given environment. If any of these jobs
+fail, the deployment stage is failed in that environment.
 
 #### buildspec-api-documentation.yml
-Publishes environment specific API documentation
+Generates an publishes environment specific API documentation for your API.
 
-This buildspec runs near the end of a deployment stage for a given pipeline environment (testing, e2e, prod, etc.). 
+1. Exports a swagger file from your API Gateway deployment.
+2. Generates API documentation using <a href="https://www.npmjs.com/package/spectacle-docs">spectacle docs</a>.
+3. Uploads this documentation to an S3 bucket.
+4. Invalidates the CloudFormation cache to ensure the latest documentation is visible.
 
 #### buildspec-integration-test.yml
 
@@ -1308,6 +1315,7 @@ This buildspec runs near the end of a deployment stage for a given pipeline envi
 #### buildspec-post-prod-deploy.yml
 
 ###  Manually Invoked CodeBuild jobs
+CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
 
 #### buildspec-destroy-microservice.yml
 
