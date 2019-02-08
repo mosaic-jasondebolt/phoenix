@@ -16,7 +16,7 @@
         * [Create the base docker images for the Phoenix projects in your AWS account](#create-the-base-docker-images-for-the-phoenix-projects-in-your-aws-account)
     * [Creating a Phoenix project](#creating-a-phoenix-project)
         * [Configuring the project config file](#configuring-the-project-config-file)
-        * [Initializing the Microservice](#Initializing the Microservice)
+        * [Initializing the Microservice](#initializing-the-microservice)
 * [Why No Nested Stacks](#why-no-nested-stacks)
 * [CloudFormation JSON Template Files](#cloudformation-json-template-files)
     * [Account Specific Stacks](#account-specific-stacks)
