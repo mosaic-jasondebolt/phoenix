@@ -10,6 +10,7 @@
 * [Phoenix Pipelines](#phoenix-pipelines)
 * [Initial Phoenix Project Setup](#initial-phoenix-project-setup)
     * [Preparing an AWS account to work with Phoenix](#preparing-an-aws-account-to-work-with-phoenix)
+        * [Create a repo in github](#create-a-repo-in-github)
         * [Configure the VPC's](#configure-the-vpcs)
         * [Save the API docs user agent token](#save-the-api-docs-user-agent-token)
         * [AWS CodeBuild GitHub OAuth authorization](#aws-codebuild-github-oauth-authorization)
@@ -176,6 +177,16 @@ A Phoenix microservice includes one or more CI/CD pipelines, some permanent, som
 ## Initial Phoenix Project Setup
 
 ### Preparing an AWS account to work with Phoenix
+
+#### Create a repo in github 
+1. Create a blank repo in GitHub with an all lowercase repo name.
+    * The name of the repo should be short and lowercase, ideally having the same name as the project name.
+2. Make sure to add this repo under the solmosaic organization
+3. Add both the "codebuild-users" and "devops-and-it" groups as admin users.
+4. Clone the this repo and change the remote path
+    * git remote -v
+    * git remote remove origin
+    * git remote add origin git@github.com:/solmosaic/{your-repo}.git
 
 #### Configure the VPC's
 * These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
