@@ -1291,6 +1291,44 @@ These CodeBuild jobs run in the "Build" stage of a code pipeline, before any env
 fail, the pipeline stops.
 
 #### buildspec.yml
+Builds docker images, lambda functions, and infrastructure artifacts such as CloudFormation template parameter files.
+
+This is the most important build spec in Phoenix. This same buildspec.yml is used for all pipelines:
+1. Main Pipeline
+2. Pull Request Pipelines
+3. Release Pipelines
+
+Each of the above 3 pipeline types has a CloudFormation template:
+```
+template-pipeline.json
+template-pull-request-pipeline.json
+template-release-environment-pipeline.json
+```
+
+Each cloudFormation template above has a single CodeBuild job that points to the same buildspec.yml file. The only difference
+between these 3 CodeBuild jobs (all pointing to the same buildspec.yml) is that the environment variables configured for
+each CodeBuild job are different.
+
+This buildspec.yml job does the following:
+1. Receives all source code associated with a single git commit.
+2. Generates a $VERSION_ID environment variable from the first 7 characters of the git commit SHA1.
+3. Loops through all environments (testing, e2e, prod, etc.) and injects the $VERSION_ID value into the Cloudformation parameter files.
+4. Builds a docker image and tags it with the $VERSION_ID.
+5. Loops through several lambda functions and deploys their source bundles into an S3 folder with the $VERSION_ID as the folder name.
+6. Runs the Phoenix/pull_request_codebuild.py script (this will be a no-op for non-pull request builds)
+    * For pull request builds, this script will report build statuses back to GitHub.
+7. Pushes the docker image to the project's ECR repo.
+8. Exports all artifacts, including Cloudformation templates and parameter files, for later pipeline deployment actions.
+
+
+Related Files:
+```
+buildspec.yml
+template-pipeline.json
+template-pull-request-pipeline.json
+template-release-environment-pipeline.json
+pull_request_codebuild.py
+```
 
 #### buildspec-unit-test.yml
 This is a placeholder file for running unit tests against source code. If your tests are large, consider
