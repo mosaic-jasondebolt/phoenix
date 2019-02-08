@@ -13,6 +13,7 @@
         * [Configure the VPC's](#configure-the-vpcs)
         * [Save the API docs user agent token](#save-the-api-docs-user-agent-token)
         * [AWS CodeBuild GitHub OAuth authorization](#aws-codebuild-github-oauth-authorization)
+        * [Create the base docker images for the Phoenix projects in your AWS account](#create-the-base-docker-images-for-the-phoenix-projects-in-your-aws-account)
     * [Creating a Phoenix project](#creating-a-phoenix-project)
         * [Configuring the project config file](#configuring-the-project-config-file)
 * [Why No Nested Stacks](#why-no-nested-stacks)
@@ -215,7 +216,7 @@ in SSM parameter store for the AWS account, you don't need to do anything.
 8. A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
 9. Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
 
-#### Create a docker pipeline for your images
+#### Create the base docker images for the Phoenix projects in your AWS account
 It's a great idea to <a href="https://12factor.net/dependencies">Explicitly declare and isolate dependencies</a> by using
 immutable Docker images for build nodes and application nodes.
 
