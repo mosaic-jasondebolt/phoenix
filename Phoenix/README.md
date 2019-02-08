@@ -1847,7 +1847,7 @@ The SSM replacement function can also interpolate on CloudFormation parameter va
 Where {Environment} is a CloudFormation parameter in the template that gets passed to the macro for interpolation.
 
 The above {"PhoenixSSM":...} values will be replaced by the macro with whatever is in SSM parameter store for your project.
-To add, update, or delete these SSM parameters to your project, see [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh) and [deploy-dev-ssm-environments.sh](deploy-dev-ssm-environmentssh).
+To add, update, or delete these SSM parameters to your project, see [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh) and [deploy-dev-ssm-environments.sh](#deploy-dev-ssm-environmentssh).
 
 I've created a very basic CloudFormation macro <a href="https://github.com/jasondebolt/cloudformation-search-and-replace-macro">in this GitHub repo</a> for anybody to experiment with. Feel free to clone this repo and poke around. More detailed information about CloudFormation macros can be found <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">here</a>
 
