@@ -1838,6 +1838,13 @@ All throughout Phoenix templates, you'll see values such as this:
     {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
     {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn-api-docs"}
 ```
+Where {ProjectName} is replaced by Lambda with your project's name.
+
+The SSM replacement function can also interpolate on CloudFormation parameter values:
+```
+{"PhoenixSSM": "/microservice/{ProjectName}/{Environment}/{your-parameter-key-name"}
+```
+Where {Environment} is a CloudFormation parameter in the template that gets passed to the macro for interpolation.
 
 The above {"PhoenixSSM":...} values will be replaced by the macro with whatever is in SSM parameter store for your project.
 To add, update, or delete these SSM parameters to your project, see [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh].
