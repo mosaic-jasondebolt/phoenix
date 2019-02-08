@@ -280,6 +280,8 @@ This template creates an ECR repository for your projects docker images as well 
 #### template-ssm-globals-macro.json
 This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a> and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
 
+See [macro](#macro) and [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh) for more information.
+
 #### template-pipeline.json
 This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation stacks of any Phoenix project.
 
@@ -675,6 +677,7 @@ Lastly, there is a CloudFormation Lambda Macro function that reads all SSM param
 5. Avoids having to add dozens of parameters to each CloudFormation template.
 6. Enables easier git merges between the core Phoenix repository and other Phoenix repositories since project config is limited to a small group of files.
 
+See [macro](#macro) for more information.
 
 Usage:
 ```
@@ -1814,6 +1817,55 @@ buildspec.yml
 ```
 
 ### macro
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">Lambda Macro function</a> that reads all SSM parameters into memory and renders CloudFormation templates dynamically. This macro is used by most Phoenix CloudFormation templates. The macro solves the following problems:
+
+1. Provides centralize storage of global and environment specific SSM parameters across a small known set of files.
+2. Avoids duplication of "template-ssm-globals-macro-params.json" params accross dozens of Cloudformation parameter files.
+3. Avoids the CloudFormation limit of 60 SSM parameters per stack.
+4. Avoids rate limiting associated with bursty SSM parameter calls from CloudFormation stacks.
+5. Avoids having to add **dozens of parameters** to each CloudFormation template.
+6. Enables easier git merges between the core Phoenix repository and other Phoenix repositories since project config is limited to a small group of files.
+
+See [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh] for more information.
+
+All throughout Phoenix templates, you'll see values such as this:
+```
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn-api-docs"}
+```
+
+The above {"PhoenixSSM":...} values will be replaced by the macro with whatever is in SSM parameter store for your project.
+To add, update, or delete these SSM parameters to your project, see [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh].
+
+I've created a very basic CloudFormation macro <a href="https://github.com/jasondebolt/cloudformation-search-and-replace-macro">in this GitHub repo</a> for anybody to experiment with. Feel free to clone this repo and poke around. More detailed information about CloudFormation macros can be found <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">here</a>
+
+In addition the SSM parameter injection, this macro also supports AWS S3 transforms:
+```
+    Replaces references like the following:
+
+    {"PhoenixS3Transform": "transform-filename.json"}
+    {"PhoenixS3Transform": {"Ref": "SomeFilenameParam"}
+
+    ..with JSON from a file in S3.
+
+    This assumes that the file has already been uploaded to your Phoenix project's S3 bucket
+    under the 'cloudformation' folder of the bucket.
+
+    This is similar to the CloudFormation Transform AWS::Include macro, but less limiting
+    because "AWS::Include" can't be used form within certain CloudFormation intrinsic functions.
+```
+
+Related Files:
+```
+lambda/macro/lambda_function.py
+template-ssm-globals-macro.json
+deploy-ssm-globals-macro.sh
+```
 
 ### password_generator
 A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that generates, encrypts, and stores RDS or Aurora instance MasterUser passwords in SSM parameter store.
