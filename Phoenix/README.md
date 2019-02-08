@@ -127,7 +127,10 @@
 
 
 ## What is Phoenix
-Phoenix is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform.
+It is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform.
+
+It is a subdirectory in which all of your infrastructure code lives, including admin scripts for manipulating
+everything from developer clouds, pipelines, releases, and deployments. 
 
 It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt, a Senior DevOps Engineer at Mosaic, in 2018.
 
@@ -136,6 +139,13 @@ A Phoenix project ships with multi-environment VPC configuration, complex CI/CD 
 Phoenix is not a framework and it does not hide anything, which can be overwhelming for those not deeply familiar with AWS and CloudFormation. A good starting point would be to study the "deploy-microservice-init.sh" file, as this is the file used to bootstrap a Phoenix project. When this script is invoked, over 30 CloudFormation stacks are created for your Phoenix project.
 
 *AWS is LEGO, and Phoenix is just a set of instructions to build microservice LEGO castles.*
+
+## How do I get started?
+1. Clone this repository.
+2. Place all of your application source code in the root directory of this repository (above the Phoenix directory).
+3. Create a Dockerfile for your application.
+   * You will later need to update the "docker build" command in [buildspec.yml](#buildspecyml) with this location.
+4. Complete the [Initial Phoenix Project Setup](#initial-phoenix-project-setup) section.
 
 ## Phoenix Overview
 A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
