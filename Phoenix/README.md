@@ -1304,6 +1304,41 @@ lambda/projects/lambda_function.py
 
 
 #### deploy-dev-ssm-environments.sh
+Deploys developer cloud specific SSM parameters.
+
+Phoenix encourages centralization of both global and environment specific project configuration. All config should
+be decoupled from deployment artifacts such as docker images. While execution environments and config often change across
+each deployment environment, artifacts deployed in these environments should not. This is why config should be decoupled
+from deployment artifacts (see the <a href="https://12factor.net/config">Config</a> rule in 12 Factor Apps).
+
+All environments, including developer environments, have their own SSM parameter CloudFormation stack for storing
+config in SSM parameter store for that environment. This script deploys developer specific config values into
+SSM parameter store.
+
+To add a new config value and make it available to another CloudFormation stack, you must do the following:
+1. Add a new key/value pair in "template-ssm-environments-dev.json"
+2. Create a new "AWS::SSM::Parameter" resource in "template-ssm-environments.json"
+3. In a different CloudFormation template, inject the value anywhere you wish:
+```
+{"PhoenixSSM": "/microservice/{ProjectName}/{Environment}/{your-parameter-key-name"}
+```
+**Take a look at the "Outputs" section near the bottom of the "template-lambda.json" template for how to inject**
+
+The "PhoenixSSM" function isn't really a function, it's just a string that tells the Phoenix [macro](#macro) that this is a special value that must be replaced by an SSM parameter lookup.
+
+Usage:
+```
+    ./deploy-dev-ssm-environments.sh create
+    ./deploy-dev-ssm-environments.sh update
+```
+
+Related Files:
+```
+deploy-dev-ssm-environments.sh
+template-ssm-environments-dev.json
+template-ssm-environments.json
+```
+
 
 
 ## CodeBuild buildspec.yml Files
