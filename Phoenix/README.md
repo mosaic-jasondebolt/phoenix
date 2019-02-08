@@ -207,15 +207,19 @@ in SSM parameter store for the AWS account, you don't need to do anything.
 * These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
 * When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
 * We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
-1. Sign out of your OneLogin account.
-2. Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
-3. Once logged in, click on the GitHub app within OneLogin.
-4. At the GitHub login screen, use the username and password specified in lastpass.
-5. Verify that you are logged into GitHub as the mosaic-codebuild user and not your mosaic github user.
-6. In the new AWS account, open the AWS CodeBuild console and a new job called "test".
-7. Create a simple CodeBuild job using GitHub as the source, and click on the "Connect to GitHub" button.
-8. A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
-9. Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
+1. Sign out of your GitHub account.
+2. Sign out of your OneLogin account.
+3. Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
+4. Once logged in, click on the GitHub app within OneLogin.
+5. At the GitHub login screen, use the username and password specified in lastpass.
+6. Verify that you are logged into GitHub as the mosaic-codebuild user and not your mosaic github user.
+7. In the new AWS account, open the AWS CodeBuild console and a new job called "test".
+8. Create a simple CodeBuild job using GitHub as the source, and click on the "Connect to GitHub" button.
+9. A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
+10. Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
+11. Log out of the mosaic-codebuild GitHub account.
+12. Log out of the mosaic-codebuild OneLogin account.
+13. Log back into your OneLogin and GitHub accounts. 
 
 #### Create the base docker images for the Phoenix projects in your AWS account
 It's a great idea to <a href="https://12factor.net/dependencies">Explicitly declare and isolate dependencies</a> by using
