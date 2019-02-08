@@ -132,7 +132,7 @@
 
 
 ## What is Phoenix
-It is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform created by Jason DeBolt.
+It is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform originally created by Jason DeBolt.
 
 It is a subdirectory in which all of your infrastructure code lives, including admin scripts for manipulating
 everything from developer clouds, pipelines, releases, and deployments. 
