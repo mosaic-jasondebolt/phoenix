@@ -1293,8 +1293,11 @@ fail, the pipeline stops.
 #### buildspec.yml
 
 #### buildspec-unit-test.yml
+This is a placeholder file for running unit tests against source code. If your tests are large, consider
+splitting your tests across muiltiple unit testing CodeBuild jobs running in parallel.
 
 #### buildspec-lint.yml
+This is a placeholder file for running lint or static analysis against source code to check for code quality.
 
 ### Environment Specific CodeBuild jobs
 These CodeBuild jobs run in a specific deployment stage (testing, ec2, prod) of a CodePipeline. These CodeBuild jobs often require infrastructure like RDS databases to be up before the job starts. For example, "buildspec-rds-migration.yml" runs a database migration for a specific database deployed in a given environment. If any of these jobs
@@ -1309,15 +1312,22 @@ Generates an publishes environment specific API documentation for your API.
 4. Invalidates the CloudFormation cache to ensure the latest documentation is visible.
 
 #### buildspec-integration-test.yml
+This is a placeholder file for running integration tests against a deployed environment. 
 
 #### buildspec-rds-migration.yml
+This is a placeholder file for running a database migration within a deployment stage.
 
 #### buildspec-post-prod-deploy.yml
+This is a post production deployment hook to do anything you want. Currently it's being used to enable termination
+protection on production Cloudformation stacks.
 
 ###  Manually Invoked CodeBuild jobs
 CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
 
 #### buildspec-destroy-microservice.yml
+This CodeBuild job can destroy all stacks in one or more deployment environments.
+
+See [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh) for details.
 
 
 ## Python Helper Scripts
