@@ -4,7 +4,18 @@
 ## Table of Contents
 
 * [What is Phoenix?](#what-is-phoenix)
+* [How do I get started?](#how-do-i-get-started)
 * [Phoenix Overview](#phoenix-overview)
+* [Prerequisites](#prerequisites)
+* [Phoenix Pipelines](#phoenix-pipelines)
+* [Initial Phoenix Project Setup](#initial-phoenix-project-setup)
+    * [Preparing an AWS account to work with Phoenix](#preparing-an-aws-account-to-work-with-phoenix)
+        * [Configure the VPC's](#configure-the-vpcs)
+        * [Save the API docs user agent token](#save-the-api-docs-user-agent-token)
+        * [AWS CodeBuild GitHub OAuth authorization](#aws-codebuild-github-oauth-authorization)
+    * [Creating a Phoenix project](#creating-a-phoenix-project)
+        * [Configuring the project config file](#configuring-the-project-config-file)
+* [Why No Nested Stacks](#why-no-nested-stacks)
 * [CloudFormation JSON Template Files](#cloudformation-json-template-files)
     * [Account Specific Stacks](#account-specific-stacks)
         * [template-vpc.json](#template-vpcjson)
@@ -75,14 +86,17 @@
         * [deploy-dev-lambda.sh](#deploy-dev-lambdash)
         * [deploy-dev-ssm-environments.sh](#deploy-dev-ssm-environmentssh)
 * [CodeBuild buildspec.yml Files](#codebuild-buildspecyml-files)
-    * [buildspec-api-documentation.yml](#buildspec-api-documentationyml)
-    * [buildspec-destroy-microservice.yml](#buildspec-destroy-microserviceyml)
-    * [buildspec-integration-test.yml](#buildspec-integration-testyml)
-    * [buildspec-lint.yml](#buildspec-lintyml)
-    * [buildspec-post-prod-deploy.yml](#buildspec-post-prod-deployyml)
-    * [buildspec-rds-migration.yml](#buildspec-rds-migrationyml)
-    * [buildspec-unit-test.yml](#buildspec-unit-testyml)
-    * [buildspec.yml](#buildspecyml)
+    * [Build Stage CodeBuild jobs](#build-stage-codebuild-jobs)
+        * [buildspec.yml](#buildspecyml)
+        * [buildspec-unit-test.yml](#buildspec-unit-testyml)
+        * [buildspec-lint.yml](#buildspec-lintyml)
+    * [Environment Specific CodeBuild jobs](#build-stage-codebuild-jobs)
+        * [buildspec-api-documentation.yml](#buildspec-api-documentationyml)
+        * [buildspec-integration-test.yml](#buildspec-integration-testyml)
+        * [buildspec-rds-migration.yml](#buildspec-rds-migrationyml)
+        * [buildspec-post-prod-deploy.yml](#buildspec-post-prod-deployyml)
+    * [Manually Invoked CodeBuild jobs](#manually-invoked-codebuild-jobs)
+        * [buildspec-destroy-microservice.yml](#buildspec-destroy-microserviceyml)
 * [Python Helper Scripts](#python-helper-scripts)
     * [parameters_generator.py](#parameters_generatorpy)
     * [search_and_replace.py](#search_and_replacepy)
@@ -109,17 +123,17 @@
     * [release_webhook](#release_webhook)
     * [ssm_secret](#ssm_secret)
     * [vpc_proxy](#vpc_proxy)
+* [Non-Python Lambda Functions](#non-python-lambda-functions)
 * [Example Dockerfile used for testing/debugging ECS deployments](#example-dockerfile)
-* [CloudFormation Stack Imports](#cloudformation-stack-imports)
-* [Phoenix Pipelines](#phoenix-pipelines)
-    * [GitHub Pull Request](#github-pull-request)
-    * [GitHub Pull Request Pipeline](#github-pull-request-pipeline)
-* [One time configuration of your AWS account to work with Phoenix](#one-time-configuration-of-your-aws-account-to-work-with-phoenix)
-* [Initial Phoenix Project Setup](#initial-phoenix-project-setup)
 
 
 ## What is Phoenix
-Phoenix is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt, a Senior DevOps Engineer at Mosaic, in 2018.
+It is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform.
+
+It is a subdirectory in which all of your infrastructure code lives, including admin scripts for manipulating
+everything from developer clouds, pipelines, releases, and deployments. 
+
+It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt, a Senior DevOps Engineer at Mosaic, in 2018.
 
 A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments.
 
@@ -127,16 +141,12 @@ Phoenix is not a framework and it does not hide anything, which can be overwhelm
 
 *AWS is LEGO, and Phoenix is just a set of instructions to build microservice LEGO castles.*
 
-## Prerequisites
-Working with Phoenix without strong knowledge of CloudFormation is an exercise in frustration. Take some time to learn it.
-
-1. Introductory CloudFormation
-    * <a href="https://aws.amazon.com/cloudformation/getting-started/">AWS CloudFormation Getting Started</a>
-    * <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/GettingStarted.html">Getting Started with AWS CloudFormation</a>
-2. Advanced CloudFormation (pick one from below)
-    *
-    <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
-    * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
+## How do I get started?
+1. Clone this repository.
+2. Place all of your application source code in the root directory of this repository (above the Phoenix directory).
+3. Create a Dockerfile for your application.
+   * You will later need to update the "docker build" command in [buildspec.yml](#buildspecyml) with this location.
+4. Complete the [Initial Phoenix Project Setup](#initial-phoenix-project-setup) section.
 
 ## Phoenix Overview
 A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This Phoenix subdirectory includes the following file types:
@@ -148,6 +158,93 @@ A Phoenix microservice is a Git repository with a "Phoenix" subdirectory. This P
 6) [Python 3.6 Lambda Functions](#python-36-lambda-functions)
 7) [Example Dockerfile used for testing/debugging ECS deployments](#example-dockerfile)
 
+## Prerequisites
+Working with Phoenix without strong knowledge of CloudFormation is an exercise in frustration. Take some time to learn it.
+
+1. Introductory CloudFormation
+    * <a href="https://aws.amazon.com/cloudformation/getting-started/">AWS CloudFormation Getting Started</a>
+    * <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/GettingStarted.html">Getting Started with AWS CloudFormation</a>
+2. Advanced CloudFormation (pick one from below)
+    * <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
+    * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
+ 
+## Phoenix Pipelines
+A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral. Each pipeline has a source stage, which is usually triggered from a Git repository webhook. There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments. Both source code and artifacts can be scanned for security and/or static analysis. If the build, testing, and linting stages pass, the artifacts (lambda functions, docker images, etc.) are deployed into a testing environment. After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice. All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments. Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources. Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
+
+## Initial Phoenix Project Setup
+
+### Preparing an AWS account to work with Phoenix
+
+#### Configure the VPC's
+* These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
+* Add appropriate CIDR ranges in the template-vpc-params-dev.json, template-vpc-params-testing.json, and template-vpc-params-prod.json files.
+* Ensure that all CIDR IP ranges are not currently used by any other Phoenix projects or other networks.
+* Deploy the VPC's
+```
+$ cd Phoenix
+$ ./deploy-vpc.sh create
+```
+
+#### Save the API docs user agent token
+* These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
+* This is a secret token used to verify HTTP requests made to API documents served from the S3 bucket.
+* This token can be shared by all Phoenix projects in a single AWS account.
+* This token can saved in a browser using the Chrome browser plugin to add to the 'user-agent' header in requests.
+* Usage of this token in the browser is optional, but it can be useful when accessing API docs from over VPN.
+
+```
+From you mac:
+$ pwgen 32 -1
+```
+
+Save the above generated token in the '/global/api-docs-user-agent' SSM parameter store parameter with
+the descripte "UserAgent used to authenticate with S3 static websites for API Documentation." It this key already exists
+in SSM parameter store for the AWS account, you don't need to do anything.
+
+#### AWS CodeBuild GitHub OAuth authorization
+* These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
+* When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
+* We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
+1. Sign out of your OneLogin account.
+2. Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
+3. Once logged in, click on the GitHub app within OneLogin.
+4. At the GitHub login screen, use the username and password specified in lastpass.
+5. Verify that you are logged into GitHub as the mosaic-codebuild user and not your mosaic github user.
+6. In the new AWS account, open the AWS CodeBuild console and a new job called "test".
+7. Create a simple CodeBuild job using GitHub as the source, and click on the "Connect to GitHub" button.
+8. A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
+9. Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
+
+### Creating a Phoenix project
+
+#### Configuring the project config file
+* All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
+
+- Create DNS hosted zone.
+    - Copy the ID of this hosted into into the HostedZoneId param of the project config file laster.
+- Create NS record in main account
+- Create GitHub repo
+    - Add the DevOps+IT group and mosaic code build groups as admins to this repo.
+- Update template-ssm-globals-macro-params.json file
+- Run ‘pwgen 32 -1’ and save token in the ‘/global/api-docs-user-agent’ SSM parameter.
+- In the AWS CodeBuild console
+    - Make sure you are logged into GitHub as the mosaic-codebuild user
+    - Create a CodeBuild project called ‘test’
+    - In the Source section, link to GitHub using OAuth.
+    - Click the dialog box that pops up. You only need to do this once for the AWS account.
+- Copy the mosaic-codebuild GitHub access token from lastpass
+    - You will pass this token into the ‘./deploy-microservice-init.sh’ shell script.
+- Run the ‘/deploy-microservice-init.sh’ shell script with the mosaic-codebuild access token
+    - ./deploy-microservice-init.sh {token}
+- After all stacks from the microservice-init script have been created, push to that master branch of the repo
+- $ git push origin master.
+
+## Why no Nested Stacks?
+At the time Phoenix was first developed, Cloudformation Nested Stacks had several limitations. These limitations included
+lack of support for <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/create-reusable-transform-function-snippets-and-add-to-your-template-with-aws-include-transform.html">AWS::Include</a> transforms, Cloudformation
+macros and more. Nested stacks can also become difficult to work with for large sets of stacks, sometimes becoming
+completely stuck (requiring AWS support to fix). In December 2018, Cloudformation macro support was added to Nested Stacks,
+so it may be possible to refactor Phoenix to leverage Nested Stacks in the near future. If this occurs, it would probably be  best to decouple stacksets for the expensive, heavy resources such as RDS instances, API gateway custom domains, and CloudFront distributions from the faster, lightweight resources such as ECS, Lambda, DynamoDB, and API Gateway deployments.
 
 ## CloudFormation JSON Template Files
 An AWS account may include multiple Phoenix projects, and each Phoenix project may include multiple environments like
@@ -182,6 +279,8 @@ This template creates an ECR repository for your projects docker images as well 
 
 #### template-ssm-globals-macro.json
 This template creates a <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">CloudFormation Macro</a> and a set of global non-environment specific SSM parameters for your Phoenix project. The macro is a Lambda function that pre-processes CloudFormation templates and the SSM parameters are saved into SSM parameter store.
+
+See [macro](#macro) and [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh) for more information.
 
 #### template-pipeline.json
 This template creates a multi-environment AWS CodePipeline, GitHub webhook on the master branch, build/test/lint AWS CodeBuild jobs, and an CloudWatch rule which sends SNS notifications to the project email upon pipeline failure. This is one of the most important CloudFormation stacks of any Phoenix project.
@@ -578,6 +677,7 @@ Lastly, there is a CloudFormation Lambda Macro function that reads all SSM param
 5. Avoids having to add dozens of parameters to each CloudFormation template.
 6. Enables easier git merges between the core Phoenix repository and other Phoenix repositories since project config is limited to a small group of files.
 
+See [macro](#macro) for more information.
 
 Usage:
 ```
@@ -1180,224 +1280,819 @@ lambda/password_generator/lambda_function.py
 ```
 
 #### deploy-dev-lambda.sh
+Deploys developer cloud specific Lambda functions. Each developer will have their own set of these functions.
+
+You can read more about these individual functions here:
+[vpc_proxy])(#vpc_proxy)
+[proxy](#proxy)
+[alb_listener_rule](#alb_listener_rule)
+[projects](#projects)
+
+Usage:
+```
+    ./deploy-dev-lambda.sh create
+    ./deploy-dev-lambda.sh update
+```
+
+Related Files:
+```
+deploy-dev-lambda.sh
+template-lambda-params-dev.json
+template-lambda.json
+lambda/vpc_proxy/lambda_function.js
+lambda/proxy/lambda_function.py
+lambda/alb_listener_rule/lambda_function.py
+lambda/projects/lambda_function.py
+```
+
 
 #### deploy-dev-ssm-environments.sh
+Deploys developer cloud specific SSM parameters.
 
+Phoenix encourages centralization of both global and environment specific project configuration. All config should
+be decoupled from deployment artifacts such as docker images. While execution environments and config often change across
+each deployment environment, artifacts deployed in these environments should not. This is why config should be decoupled
+from deployment artifacts (see the <a href="https://12factor.net/config">Config</a> rule in 12 Factor Apps).
+
+All environments, including developer environments, have their own SSM parameter CloudFormation stack for storing
+config in SSM parameter store for that environment. This script deploys developer specific config values into
+SSM parameter store.
+
+To add a new config value and make it available to another CloudFormation stack, you must do the following:
+1. Add a new key/value pair in "template-ssm-environments-dev.json"
+2. Create a new "AWS::SSM::Parameter" resource in "template-ssm-environments.json"
+3. In a different CloudFormation template, inject the value anywhere you wish:
+```
+{"PhoenixSSM": "/microservice/{ProjectName}/{Environment}/{your-parameter-key-name"}
+```
+**Take a look at the "Outputs" section near the bottom of the "template-lambda.json" template for an example**
+
+The "PhoenixSSM" function isn't really a function, it's just a string that tells the Phoenix [macro](#macro) that this is a special value that must be replaced by an SSM parameter lookup. The [macro](#macro) replaces {ProjectName} with your
+project's name and replaces {Environment} with the "Environment" parameter passed into your template before querying
+SSM parameter store and replacing with value.
+
+Usage:
+```
+    ./deploy-dev-ssm-environments.sh create
+    ./deploy-dev-ssm-environments.sh update
+```
+
+Related Files:
+```
+deploy-dev-ssm-environments.sh
+template-ssm-environments-dev.json
+template-ssm-environments.json
+```
 
 ## CodeBuild buildspec.yml Files
+A <a href="https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html">build spec</a> is a collection of build commands and related settings, in YAML format, that AWS CodeBuild uses to run a build. You can include a build spec as part of the source code or you can define a build spec when you create a build project. For information about how a build spec works, see <a href="https://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html#concepts-how-it-works">How AWS CodeBuild Works</a>.
 
-### buildspec-api-documentation.yml
+Phoenix groups CodeBuild jobs into three different types:
+1. Build Stage
+2. Environment Specific
+3. Manually Invoked
 
-### buildspec-destroy-microservice.yml
+"Build Stage" CodeBuild jobs run in the "Build" stage of a code pipeline, before any environments are deployed to. These jobs, build artifacts, run unit tests against code, and run static analysis or lint checks on the code. If any of these jobs
+fail, the pipeline stops.
 
-### buildspec-integration-test.yml
+"Environment Specific" CodeBuild jobs run in a specific deployment stage (testing, ec2, prod) of a CodePipeline. These CodeBuild jobs often require infrastructure like RDS databases to be up before the job starts. For example, "buildspec-rds-migration.yml" runs a database migration for a specific database deployed in a given environment. If any of these jobs
+fail, the deployment stage is failed in that environment.
 
-### buildspec-lint.yml
+"Manually Invoked" CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
 
-### buildspec-post-prod-deploy.yml
+### Build Stage CodeBuild jobs
+These CodeBuild jobs run in the "Build" stage of a code pipeline, before any environments are deployed to. These jobs, build artifacts, run unit tests against code, and run static analysis or lint checks on the code. If any of these jobs
+fail, the pipeline stops.
 
-### buildspec-rds-migration.yml
+#### buildspec.yml
+Builds docker images, lambda functions, and infrastructure artifacts such as CloudFormation template parameter files.
 
-### buildspec-unit-test.yml
+This is the most important build spec in Phoenix. This same buildspec.yml is used for all pipelines:
+1. Main Pipeline
+2. Pull Request Pipelines
+3. Release Pipelines
 
-### buildspec.yml
+Each of the above 3 pipeline types has a CloudFormation template:
+```
+template-pipeline.json
+template-pull-request-pipeline.json
+template-release-environment-pipeline.json
+```
+
+Each cloudFormation template above has a single CodeBuild job that points to the same buildspec.yml file. The only difference
+between these 3 CodeBuild jobs (all pointing to the same buildspec.yml) is that the environment variables configured for
+each CodeBuild job are different.
+
+This buildspec.yml job does the following:
+1. Receives all source code associated with a single git commit.
+2. Generates a $VERSION_ID environment variable from the first 7 characters of the git commit SHA1.
+3. Loops through all environments (testing, e2e, prod, etc.) and injects the $VERSION_ID value into the Cloudformation parameter files.
+4. Builds a docker image and tags it with the $VERSION_ID.
+5. Loops through several lambda functions and deploys their source bundles into an S3 folder with the $VERSION_ID as the folder name.
+6. Runs the Phoenix/pull_request_codebuild.py script (this will be a no-op for non-pull request builds)
+    * For pull request builds, this script will report build statuses back to GitHub.
+7. Pushes the docker image to the project's ECR repo.
+8. Exports all artifacts, including Cloudformation templates and parameter files, for later pipeline deployment actions.
+
+
+Related Files:
+```
+buildspec.yml
+template-pipeline.json
+template-pull-request-pipeline.json
+template-release-environment-pipeline.json
+pull_request_codebuild.py
+```
+
+#### buildspec-unit-test.yml
+This is a placeholder file for running unit tests against source code. If your tests are large, consider
+splitting your tests across muiltiple unit testing CodeBuild jobs running in parallel.
+
+#### buildspec-lint.yml
+This is a placeholder file for running lint or static analysis against source code to check for code quality.
+
+### Environment Specific CodeBuild jobs
+These CodeBuild jobs run in a specific deployment stage (testing, ec2, prod) of a CodePipeline. These CodeBuild jobs often require infrastructure like RDS databases to be up before the job starts. For example, "buildspec-rds-migration.yml" runs a database migration for a specific database deployed in a given environment. If any of these jobs
+fail, the deployment stage is failed in that environment.
+
+#### buildspec-api-documentation.yml
+Generates an publishes environment specific API documentation for your API.
+
+1. Exports a swagger file from your API Gateway deployment.
+2. Generates API documentation using <a href="https://www.npmjs.com/package/spectacle-docs">spectacle docs</a>.
+3. Uploads this documentation to an S3 bucket.
+4. Invalidates the CloudFormation cache to ensure the latest documentation is visible.
+
+#### buildspec-integration-test.yml
+This is a placeholder file for running integration tests against a deployed environment. 
+
+#### buildspec-rds-migration.yml
+This is a placeholder file for running a database migration within a deployment stage.
+
+#### buildspec-post-prod-deploy.yml
+This is a post production deployment hook to do anything you want. Currently it's being used to enable termination
+protection on production Cloudformation stacks.
+
+###  Manually Invoked CodeBuild jobs
+CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
+
+#### buildspec-destroy-microservice.yml
+This CodeBuild job can destroy all stacks in one or more deployment environments.
+
+See [deploy-microservice-cleanup.sh](#deploy-microservice-cleanupsh) for details.
 
 
 ## Python Helper Scripts
+Phoenix ships with various Python scripts to automate various tasks. The naming convention for these Python script files
+is to use underscores.
 
 ### parameters_generator.py
+Converts CloudFormation parameters to the native format expected by the CloudFormation CLI.
 
+Code Pipeline expects <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/continuous-delivery-codepipeline-cfn-artifacts.html#w2ab2c13c15c13">this format</a> for CloudFormation parameters, while CloudFormation expects <a href="https://aws.amazon.com/blogs/devops/passing-parameters-to-cloudformation-stacks-with-the-aws-cli-and-powershell/">this format</a>.
+
+This Python script is often called from the main buildspec.yml file and also many of the local shell scripts.
+
+Usage:
+```
+    python parameters_generator.py template.json {cloudformation | codepipeline} > temp.json
+```
+
+Where "template.json" is in either cloudformation or codepipeline parameter format and the next argument
+specifies which format is desired in the output file.
+
+If "cloudformation" is specified, the "temp.json" file would be used in CloudFormation CLI calls:
+```
+    aws cloudformation create-stack --stack-name <stack_name> --template-body file://template.json --parameters file://temp.json
+```
+
+If "codepipeline" is specified, the "temp.json" file would be used in CodePipeline deployment actions (see template-pipeline.json):
+```
+    "TemplateConfiguration": "BuildOutput::temp.json",
+```
+ 
 ### search_and_replace.py
+Recursively searches and replaces all strings in a given directory for a given file pattern.
+
+This is a very simple but extremely useful Python script, especially for refactoring.
+
+Usage:
+```
+  $ python search_and_replace.py {directory_to_search} {string_to_find} {replacement_string} {pattern}
+```
+
+Example:
+  The following Recursively searches for the string FOO and replaces with BAR
+  for all text files in the current directory and all subdirectories.
+
+```
+  $ python search_and_replace.py . FOO BAR    ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR file.txt  ==> Matches a single file.
+  $ python search_and_replace.py . FOO BAR "*"  ==> Matches ALL files, like *
+  $ python search_and_replace.py . FOO BAR "*.txt"  ==> Matches
+```
 
 ### generate_environment_params.py
+Generates CloudFormation JSON environment specific parameter files.
+
+This script just copies all of the *params-testing.json files and generates
+namespaced *-params-{environment}.json files. If the '--delete' flag is passed
+in, all files matching *-params-{environment}.json will be deleted.
+
+Typically you'll only need to run this script once per new environment. It is
+a utility script to make is easier to generate all of the cloudformation
+parameter files for a new environment.
+
+The 'environment' arg can be something like 'staging' or 'rc'.
+When CloudFormation stacks are launched using these parameter files,
+all AWS resources will be identified by this environment such as
+URL's, ECS clusters, Lambda functions, etc.
+
+Usage:
+```
+    python generate_environment_params.py {environment}
+    python generate_environment_params.py {environment} --delete
+```
+
+Examples:
+```
+    python generate_environment_params.py staging
+    python generate_environment_params.py staging --delete
+```
 
 ### rename_ssm_parameter.py
+Renames SSM parameter **keys** from an old value to a new value, optionally for encrypted parameters (True|False).
+
+Use this script only for parameters that are **not deployed via CloudFormation** (see template-ssm-globals-macro-params.json). This is because CloudFormation contains the source of truth for parameter names.
+
+You can use this script refactor the base paths of several manually configured SSM parameters, such as for secrets and tokens.
+
+Usage:
+```
+    python rename_ssm_parameter.py {old_param_key} {new_param_key} [True | False]
+```
+
+Examples:
+```
+    python rename_ssm_parameter.py /some/param/key /some/param/new-key True --> param is encrypted.
+    python rename_ssm_parameter.py /some/param/key /some/param/new-key False --> param is not encrypted
+```
 
 ### cfn_stacks.py
+Helper script used to make CloudFormation API calls.
+
+Add functions to this script when making CloudFormation CLI calls from shell code or buildspec YAML files involves
+more complex logic.
+
+Usage:
+```
+    python cfn_stacks.py delete-if-exists {stack_name}
+    python cfn_stacks.py disable-termination-protection {stack_name}
+```
+
+Examples:
+```
+    python cfn_stacks.py delete-if-exists some-stack-name
+    python cfn_stacks.py disable-termination-protection some-stack-name
+```
 
 ### generate_dev_params.py
+Generates CloudFormation JSON dev parameter files.
+
+This script just copies all of the *params-testing.json files and generates
+namespaced *params-dev.json files. Dev param files are used only by developers when
+launching CloudFormation stacks during local development.
+
+The 'environment_name' arg can be something like 'dev{username}' where
+username is the developers username. When CloudFormation stacks are launched
+using these parameter files, many AWS resources will be identified by this
+environment_name such as URL's, ECS clusters, Lambda functions, etc.
+
+Usually this script only needs to be invoked once per team member per project. When a new developer starts working
+with Phoenix for the first time, they should run this script once in their local project git repo.
+
+The *params-dev.json files are ignored by .gitignore so so the dev parameter files associated with different
+developers do not conflict/clash with eachother. This script's exection impacts local files only.
+
+Usage:
+```
+    python generate_dev_params.py {environment_name}
+```
+
+Examples:
+```
+    python generate_dev_params.py devjason
+```
 
 ### pull_request_codebuild.py
+Handles CodeBuild jobs executing in the context of a GitHub Pull Request.
 
+```
+    python pull_request_codebuild.py [build | unit-test | lint]
+```
+
+The main function of this Python script is to notify GitHub of build/unit-test/lint CodeBuild job statuses (pass or fail?) during GitHub pull request pipeline executions.
+
+This script is usually invoked in the "post_build" step of the following buildspec YAML files:
+```
+    buildspec.yml
+    buildspec-unit-test.yml
+    buildspec-lint.yml
+```
+
+This script accesses environment variables available on the CodeBuild node host to determine what to do. These environment variables are automatically set on the CodeBuild job definition from the 'template-pull-request-pipeline.json' CloudFormation stack. This stack is created by a Lambda function that is invoked by a GitHub webhook for pull request events.
+
+This script does the following:
+1) Persists a github.json file that is passed by CodePipeline to a Lambda function.
+2) Notifies GitHub of the status of AWS CodeBuild jobs.
+3) Generates an ECS parameter template specifically for spinning up
+   a dev ECS instance used during code review.
+
+As long as you have the environment variables set as specified in the
+initializer, you can run this script either locally or on AWS CodeBuild.
 
 ## Python 3.6 Lambda Functions
+Phoenix leverage AWS Lambda for many event based workloads, such as handling GitHub webhooks or cleaning up AWS resources
+during stack deletions.
+
+All Lambda functions are located in the "lambda" subfolder of the Phoenix directory. Most of these functions use the
+Python3.6 runtime but a few use NodeJS.
+
+There are many frameworks out there that deploy Lambda functions, but Phoenix deploys Lambda simply by zipping up the
+file contents, saving the zip to a versioned S3 folder (either using a timestamp or a git commit SHA1), and provisioning
+the Lambda functions using CloudFormation (which then pick up the source in the versioned S3 folder).
+
+For example, the shell code snippet below loops through some function names within the "Phoenix/lambda" folder:
+```
+listOfPythonLambdaFunctions='projects delete_network_interface alb_listener_rule proxy'
+for functionName in $listOfPythonLambdaFunctions
+do
+  mkdir -p builds/$functionName
+  cp -rf lambda/$functionName/* builds/$functionName/
+  cd builds/$functionName/
+  pip install -r requirements.txt -t .
+  zip -r lambda_function.zip ./*
+  aws s3 cp lambda_function.zip s3://$LAMBDA_BUCKET_NAME/$VERSION_ID/$functionName/
+  cd ../../
+  rm -rf builds
+done
+```
+
+Where $LAMBDA_BUCKET_NAME is usually {organization-name}-{project-name}-lambda and the $VERSION_ID is usually a
+timestamp for developer deployments or a git SHA1 for pipeline deployments.
+
+The CloudFormation code snippet below deploys the Lambda function itself:
+```
+    "LambdaProjects": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "lambda_function.lambda_handler",
+        "Code": {
+          "S3Bucket" : "your-bucket-name",
+          "S3Key" : {"Fn::Join": ["/", [
+            {"Ref": "Version"},
+            "projects",
+            "lambda_function.zip"
+          ]]}
+        },
+        "Runtime": "python3.6",
+        "Timeout": "25"
+      }
+    },
+```
+
+Where the above function deploys a Python Lambda function that times out after 25 seconds. The source code of the Lambda
+function would be found at "s3://your-bucket-name/$VERSION_ID/projects/lambda_function.zip", which is where our
+shell code above deployed it to on the first loop iteration.
+
 
 ### alb_listener_rule
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for creating ALB redirection rules.
+
+This is particularly useful for adding HTTP->HTTPS redirects to Application
+Load Balancers.
+
+At the time this was created, AWS had introduced redirect rules on ALBs but
+had not yet made them available in CloudFormation. The boto3 Python library
+does support it however.
+
+Original Git Repo:
+https://github.com/jheller/alb-rule/blob/master/lambda/alb_listener_rule.py
+
+Related Files:
+```
+lambda/alb_listener_rule/lambda_function.py
+deploy-dev-lambda.sh
+template-lambda.json
+buildspec.yml
+```
+
 
 ### api_internals
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for altering the request body of API Gateway HTTP requests being sent
+to Lambda functions.
+
+See [deploy-dev-api-deployment.sh](#deploy-dev-api-deploymentsh) for details.
+
+Related Files:
+```
+lambda/api_internals/lambda_function.py
+deploy-dev-api-deployment.sh
+template-api-deployment.json
+buildspec.yml
+```
 
 ### cognito_internals
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> for creating/updating/delete Cognito resources that are not supported
+by CloudFormation.
+
+See [deploy-dev-cognito-internals.sh](#deploy-dev-cognito-internalssh) and [template-cognito-internals.json](#template-cognito-internalsjson) for details.
+
+Related Files:
+```
+lambda/cognito_internals/lambda_function.py
+deploy-dev-cognito-internals.sh
+template-cognito-internals.json
+buildspec.yml
+```
 
 ### create_pull_request_webhook
+Creates a GitHub webhook within GitHub for sending pull request events to an endpoint.
+
+View the full GitHub Pull Request REST API <a href="https://developer.github.com/v3/activity/events/types/#pullrequestevent">here</a>.
+
+This Lambda function calls three lambda functions depending on the stack even type:
+1. create_webook()
+2. update_webhook()
+3. delete_webhook()
+
+When "create_webhook" is called, it grabs the project's Git access token and a shared pull request secret from SSM parameter store and makes a GitHub API call to create a pull request webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
+
+This function creates the pull request webhook. The [pull_request_webhook](#pull_request_webhook) processes webhook events to orchestrate pull request pipelines.
+
+Related Files:
+```
+lambda/create_pull_request_webhook/lambda_function.py
+deploy-github-webhook-pull-request.sh
+template-github-webhook-pull-request-params.json
+Phoenix/lambda/create_pull_request_webhook
+Phoenix/lambda/pull_request_webhook
+Phoenix/lambda/post_pullrequests
+```
 
 ### create_release_webhook
+Creates a GitHub webhook within GitHub for sending release related events to an endpoint.
+
+This Lambda function calls three lambda functions depending on the stack even type:
+1. create_webook()
+2. update_webhook()
+3. delete_webhook()
+
+When "create_webhook" is called, it grabs the project's Git access token and a shared release secret from SSM parameter store and makes a GitHub API call to create a release webook. When the CloudFormation stack is deleted, this Lambda function automatically deletes the GitHub webhook.
+
+This function creates the release webhook. The [release_webhook](#release_webhook) processes webhook events to orchestrate release pipelines.
+
+Related Files:
+```
+lambda/create_release_webhook/lambda_function.py
+deploy-github-webhook-release.sh
+template-github-webhook-release-params.json
+Phoenix/lambda/create_release_webhook
+Phoenix/lambda/release_webhook
+```
 
 ### delete_ecr_repos
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that automatically deletes all images in one or more ECR repos, as well as the ECR repo itself. This is particularly useful for automatically deleting ECR repos upon stack deletion since CloudFormation cannot delete non-empty ECR repos.
+
+Related Files:
+```
+lambda/delete_ecr_repos/lambda_function.py
+deploy-s3-ecr.sh
+template-s3-ecr.json
+```
 
 ### delete_network_interface
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that force deletes the ENI associated with a Lambda function residing
+inside of a VPC upon stack deletion. There is currently a <a href="https://forums.aws.amazon.com/thread.jspa?messageID=756642">bug</a> where CloudFormation fails to delete lambda functions (functions that are created inside of a VPC) upon stack deletion. As a result, the stack will hang.
+
+Some Lambda functions are deployed into an VPC. When Cloudformation stacks with these functions are deleted, the stack will
+wait up to **45 minutes** for the Elastic Networking Interface (ENI) associated with the Lambdas to be deleted. 
+
+Before I wrote this function, I had to complete the following to delete CloudFormation stacks that had VPC Lambdas:
+1. Find security group id associated with the Lambda function
+2. Open the EC2 console and click on the "elastic networkg interface" section
+3. Search for the ENI associated with the security
+4. Delete the ENI
+5. Wait a few minutes for CloudFormation to detect the deleted ENI and finally delete the stack
+
+The "delete_network_interface" function automates the above steps, so cleanup happens automatically.
+
+Related Files:
+```
+lambda/delete_network_interface/lambda_function.py
+deploy-dev-lambda.sh
+deploy-ssm-globals-macro.sh
+template-ssm-globals-macro.json
+buildspec.yml
+```
 
 ### delete_s3_files
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that automatically deletes all files in one or more S3 buckets upon
+stack deletion.
+
+This is useful when deleting S3 bucket resources in CloudFormation since CloudFormation cannot delete non-empty S3 buckets
+when CloudFormation stacks are deleted.
+
+If this Lambda function did not exist, you would not be able to delete the S3/ECR stacks without first deleting the following:
+1. All files in all CloudFormation created S3 buckets.
+2. All images in all CloudFormation created ECR repositories.
+
+Related Files:
+```
+lambda/delete_s3_file/lambda_function.py
+deploy-s3-ecr.sh
+deploy-dev-api-documentation.sh
+template-s3-ecr.json
+buildspec.yml
+```
 
 ### macro
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">Lambda Macro function</a> that adds custom function to CloudFormation templates, such as reading all SSM parameters into memory and rendering the values into CloudFormation templates dynamically, or copying JSON files from S3 and rendering them into CloudFormation templates. The "PhoenixSSM" custom function within the macro is used by most Phoenix CloudFormation templates. The function solves the following problems:
+
+1. Provides centralize storage of global and environment specific SSM parameters across a small known set of files.
+2. Avoids duplication of "template-ssm-globals-macro-params.json" params accross dozens of Cloudformation parameter files.
+3. Avoids the CloudFormation limit of 60 SSM parameters per stack.
+4. Avoids rate limiting associated with bursty SSM parameter calls from CloudFormation stacks.
+5. Avoids having to add **dozens of parameters** to each CloudFormation template.
+6. Enables easier git merges between the core Phoenix repository and other Phoenix repositories since project config is limited to a small group of files.
+
+See [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh] for more information.
+
+All throughout Phoenix templates, you'll see values such as this:
+```
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/project-name"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/domain"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/iam-role"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/hosted-zone-id"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/code-build-docker-image"},
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/lambda-bucket-name"}
+    {"PhoenixSSM": "/microservice/{ProjectName}/global/ssl-certificate-arn-api-docs"}
+```
+Where {ProjectName} is replaced by Lambda with your project's name.
+
+The SSM replacement function can also interpolate on CloudFormation parameter values:
+```
+{"PhoenixSSM": "/microservice/{ProjectName}/{Environment}/{your-parameter-key-name"}
+```
+Where {Environment} is a CloudFormation parameter in the template that gets passed to the macro for interpolation.
+
+The above {"PhoenixSSM":...} values will be replaced by the macro with whatever is in SSM parameter store for your project.
+To add, update, or delete these SSM parameters to your project, see [deploy-ssm-globals-macro.sh](#deploy-ssm-globals-macrosh) and [deploy-dev-ssm-environments.sh](#deploy-dev-ssm-environmentssh).
+
+I've created a very basic CloudFormation macro <a href="https://github.com/jasondebolt/cloudformation-search-and-replace-macro">in this GitHub repo</a> for anybody to experiment with. Feel free to clone this repo and poke around. More detailed information about CloudFormation macros can be found <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">here</a>
+
+In addition the SSM parameter injection, this macro also supports AWS S3 transforms:
+```
+    Replaces references like the following:
+
+    {"PhoenixS3Transform": "transform-filename.json"}
+    {"PhoenixS3Transform": {"Ref": "SomeFilenameParam"}
+
+    ..with JSON from a file in S3.
+
+    This assumes that the file has already been uploaded to your Phoenix project's S3 bucket
+    under the 'cloudformation' folder of the bucket.
+
+    This is similar to the CloudFormation Transform AWS::Include macro, but less limiting
+    because "AWS::Include" can't be used form within certain CloudFormation intrinsic functions.
+```
+
+Related Files:
+```
+lambda/macro/lambda_function.py
+template-ssm-globals-macro.json
+deploy-ssm-globals-macro.sh
+```
 
 ### password_generator
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> that generates, encrypts, and stores RDS or Aurora instance MasterUser passwords in SSM parameter store.
+
+Optionally retrieves passwords and returns to a Cloudformation stack. However, this is not recommended as it would expose the
+password in the CloudFormation logs. It's better to have the application query SSM parameter store instead.
+
+Related Files:
+```
+lambda/password_generator/lambda_function.py
+deploy-dev-database.sh
+template-database.json
+buildspec.yml
+```
 
 ### post_pullrequests
+Handles the final stages of the pull request pipeline, after all tests pass and the ECS container is deployed.
+
+The function is called from the CodePipeline service during the final action of a Pull Request Pipeline. Note that
+this function is only called if a pull request environment is deployed to.
+
+The Lambda function does the following:
+1. Receives a CodePipeline event object.
+2. Extracts the ECS URL and Git Commit SHA1 from the CodePipeline event object.
+3. Generates the below request body to send to GitHub:
+   ```
+   View deployed container (<a href={ecr-url}>{ecr-url}</a>) @ commit {git-commit-sha1}
+   ```
+4. Sends the request via the GitHub API to the pull request associated with pipeline.
+   
+Related Files:
+```
+lambda/post_pullrequests/lambda_function.py
+deploy-github-webhook-pull-request.sh
+pull_request_codebuild.py
+template-github-webhook-pull-request-params.json
+```
 
 ### projects
+This is a Lambda function used for testing purposes.
+
+This function can be called by invoking the "/projects" API gateway endpoint within the API Gateway console.
+The projects function demonstrates how to write up a Lambda function to API Gateway. It can be deleted as long as all
+references to this file are deleted as well (see Related Files below).
+
+Related Files:
+```
+lambda/project/lambda_function.py
+template-api.json
+template-lambda.json
+deploy-dev-lambda.sh
+buildspec.yml
+```
 
 ### proxy
+A bare bones Lambda proxy that does the following:
+
+1. Receives an HTTP request from API Gateway.
+2. Forwards the HTTP request to another server.
+3. Returns the HTTP response back to API Gateway.
+
+The reason Lambda proxy functions are useful it because API Gateway can forward requests to Lambda functions
+that are deployed in a VPC. These Lambda functions can then forward the request to other resources in the VPC.
+
+API Gateway can forward request to public IP address, but not to private IP's associated with a VPC resources. The workaround
+is to forward the requests to a VPC Lambda, which can then proxy the request to a private IP.
+
+Related Files:
+```
+lambda/proxy/lambda_function.py
+deploy-dev-lambda.sh
+template-lambda.json
+buildspec.yml
+```
 
 ### pull_request_webhook
+Handles <a href="https://developer.github.com/v3/activity/events/types/#pullrequestevent">GitHub pull request events</a> from GitHub.
+
+This is probably the most important Lambda function within Phoenix since it orchestrates pull request pipelines.
+This function creates, updates, and deletes pull request pipelines upon receiving GitHub pull request events
+from GitHub. This function depends on [create_pull_request_webhook](#create_pull_request_webhook) having already
+been deployed.
+
+After [create_pull_request_webhook](#create_pull_request_webhook) creates a single webhook to handle all pull
+request events from GitHub, these pull request events will later be consumed by yet another lambda function (this one, 
+[pull_request_webhook](#pull_request_webhook)). The "pull_request_webhook" function sits behind API Gateway and processes
+the pull request event by creating, updating, or deleting a pull request pipeline. If a pull request is deleted,
+the pull request pipeline as well as all AWS resources deployed in the pipeline (EC2 instances, ECS clusters, etc.)
+are deleted as well.
+
+Related Files:
+```
+lambda/pull_request_webhook/lambda_function.py
+deploy-github-webhook-pull-request.sh
+template-github-webhook-pull-request-params.json
+template-github-webhook.json
+```
 
 ### release_webhook
+Handles <a href="https://developer.github.com/v3/activity/events/types/#pushevent">GitHub push events</a> associated with release branches from GitHub.
+
+This function depends on [create_release_webhook](#create_release_webhook) having already been deployed.
+
+A release branch is any branch matching the pattern "release-\d{8}$". So, a release on December 15th 2018 would have a git branch like "release-20181215" and a separate release pipeline for every release environment in your [template-ssm-globals-macro.json](#template-ssm-globals-macrojson) file.
+
+To create a release environment, do the following:
+1. Create the [release_webhook](#create_release_webhook) if it already hasn't been created.
+2. Create and checkout a new git branch locally with a branch name matching the pattern "release-\d{8}$":
+    * You can use 8 digits for today's date in YYYYMMDD format.
+3. Provide a named environment like "staging" in the "ReleaseEnvironments" parameter of the
+[template-ssm-globals-macro.json](#template-ssm-globals-macrojson) file.
+    * A comma delimted list for multiple release environments is allowed.
+4. Update the "ssm-globals-macro" stack and wait for the stack to complete.
+```
+    ./deploy-ssm-globals-macro.sh update
+```
+5. Create CloudFormation parameter files for your new release environment.
+    * See [generate_environment_params.py](#generate_environment_paramspy) for details.
+```
+    python generate_environment_params.py staging
+```
+6. Git commit these changes in the release branch and push the branch to github.
+7. Open AWS CodePipeline and view one or pipelines pertaining to your release environments.
+
+Notes on release environments:
+* You can have many release pipelines (each associated with a separate, isolated environment)
+* Each environment has its own EC2 instances, security groups, lambda functions, URL's, etc.
+* All release pipelines listen to the same release branch, so you should try to have only one release branch at a time.
+* Deleting a release branch will delete all release pipelines, but will not delete the release environment's AWS resources.
+* Creating a new release branch and pushing changes to it will do the following:
+    * Create new release pipelines, one for each release environment.
+    * Create or update all release environments.
+    * Any existing release environments associated with other release branchs will be overwritten.
+* To delete a release environment, execute the [destroy microservice](#deploy-microservice-cleanupsh) CodeBuild job
+  for the release environment in question.
+    
+Related Files:
+```
+lambda/release_webhook/lambda_function.py
+deploy-github-webhook-release.sh
+template-github-webhook-release-params.json
+template-github-webhook.json
+```
 
 ### ssm_secret
+Creates, updates, and deletes **secret** SSM parameters in parameter store.
+
+**warning** these secrets are deleted upon stack deletion. Only used these secrets for things like GitHub webhook
+tokens that can be easily replaced. In fact, GitHub webhook tokens are currently all that this function is used for.
+
+GitHub webhooks required a shared secret between the sender (GitHub) and the receiver (Lambda) to authenticate using HMAC auth. This shared secret is generated by this "ssm_secret" lambda function and made available at the following points:
+1. At the time the webhook is created ([template-github-webhook.json](#template-github-webhookjson))
+2. At the time the webhook event is received/handled by Lambda:
+    * ([pull_request_webhook](#pull_request_webhook)))
+    * ([release_webhook](#release_webhook)))
+
+If you look at [template-github-webhook.json](#template-github-webhookjson) you will see that this Lambda function is
+used to create a CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> called "CustomResourceGitHubSecret". This custom resource
+invokes the lambda function which generates a 100 character secret that is persisted to SSM parameter store. This
+same secret is used by both the 
+
+Related Files:
+```
+lambda/ssm_secret/lambda_function.py
+deploy-ssm-globals-macro.sh
+template-ssm-globals-macro.json
+template-github-webhook-release-params.json
+template-github-webhook-pull-request-params.json
+template-github-webhook.json
+```
+
+
+## Non-Python Lambda Functions
+Whenever possible, try to use Python3.6 for all Lambda functions within Phoenix, as well as for all local Python scripts.
+Sometimes this isn't possible since off-the-shelf Lambda functions can be leveraged to solve common problems.
 
 ### vpc_proxy
+Proxies HTTP requests from API Gateway to resources in a VPC.
+
+To isolate critical parts of their app’s architecture, we often rely on Virtual Private Cloud (VPC) and private subnets. Today, Amazon API Gateway cannot directly integrate with endpoints that live within a VPC without internet access. However, it is possible to proxy calls to your VPC endpoints using AWS Lambda functions.
+
+This is exactly how to function is used. This function is nearly identical to the one documented in the <a href="https://aws.amazon.com/blogs/compute/using-api-gateway-with-vpc-endpoints-via-aws-lambda/">Using API Gateway with VPC endpoints via AWS Lambda</a> blog post.
 
 
+Related Files:
+```
+lambda/vpc_proxy/lambda_function.py
+deploy-dev-lambda.sh
+template-lambda.json
+lambda/api_internals/lambda_function.py
+template-api.json
+template-api-deployment.json
+```
 
 ## Example Dockerfile
+A basic Dockerfile used for testing within Phoenix.
 
-
-
-#### CloudFormation Stack Imports
-You can use AWS CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-importvalue.html"> Stack Imports</a> to import physical ID's and ARN's from the VPC stacks. Below is an example of
-an environment aware template ("template-ecs-task.json") that imports the correct subnet ID's for for a given environment (dev, testing, prod) and a given subnet configuration (public or private):
+You can find where this image is build in the main pipeline's [buildspec.yml](#buildspecyml) file:
 ```
-"Parameters": {
-    "VPCPrefix": {
-      "Description": "The 'export' name prefix of the cloudformation stack for the VPC used by this service.",
-      "Type": "String"
-    },
-    "PublicOrPrivate": {
-      "Description": "The type of subnets to place the ELB for this service in.",
-      "AllowedValues": ["Public", "Private"],
-      "Default": "Public",
-      "Type": "String"
-    },
-    ...
-  },
-  "Resources": {
-   ...
-            "Subnets" : [
-              {"Fn::ImportValue": { "Fn::Sub": [
-                "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ1", {
-                  "VPCPrefix": {"Ref": "VPCPrefix"},
-                  "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
-                }]
-              }},
-              {"Fn::ImportValue": { "Fn::Sub": [
-                "${VPCPrefix}-vpc-${PublicOrPrivate}SubnetAZ2", {
-                  "VPCPrefix": {"Ref": "VPCPrefix"},
-                  "PublicOrPrivate": {"Ref": "PublicOrPrivate"}
-                }]
-              }}
-            ]
-    ...
-    }
+    docker build -t $MAIN_REPOSITORY_URI:$IMAGE_TAG $CODEBUILD_SRC_DIR/Phoenix/ecs
 ```
 
-This may evaluate to:
+For dev cloud deployments, you can find where this test image is build in the [deploy-dev-ecs-task-main.sh](#deploy-dev-ecs-task-mainsh) file.
 ```
-subnets: [ 'subnet-02e14d8b95a3b75f3', 'subnet-0e070b582f9c4add2']
+    docker build -t $ECR_REPO $2
+```
+
+I decided to use a Python Flask app for the example/test image because it's extremely lightweight. This Dockerfile
+can be replace with anything, but make sure the exposed port in the ECS main task parameter file matches the port
+of your app.
+
+Related Files:
+```
+ecs/app.py
+ecs/Dockerfile
+ecs/requirements.txt
+buildspec.yml
+deploy-dev-ecs-task-main.sh
+template-ecs-task-main-params-*.json
+template-ecs-task.json
 ```
 
 
-## Phoenix Pipelines
-* A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral.
-* Each pipeline has a source stage, which is usually triggered from a Git repository webhook.
-* There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments.
-* Both source code and artifacts can be scanned for security and/or static analysis.
-* If the build, testing, and linting stages pass, the artifacts (lambda functions, docker images, etc.) are deployed into a testing environment.
-* After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice.
-* All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments.
-* Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources.
-* Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
-
-### GitHub Pull Request
-![Pipeline1](/Phoenix/images/pull-request-pipeline-4.png)
-
-### GitHub Pull Request Pipeline
-![Pipeline1](/Phoenix/images/pull-request-pipeline-1.png)
-![Pipeline1](/Phoenix/images/pull-request-pipeline-2.png)
-![Pipeline1](/Phoenix/images/pull-request-pipeline-3.png)
-
-
-### Master Branch Pipeline
-![Pipeline](/Phoenix/images/pipeline_1a.png)
-![Pipeline](/Phoenix/images/pipeline_1b.png)
-
-
-## One time configuration of your AWS account to work with Phoenix
-
-### Configure the VPC's
-* These steps are only required for new Phoenix projects in NEW AWS accounts.
-* Add appropriate CIDR ranges in the template-vpc-params-dev.json, template-vpc-params-testing.json, and template-vpc-params-prod.json files.
-* Ensure that all CIDR IP ranges are not currently used by any other Phoenix projects or other networks.
-* Deploy the VPC's
-```
-$ cd Phoenix
-$ ./deploy-vpc.sh create
-```
-
-<img src="/Phoenix/images/vpc-1.png"/>
-
-### Save the API docs user agent token in SSM parameter store for the account
-* These steps are only required for new Phoenix projects in NEW AWS accounts.
-* This is a secret token used to verify HTTP requests made to API documents served from the S3 bucket.
-* This token can be shared by all Phoenix projects in a single AWS account.
-* This token can saved in a browser using the Chrome browser plugin to add to the 'user-agent' header in requests.
-* Usage of this token in the browser is optional, but it can be useful when accessing API docs from over VPN.
-
-```
-From you mac:
-$ pwgen 32 -1
-```
-
-Save the above generated token in the '/global/api-docs-user-agent' SSM parameter store parameter with
-the descripte "UserAgent used to authenticate with S3 static websites for API Documentation." It this key already exists
-in SSM parameter store for the AWS account, you don't need to do anything.
-
-
-### AWS CodeBuild GitHub OAuth authorization
-* These steps are only required for new Phoenix projects in NEW AWS accounts.
-* When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
-* We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
-* Sign out of your OneLogin account.
-* Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
-* Once logged in, click on the GitHub app within OneLogin.
-* At the GitHub login screen, use the username and password specified in lastpass.
-* Verify that you are logged into GitHub as the mosaic-codebuild user and not your mosaic github user.
-* In the new AWS account, open the AWS CodeBuild console and a new job called "test".
-* Create a simple CodeBuild job using GitHub as the source, and click on the "Connect to GitHub" button.
-* A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
-* Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
-
-<img src="/Phoenix/images/codebuild-github-1.png" width="500px"/>
-<img src="/Phoenix/images/codebuild-github-2.png" width="300px"/>
-<img src="/Phoenix/images/codebuild-github-3.png" width="300px"/>
-
-## Initial Phoenix Project Setup
-### Configuring the project config file
-* All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
-
-- Create DNS hosted zone.
-    - Copy the ID of this hosted into into the HostedZoneId param of the project config file laster.
-- Create NS record in main account
-- Create GitHub repo
-    - Add the DevOps+IT group and mosaic code build groups as admins to this repo.
-- Update template-ssm-globals-macro-params.json file
-- Run ‘pwgen 32 -1’ and save token in the ‘/global/api-docs-user-agent’ SSM parameter.
-- In the AWS CodeBuild console
-    - Make sure you are logged into GitHub as the mosaic-codebuild user
-    - Create a CodeBuild project called ‘test’
-    - In the Source section, link to GitHub using OAuth.
-    - Click the dialog box that pops up. You only need to do this once for the AWS account.
-- Copy the mosaic-codebuild GitHub access token from lastpass
-    - You will pass this token into the ‘./deploy-microservice-init.sh’ shell script.
-- Run the ‘/deploy-microservice-init.sh’ shell script with the mosaic-codebuild access token
-    - ./deploy-microservice-init.sh {token}
-- After all stacks from the microservice-init script have been created, push to that master branch of the repo
-- $ git push origin master.
