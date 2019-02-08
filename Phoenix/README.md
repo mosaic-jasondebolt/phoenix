@@ -16,6 +16,7 @@
         * [AWS CodeBuild GitHub OAuth authorization](#aws-codebuild-github-oauth-authorization)
         * [Create the base docker images for the Phoenix projects in your AWS account](#create-the-base-docker-images-for-the-phoenix-projects-in-your-aws-account)
     * [Creating a Phoenix project](#creating-a-phoenix-project)
+        * [Create a repo in github](#create-a-repo-in-github)
         * [Configuring the project config file](#configuring-the-project-config-file)
         * [Initializing the Microservice](#initializing-the-microservice)
 * [Why No Nested Stacks](#why-no-nested-stacks)
@@ -178,16 +179,6 @@ A Phoenix microservice includes one or more CI/CD pipelines, some permanent, som
 
 ### Preparing an AWS account to work with Phoenix
 
-#### Create a repo in github 
-1. Create a blank repo in GitHub with an all lowercase repo name.
-    * The name of the repo should be short and lowercase, ideally having the same name as the project name.
-2. Make sure to add this repo under the solmosaic organization
-3. Add both the "codebuild-users" and "devops-and-it" groups as admin users.
-4. Clone the this repo and change the remote path
-    * git remote -v
-    * git remote remove origin
-    * git remote add origin git@github.com:/solmosaic/{your-repo}.git
-
 #### Configure the VPC's
 * These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
 * Add appropriate CIDR ranges in the template-vpc-params-dev.json, template-vpc-params-testing.json, and template-vpc-params-prod.json files.
@@ -267,6 +258,16 @@ After cloning "phoenix-docker" and following the README, you should have a set o
 Where 111111111111 is your AWS account ID.
 
 ### Creating a Phoenix project
+
+#### Create a repo in github 
+1. Create a blank repo in GitHub with an all lowercase repo name.
+    * The name of the repo should be short and lowercase, ideally having the same name as the project name.
+2. Make sure to add this repo under the solmosaic organization
+3. Add both the "codebuild-users" and "devops-and-it" groups as admin users.
+4. Clone the this repo and change the remote path
+    * git remote -v
+    * git remote remove origin
+    * git remote add origin git@github.com:/solmosaic/{your-repo}.git
 
 #### Configuring the project config file
 All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
