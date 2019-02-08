@@ -1266,6 +1266,31 @@ lambda/password_generator/lambda_function.py
 ```
 
 #### deploy-dev-lambda.sh
+Deploys developer cloud specific Lambda functions. Each developer will have their own set of these functions.
+
+You can read more about these individual functions here:
+[vpc_proxy])(#vpc_proxy)
+[proxy](#proxy)
+[alb_listener_rule](#alb_listener_rule)
+[projects](#projects)
+
+Usage:
+```
+    ./deploy-dev-lambda.sh create
+    ./deploy-dev-lambda.sh update
+```
+
+Related Files:
+```
+deploy-dev-lambda.sh
+template-lambda-params-dev.json
+template-lambda.json
+lambda/vpc_proxy/lambda_function.js
+lambda/proxy/lambda_function.py
+lambda/alb_listener_rule/lambda_function.py
+lambda/projects/lambda_function.py
+```
+
 
 #### deploy-dev-ssm-environments.sh
 
