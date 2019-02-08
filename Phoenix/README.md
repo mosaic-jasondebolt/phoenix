@@ -348,8 +348,7 @@ Lastly, we need to invoke a single script will will bootstrap our Phoenix micros
 Where {token} can be found in LastPass under "mosaic-codebuild personal access token". This token is required
 mostly to create webhook and make API calls into GitHub.
 
-**IMPORTANT**: Immediately after invoking the above script, open the <a href="https://console.aws.amazon.com/acm">AWS ACM console</a> and manually approve the adding of CNAME records for your domain. If you forget to do this, the above
-script will hang on the "./deploy-acm-certificates.sh create" call.
+**IMPORTANT**: Immediately after invoking the above script, open the <a href="https://console.aws.amazon.com/acm">AWS ACM console</a> and manually approve the adding of CNAME records for your domain. Click on the little expansion arrows, 2 levels down. **If you forget to do this, the above script will hang on the "./deploy-acm-certificates.sh create" call.**
 
 The above script will call a series of other scripts to create your microserivice. You should monitor the following
 consoles while these scripts are running:
