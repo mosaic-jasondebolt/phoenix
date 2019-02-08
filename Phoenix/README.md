@@ -132,12 +132,12 @@
 
 
 ## What is Phoenix
-It is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform.
+It is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform created by DevOps Engineer Jason DeBolt in 2018.
 
 It is a subdirectory in which all of your infrastructure code lives, including admin scripts for manipulating
 everything from developer clouds, pipelines, releases, and deployments. 
 
-It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. It was created by Jason DeBolt, a Senior DevOps Engineer at Mosaic, in 2018.
+It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. 
 
 A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments.
 
