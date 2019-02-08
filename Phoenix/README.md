@@ -1817,7 +1817,7 @@ buildspec.yml
 ```
 
 ### macro
-A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">Lambda Macro function</a> that reads all SSM parameters into memory and renders CloudFormation templates dynamically. This macro is used by most Phoenix CloudFormation templates. The macro solves the following problems:
+A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-macros.html">Lambda Macro function</a> that adds custom function to CloudFormation templates, such as reading all SSM parameters into memory and rendering the values into CloudFormation templates dynamically, or copying JSON files from S3 and rendering them into CloudFormation templates. The "PhoenixSSM" custom function within the macro is used by most Phoenix CloudFormation templates. The function solves the following problems:
 
 1. Provides centralize storage of global and environment specific SSM parameters across a small known set of files.
 2. Avoids duplication of "template-ssm-globals-macro-params.json" params accross dozens of Cloudformation parameter files.
