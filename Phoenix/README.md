@@ -1322,9 +1322,11 @@ To add a new config value and make it available to another CloudFormation stack,
 ```
 {"PhoenixSSM": "/microservice/{ProjectName}/{Environment}/{your-parameter-key-name"}
 ```
-**Take a look at the "Outputs" section near the bottom of the "template-lambda.json" template for how to inject**
+**Take a look at the "Outputs" section near the bottom of the "template-lambda.json" template for an example**
 
-The "PhoenixSSM" function isn't really a function, it's just a string that tells the Phoenix [macro](#macro) that this is a special value that must be replaced by an SSM parameter lookup.
+The "PhoenixSSM" function isn't really a function, it's just a string that tells the Phoenix [macro](#macro) that this is a special value that must be replaced by an SSM parameter lookup. The [macro](#macro) replaces {ProjectName} with your
+project's name and replaces {Environment} with the "Environment" parameter passed into your template before querying
+SSM parameter store and replacing with value.
 
 Usage:
 ```
@@ -1338,8 +1340,6 @@ deploy-dev-ssm-environments.sh
 template-ssm-environments-dev.json
 template-ssm-environments.json
 ```
-
-
 
 ## CodeBuild buildspec.yml Files
 A <a href="https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html">build spec</a> is a collection of build commands and related settings, in YAML format, that AWS CodeBuild uses to run a build. You can include a build spec as part of the source code or you can define a build spec when you create a build project. For information about how a build spec works, see <a href="https://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html#concepts-how-it-works">How AWS CodeBuild Works</a>.
