@@ -270,6 +270,8 @@ Where 111111111111 is your AWS account ID.
     * git remote add origin git@github.com:/solmosaic/{your-repo}.git
 
 #### Configuring the project config file
+Make sure you have followed all steps in [Preparing an AWS account to work with Phoenix](#preparing-an-aws-account-to-work-with-phoenix) before continuing these next few sections.
+
 All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
 The project wide configuration values include, but aren't limited to, the following:
 
