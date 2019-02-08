@@ -16,6 +16,7 @@
         * [Create the base docker images for the Phoenix projects in your AWS account](#create-the-base-docker-images-for-the-phoenix-projects-in-your-aws-account)
     * [Creating a Phoenix project](#creating-a-phoenix-project)
         * [Configuring the project config file](#configuring-the-project-config-file)
+        * [Initializing the Microservice](#Initializing the Microservice)
 * [Why No Nested Stacks](#why-no-nested-stacks)
 * [CloudFormation JSON Template Files](#cloudformation-json-template-files)
     * [Account Specific Stacks](#account-specific-stacks)
@@ -253,26 +254,107 @@ Where 111111111111 is your AWS account ID.
 ### Creating a Phoenix project
 
 #### Configuring the project config file
-* All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
+All Phoenix projects have a file called "template-ssm-globals-macro-params.json" used for project wide configuration.
+The project wide configuration values include, but aren't limited to, the following:
 
-- Create DNS hosted zone.
-    - Copy the ID of this hosted into into the HostedZoneId param of the project config file laster.
-- Create NS record in main account
-- Create GitHub repo
-    - Add the DevOps+IT group and mosaic code build groups as admins to this repo.
-- Update template-ssm-globals-macro-params.json file
-- Run ‘pwgen 32 -1’ and save token in the ‘/global/api-docs-user-agent’ SSM parameter.
-- In the AWS CodeBuild console
-    - Make sure you are logged into GitHub as the mosaic-codebuild user
-    - Create a CodeBuild project called ‘test’
-    - In the Source section, link to GitHub using OAuth.
-    - Click the dialog box that pops up. You only need to do this once for the AWS account.
-- Copy the mosaic-codebuild GitHub access token from lastpass
-    - You will pass this token into the ‘./deploy-microservice-init.sh’ shell script.
-- Run the ‘/deploy-microservice-init.sh’ shell script with the mosaic-codebuild access token
-    - ./deploy-microservice-init.sh {token}
-- After all stacks from the microservice-init script have been created, push to that master branch of the repo
-- $ git push origin master.
+* Organization name
+    * This would typically be the name of the company/organization associated with the repo.
+* Project name
+    * The name of your project.
+* Git repo name
+    * The name of your git repository in GitHub.
+* Git root project branch
+    * The name of the git branch used to deploy to production
+* Git current project branch
+    * This is a deprecated field that can just be the same as the root project branch.
+* GitHub organization
+    * The name of your GitHub Organization
+* Domain
+    * The name of your domain (use "api.your-domain.com" for API's, and "your-domain.com" for applications)
+    * You should create a public hosted zone for this domain or subdomain (see the Hosted Zone ID param)
+* Hosted Zone ID
+    * You **must manually create a public hosted zone** in the AWS Route53 console and enter this ID here.
+* Key pair name
+    * You must manually create an EC2 SSH key and enter the name of the key here (use "us-east-1-{your-aws-account-id}"
+* Notification email
+    * An email to send build notification to and other alerts
+* IAM Role
+    * You must manually create an IAM role with admin permissions which includes secretsmanager.amazonaws.com, cloudformation.amazonaws.com, codepipeline.amazonaws.com, codebuild.amazonaws.com, and lambda.amazonaws.com in the trust policy. This will get you started, but should obviously be changed if strong security is a concern.
+* Code Build Docker Image
+    * Enter the ID, including the image tag, of the ECR image you are using for your AWS CodeBuild jobs.
+    * See [Create the base docker images for the Phoenix projects in your AWS account](#create-the-base-docker-images-for-the-phoenix-projects-in-your-aws-account).
+* NodeJS Build Docker Image
+    * For build that require NodeJS, enter the ID, including the image tag, of the ECR image you are using. You can also just use the same ID as the code build docker image above.
+    * See [Create the base docker images for the Phoenix projects in your AWS account](#create-the-base-docker-images-for-the-phoenix-projects-in-your-aws-account).
+* Git URL
+    * This can just be "https://github.com"
+* Pipeline Environments
+    * A comma delimited list of environment names you wish to deploy to in the main pipeline.
+* Release Environments
+    * A comma delimited list of release environment names you wish to deploy to in all release pipelines.
+* Version
+    * The VERSION_ID value in this field will usually be replace with a timestamp from one of the deployment shell scripts.
+
+The config should look something like this:
+```
+  {
+  "Parameters": {
+    "OrganizationName": "example",
+    "ProjectName": "foo",
+    "GitRepoName": "foo",
+    "GitRootProjectBranch": "master",
+    "GitCurrentProjectBranch": "master",
+    "GitHubOrganization": "example",
+    "Domain": "foo.example.com",
+    "HostedZoneId": "Z1Q365PZIUEHGE",
+    "KeyPairName": "us-east-1-111111111111",
+    "ProjectDescription": "The Example Foo project.",
+    "NotificationEmail": "foo-engineering@example.com",
+    "IAMRole": "arn:aws:iam::111111111111:role/OriginationsAdmins",
+    "CodeBuildDockerImage": "111111111111.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.1",
+    "NodeJSBuildDockerImage": "111111111111.dkr.ecr.us-east-1.amazonaws.com/nodejs:10.1.0",
+    "GitURL": "https://github.com",
+    "PipelineEnvironments": "testing, e2e, prod",
+    "ReleaseEnvironments": "",
+    "Version": "VERSION_ID"
+  }
+}
+```
+- Where 111111111111 is your AWS account ID.
+- You can keep "VERSION_ID" as is.
+
+#### Initializing the Microservice
+Lastly, we need to invoke a single script will will bootstrap our Phoenix microservice.
+
+```
+    ./deploy-microservice-init.sh {token}
+```
+Where {token} can be found in LastPass under "mosaic-codebuild personal access token". This token is required
+mostly to create webhook and make API calls into GitHub.
+
+**IMPORTANT**: Immediately after invoking the above script, open the <a href="https://console.aws.amazon.com/acm">AWS ACM console</a> and manually approve the adding of CNAME records for your domain. If you forget to do this, the above
+script will hang on the "./deploy-acm-certificates.sh create" call.
+
+The above script will call a series of other scripts to create your microserivice. You should monitor the following
+consoles while these scripts are running:
+1. <a href="https://console.aws.amazon.com/cloudformation">CloudFormation Console</a>
+2. <a href="https://console.aws.amazon.com/codepipeline">CodePipeline Console</a>
+3. <a href="https://console.aws.amazon.com/acm">AWS Certificate Manager Console</a> --> You must approve the CNAME's.
+
+All of these global stacks are idempotent, so if anything fails you can safely delete, fix, and retry.
+
+After all stacks from the microservice-init script have been created, push to that master branch of the repo
+```
+$ git push origin master
+```
+
+Open the <a href="https://console.aws.amazon.com/codepipeline">CodePipeline Console</a> to view the git revision
+propagating down the pipeline. 
+
+Additional things to consider:
+* Do you want to create any NS records in a different AWS account that point to your subdomain's 4 NS records?
+* Do you need to grant other teams access to your GitHub repo?
+
 
 ## Why no Nested Stacks?
 At the time Phoenix was first developed, Cloudformation Nested Stacks had several limitations. These limitations included
