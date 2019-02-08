@@ -135,9 +135,9 @@
 It is a <a href="https://aws.amazon.com/microservices/">microservice</a> platform originally created by Jason DeBolt.
 
 It is a subdirectory in which all of your infrastructure code lives, including admin scripts for manipulating
-everything from developer clouds, pipelines, releases, and deployments. 
+everything from developer clouds, pipelines, releases, and deployments.
 
-It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. 
+It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation.
 
 It ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, advanced GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific cloud environments.
 
@@ -169,7 +169,7 @@ Working with Phoenix without strong knowledge of CloudFormation is an exercise i
 2. Advanced CloudFormation (pick one from below)
     * <a href="https://linuxacademy.com/amazon-web-services/training/course/name/aws-cloudformation-deep-dive"> Linux Academy - AWS CloudFormation Deep Dive</a>
     * <a href="https://acloud.guru/learn/aws-advanced-cloudformation">A Cloud Guru - AWS Advanced CloudFormation</a>
- 
+
 ## Phoenix Pipelines
 A Phoenix microservice includes one or more CI/CD pipelines, some permanent, some ephemeral. Each pipeline has a source stage, which is usually triggered from a Git repository webhook. There is also a build stage, which will build a set of immutable artifacts that will be later deployed to one or more environments. Both source code and artifacts can be scanned for security and/or static analysis. If the build, testing, and linting stages pass, the artifacts (lambda functions, docker images, etc.) are deployed into a testing environment. After the testing environment is deployed to, a set of integration tests and load tests may further test your microservice. All environments contain there own databases, lambda functions, ECS clusters, dynamoDB tables, SSM parameters, and API Gateway deployments. Finally, the artifacts are deployed to a production environment using blue/green deployment strategies for all AWS resources. Optionally, pull request specific ephemeral pipelines can be added if your team requires these.
 
@@ -204,22 +204,23 @@ the descripte "UserAgent used to authenticate with S3 static websites for API Do
 in SSM parameter store for the AWS account, you don't need to do anything.
 
 #### AWS CodeBuild GitHub OAuth authorization
+- The following steps assume use of LastPass and OneLogin for credentials storage and auth.
 * These steps are only required once per AWS account (once for all Phoenix projects in an AWS account).
 * When using AWS CodeBuild with GitHub webhook integrations, there is a one time setup involving Oauth tokens for new AWS accounts.
 * We will need to use a shared admin GitHub account to authorize these tokens rather than use user specific GitHub accounts.
 1. Sign out of your GitHub account.
 2. Sign out of your OneLogin account.
-3. Sign back into OneLogin as the "devops+mosaic-codebuild@joinmosaic.com" user. See lastpass for login credentials.
+3. Sign back into OneLogin as the your "user@yourdomain.com" user.
 4. Once logged in, click on the GitHub app within OneLogin.
-5. At the GitHub login screen, use the username and password specified in lastpass.
-6. Verify that you are logged into GitHub as the mosaic-codebuild user and not your mosaic github user.
-7. In the new AWS account, open the AWS CodeBuild console and a new job called "test".
+5. At the GitHub login screen, use the username and password specified in LastPass.
+6. Verify that you are logged into GitHub as the the user who will issue access tokens.
+7. In the new AWS account, open the AWS CodeBuild console as the user who will issue access tokens.
 8. Create a simple CodeBuild job using GitHub as the source, and click on the "Connect to GitHub" button.
 9. A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
 10. Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
-11. Log out of the mosaic-codebuild GitHub account.
-12. Log out of the mosaic-codebuild OneLogin account.
-13. Log back into your OneLogin and GitHub accounts. 
+11. Log out of the "user@yourdomain.com" GitHub account.
+12. Log out of the "user@yourdomain.com" OneLogin account.
+13. Log back into your OneLogin and GitHub accounts.
 
 #### Create the base docker images for the Phoenix projects in your AWS account
 It's a great idea to <a href="https://12factor.net/dependencies">Explicitly declare and isolate dependencies</a> by using
@@ -228,7 +229,7 @@ immutable Docker images for build nodes and application nodes.
 Phoenix uses a sister repo called "phoenix-docker" that includes a full CI/CD solution for continuously building and deploying entire Docker image hierarchies.
 
 You can clone the "phoenix-docker" repo here:
-https://github.com/solmosaic/phoenix-docker
+https://github.com/solarmosaic/phoenix-docker
 
 The CloudFormation project in the "phoenix-docker" repo does the following:
 1. Creates a GitHub webhook.
@@ -257,15 +258,15 @@ Where 111111111111 is your AWS account ID.
 
 ### Creating a Phoenix project
 
-#### Create a repo in github 
+#### Create a repo in github
 1. Create a blank repo in GitHub with an all lowercase repo name.
     * The name of the repo should be short and lowercase, ideally having the same name as the project name.
-2. Make sure to add this repo under the solmosaic organization
+2. Make sure to add this repo under the correct organization
 3. Add both the "codebuild-users" and "devops-and-it" groups as admin users.
 4. Clone the this repo and change the remote path
     * git remote -v
     * git remote remove origin
-    * git remote add origin git@github.com:/solmosaic/{your-repo}.git
+    * git remote add origin git@github.com:/{your-organization}/{your-repo}.git
 
 #### Configuring the project config file
 Make sure you have followed all steps in [Preparing an AWS account to work with Phoenix](#preparing-an-aws-account-to-work-with-phoenix) before continuing these next few sections.
@@ -345,8 +346,6 @@ Lastly, we need to invoke a single script will will bootstrap our Phoenix micros
 ```
     ./deploy-microservice-init.sh {token}
 ```
-Where {token} can be found in LastPass under "mosaic-codebuild personal access token". This token is required
-mostly to create webhook and make API calls into GitHub.
 
 **IMPORTANT**: Immediately after invoking the above script, open the <a href="https://console.aws.amazon.com/acm">AWS ACM console</a> and manually approve the adding of CNAME records for your domain. Click on the little expansion arrows, 2 levels down. **If you forget to do this, the above script will hang on the "./deploy-acm-certificates.sh create" call.**
 
@@ -364,7 +363,7 @@ $ git push origin master
 ```
 
 Open the <a href="https://console.aws.amazon.com/codepipeline">CodePipeline Console</a> to view the git revision
-propagating down the pipeline. 
+propagating down the pipeline.
 
 Additional things to consider:
 * Do you want to create any NS records in a different AWS account that point to your subdomain's 4 NS records?
@@ -1295,7 +1294,7 @@ Befor executing this script (or any developer script), you must complete a one-t
 ```
     cd Phoenix
     python generate_dev_params.py dev{your-lowercase-firstname}
-    
+
     For example, if you username is john.doe:
       python generate_dev_params.py devjohn
 ```
@@ -1490,7 +1489,7 @@ fail, the pipeline stops.
 "Environment Specific" CodeBuild jobs run in a specific deployment stage (testing, ec2, prod) of a CodePipeline. These CodeBuild jobs often require infrastructure like RDS databases to be up before the job starts. For example, "buildspec-rds-migration.yml" runs a database migration for a specific database deployed in a given environment. If any of these jobs
 fail, the deployment stage is failed in that environment.
 
-"Manually Invoked" CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
+"Manually Invoked" CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console.
 
 ### Build Stage CodeBuild jobs
 These CodeBuild jobs run in the "Build" stage of a code pipeline, before any environments are deployed to. These jobs, build artifacts, run unit tests against code, and run static analysis or lint checks on the code. If any of these jobs
@@ -1556,7 +1555,7 @@ Generates an publishes environment specific API documentation for your API.
 4. Invalidates the CloudFormation cache to ensure the latest documentation is visible.
 
 #### buildspec-integration-test.yml
-This is a placeholder file for running integration tests against a deployed environment. 
+This is a placeholder file for running integration tests against a deployed environment.
 
 #### buildspec-rds-migration.yml
 This is a placeholder file for running a database migration within a deployment stage.
@@ -1566,7 +1565,7 @@ This is a post production deployment hook to do anything you want. Currently it'
 protection on production Cloudformation stacks.
 
 ###  Manually Invoked CodeBuild jobs
-CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console. 
+CodeBuild jobs are jobs that are not invoked in a CodePipeline, but are invoked manually by a user from within the CodeBuild console.
 
 #### buildspec-destroy-microservice.yml
 This CodeBuild job can destroy all stacks in one or more deployment environments.
@@ -1602,7 +1601,7 @@ If "codepipeline" is specified, the "temp.json" file would be used in CodePipeli
 ```
     "TemplateConfiguration": "BuildOutput::temp.json",
 ```
- 
+
 ### search_and_replace.py
 Recursively searches and replaces all strings in a given directory for a given file pattern.
 
@@ -1908,7 +1907,7 @@ A CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/U
 inside of a VPC upon stack deletion. There is currently a <a href="https://forums.aws.amazon.com/thread.jspa?messageID=756642">bug</a> where CloudFormation fails to delete lambda functions (functions that are created inside of a VPC) upon stack deletion. As a result, the stack will hang.
 
 Some Lambda functions are deployed into an VPC. When Cloudformation stacks with these functions are deleted, the stack will
-wait up to **45 minutes** for the Elastic Networking Interface (ENI) associated with the Lambdas to be deleted. 
+wait up to **45 minutes** for the Elastic Networking Interface (ENI) associated with the Lambdas to be deleted.
 
 Before I wrote this function, I had to complete the following to delete CloudFormation stacks that had VPC Lambdas:
 1. Find security group id associated with the Lambda function
@@ -2034,7 +2033,7 @@ The Lambda function does the following:
    View deployed container (<a href={ecr-url}>{ecr-url}</a>) @ commit {git-commit-sha1}
    ```
 4. Sends the request via the GitHub API to the pull request associated with pipeline.
-   
+
 Related Files:
 ```
 lambda/post_pullrequests/lambda_function.py
@@ -2089,7 +2088,7 @@ from GitHub. This function depends on [create_pull_request_webhook](#create_pull
 been deployed.
 
 After [create_pull_request_webhook](#create_pull_request_webhook) creates a single webhook to handle all pull
-request events from GitHub, these pull request events will later be consumed by yet another lambda function (this one, 
+request events from GitHub, these pull request events will later be consumed by yet another lambda function (this one,
 [pull_request_webhook](#pull_request_webhook)). The "pull_request_webhook" function sits behind API Gateway and processes
 the pull request event by creating, updating, or deleting a pull request pipeline. If a pull request is deleted,
 the pull request pipeline as well as all AWS resources deployed in the pipeline (EC2 instances, ECS clusters, etc.)
@@ -2140,7 +2139,7 @@ Notes on release environments:
     * Any existing release environments associated with other release branchs will be overwritten.
 * To delete a release environment, execute the [destroy microservice](#deploy-microservice-cleanupsh) CodeBuild job
   for the release environment in question.
-    
+
 Related Files:
 ```
 lambda/release_webhook/lambda_function.py
@@ -2164,7 +2163,7 @@ GitHub webhooks required a shared secret between the sender (GitHub) and the rec
 If you look at [template-github-webhook.json](#template-github-webhookjson) you will see that this Lambda function is
 used to create a CloudFormation <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-custom-resources-lambda.html">Lambda-backed custom resource</a> called "CustomResourceGitHubSecret". This custom resource
 invokes the lambda function which generates a 100 character secret that is persisted to SSM parameter store. This
-same secret is used by both the 
+same secret is used by both the
 
 Related Files:
 ```
@@ -2226,5 +2225,3 @@ deploy-dev-ecs-task-main.sh
 template-ecs-task-main-params-*.json
 template-ecs-task.json
 ```
-
-
