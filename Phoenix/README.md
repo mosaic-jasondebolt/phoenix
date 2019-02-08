@@ -139,9 +139,7 @@ everything from developer clouds, pipelines, releases, and deployments.
 
 It is a collection of tools, templates, and scripts for launching highly available, multi-environment, <a href="https://12factor.net/">Twelve Factor App</a> microservice projects on AWS with advanced support for CI/CD automation. 
 
-A Phoenix project ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific clouds environments.
-
-Phoenix is not a framework and it does not hide anything, which can be overwhelming for those not deeply familiar with AWS and CloudFormation. A good starting point would be to study the "deploy-microservice-init.sh" file, as this is the file used to bootstrap a Phoenix project. When this script is invoked, over 30 CloudFormation stacks are created for your Phoenix project.
+It ships with multi-environment VPC configuration, complex CI/CD pipeline infrastructure, advanced GitHub webhook integration, central storage and propagation of project parameters/variables, and multiple developer specific cloud environments.
 
 Currently, Phoenix is only supported in the **us-east-1** region. This is mostly due to requirements in some AWS services that ACM certificates be created in the us-east-1 region.
 
