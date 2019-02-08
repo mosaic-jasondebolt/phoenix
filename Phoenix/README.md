@@ -4,6 +4,7 @@
 ## Table of Contents
 
 * [What is Phoenix?](#what-is-phoenix)
+* [How do I get started?](#how-do-i-get-started)
 * [Phoenix Overview](#phoenix-overview)
 * [Prerequisites](#prerequisites)
 * [Phoenix Pipelines](#phoenix-pipelines)
