@@ -1900,7 +1900,31 @@ template-api-deployment.json
 ```
 
 ## Example Dockerfile
+A basic Dockerfile used for testing within Phoenix.
 
+You can find where this image is build in the main pipeline's [buildspec.yml](#buildspecyml) file:
+```
+    docker build -t $MAIN_REPOSITORY_URI:$IMAGE_TAG $CODEBUILD_SRC_DIR/Phoenix/ecs
+```
 
+For dev cloud deployments, you can find where this test image is build in the [deploy-dev-ecs-task-main.sh](#deploy-dev-ecs-task-mainsh) file.
+```
+    docker build -t $ECR_REPO $2
+```
+
+I decided to use a Python Flask app for the example/test image because it's extremely lightweight. This Dockerfile
+can be replace with anything, but make sure the exposed port in the ECS main task parameter file matches the port
+of your app.
+
+Related Files:
+```
+ecs/app.py
+ecs/Dockerfile
+ecs/requirements.txt
+buildspec.yml
+deploy-dev-ecs-task-main.sh
+template-ecs-task-main-params-*.json
+template-ecs-task.json
+```
 
 
