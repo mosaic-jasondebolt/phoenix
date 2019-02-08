@@ -215,6 +215,40 @@ in SSM parameter store for the AWS account, you don't need to do anything.
 8. A dialog box will appear where you can authorize "aws-codesuite" to access the GitHub organization.
 9. Now you can allow CloudFormation to automatically create GitHub webhooks associated with this AWS account.
 
+#### Create a docker pipeline for your images
+It's a great idea to <a href="https://12factor.net/dependencies">Explicitly declare and isolate dependencies</a> by using
+immutable Docker images for build nodes and application nodes.
+
+Phoenix uses a sister repo called "phoenix-docker" that includes a full CI/CD solution for continuously building and deploying entire Docker image hierarchies.
+
+You can clone the "phoenix-docker" repo here:
+https://github.com/solmosaic/phoenix-docker
+
+The CloudFormation project in the "phoenix-docker" repo does the following:
+1. Creates a GitHub webhook.
+2. Creates ECR repos for storing families of related docker images.
+3. Creates a CodeBuild job for building and pushing the docker images.
+4. Creates a CodePipeline for orchestration.
+5. Creates IAM roles.
+
+The default Docker image hierarchy provide look like this:
+```
+                               Ubuntu 14.04
+                          /                    \
+                   Java/Openjkd-8        NodeJS/10.1.0
+                    /
+                 Scala
+                 /
+               ScalaBuild
+```
+
+After cloning "phoenix-docker" and following the README, you should have a set of built docker images in ECR that you can used for all Phoenix projects in your AWS account. Your Phoenix projects "template-ssm-globals-macro-params.json" file should know where to find these docker images in ECR:
+```
+    "CodeBuildDockerImage": "111111111111.dkr.ecr.us-east-1.amazonaws.com/scala-build:0.1.1",
+    "NodeJSBuildDockerImage": "111111111111.dkr.ecr.us-east-1.amazonaws.com/nodejs:10.1.0",
+```
+Where 111111111111 is your AWS account ID.
+
 ### Creating a Phoenix project
 
 #### Configuring the project config file
